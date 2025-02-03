@@ -1,3 +1,3 @@
-<x-layouts.auth.split>
+<x-layouts.auth.simple>
     {{ $slot }}
-</x-layouts.auth.split>
+</x-layouts.auth.simple>
