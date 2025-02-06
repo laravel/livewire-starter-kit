@@ -81,26 +81,6 @@
                     </form>
                 </flux:menu>
             </flux:dropdown>
-{{--             
-            <flux:dropdown position="top" alignt="start">
-                <flux:profile avatar="https://fluxui.dev/img/demo/user.png" />
-    
-                <flux:menu>
-                    <flux:menu.radio.group>
-                        <flux:menu.radio checked>Olivia Martin</flux:menu.radio>
-                        <flux:menu.radio>Truly Delta</flux:menu.radio>
-                    </flux:menu.radio.group>
-    
-                    <flux:menu.separator />
-    
-                    <form method="POST" action="{{ route('logout') }}" class="w-full">
-                        @csrf
-                        <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
-                            {{ __('Log Out') }}
-                        </flux:menu.item>
-                    </form>
-                </flux:menu>
-            </flux:dropdown> --}}
         </flux:header>
     
         {{ $slot}}
