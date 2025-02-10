@@ -17,21 +17,17 @@ new #[Layout('components.layouts.auth')] class extends Component
             'email' => ['required', 'string', 'email'],
         ]);
 
-        // We will send the password reset link to this user if the email exists
         Password::sendResetLink(
             $this->only('email')
         );
 
-        // We want to always return a 200 response, even if the user is not found. This is a
-        // security measure to prevent email accounts from being discovered
-        session()->flash('status', __('If that email exists in our system, a reset link was sent.'));
+        session()->flash('status', __('If an account exists with that email, you’ll receive a reset link shortly.'));
     }
 
         
 }; ?>
 
 <div class="flex flex-col gap-6">
-
     <x-auth-header 
         title="Forgot Password"
         description="Enter your email to receive a password reset link"
@@ -49,6 +45,7 @@ new #[Layout('components.layouts.auth')] class extends Component
 
         <flux:button variant="primary" type="submit" class="w-full">{{ __('Email password reset link') }}</flux:button>
     </form>
+
     <div class="text-center text-sm">
         Or, return to the <x-text-link href="{{ route('login') }}">login page</x-text-link>
     </div>

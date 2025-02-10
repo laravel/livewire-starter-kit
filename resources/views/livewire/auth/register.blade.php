@@ -14,6 +14,7 @@ new #[Layout('components.layouts.auth')] class extends Component
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
+
     /**
      * Handle an incoming registration request.
      */
@@ -75,5 +76,4 @@ new #[Layout('components.layouts.auth')] class extends Component
     <div class="text-center text-sm">
         Already have an account? <x-text-link href="{{ route('login') }}">Log in</x-text-link>
     </div>
-
 </div>

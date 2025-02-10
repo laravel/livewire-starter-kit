@@ -68,9 +68,7 @@ new #[Layout('components.layouts.app')] class extends Component
 
     <x-settings.layout
         heading="Profile"
-        subheading="Update your name and email address"
-        >
-        
+        subheading="Update your name and email address">
         <form wire:submit="updateProfileInformation" class="my-6 space-y-6 w-full">
             <flux:input wire:model="name" label="{{ __('Name') }}" type="text" name="name" required autofocus autocomplete="name" />
     
@@ -108,6 +106,5 @@ new #[Layout('components.layouts.app')] class extends Component
         </form>
 
         <livewire:settings.delete-user-form />
-
     </x-settings.layout>
 </section>

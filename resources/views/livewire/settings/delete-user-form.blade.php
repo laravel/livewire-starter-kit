@@ -24,7 +24,6 @@ new class extends Component
 }; ?>
 
 <section class="space-y-6 mt-10">
-
     <div class="relative mb-5">
         <flux:heading>{{ __('Delete Account') }}</flux:heading>
         <flux:subheading>{{ __('Delete your account and all of its resources') }}</flux:subheading>
@@ -41,7 +40,6 @@ new class extends Component
 
     <flux:modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable class="max-w-lg space-y-6">
         <form wire:submit="deleteUser">
-
             <h2 class="text-lg font-medium text-gray-900">
                 {{ __('Are you sure you want to delete your account?') }}
             </h2>

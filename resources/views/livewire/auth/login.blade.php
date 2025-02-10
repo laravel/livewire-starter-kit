@@ -38,6 +38,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
+
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 
@@ -72,7 +73,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    
     <x-auth-header 
         title="Log in to your account"
         description="Enter your email and password below to log in"
@@ -85,11 +85,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <!-- Email Address -->
         <flux:input wire:model="email" label="{{ __('Email address') }}" type="email" name="email" required autofocus autocomplete="email" />
         
-
         <!-- Password -->
         <div class="relative">
             <flux:input wire:model="password" label="{{ __('Password') }}" type="password" name="password" required
                 autocomplete="current-password" />
+
             @if (Route::has('password.request'))
                 <x-text-link    
                     class="absolute top-0 right-0"
@@ -106,6 +106,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             <flux:button variant="primary" type="submit" class="w-full">{{ __('Log In') }}</flux:button>
         </div>
     </form>
+
     <div class="text-center text-sm">
         Don't have an account? <x-text-link href="{{ route('register') }}">Sign up</x-text-link>
     </div>

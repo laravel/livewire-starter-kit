@@ -43,9 +43,7 @@ new class extends Component
 
     <x-settings.layout
         heading="Update password"
-        subheading="Ensure your account is using a long, random password to stay secure"
-        >
-
+        subheading="Ensure your account is using a long, random password to stay secure">
         <form wire:submit="updatePassword" class="mt-6 space-y-6">
             <flux:input wire:model="current_password" id="update_password_current_passwordpassword" label="{{ __('Current password') }}" type="password" name="current_password" required autocomplete="current-password" />
             <flux:input wire:model="password" id="update_password_password" label="{{ __('New password') }}" type="password" name="password" required autocomplete="new-password" />

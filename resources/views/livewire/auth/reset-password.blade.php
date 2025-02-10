@@ -57,7 +57,7 @@ new #[Layout('components.layouts.auth')] class extends Component
         // If the password was successfully reset, we will redirect the user back to
         // the application's home authenticated view. If there is an error we can
         // redirect them back to where they came from with their error message.
-        if ($status != Password::PASSWORD_RESET) {
+        if ($status != Password::PasswordReset) {
             $this->addError('email', __($status));
 
             return;
@@ -70,7 +70,6 @@ new #[Layout('components.layouts.auth')] class extends Component
 }; ?>
 
 <div class="flex flex-col gap-6">
-
     <x-auth-header 
         title="Reset Password"
         description="Please enter your new password below"
@@ -80,7 +79,6 @@ new #[Layout('components.layouts.auth')] class extends Component
     <x-auth-session-status class="text-center" :status="session('status')" />
 
     <form wire:submit="resetPassword" class="flex flex-col gap-6">
-
         <!-- Email Address -->
         <div class="grid gap-2">
             <flux:input wire:model="email" id="email" label="{{ __('Email') }}" type="email" name="email" required autocomplete="email" />
