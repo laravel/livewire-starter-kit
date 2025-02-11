@@ -9,8 +9,7 @@
 $classes = Flux::classes()
     ->add('group flex items-center rounded-lg')
     ->add('[ui-dropdown>&]:w-full') // Without this, the "name" won't get truncated in a sidebar dropdown...
-    ->add('p-1 hover:bg-zinc-800/5 dark:hover:bg-white/10')
-    ;
+    ->add('p-1 hover:bg-zinc-800/5 dark:hover:bg-white/10');
 @endphp
 
 <button type="button" {{ $attributes->class($classes) }} data-flux-profile>
