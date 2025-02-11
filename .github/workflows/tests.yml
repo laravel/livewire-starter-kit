@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "FLUX_USERNAME is set: ${{ FLUX_USERNAME != '' }}"
 
-      - name: Add Flux credentials Loaded from ENV
+      - name: Add Flux Credentials Loaded From ENV
         run: composer config http-basic.composer.fluxui.dev "${{ FLUX_USERNAME }}" "${{ FLUX_LICENSE_KEY }}"
 
       - name: Install Dependencies
