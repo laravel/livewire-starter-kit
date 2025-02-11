@@ -37,8 +37,12 @@ jobs:
       - name: Create SQLite Database
         run: touch database/database.sqlite
 
+      - name: Debug Environment Variables
+        run: |
+          echo "FLUX_USERNAME is set: ${{ secrets.FLUX_USERNAME != '' }}"
+
       - name: Add Flux credentials Loaded from ENV
-        run: composer config http-basic.composer.fluxui.dev "${FLUX_USERNAME}" "${FLUX_LICENSE_KEY}"
+        run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
 
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
