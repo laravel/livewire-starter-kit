@@ -36,7 +36,7 @@ jobs:
       - name: Run Pint
         run: vendor/bin/pint
 
-      - name: Frontend Format Check
+      - name: Run Frontend Foratting
         run: npm run format
 
       - name: Commit Changes
@@ -47,5 +47,5 @@ jobs:
           file_pattern: '!.github/workflows/* **/*'
 
       # We need to run PHPStan after commiting changes as it does not auto-fix errors...
-      - name: PHPStan
+      - name: Run PHPStan
         run: ./vendor/bin/phpstan
