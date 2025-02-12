@@ -24,6 +24,8 @@ class PasswordConfirmationTest extends TestCase
     {
         $user = User::factory()->create();
 
+        $this->actingAs($user);
+
         $response = Volt::test('auth.confirm-password')
             ->set('password', 'password')
             ->call('confirmPassword');
@@ -36,6 +38,8 @@ class PasswordConfirmationTest extends TestCase
     public function test_password_is_not_confirmed_with_invalid_password(): void
     {
         $user = User::factory()->create();
+
+        $this->actingAs($user);
 
         $response = Volt::test('auth.confirm-password')
             ->set('password', 'wrong-password')

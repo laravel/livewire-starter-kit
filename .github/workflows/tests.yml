@@ -39,7 +39,7 @@ jobs:
 
       - name: Debug Environment Variables
         run: |
-          echo "FLUX_USERNAME is set: ${{ env.secrets.FLUX_USERNAME != '' }}" ${{ secrets.FLUX_USERNAME != '' }}" ${{ env.FLUX_USERNAME != '' }}"
+          echo "FLUX_USERNAME is set: ${{ env.secrets.FLUX_USERNAME != '' }} ${{ secrets.FLUX_USERNAME != '' }} ${{ env.FLUX_USERNAME != '' }}"
 
       - name: Add Flux Credentials Loaded From ENV
         run: composer config http-basic.composer.fluxui.dev "${{ env.FLUX_USERNAME }}" "${{ env.FLUX_LICENSE_KEY }}"
@@ -60,4 +60,4 @@ jobs:
         run: npm run build
 
       - name: Tests
-        run: ./vendor/bin/pest --ci
+        run: ./vendor/bin/phpunit

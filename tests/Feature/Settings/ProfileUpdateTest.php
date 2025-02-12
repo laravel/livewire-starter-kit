@@ -10,14 +10,15 @@ use Tests\TestCase;
 class ProfileUpdateTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     public function test_profile_page_is_displayed(): void
     {
         $user = User::factory()->create();
 
-        $response = $this
-            ->actingAs($user)
-            ->get('/settings/profile');
+        $this->actingAs($user)
+            ->withSession(['auth.password_confirmed_at' => time()]);
+
+        $response = $this->get('/settings/profile');
 
         $response->assertOk();
     }
@@ -25,6 +26,8 @@ class ProfileUpdateTest extends TestCase
     public function test_profile_information_can_be_updated(): void
     {
         $user = User::factory()->create();
+
+        $this->actingAs($user);
 
         $response = Volt::test('settings.profile')
             ->set('name', 'Test User')
@@ -44,6 +47,8 @@ class ProfileUpdateTest extends TestCase
     {
         $user = User::factory()->create();
 
+        $this->actingAs($user);
+
         $response = Volt::test('settings.profile')
             ->set('name', 'Test User')
             ->set('email', $user->email)
@@ -57,6 +62,8 @@ class ProfileUpdateTest extends TestCase
     public function test_user_can_delete_their_account(): void
     {
         $user = User::factory()->create();
+
+        $this->actingAs($user);
 
         $response = Volt::test('settings.delete-user-form')
             ->set('password', 'password')
@@ -73,6 +80,8 @@ class ProfileUpdateTest extends TestCase
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
         $user = User::factory()->create();
+
+        $this->actingAs($user);
 
         $response = Volt::test('settings.delete-user-form')
             ->set('password', 'wrong-password')
