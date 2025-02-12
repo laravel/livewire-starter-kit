@@ -28,7 +28,15 @@ new class extends Component {
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+
+            'email' => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                Rule::unique(User::class)->ignore($user->id)
+            ],
         ]);
 
         $user->fill($validated);
@@ -45,7 +53,7 @@ new class extends Component {
     /**
      * Send an email verification notification to the current user.
      */
-    public function sendVerification(): void
+    public function resendVerificationNotification(): void
     {
         $user = Auth::user();
 
@@ -77,7 +85,7 @@ new class extends Component {
                             {{ __('Your email address is unverified.') }}
 
                             <button
-                                wire:click.prevent="sendVerification"
+                                wire:click.prevent="resendVerificationNotification"
                                 class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                             >
                                 {{ __('Click here to re-send the verification email.') }}
