@@ -1,14 +1,16 @@
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <!-- Used to add dark mode right away, adding here prevents any flicker... -->
-{{-- <script>
+{{--
+    <script>
     if (typeof(Storage) !== "undefined") {
-        if(localStorage.getItem('dark_mode') && localStorage.getItem('dark_mode') == 'true'){
-            document.documentElement.classList.add('dark');
-        }
+    if(localStorage.getItem('dark_mode') && localStorage.getItem('dark_mode') == 'true'){
+    document.documentElement.classList.add('dark');
     }
-</script> --}}
+    }
+    </script>
+--}}
 
 <title>{{ $title ?? 'Laravel' }}</title>
 

@@ -68,32 +68,33 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+        return Str::transliterate(Str::lower($this->email) . '|' . request()->ip());
     }
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header 
-        title="Log in to your account"
-        description="Enter your email and password below to log in"
-    />
-    
+    <x-auth-header title="Log in to your account" description="Enter your email and password below to log in" />
+
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
 
     <form wire:submit="login" class="flex flex-col gap-6">
         <!-- Email Address -->
         <flux:input wire:model="email" label="{{ __('Email address') }}" type="email" name="email" required autofocus autocomplete="email" />
-        
+
         <!-- Password -->
         <div class="relative">
-            <flux:input wire:model="password" label="{{ __('Password') }}" type="password" name="password" required
-                autocomplete="current-password" />
+            <flux:input
+                wire:model="password"
+                label="{{ __('Password') }}"
+                type="password"
+                name="password"
+                required
+                autocomplete="current-password"
+            />
 
             @if (Route::has('password.request'))
-                <x-text-link    
-                    class="absolute top-0 right-0"
-                    href="{{ route('password.request') }}">
+                <x-text-link class="absolute right-0 top-0" href="{{ route('password.request') }}">
                     {{ __('Forgot your password?') }}
                 </x-text-link>
             @endif
@@ -108,6 +109,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     </form>
 
     <div class="text-center text-sm">
-        Don't have an account? <x-text-link href="{{ route('register') }}">Sign up</x-text-link>
+        Don't have an account?
+        <x-text-link href="{{ route('register') }}">Sign up</x-text-link>
     </div>
 </div>

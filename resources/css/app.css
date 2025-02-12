@@ -16,19 +16,18 @@
     }
 }
 
-
 [data-flux-field] {
     @apply grid gap-2;
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
 input:focus[data-flux-control],
 textarea:focus[data-flux-control],
 select:focus[data-flux-control] {
-    @apply ring-2 ring-offset-2 ring-offset-accent-foreground ring-accent outline-none;
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
 
 /* \[:where(&)\]:size-4 {
