@@ -5,8 +5,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component
-{
+new #[Layout('components.layouts.auth')] class extends Component {
     public string $password = '';
 
     /**
@@ -18,10 +17,12 @@ new #[Layout('components.layouts.auth')] class extends Component
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::guard('web')->validate([
-            'email' => Auth::user()->email,
-            'password' => $this->password,
-        ])) {
+        if (
+            ! Auth::guard('web')->validate([
+                'email' => Auth::user()->email,
+                'password' => $this->password,
+            ])
+        ) {
             throw ValidationException::withMessages([
                 'password' => __('auth.password'),
             ]);
@@ -34,7 +35,7 @@ new #[Layout('components.layouts.auth')] class extends Component
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header 
+    <x-auth-header
         title="Confirm Your Password"
         description="This is a secure area of the application. Please confirm your password before continuing"
     />
@@ -45,7 +46,15 @@ new #[Layout('components.layouts.auth')] class extends Component
     <form wire:submit="confirmPassword" class="flex flex-col gap-6">
         <!-- Password -->
         <div class="grid gap-2">
-            <flux:input wire:model="password" id="password" label="{{ __('Password') }}" type="password" name="password" required autocomplete="new-password" />
+            <flux:input
+                wire:model="password"
+                id="password"
+                label="{{ __('Password') }}"
+                type="password"
+                name="password"
+                required
+                autocomplete="new-password"
+            />
         </div>
 
         <flux:button variant="primary" type="submit" class="w-full">{{ __('Confirm') }}</flux:button>

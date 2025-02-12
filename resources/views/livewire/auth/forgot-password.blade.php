@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component
-{
+new #[Layout('components.layouts.auth')] class extends Component {
     public string $email = '';
 
     /**
@@ -17,21 +16,14 @@ new #[Layout('components.layouts.auth')] class extends Component
             'email' => ['required', 'string', 'email'],
         ]);
 
-        Password::sendResetLink(
-            $this->only('email')
-        );
+        Password::sendResetLink($this->only('email'));
 
         session()->flash('status', __('If an account exists with that email, you’ll receive a reset link shortly.'));
     }
-
-        
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header 
-        title="Forgot Password"
-        description="Enter your email to receive a password reset link"
-    />
+    <x-auth-header title="Forgot Password" description="Enter your email to receive a password reset link" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
@@ -47,6 +39,7 @@ new #[Layout('components.layouts.auth')] class extends Component
     </form>
 
     <div class="text-center text-sm">
-        Or, return to the <x-text-link href="{{ route('login') }}">login page</x-text-link>
+        Or, return to the
+        <x-text-link href="{{ route('login') }}">login page</x-text-link>
     </div>
 </div>

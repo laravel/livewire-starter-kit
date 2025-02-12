@@ -4,8 +4,7 @@ use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Component;
 
-new class extends Component
-{
+new class extends Component {
     public string $password = '';
 
     /**
@@ -23,17 +22,14 @@ new class extends Component
     }
 }; ?>
 
-<section class="space-y-6 mt-10">
+<section class="mt-10 space-y-6">
     <div class="relative mb-5">
         <flux:heading>{{ __('Delete Account') }}</flux:heading>
         <flux:subheading>{{ __('Delete your account and all of its resources') }}</flux:subheading>
     </div>
 
     <flux:modal.trigger name="confirm-user-deletion">
-        <flux:button 
-            variant="danger"
-            x-data=""
-            x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
+        <flux:button variant="danger" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
             {{ __('Delete Account') }}
         </flux:button>
     </flux:modal.trigger>

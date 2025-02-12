@@ -3,6 +3,6 @@
 </div>
 
 <div class="grid flex-1 text-left text-sm leading-tight">
-    <span class="truncate mb-0.5 font-semibold leading-none">Laravel</span>
-    <span class="truncate text-[11px] tracking-tight opacity-80 leading-none">Starter Kit</span>
+    <span class="mb-0.5 truncate font-semibold leading-none">Laravel</span>
+    <span class="truncate text-[11px] leading-none tracking-tight opacity-80">Starter Kit</span>
 </div>

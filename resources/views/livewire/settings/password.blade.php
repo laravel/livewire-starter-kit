@@ -6,8 +6,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Livewire\Volt\Component;
 
-new class extends Component
-{
+new class extends Component {
     public string $current_password = '';
     public string $password = '';
     public string $password_confirmation = '';
@@ -41,13 +40,35 @@ new class extends Component
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout
-        heading="Update password"
-        subheading="Ensure your account is using a long, random password to stay secure">
+    <x-settings.layout heading="Update password" subheading="Ensure your account is using a long, random password to stay secure">
         <form wire:submit="updatePassword" class="mt-6 space-y-6">
-            <flux:input wire:model="current_password" id="update_password_current_passwordpassword" label="{{ __('Current password') }}" type="password" name="current_password" required autocomplete="current-password" />
-            <flux:input wire:model="password" id="update_password_password" label="{{ __('New password') }}" type="password" name="password" required autocomplete="new-password" />
-            <flux:input wire:model="password_confirmation" id="update_password_password_confirmation" label="{{ __('Confirm Password') }}" type="password" name="password_confirmation" required autocomplete="new-password" />
+            <flux:input
+                wire:model="current_password"
+                id="update_password_current_passwordpassword"
+                label="{{ __('Current password') }}"
+                type="password"
+                name="current_password"
+                required
+                autocomplete="current-password"
+            />
+            <flux:input
+                wire:model="password"
+                id="update_password_password"
+                label="{{ __('New password') }}"
+                type="password"
+                name="password"
+                required
+                autocomplete="new-password"
+            />
+            <flux:input
+                wire:model="password_confirmation"
+                id="update_password_password_confirmation"
+                label="{{ __('Confirm Password') }}"
+                type="password"
+                name="password_confirmation"
+                required
+                autocomplete="new-password"
+            />
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">

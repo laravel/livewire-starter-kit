@@ -11,8 +11,8 @@ export default {
         './resources/views/components/**/*.blade.php',
         './resources/**/*.js',
         './resources/**/*.vue',
-        "./vendor/livewire/flux-pro/stubs/**/*.blade.php",
-        "./vendor/livewire/flux/stubs/**/*.blade.php",
+        './vendor/livewire/flux-pro/stubs/**/*.blade.php',
+        './vendor/livewire/flux/stubs/**/*.blade.php',
     ],
     theme: {
         extend: {
