@@ -12,7 +12,6 @@ on:
 
 permissions:
   contents: write
-  workflows: write
 
 jobs:
   quality:
@@ -25,7 +24,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-      
+
       - name: Add Flux Credentials Loaded From ENV
         run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
 
@@ -45,6 +44,7 @@ jobs:
         with:
           commit_message: fix code style
           commit_options: '--no-verify'
+          file_pattern: '!.github/workflows/* **/*'
 
       # We need to run PHPStan after commiting changes as it does not auto-fix errors...
       - name: PHPStan
