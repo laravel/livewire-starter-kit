@@ -13,13 +13,9 @@ class ProfileUpdateTest extends TestCase
 
     public function test_profile_page_is_displayed(): void
     {
-        $user = User::factory()->create();
+        $this->actingAs($user = User::factory()->create());
 
-        $this->actingAs($user);
-
-        $response = $this->get('/settings/profile');
-
-        $response->assertOk();
+        $this->get('/settings/profile')->assertOk();
     }
 
     public function test_profile_information_can_be_updated(): void
