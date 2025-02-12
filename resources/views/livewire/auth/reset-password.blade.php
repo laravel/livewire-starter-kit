@@ -42,12 +42,10 @@ new #[Layout('components.layouts.auth')] class extends Component {
         // will update the password on an actual user model and persist it to the
         // database. Otherwise we will parse the error and return the response.
         $status = Password::reset($this->only('email', 'password', 'password_confirmation', 'token'), function ($user) {
-            $user
-                ->forceFill([
-                    'password' => Hash::make($this->password),
-                    'remember_token' => Str::random(60),
-                ])
-                ->save();
+            $user->forceFill([
+                'password' => Hash::make($this->password),
+                'remember_token' => Str::random(60),
+            ])->save();
 
             event(new PasswordReset($user));
         });
