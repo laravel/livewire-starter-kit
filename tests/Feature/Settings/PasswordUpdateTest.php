@@ -3,10 +3,10 @@
 namespace Tests\Feature\Settings;
 
 use App\Models\User;
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Volt\Volt;
+use Tests\TestCase;
 
 class PasswordUpdateTest extends TestCase
 {
@@ -27,7 +27,7 @@ class PasswordUpdateTest extends TestCase
             ->call('updatePassword');
 
         $response->assertHasNoErrors();
-        
+
         $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
     }
 
