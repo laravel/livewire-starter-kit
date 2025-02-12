@@ -15,8 +15,7 @@ class ProfileUpdateTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)
-            ->withSession(['auth.password_confirmed_at' => time()]);
+        $this->actingAs($user);
 
         $response = $this->get('/settings/profile');
 
