@@ -1,6 +1,7 @@
 {
-    "semi": false,
+    "semi": true,
     "singleQuote": true,
+    "singleAttributePerLine": false,
     "htmlWhitespaceSensitivity": "css",
     "printWidth": 150,
     "plugins": ["prettier-plugin-tailwindcss", "prettier-plugin-blade"],
