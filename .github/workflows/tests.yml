@@ -13,6 +13,7 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    environment: Testing
 
     steps:
       - name: Checkout
@@ -39,10 +40,11 @@ jobs:
 
       - name: Debug Environment Variables
         run: |
-          echo "FLUX_USERNAME is set: ${{ FLUX_USERNAME != '' }}"
+          echo "FLUX_USERNAME is set: ${{ secrets.FLUX_USERNAME != '' }}"
+          echo "FLUX_LICENSE_KEY is set: ${{ secrets.FLUX_LICENSE_KEY != '' }}"
 
       - name: Add Flux Credentials Loaded From ENV
-        run: composer config http-basic.composer.fluxui.dev "${{ FLUX_USERNAME }}" "${{ FLUX_LICENSE_KEY }}"
+        run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
 
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -53,11 +55,8 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
-      - name: Publish Ziggy Configuration
-        run: php artisan ziggy:generate
-
       - name: Build Assets
         run: npm run build
 
       - name: Tests
-        run: ./vendor/bin/pest --ci
+        run: ./vendor/bin/phpunit

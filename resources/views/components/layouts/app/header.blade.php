@@ -11,17 +11,16 @@
                 <x-app-logo class="size-8" href="#"></x-app-logo>
             </a>
             
-    
             <flux:navbar class="-mb-px max-lg:hidden">
-                <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" current>Dashboard</flux:navbar.item>
+                <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:navbar.item>
             </flux:navbar>
     
             <flux:spacer />
     
-            <flux:navbar class="mr-4">
-                <flux:navbar.item icon="magnifying-glass" href="#" label="Search" />
-                <flux:navbar.item class="max-lg:hidden" icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank" label="Repository" />
-                <flux:navbar.item class="max-lg:hidden" icon="book-open-text" href="https://laravel.com/docs/starter-kits" target="_blank" label="Documentation" />
+            <flux:navbar class="mr-4 !py-0">
+                <flux:navbar.item class="[&>div>svg]:size-5 !h-10" icon="magnifying-glass" href="#" label="Search" />
+                <flux:navbar.item class="[&>div>svg]:size-5 !h-10 max-lg:hidden" icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank" label="Repository" />
+                <flux:navbar.item class="[&>div>svg]:size-5 !h-10 max-lg:hidden" icon="book-open-text" href="https://laravel.com/docs/starter-kits" target="_blank" label="Documentation" />
             </flux:navbar>
     
             <flux:dropdown position="top" align="end">
@@ -37,10 +36,7 @@
                     <flux:menu.radio.group>
                         <flux:menu.item href="/settings/profile" icon="cog">Settings</flux:menu.item>
                     </flux:menu.radio.group>
-    
                     <flux:menu.separator />
-    
-
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
                         <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
@@ -60,7 +56,7 @@
     
             <flux:navlist variant="outline">
                 <flux:navlist.group heading="Platform">
-                    <flux:navlist.item icon="layout-grid" href="{{ route('dashboard') }}" current>Dashboard</flux:navbar.item>
+                    <flux:navlist.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">Dashboard</flux:navbar.item>
                 </flux:navlist.group>
             </flux:navlist>
     
