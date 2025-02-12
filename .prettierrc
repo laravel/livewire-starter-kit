@@ -4,7 +4,7 @@
     "singleAttributePerLine": false,
     "htmlWhitespaceSensitivity": "css",
     "printWidth": 150,
-    "plugins": ["prettier-plugin-tailwindcss", "prettier-plugin-blade"],
+    "plugins": ["prettier-plugin-tailwindcss"],
     "tabWidth": 4,
     "overrides": [
         {

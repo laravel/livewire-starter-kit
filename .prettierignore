@@ -1,27 +1,23 @@
-# Dependencies
-/node_modules
-/vendor
-
-# Build outputs
-/public/build
-/public/hot
-/public/storage
-/storage/*.key
-
-# Environment files
-.env
-.env.*
-
 # IDE files
 .idea
 .vscode
 
-# Cache files
+# Dependencies
+/node_modules
+/vendor
+
+# Build Outputs
+/public/build
+/public/hot
+/public/storage
+
+# Environment Files
+.env
+.env.*
+
+# Cache Files
 .phpunit.result.cache
 .php-cs-fixer.cache
-
-# Volt Files
-/resources/views/livewire
 
 # Other
 /bootstrap/cache
