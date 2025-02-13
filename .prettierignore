@@ -1,6 +1,20 @@
-# Ignore everything by default
-*
+# Dependencies
+/node_modules
+/vendor
 
-# But allow Blade files for Tailwind class sorting
-!resources/views/**/*.blade.php
+# Build outputs
+/public/build
+/public/hot
+/public/storage
+/storage
+
+# Environment and cache files
+.env
+.env.*
 *.cache
+.phpunit.result.cache
+.php-cs-fixer.cache
+
+# IDE files
+.idea
+.vscode
