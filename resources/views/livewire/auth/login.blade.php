@@ -68,7 +68,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+        return Str::transliterate(Str::lower($this->email) . '|' . request()->ip());
     }
 }; ?>
 
@@ -80,7 +80,15 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
     <form wire:submit="login" class="flex flex-col gap-6">
         <!-- Email Address -->
-        <flux:input wire:model="email" label="{{ __('Email address') }}" type="email" name="email" required autofocus autocomplete="email" />
+        <flux:input
+            wire:model="email"
+            label="{{ __('Email address') }}"
+            type="email"
+            name="email"
+            required
+            autofocus
+            autocomplete="email"
+        />
 
         <!-- Password -->
         <div class="relative">

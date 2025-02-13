@@ -12,7 +12,11 @@
             </a>
 
             <flux:navbar class="-mb-px max-lg:hidden">
-                <flux:navbar.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">
+                <flux:navbar.item
+                    icon="layout-grid"
+                    href="{{ route('dashboard') }}"
+                    :current="request()->routeIs('dashboard')"
+                >
                     Dashboard
                 </flux:navbar.item>
             </flux:navbar>
@@ -83,7 +87,11 @@
             </flux:dropdown>
         </flux:header>
 
-        <flux:sidebar stashable sticky class="border-r border-zinc-200 bg-zinc-50 lg:hidden dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar
+            stashable
+            sticky
+            class="border-r border-zinc-200 bg-zinc-50 lg:hidden dark:border-zinc-700 dark:bg-zinc-900"
+        >
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
             <a href="{{ route('dashboard') }}" class="ml-1 flex items-center space-x-2">
@@ -92,7 +100,11 @@
 
             <flux:navlist variant="outline">
                 <flux:navlist.group heading="Platform">
-                    <flux:navlist.item icon="layout-grid" href="{{ route('dashboard') }}" :current="request()->routeIs('dashboard')">
+                    <flux:navlist.item
+                        icon="layout-grid"
+                        href="{{ route('dashboard') }}"
+                        :current="request()->routeIs('dashboard')"
+                    >
                         Dashboard
                     </flux:navlist.item>
                 </flux:navlist.group>
@@ -101,7 +113,11 @@
             <flux:spacer />
 
             <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
+                <flux:navlist.item
+                    icon="folder-git-2"
+                    href="https://github.com/laravel/livewire-starter-kit"
+                    target="_blank"
+                >
                     Repository
                 </flux:navlist.item>
                 <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits" target="_blank">
