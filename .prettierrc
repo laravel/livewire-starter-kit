@@ -4,13 +4,13 @@
     "singleQuote": true,
     "tabWidth": 4,
     "trailingComma": "all",
-    "plugins": ["prettier-plugin-tailwindcss"],
+    "plugins": ["prettier-plugin-tailwindcss", "@prettier/plugin-php"],
     "overrides": [{
         "files": [
             "*.blade.php"
         ],
         "options": {
-            "parser": "blade"
+            "parser": "php"
         }
     }]
 }
