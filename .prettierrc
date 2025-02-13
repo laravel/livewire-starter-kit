@@ -1,12 +1,18 @@
 {
     "plugins": ["prettier-plugin-blade", "prettier-plugin-tailwindcss"],
     "tailwindConfig": "./tailwind.config.js",
-    "singleQuote": false,
     "overrides": [{
         "files": "*.blade.php",
         "options": {
             "parser": "blade",
-            "singleQuote": false
+            "bladeKeepEmptyLines": true,
+            "bladeQuoteProperties": "preserve",
+            "bladeFormatPhpCode": false,
+            "bladePreservePhpQuotes": true,
+            "bladePreserveDirectiveContent": true,
+            "bladePreserveText": true,
+            "bladePreserveQuotes": true,
+            "bladeQuoteStyle": "preserve"
         }
     }]
 }
