@@ -4,8 +4,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "format": "prettier --write .",
-        "format:check": "prettier --check ."
+        "format": "prettier --write resources/",
+        "format:check": "prettier --check resources/"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",
