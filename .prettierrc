@@ -7,8 +7,9 @@
             "parser": "blade",
             "wrapAttributes": "force-expand-multiline",
             "sortTailwindcssClasses": true,
-            "tailwindcssConfigPath": "tailwind.config.cjs",
-            "sortHtmlAttributes": "code-guide"
+            "tailwindcssConfigPath": "tailwind.config.js",
+            "sortHtmlAttributes": "code-guide",
+            "indentInnerHtml": true
         }
     }]
 }

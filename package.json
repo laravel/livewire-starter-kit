@@ -8,14 +8,14 @@
         "format:check": "prettier --check resources/"
     },
     "devDependencies": {
-        "@shufo/prettier-plugin-blade": "^1.15.3",
+        "@shufo/prettier-plugin-blade": "^1.13.0",
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.4",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^1.0",
         "postcss": "^8.4.47",
-        "prettier": "^3.5.0",
-        "prettier-plugin-tailwindcss": "^0.6.11",
+        "prettier": "^3.0.3",
+        "prettier-plugin-tailwindcss": "^0.5.6",
         "tailwindcss": "^3.4.13",
         "vite": "^6.0"
     }
