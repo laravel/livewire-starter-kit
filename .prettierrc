@@ -1,15 +1,11 @@
 {
-    "plugins": ["@shufo/prettier-plugin-blade", "prettier-plugin-tailwindcss"],
-    "tailwindConfig": "./tailwind.config.js",
+    "plugins": ["prettier-plugin-blade", "prettier-plugin-tailwindcss"],
     "overrides": [{
-        "files": "*.blade.php",
+        "files": [
+            "*.blade.php"
+        ],
         "options": {
-            "parser": "blade",
-            "wrapAttributes": "force-expand-multiline",
-            "sortTailwindcssClasses": true,
-            "tailwindcssConfigPath": "tailwind.config.js",
-            "sortHtmlAttributes": "code-guide",
-            "indentInnerHtml": true
+            "parser": "blade"
         }
     }]
 }
