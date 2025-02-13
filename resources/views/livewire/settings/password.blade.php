@@ -7,9 +7,9 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Volt\Component;
 
 new class extends Component {
-    public string $current_password = '';
-    public string $password = '';
-    public string $password_confirmation = '';
+    public string $current_password = "";
+    public string $password = "";
+    public string $password_confirmation = "";
 
     /**
      * Update the password for the currently authenticated user.
@@ -18,34 +18,51 @@ new class extends Component {
     {
         try {
             $validated = $this->validate([
-                'current_password' => ['required', 'string', 'current_password'],
-                'password' => ['required', 'string', Password::defaults(), 'confirmed'],
+                "current_password" => [
+                    "required",
+                    "string",
+                    "current_password",
+                ],
+                "password" => [
+                    "required",
+                    "string",
+                    Password::defaults(),
+                    "confirmed",
+                ],
             ]);
         } catch (ValidationException $e) {
-            $this->reset('current_password', 'password', 'password_confirmation');
+            $this->reset(
+                "current_password",
+                "password",
+                "password_confirmation",
+            );
 
             throw $e;
         }
 
         Auth::user()->update([
-            'password' => Hash::make($validated['password']),
+            "password" => Hash::make($validated["password"]),
         ]);
 
-        $this->reset('current_password', 'password', 'password_confirmation');
+        $this->reset("current_password", "password", "password_confirmation");
 
-        $this->dispatch('password-updated');
+        $this->dispatch("password-updated");
     }
-}; ?>
+};
+?>
 
 <section class="w-full">
-    @include('partials.settings-heading')
+    @include("partials.settings-heading")
 
-    <x-settings.layout heading="Update password" subheading="Ensure your account is using a long, random password to stay secure">
+    <x-settings.layout
+        heading="Update password"
+        subheading="Ensure your account is using a long, random password to stay secure"
+    >
         <form wire:submit="updatePassword" class="mt-6 space-y-6">
             <flux:input
                 wire:model="current_password"
                 id="update_password_current_passwordpassword"
-                label="{{ __('Current password') }}"
+                label="{{ __("Current password") }}"
                 type="password"
                 name="current_password"
                 required
@@ -54,7 +71,7 @@ new class extends Component {
             <flux:input
                 wire:model="password"
                 id="update_password_password"
-                label="{{ __('New password') }}"
+                label="{{ __("New password") }}"
                 type="password"
                 name="password"
                 required
@@ -63,7 +80,7 @@ new class extends Component {
             <flux:input
                 wire:model="password_confirmation"
                 id="update_password_password_confirmation"
-                label="{{ __('Confirm Password') }}"
+                label="{{ __("Confirm Password") }}"
                 type="password"
                 name="password_confirmation"
                 required
@@ -72,11 +89,13 @@ new class extends Component {
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>
+                    <flux:button variant="primary" type="submit" class="w-full">
+                        {{ __("Save") }}
+                    </flux:button>
                 </div>
 
                 <x-action-message class="me-3" on="password-updated">
-                    {{ __('Saved.') }}
+                    {{ __("Saved.") }}
                 </x-action-message>
             </div>
         </form>

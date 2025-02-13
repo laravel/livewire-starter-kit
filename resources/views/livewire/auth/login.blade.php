@@ -10,12 +10,12 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component {
-    #[Validate('required|string|email')]
-    public string $email = '';
+new #[Layout("components.layouts.auth")] class extends Component {
+    #[Validate("required|string|email")]
+    public string $email = "";
 
-    #[Validate('required|string')]
-    public string $password = '';
+    #[Validate("required|string")]
+    public string $password = "";
 
     public bool $remember = false;
 
@@ -28,18 +28,26 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        if (
+            ! Auth::attempt(
+                ["email" => $this->email, "password" => $this->password],
+                $this->remember,
+            )
+        ) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                "email" => __("auth.failed"),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(
+            default: route("dashboard", absolute: false),
+            navigate: true,
+        );
     }
 
     /**
@@ -56,9 +64,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => __('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
+            "email" => __("auth.throttle", [
+                "seconds" => $seconds,
+                "minutes" => ceil($seconds / 60),
             ]),
         ]);
     }
@@ -68,43 +76,62 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+        return Str::transliterate(
+            Str::lower($this->email) . "|" . request()->ip(),
+        );
     }
-}; ?>
+};
+?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header title="Log in to your account" description="Enter your email and password below to log in" />
+    <x-auth-header
+        title="Log in to your account"
+        description="Enter your email and password below to log in"
+    />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
 
     <form wire:submit="login" class="flex flex-col gap-6">
         <!-- Email Address -->
-        <flux:input wire:model="email" label="{{ __('Email address') }}" type="email" name="email" required autofocus autocomplete="email" />
+        <flux:input
+            wire:model="email"
+            label="{{ __("Email address") }}"
+            type="email"
+            name="email"
+            required
+            autofocus
+            autocomplete="email"
+        />
 
         <!-- Password -->
         <div class="relative">
             <flux:input
                 wire:model="password"
-                label="{{ __('Password') }}"
+                label="{{ __("Password") }}"
                 type="password"
                 name="password"
                 required
                 autocomplete="current-password"
             />
 
-            @if (Route::has('password.request'))
-                <x-text-link class="absolute right-0 top-0" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
+            @if (Route::has("password.request"))
+                <x-text-link
+                    class="absolute right-0 top-0"
+                    href="{{ route('password.request') }}"
+                >
+                    {{ __("Forgot your password?") }}
                 </x-text-link>
             @endif
         </div>
 
         <!-- Remember Me -->
-        <flux:checkbox wire:model="remember" label="{{ __('Remember me') }}" />
+        <flux:checkbox wire:model="remember" label="{{ __("Remember me") }}" />
 
         <div class="flex items-center justify-end">
-            <flux:button variant="primary" type="submit" class="w-full">{{ __('Log In') }}</flux:button>
+            <flux:button variant="primary" type="submit" class="w-full">
+                {{ __("Log In") }}
+            </flux:button>
         </div>
     </form>
 

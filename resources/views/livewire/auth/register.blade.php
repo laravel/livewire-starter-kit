@@ -8,11 +8,11 @@ use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component {
-    public string $name = '';
-    public string $email = '';
-    public string $password = '';
-    public string $password_confirmation = '';
+new #[Layout("components.layouts.auth")] class extends Component {
+    public string $name = "";
+    public string $email = "";
+    public string $password = "";
+    public string $password_confirmation = "";
 
     /**
      * Handle an incoming registration request.
@@ -20,23 +20,39 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public function register(): void
     {
         $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
-            'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+            "name" => ["required", "string", "max:255"],
+            "email" => [
+                "required",
+                "string",
+                "lowercase",
+                "email",
+                "max:255",
+                "unique:" . User::class,
+            ],
+            "password" => [
+                "required",
+                "string",
+                "confirmed",
+                Rules\Password::defaults(),
+            ],
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
+        $validated["password"] = Hash::make($validated["password"]);
 
         event(new Registered(($user = User::create($validated))));
 
         Auth::login($user);
 
-        $this->redirect(route('dashboard', absolute: false), navigate: true);
+        $this->redirect(route("dashboard", absolute: false), navigate: true);
     }
-}; ?>
+};
+?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header title="Create an account" description="Enter your information below to create your account" />
+    <x-auth-header
+        title="Create an account"
+        description="Enter your information below to create your account"
+    />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
@@ -44,12 +60,29 @@ new #[Layout('components.layouts.auth')] class extends Component {
     <form wire:submit="register" class="flex flex-col gap-6">
         <!-- Name -->
         <div class="grid gap-2">
-            <flux:input wire:model="name" id="name" label="{{ __('Name') }}" type="text" name="name" required autofocus autocomplete="name" />
+            <flux:input
+                wire:model="name"
+                id="name"
+                label="{{ __("Name") }}"
+                type="text"
+                name="name"
+                required
+                autofocus
+                autocomplete="name"
+            />
         </div>
 
         <!-- Email Address -->
         <div class="grid gap-2">
-            <flux:input wire:model="email" id="email" label="{{ __('Email address') }}" type="email" name="email" required autocomplete="email" />
+            <flux:input
+                wire:model="email"
+                id="email"
+                label="{{ __("Email address") }}"
+                type="email"
+                name="email"
+                required
+                autocomplete="email"
+            />
         </div>
 
         <!-- Password -->
@@ -57,7 +90,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             <flux:input
                 wire:model="password"
                 id="password"
-                label="{{ __('Password') }}"
+                label="{{ __("Password") }}"
                 type="password"
                 name="password"
                 required
@@ -70,7 +103,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             <flux:input
                 wire:model="password_confirmation"
                 id="password_confirmation"
-                label="{{ __('Confirm password') }}"
+                label="{{ __("Confirm password") }}"
                 type="password"
                 name="password_confirmation"
                 required
@@ -80,7 +113,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         <div class="flex items-center justify-end">
             <flux:button type="submit" variant="primary" class="w-full">
-                {{ __('Register') }}
+                {{ __("Register") }}
             </flux:button>
         </div>
     </form>
