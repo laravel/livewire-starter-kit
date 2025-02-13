@@ -12,7 +12,11 @@
         ->add('p-1 hover:bg-zinc-800/5 dark:hover:bg-white/10');
 @endphp
 
-<button type="button" {{ $attributes->class($classes) }} data-flux-profile>
+<button
+    type="button"
+    {{ $attributes->class($classes) }}
+    data-flux-profile
+>
     <div class="size-8 shrink-0 overflow-hidden rounded-lg bg-zinc-400">
         <?php if($initials): ?>
 
@@ -48,7 +52,11 @@
     <?php if ($iconTrailing): ?>
 
     <div class="ml-auto flex size-8 shrink-0 items-center justify-center">
-        <x-dynamic-component :component="'icon.' . $iconTrailing" variant="micro" class="text-zinc-400 group-hover:text-zinc-800 dark:text-white/80 group-hover:dark:text-white" />
+        <x-dynamic-component
+            :component="'icon.' . $iconTrailing"
+            variant="micro"
+            class="text-zinc-400 group-hover:text-zinc-800 dark:text-white/80 group-hover:dark:text-white"
+        />
     </div>
 
     <?php endif; ?>

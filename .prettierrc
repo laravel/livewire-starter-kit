@@ -4,6 +4,7 @@
     "singleQuote": true,
     "tabWidth": 4,
     "trailingComma": "all",
+    "singleAttributePerLine": true,
     "plugins": ["prettier-plugin-blade", "prettier-plugin-tailwindcss"],
     "overrides": [{
         "files": [

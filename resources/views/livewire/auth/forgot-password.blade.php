@@ -23,18 +23,40 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header title="Forgot Password" description="Enter your email to receive a password reset link" />
+    <x-auth-header
+        title="Forgot Password"
+        description="Enter your email to receive a password reset link"
+    />
 
     <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+    <x-auth-session-status
+        class="text-center"
+        :status="session('status')"
+    />
 
-    <form wire:submit="sendPasswordResetLink" class="flex flex-col gap-6">
+    <form
+        wire:submit="sendPasswordResetLink"
+        class="flex flex-col gap-6"
+    >
         <!-- Email Address -->
         <div class="grid gap-2">
-            <flux:input wire:model="email" label="{{ __('Email Address') }}" type="email" name="email" required autofocus />
+            <flux:input
+                wire:model="email"
+                label="{{ __('Email Address') }}"
+                type="email"
+                name="email"
+                required
+                autofocus
+            />
         </div>
 
-        <flux:button variant="primary" type="submit" class="w-full">{{ __('Email password reset link') }}</flux:button>
+        <flux:button
+            variant="primary"
+            type="submit"
+            class="w-full"
+        >
+            {{ __('Email password reset link') }}
+        </flux:button>
     </form>
 
     <div class="text-center text-sm">
