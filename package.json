@@ -3,9 +3,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite",
-        "format": "prettier --write .",
-        "format:check": "prettier --check ."
+        "dev": "vite"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",
@@ -13,8 +11,6 @@
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^1.0",
         "postcss": "^8.4.47",
-        "prettier": "^3.5.0",
-        "prettier-plugin-tailwindcss": "^0.6.11",
         "tailwindcss": "^3.4.13",
         "vite": "^6.0"
     }
