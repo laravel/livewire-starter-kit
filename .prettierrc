@@ -1,18 +1,14 @@
 {
-    "plugins": ["prettier-plugin-blade", "prettier-plugin-tailwindcss"],
+    "plugins": ["@shufo/prettier-plugin-blade", "prettier-plugin-tailwindcss"],
     "tailwindConfig": "./tailwind.config.js",
     "overrides": [{
         "files": "*.blade.php",
         "options": {
             "parser": "blade",
-            "bladeKeepEmptyLines": true,
-            "bladeQuoteProperties": "preserve",
-            "bladeFormatPhpCode": false,
-            "bladePreservePhpQuotes": true,
-            "bladePreserveDirectiveContent": true,
-            "bladePreserveText": true,
-            "bladePreserveQuotes": true,
-            "bladeQuoteStyle": "preserve"
+            "wrapAttributes": "force-expand-multiline",
+            "sortTailwindcssClasses": true,
+            "tailwindcssConfigPath": "tailwind.config.cjs",
+            "sortHtmlAttributes": "code-guide"
         }
     }]
 }
