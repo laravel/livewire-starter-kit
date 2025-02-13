@@ -29,11 +29,7 @@ new class extends Component {
     </div>
 
     <flux:modal.trigger name="confirm-user-deletion">
-        <flux:button
-            variant="danger"
-            x-data=""
-            x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-        >
+        <flux:button variant="danger" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
             {{ __('Delete Account') }}
         </flux:button>
     </flux:modal.trigger>
@@ -49,13 +45,7 @@ new class extends Component {
             </p>
 
             <div class="mt-6">
-                <flux:input
-                    wire:model="password"
-                    id="password"
-                    label="{{ __('Password') }}"
-                    type="password"
-                    name="password"
-                />
+                <flux:input wire:model="password" id="password" label="{{ __('Password') }}" type="password" name="password" />
             </div>
 
             <div class="mt-6 flex justify-end space-x-2">
