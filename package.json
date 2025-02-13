@@ -5,7 +5,8 @@
         "build": "vite build",
         "dev": "vite",
         "format": "prettier --write .",
-        "format:check": "prettier --check ."
+        "format:check": "prettier --check .",
+        "format:tailwind": "prettier --write 'resources/views/**/*.blade.php' --ignore-unknown"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",
