@@ -39,7 +39,7 @@
 
     <?php if ($name): ?>
 
-    <span class="ml-2 truncate text-sm font-medium text-zinc-500 group-hover:text-zinc-800 dark:text-white/80 group-hover:dark:text-white">
+    <span class="ml-2 truncate text-sm font-medium text-zinc-500 group-hover:text-zinc-800 dark:text-white/80 dark:group-hover:text-white">
         {{ $name }}
     </span>
 
@@ -51,7 +51,7 @@
         <x-dynamic-component
             :component="'icon.' . $iconTrailing"
             variant="micro"
-            class="text-zinc-400 group-hover:text-zinc-800 dark:text-white/80 group-hover:dark:text-white"
+            class="text-zinc-400 group-hover:text-zinc-800 dark:text-white/80 dark:group-hover:text-white"
         />
     </div>
 
