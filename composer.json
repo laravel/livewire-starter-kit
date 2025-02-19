@@ -12,7 +12,7 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "livewire/flux-pro": "^1.1",
+        "livewire/flux": "^2.0",
         "livewire/volt": "^1.6.7"
     },
     "require-dev": {
@@ -72,11 +72,5 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true,
-    "repositories": {
-        "flux-pro": {
-            "type": "composer",
-            "url": "https://composer.fluxui.dev"
-        }
-    }
+    "prefer-stable": true
 }
