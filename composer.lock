@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "332a2c9635d3911ec8cb097355d32743",
+    "content-hash": "f97c8b37013457415e5ed3b6b71a30b2",
     "packages": [
         {
             "name": "brick/math",
@@ -2008,16 +2008,16 @@
         },
         {
             "name": "livewire/flux",
-            "version": "v2.0.0",
+            "version": "v2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/livewire/flux.git",
-                "reference": "26ea898a229c8ea2b877cb952d227a89bbb61e3c"
+                "reference": "27f6a21c68be15701e225f48729347ca43528fc9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/livewire/flux/zipball/26ea898a229c8ea2b877cb952d227a89bbb61e3c",
-                "reference": "26ea898a229c8ea2b877cb952d227a89bbb61e3c",
+                "url": "https://api.github.com/repos/livewire/flux/zipball/27f6a21c68be15701e225f48729347ca43528fc9",
+                "reference": "27f6a21c68be15701e225f48729347ca43528fc9",
                 "shasum": ""
             },
             "require": {
@@ -2065,66 +2065,9 @@
             ],
             "support": {
                 "issues": "https://github.com/livewire/flux/issues",
-                "source": "https://github.com/livewire/flux/tree/v2.0.0"
+                "source": "https://github.com/livewire/flux/tree/v2.0.1"
             },
-            "time": "2025-02-19T03:44:19+00:00"
-        },
-        {
-            "name": "livewire/flux-pro",
-            "version": "2.0.0",
-            "dist": {
-                "type": "zip",
-                "url": "https://composer.fluxui.dev/download/9e3f1e0c-24c6-4c7e-885e-7c302851b2aa/flux-pro-2.0.0.zip",
-                "reference": "2926625a15eb30b1dce374840892e6bb777613ab",
-                "shasum": "b9d6164e87fb9233ef06ea5a256010d23553badd"
-            },
-            "require": {
-                "illuminate/console": "^10.0|^11.0|^12.0",
-                "illuminate/support": "^10.0|^11.0|^12.0",
-                "illuminate/view": "^10.0|^11.0|^12.0",
-                "laravel/prompts": "^0.1.24|^0.2|^0.3",
-                "livewire/flux": "2.0.0|dev-main",
-                "livewire/livewire": "^3.5.19",
-                "php": "^8.1",
-                "symfony/console": "^6.0|^7.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "Flux": "FluxPro\\FluxPro"
-                    },
-                    "providers": [
-                        "FluxPro\\FluxProServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/helpers.php"
-                ],
-                "psr-4": {
-                    "FluxPro\\": "src/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "authors": [
-                {
-                    "name": "Caleb Porzio",
-                    "email": "calebporzio@gmail.com"
-                }
-            ],
-            "description": "The pro version of Flux, the official UI component library for Livewire.",
-            "keywords": [
-                "components",
-                "flux",
-                "laravel",
-                "livewire",
-                "ui"
-            ],
-            "time": "2025-02-19T04:27:23+00:00"
+            "time": "2025-02-20T02:33:33+00:00"
         },
         {
             "name": "livewire/livewire",
