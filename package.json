@@ -18,5 +18,8 @@
         "postcss": "^8.4.47",
         "tailwindcss": "^4.0.7",
         "vite": "^6.0"
+    },
+    "optionalDependencies": {
+        "@rollup/rollup-linux-x64-gnu": "4.9.5"
     }
 }
