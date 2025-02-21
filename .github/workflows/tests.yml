@@ -48,7 +48,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Build Assets
-        run: vite build
+        run: npm run build
 
       - name: Run Tests
         run: ./vendor/bin/phpunit
