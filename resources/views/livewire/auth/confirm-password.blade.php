@@ -35,7 +35,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 <div class="flex flex-col gap-6">
     <x-auth-header
         title="Confirm Your Password"
-        description="This is a secure area of the application. Please confirm your password before continuing"
+        description="This is a secure area of the application. Please confirm your password before continuing."
     />
 
     <!-- Session Status -->
