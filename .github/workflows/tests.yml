@@ -13,6 +13,7 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    environment: Testing
 
     steps:
       - name: Checkout
@@ -34,9 +35,6 @@ jobs:
       - name: Install Node Dependencies
         run: npm ci
 
-      - name: Build Assets
-        run: npm run build
-
       - name: Create SQLite Database
         run: touch database/database.sqlite
 
@@ -49,5 +47,8 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
-      - name: Tests
+      - name: Build Assets
+        run: npm run build
+
+      - name: Run Tests
         run: ./vendor/bin/phpunit
