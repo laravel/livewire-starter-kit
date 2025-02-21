@@ -18,7 +18,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         Password::sendResetLink($this->only('email'));
 
-        session()->flash('status', __('If an account exists with that email, you’ll receive a reset link shortly.'));
+        session()->flash('status', __('If that account exists, you’ll get a password reset link soon.'));
     }
 }; ?>
 
