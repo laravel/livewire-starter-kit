@@ -13,7 +13,6 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    environment: Testing
 
     steps:
       - name: Checkout
@@ -35,16 +34,11 @@ jobs:
       - name: Install Node Dependencies
         run: npm ci
 
+      - name: Build Assets
+        run: npm run build
+
       - name: Create SQLite Database
         run: touch database/database.sqlite
-
-      - name: Debug Environment Variables
-        run: |
-          echo "FLUX_USERNAME is set: ${{ secrets.FLUX_USERNAME != '' }}"
-          echo "FLUX_LICENSE_KEY is set: ${{ secrets.FLUX_LICENSE_KEY != '' }}"
-
-      - name: Add Flux Credentials Loaded From ENV
-        run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
 
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -55,8 +49,5 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
-      - name: Build Assets
-        run: npm run build
-
-      - name: Run Tests
+      - name: Tests
         run: ./vendor/bin/phpunit
