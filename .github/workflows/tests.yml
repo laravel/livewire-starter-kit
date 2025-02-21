@@ -48,7 +48,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Build Assets
-        run: npm run ci
+        run: npm ci
 
       - name: Run Tests
         run: ./vendor/bin/phpunit
