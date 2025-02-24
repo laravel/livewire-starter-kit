@@ -63,6 +63,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 required
                 autocomplete="new-password"
                 placeholder="Password"
+                viewable
             />
         </div>
 
@@ -77,6 +78,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 required
                 autocomplete="new-password"
                 placeholder="Confirm password"
+                viewable
             />
         </div>
 
