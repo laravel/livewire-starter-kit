@@ -74,10 +74,10 @@ new class extends Component {
 
     <x-settings.layout heading="Profile" subheading="Update your name and email address">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" label="{{ __('Name') }}" type="text" name="name" required autofocus autocomplete="name" />
+            <flux:input wire:model="name" label="{{ __('Name') }}" type="text" name="name" invalid="{{ $errors->has('name') }}" autofocus autocomplete="name" />
 
             <div>
-                <flux:input wire:model="email" label="{{ __('Email') }}" type="email" name="email" required autocomplete="email" />
+                <flux:input wire:model="email" label="{{ __('Email') }}" type="email" name="email" invalid="{{ $errors->has('email') }}" autocomplete="email" />
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
                     <div>

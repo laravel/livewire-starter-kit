@@ -48,7 +48,7 @@ new class extends Component {
                 label="{{ __('Current password') }}"
                 type="password"
                 name="current_password"
-                required
+                invalid="{{ $errors->has('current_password') }}"
                 autocomplete="current-password"
             />
             <flux:input
@@ -57,7 +57,7 @@ new class extends Component {
                 label="{{ __('New password') }}"
                 type="password"
                 name="password"
-                required
+                invalid="{{ $errors->has('password') }}"
                 autocomplete="new-password"
             />
             <flux:input
@@ -66,7 +66,7 @@ new class extends Component {
                 label="{{ __('Confirm Password') }}"
                 type="password"
                 name="password_confirmation"
-                required
+                invalid="{{ $errors->has('password_confirmation') }}"
                 autocomplete="new-password"
             />
 
