@@ -81,7 +81,7 @@ new class extends Component {
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
                     <div>
-                        <p class="mt-2 text-sm text-gray-800">
+                        <flux:text class="mt-2">
                             {{ __('Your email address is unverified.') }}
 
                             <button
@@ -90,12 +90,12 @@ new class extends Component {
                             >
                                 {{ __('Click here to re-send the verification email.') }}
                             </button>
-                        </p>
+                        </flux:text>
 
                         @if (session('status') === 'verification-link-sent')
-                            <p class="mt-2 text-sm font-medium text-green-600">
+                            <flux:text class="mt-2 !dark:text-green-400 !text-green-600">
                                 {{ __('A new verification link has been sent to your email address.') }}
-                            </p>
+                            </flux:text>
                         @endif
                     </div>
                 @endif
