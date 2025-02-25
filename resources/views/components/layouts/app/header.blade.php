@@ -8,7 +8,7 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <a href="{{ route('dashboard') }}" class="ml-2 mr-5 flex items-center space-x-2 lg:ml-0" wire:navigate>
-                <x-app-logo class="size-8" href="#"></x-app-logo>
+                <x-app-logo />
             </a>
 
             <flux:navbar class="-mb-px max-lg:hidden">
@@ -93,7 +93,7 @@
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
             <a href="{{ route('dashboard') }}" class="ml-1 flex items-center space-x-2" wire:navigate>
-                <x-app-logo class="size-8" href="#"></x-app-logo>
+                <x-app-logo />
             </a>
 
             <flux:navlist variant="outline">
