@@ -23,7 +23,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header title="Forgot password" description="Enter your email to receive a password reset link" />
+    <x-auth-header title="{{ __('Forgot password') }}" description="{{ __('Enter your email to receive a password reset link') }}" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
@@ -44,7 +44,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     </form>
 
     <div class="space-x-1 text-center text-sm text-zinc-400">
-        Or, return to
-        <x-text-link href="{{ route('login') }}">log in</x-text-link>
+    {{ __('Or, return to') }}
+    <flux:link href="{{ route('login') }}" wire:navigate>{{ __('log in') }}</flux:link>
     </div>
 </div>
