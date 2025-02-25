@@ -32,7 +32,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <!-- Email Address -->
         <flux:input
             wire:model="email"
-            label="{{ __('Email Address') }}"
+            :label="__('Email Address')"
             type="email"
             name="email"
             required
