@@ -46,7 +46,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <flux:input
             wire:model="name"
             id="name"
-            label="{{ __('Name') }}"
+            :label="__('Name')"
             type="text"
             name="name"
             required
@@ -59,7 +59,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <flux:input
             wire:model="email"
             id="email"
-            label="{{ __('Email address') }}"
+            :label="__('Email address')"
             type="email"
             name="email"
             required
@@ -71,7 +71,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <flux:input
             wire:model="password"
             id="password"
-            label="{{ __('Password') }}"
+            :label="__('Password')"
             type="password"
             name="password"
             required
@@ -83,7 +83,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <flux:input
             wire:model="password_confirmation"
             id="password_confirmation"
-            label="{{ __('Confirm password') }}"
+            :label="__('Confirm password')"
             type="password"
             name="password_confirmation"
             required
