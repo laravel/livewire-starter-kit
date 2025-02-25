@@ -7,31 +7,22 @@
         <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <a href="{{ route('dashboard') }}" class="mr-5 flex items-center space-x-2">
+            <a href="{{ route('dashboard') }}" wire:navigate class="mr-5 flex items-center space-x-2">
                 <x-app-logo class="size-8" href="#"></x-app-logo>
             </a>
 
             <flux:navlist variant="outline">
                 <flux:navlist.group heading="Platform" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')">Dashboard</flux:navlist.item>
+                    <flux:navlist.item  wire:navigate icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')">Dashboard</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
             <flux:spacer />
 
-            <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    Repository
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits" target="_blank">
-                    Documentation
-                </flux:navlist.item>
-            </flux:navlist>
-
             <!-- Desktop User Menu -->
             <flux:dropdown position="bottom" align="start">
                 <flux:profile
+                    wire:navigate
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
                     icon-trailing="chevrons-up-down"
@@ -60,7 +51,7 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:menu.item href="/settings/profile" icon="cog">Settings</flux:menu.item>
+                        <flux:menu.item href="/settings/profile" wire:navigate icon="cog">Settings</flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
@@ -110,7 +101,7 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:menu.item href="/settings/profile" icon="cog">Settings</flux:menu.item>
+                        <flux:menu.item href="/settings/profile" wire:navigate icon="cog">Settings</flux:menu.item>
                     </flux:menu.radio.group>
 
                     <flux:menu.separator />
