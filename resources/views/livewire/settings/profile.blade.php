@@ -47,6 +47,8 @@ new class extends Component {
 
         $user->save();
 
+        $this->dispatch('notify', type: 'success', message: 'Profile updated successfully');
+
         $this->dispatch('profile-updated', name: $user->name);
     }
 
@@ -64,6 +66,8 @@ new class extends Component {
         }
 
         $user->sendEmailVerificationNotification();
+
+        $this->dispatch('notify', type: 'success', message: 'Verification link sent');
 
         Session::flash('status', 'verification-link-sent');
     }
