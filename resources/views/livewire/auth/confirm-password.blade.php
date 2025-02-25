@@ -46,7 +46,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <flux:input
             wire:model="password"
             id="password"
-            label="{{ __('Password') }}"
+            :label="__('Password')"
             type="password"
             name="password"
             required
