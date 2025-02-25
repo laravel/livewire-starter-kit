@@ -35,7 +35,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="mt-4 flex flex-col gap-6">
-    <div class="text-center text-sm text-gray-600">
+    <div class="text-center text-sm text-zinc-500 dark:text-white/70">
         {{ __('Please verify your email address by clicking on the link we just emailed to you.') }}
     </div>
 
@@ -53,7 +53,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <button
             wire:click="logout"
             type="submit"
-            class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            class="underline text-sm decoration-neutral-400 underline-offset-2 duration-300 ease-out hover:decoration-neutral-700 text-neutral-900 dark:text-neutral-200 dark:hover:decoration-neutral-100"
         >
             {{ __('Log out') }}
         </button>
