@@ -81,7 +81,7 @@ new class extends Component {
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
                     <div>
-                        <flux:text class="mt-2">
+                        <flux:text class="mt-4">
                             {{ __('Your email address is unverified.') }}
 
                             <button
