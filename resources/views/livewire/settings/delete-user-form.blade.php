@@ -44,7 +44,7 @@ new class extends Component {
                 </flux:subheading>
             </div>
 
-            <flux:input wire:model="password" id="password" label="{{ __('Password') }}" type="password" name="password" />
+            <flux:input wire:model="password" id="password" :label="__('Password')" type="password" name="password" />
 
             <div class="flex justify-end space-x-2">
                 <flux:modal.close>

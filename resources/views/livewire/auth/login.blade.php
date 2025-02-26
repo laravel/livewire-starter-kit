@@ -73,7 +73,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header title="{{ __('Log in to your account') }}" description="{{ __('Enter your email and password below to log in') }}" />
+    <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
@@ -82,7 +82,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <!-- Email Address -->
         <flux:input
             wire:model="email"
-            label="{{ __('Email address') }}"
+            :label="__('Email address')"
             type="email"
             name="email"
             required
@@ -95,7 +95,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <div class="relative">
             <flux:input
                 wire:model="password"
-                label="{{ __('Password') }}"
+                :label="__('Password')"
                 type="password"
                 name="password"
                 required
@@ -111,7 +111,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         </div>
 
         <!-- Remember Me -->
-        <flux:checkbox wire:model="remember" label="{{ __('Remember me') }}" />
+        <flux:checkbox wire:model="remember" :label="__('Remember me')" />
 
         <div class="flex items-center justify-end">
             <flux:button variant="primary" type="submit" class="w-full">{{ __('Log in') }}</flux:button>
