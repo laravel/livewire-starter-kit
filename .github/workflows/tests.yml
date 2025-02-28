@@ -35,9 +35,6 @@ jobs:
       - name: Install Node Dependencies
         run: npm i
 
-      - name: Create SQLite Database
-        run: touch database/database.sqlite
-
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
