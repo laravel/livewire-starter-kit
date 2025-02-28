@@ -84,12 +84,9 @@ new class extends Component {
                         <p class="mt-2 text-sm text-gray-800">
                             {{ __('Your email address is unverified.') }}
 
-                            <button
-                                wire:click.prevent="resendVerificationNotification"
-                                class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                            >
+                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
                                 {{ __('Click here to re-send the verification email.') }}
-                            </button>
+                            </flux:link>
                         </p>
 
                         @if (session('status') === 'verification-link-sent')
