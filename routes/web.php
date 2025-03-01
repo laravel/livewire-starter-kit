@@ -6,9 +6,12 @@ use Livewire\Volt\Volt;
 
 Route::view('/', 'welcome')->name('home');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+
+
+Route::middleware(['auth','verified'])->group(function() {
+    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Volt::route('contact', 'contact')->name('contact');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
