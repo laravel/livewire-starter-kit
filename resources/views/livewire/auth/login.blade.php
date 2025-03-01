@@ -85,7 +85,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
             wire:model="email"
             :label="__('Email address')"
             type="email"
-            name="email"
             required
             autofocus
             autocomplete="email"
@@ -98,7 +97,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 wire:model="password"
                 :label="__('Password')"
                 type="password"
-                name="password"
                 required
                 autocomplete="current-password"
                 placeholder="Password"

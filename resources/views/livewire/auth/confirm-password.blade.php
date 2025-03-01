@@ -45,10 +45,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <!-- Password -->
         <flux:input
             wire:model="password"
-            id="password"
             :label="__('Password')"
             type="password"
-            name="password"
             required
             autocomplete="new-password"
             placeholder="Password"

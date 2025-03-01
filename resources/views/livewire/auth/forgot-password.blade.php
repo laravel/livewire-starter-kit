@@ -34,7 +34,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
             wire:model="email"
             :label="__('Email Address')"
             type="email"
-            name="email"
             required
             autofocus
             placeholder="email@example.com"

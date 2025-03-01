@@ -45,10 +45,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <!-- Name -->
         <flux:input
             wire:model="name"
-            id="name"
             :label="__('Name')"
             type="text"
-            name="name"
             required
             autofocus
             autocomplete="name"
@@ -58,10 +56,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <!-- Email Address -->
         <flux:input
             wire:model="email"
-            id="email"
             :label="__('Email address')"
             type="email"
-            name="email"
             required
             autocomplete="email"
             placeholder="email@example.com"
@@ -70,10 +66,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <!-- Password -->
         <flux:input
             wire:model="password"
-            id="password"
             :label="__('Password')"
             type="password"
-            name="password"
             required
             autocomplete="new-password"
             placeholder="Password"
@@ -82,10 +76,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <!-- Confirm Password -->
         <flux:input
             wire:model="password_confirmation"
-            id="password_confirmation"
             :label="__('Confirm password')"
             type="password"
-            name="password_confirmation"
             required
             autocomplete="new-password"
             placeholder="Confirm password"
