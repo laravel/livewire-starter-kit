@@ -9,6 +9,10 @@ use Livewire\Form;
 
 class ContactForm extends Form
 {
+
+    #[Validate('required|string|max:1000')]
+    public $summary = '';
+
     #[Validate('required|string|max:100')]
     public $name = '';
 

@@ -81,7 +81,7 @@ new class extends Component {
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
                     <div>
-                        <p class="mt-2 text-sm text-gray-800">
+                        <p class="mt-2 text-sm text-zinc-800">
                             {{ __('Your email address is unverified.') }}
 
                             <button
