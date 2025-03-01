@@ -11,7 +11,7 @@ use Livewire\WithPagination;
 new class extends Component {
     use WithPagination;
 
-    #[Validate('required|string|max:100|unique:skills,group')]
+    #[Validate('required|string|max:100')]
     public string $skillGroupName = '';
 
     #[Validate('required|string|max:100|unique:skills,skill')]
@@ -65,13 +65,13 @@ new class extends Component {
 
         $this->modal('add-skill')->close();
 
-        $this->mount();
+        $this->close();
     }
 
     public function close()
     {
-        $this->reset('skillGroupName');
-        $this->resetValidation('skillGroupName');
+        $this->reset();
+        $this->resetValidation();
     }
 };
 ?>
@@ -109,12 +109,16 @@ new class extends Component {
         </flux:table.body>
     </flux:table>
     <flux:modal wire:close="close" name="add-skill" class="md:w-128">
-        <form wire:submit.prevent="addSkillGroup">
+        <form wire:submit.prevent="addSkill">
             <flux:heading size="lg">Add New Skill Group</flux:heading>
             <flux:subheading>Shown like Front End Development: Javascript</flux:subheading>
             <flux:separator class="mb-6" />
             <flux:grid>
-                <flux:input wire:model="skillGroupName" label="Skill Name" placeholder="Front-end Development" />
+                <flux:select placeholder="Select a skill group" wire:model="skillGroupName">
+                    @foreach (\App\Enums\SkillGroup::cases() as $value)
+                        <flux:select.option value="{{ $value }}">{{ $value }}</flux:select.option>
+                    @endforeach
+                </flux:select>
                 <flux:input wire:model="skillName" label="Skill Name" placeholder="Laravel" />
                 <flux:input wire:model="skillDescription" label="Skill Description"
                     placeholder="Laravel is a PHP web framework" />
