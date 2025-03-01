@@ -44,7 +44,7 @@ new class extends Component {
         <form wire:submit="updatePassword" class="mt-6 space-y-6">
             <flux:input
                 wire:model="current_password"
-                id="update_password_current_passwordpassword"
+                id="update_password_current_password"
                 :label="__('Current password')"
                 type="password"
                 name="current_password"
