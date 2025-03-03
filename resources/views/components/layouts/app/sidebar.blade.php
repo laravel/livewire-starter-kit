@@ -32,6 +32,7 @@
             <!-- Desktop User Menu -->
             <flux:dropdown position="bottom" align="start">
                 <flux:profile
+                    class="cursor-pointer"
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
                     icon-trailing="chevrons-up-down"
