@@ -26,7 +26,7 @@
                 name="password"
                 required
                 autocomplete="current-password"
-                placeholder="{{ __('Password') }}"
+                :placeholder="__('Password')"
             />
 
             @if (Route::has('password.request'))
