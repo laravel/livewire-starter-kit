@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-6">
-    <x-auth-header title="Reset password" description="Please enter your new password below" />
+    <x-auth-header title="{{ __('Reset password') }}" description="{{ __('Please enter your new password below') }}" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
@@ -25,7 +25,7 @@
             name="password"
             required
             autocomplete="new-password"
-            placeholder="Password"
+            placeholder="{{ __('Password') }}"
         />
 
         <!-- Confirm Password -->
@@ -37,7 +37,7 @@
             name="password_confirmation"
             required
             autocomplete="new-password"
-            placeholder="Confirm password"
+            placeholder="{{ __('Confirm password') }}"
         />
 
         <div class="flex items-center justify-end">
