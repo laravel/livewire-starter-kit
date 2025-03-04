@@ -20,25 +20,25 @@
             <flux:spacer />
 
             <flux:navbar class="mr-1.5 space-x-0.5 py-0!">
-                <flux:tooltip content="Search" position="bottom">
-                    <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#" label="Search" />
+                <flux:tooltip :content="__('Search')" position="bottom">
+                    <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#" :label="__('Search')" />
                 </flux:tooltip>
-                <flux:tooltip content="Repository" position="bottom">
+                <flux:tooltip :content="__('Repository')" position="bottom">
                     <flux:navbar.item
                         class="h-10 max-lg:hidden [&>div>svg]:size-5"
                         icon="folder-git-2"
                         href="https://github.com/laravel/livewire-starter-kit"
                         target="_blank"
-                        label="Repository"
+                        :label="__('Repository')"
                     />
                 </flux:tooltip>
-                <flux:tooltip content="Documentation" position="bottom">
+                <flux:tooltip :content="__('Documentation')" position="bottom">
                     <flux:navbar.item
                         class="h-10 max-lg:hidden [&>div>svg]:size-5"
                         icon="book-open-text"
                         href="https://laravel.com/docs/starter-kits"
                         target="_blank"
-                        label="Documentation"
+                        :label="__('Documentation')"
                     />
                 </flux:tooltip>
             </flux:navbar>
@@ -97,7 +97,7 @@
             </a>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group heading="Platform">
+                <flux:navlist.group :heading="__('Platform')">
                     <flux:navlist.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                     </flux:navlist.item>
