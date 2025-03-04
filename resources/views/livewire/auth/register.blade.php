@@ -50,7 +50,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             required
             autofocus
             autocomplete="name"
-            placeholder="Full name"
+            :placeholder="__('Full name')"
         />
 
         <!-- Email Address -->
@@ -70,7 +70,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             type="password"
             required
             autocomplete="new-password"
-            placeholder="Password"
+            :placeholder="__('Password')"
         />
 
         <!-- Confirm Password -->
@@ -80,7 +80,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             type="password"
             required
             autocomplete="new-password"
-            placeholder="Confirm password"
+            :placeholder="__('Confirm password')"
         />
 
         <div class="flex items-center justify-end">
