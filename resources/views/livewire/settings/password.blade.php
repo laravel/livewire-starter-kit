@@ -44,28 +44,22 @@ new class extends Component {
         <form wire:submit="updatePassword" class="mt-6 space-y-6">
             <flux:input
                 wire:model="current_password"
-                id="update_password_current_password"
                 :label="__('Current password')"
                 type="password"
-                name="current_password"
                 required
                 autocomplete="current-password"
             />
             <flux:input
                 wire:model="password"
-                id="update_password_password"
                 :label="__('New password')"
                 type="password"
-                name="password"
                 required
                 autocomplete="new-password"
             />
             <flux:input
                 wire:model="password_confirmation"
-                id="update_password_password_confirmation"
                 :label="__('Confirm Password')"
                 type="password"
-                name="password_confirmation"
                 required
                 autocomplete="new-password"
             />
