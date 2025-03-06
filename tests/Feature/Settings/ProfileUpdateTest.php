@@ -6,7 +6,6 @@ use App\Livewire\Settings\Profile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Livewire\Volt\Volt;
 use Tests\TestCase;
 
 class ProfileUpdateTest extends TestCase
