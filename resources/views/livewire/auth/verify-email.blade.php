@@ -40,7 +40,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     </flux:text>
 
     @if (session('status') == 'verification-link-sent')
-        <flux:text class="text-center font-medium !dark:text-green-400 !text-green-600">
+        <flux:text class="!dark:text-green-400 text-center font-medium !text-green-600">
             {{ __('A new verification link has been sent to the email address you provided during registration.') }}
         </flux:text>
     @endif
@@ -50,7 +50,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             {{ __('Resend verification email') }}
         </flux:button>
 
-        <flux:link class="text-sm cursor-pointer" wire:click="logout">
+        <flux:link class="cursor-pointer text-sm" wire:click="logout">
             {{ __('Log out') }}
         </flux:link>
     </div>
