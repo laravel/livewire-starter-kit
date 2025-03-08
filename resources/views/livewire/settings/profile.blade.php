@@ -29,14 +29,7 @@ new class extends Component {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
 
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($user->id)
-            ],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
         ]);
 
         $user->fill($validated);
@@ -84,13 +77,13 @@ new class extends Component {
                         <flux:text class="mt-4">
                             {{ __('Your email address is unverified.') }}
 
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
+                            <flux:link class="cursor-pointer text-sm" wire:click.prevent="resendVerificationNotification">
                                 {{ __('Click here to re-send the verification email.') }}
                             </flux:link>
                         </flux:text>
 
                         @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
+                            <flux:text class="!dark:text-green-400 mt-2 font-medium !text-green-600">
                                 {{ __('A new verification link has been sent to your email address.') }}
                             </flux:text>
                         @endif

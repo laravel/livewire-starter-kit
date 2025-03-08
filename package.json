@@ -3,7 +3,15 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "format": "prettier --write resources/",
+        "format:check": "prettier --check resources/"
+    },
+    "devDependencies": {
+        "prettier": "^3.5.3",
+        "prettier-plugin-blade": "^2.1.21",
+        "prettier-plugin-organize-imports": "^4.1.0",
+        "prettier-plugin-tailwindcss": "^0.6.11"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.0.7",

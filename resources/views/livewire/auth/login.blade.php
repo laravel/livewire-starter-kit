@@ -69,7 +69,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+        return Str::transliterate(Str::lower($this->email) . '|' . request()->ip());
     }
 }; ?>
 
@@ -103,7 +103,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             />
 
             @if (Route::has('password.request'))
-                <flux:link class="absolute right-0 top-0 text-sm" :href="route('password.request')" wire:navigate>
+                <flux:link class="absolute top-0 right-0 text-sm" :href="route('password.request')" wire:navigate>
                     {{ __('Forgot your password?') }}
                 </flux:link>
             @endif
