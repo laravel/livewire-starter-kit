@@ -48,6 +48,7 @@
                 <flux:profile
                     class="cursor-pointer"
                     :initials="auth()->user()->initials()"
+                    :avatar="auth()->user()->avatar"
                 />
 
                 <flux:menu>
