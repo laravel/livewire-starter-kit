@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -35,6 +36,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * The attributes that should be appended to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'avatar',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -56,5 +66,19 @@ class User extends Authenticatable
             ->explode(' ')
             ->map(fn (string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
+    }
+
+    /**
+     * Get the URL of the user's profile photo.
+     *
+     * @return string|null
+     */
+    public function getAvatarAttribute(): ?string
+    {
+        if ($this->profile_photo_path) {
+           return Storage::url($this->profile_photo_path);
+        }
+
+        return null;
     }
 }
