@@ -7,14 +7,15 @@ use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 
 new class extends Component {
     use WithFileUploads;
 
     public string $name = '';
     public string $email = '';
-    public string | null $avatar;
-    public $photo = null;
+    public ?string $avatar;
+    public ?UploadedFile $photo = null;
 
     /**
      * Mount the component.
