@@ -35,6 +35,9 @@ jobs:
 
       - name: Run Pint
         run: vendor/bin/pint
+      
+      - name: Format Frontend
+        run: npm run format
 
       # - name: Commit Changes
       #   uses: stefanzweifel/git-auto-commit-action@v5
