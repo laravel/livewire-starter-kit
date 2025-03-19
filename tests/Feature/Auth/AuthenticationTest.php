@@ -44,6 +44,7 @@ class AuthenticationTest extends TestCase
             ->call('login');
 
         $response->assertHasErrors('email');
+
         $this->assertGuest();
     }
 
