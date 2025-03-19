@@ -45,6 +45,7 @@ class AuthenticationTest extends TestCase
             ->call('login');
 
         $response->assertHasErrors('email');
+
         $this->assertGuest();
     }
 
@@ -54,7 +55,8 @@ class AuthenticationTest extends TestCase
 
         $response = $this->actingAs($user)->post('/logout');
 
-        $this->assertGuest();
         $response->assertRedirect('/');
+
+        $this->assertGuest();
     }
 }
