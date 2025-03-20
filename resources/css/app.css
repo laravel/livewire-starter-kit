@@ -47,7 +47,7 @@
     }
 }
 
-[data-flux-field] {
+[data-flux-field]:not(ui-radio) {
     @apply grid gap-2;
 }
 
