@@ -5,10 +5,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 
 new class extends Component {
+    use WithFileUploads;
+
     public string $name = '';
     public string $email = '';
+    public ?string $avatar = null;
+    public ?UploadedFile $photo = null;
 
     /**
      * Mount the component.
@@ -17,6 +24,7 @@ new class extends Component {
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->avatar = Auth::user()->avatar;
     }
 
     /**
@@ -37,6 +45,8 @@ new class extends Component {
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id)
             ],
+
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
 
         $user->fill($validated);
@@ -47,7 +57,23 @@ new class extends Component {
 
         $user->save();
 
+        if ($this->photo) {
+            $user->updateProfilePhoto($validated['photo']);
+        }
+
         $this->dispatch('profile-updated', name: $user->name);
+    }
+
+    /**
+     * Delete user's profile photo.
+     */
+    public function deleteProfilePhoto(): void
+    {
+        $user = Auth::user();
+
+        $user->deleteProfilePhoto();
+
+        $this->dispatch('profile-updated');
     }
 
     /**
@@ -74,6 +100,47 @@ new class extends Component {
 
     <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
+            <div class="grid gap-2">
+                <flux:input 
+                    id="photo"
+                    :label="__('Photo')"
+                    type="file" 
+                    class="hidden" 
+                    wire:model="photo"
+                    accept="image/*"
+                />
+
+                <div className="flex items-center gap-4">
+                    @if ($avatar || $photo)
+                        <div class="mt-2">
+                            <img src="{{ $photo ? $photo->temporaryUrl() : $avatar }}" alt="{{ $name }}" class="rounded-full size-20 object-cover">
+                        </div>
+                    @else
+                        <span class="relative flex h-20 w-20 shrink-0 overflow-hidden rounded-full">
+                            <span
+                                class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
+                            >
+                                {{ Auth::user()->initials() }}
+                            </span>
+                        </span>
+                    @endif
+
+                    <flux:button type="button" class="mt-2 me-2" onclick="document.getElementById('photo').click()">
+                        @if ($avatar)
+                            {{ __('Change Photo') }}
+                        @else
+                            {{ __('Upload Photo') }}  
+                        @endif
+                    </flux:button>
+
+                    @if ($avatar || $photo)
+                        <flux:button type="button" class="mt-2" wire:click="deleteProfilePhoto">
+                            {{ __('Remove Photo') }}
+                        </flux:button>
+                    @endif
+                </div>
+            </div>
+
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
             <div>
