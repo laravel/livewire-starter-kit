@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use App\Traits\HasProfilePhoto;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasProfilePhoto;
 
     /**
      * The attributes that are mass assignable.
@@ -36,9 +36,9 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be appended to the model's array form.
+     * The accessors to append to the model's array form.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $appends = [
         'avatar',
@@ -66,19 +66,5 @@ class User extends Authenticatable
             ->explode(' ')
             ->map(fn (string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
-    }
-
-    /**
-     * Get the URL of the user's profile photo.
-     *
-     * @return string|null
-     */
-    public function getAvatarAttribute(): ?string
-    {
-        if ($this->profile_photo_path) {
-           return Storage::url($this->profile_photo_path);
-        }
-
-        return null;
     }
 }
