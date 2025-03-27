@@ -38,10 +38,12 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
+        $response = LivewireVolt::test('auth.login')
+            ->set('email', $user->email)
+            ->set('password', 'wrong-password')
+            ->call('login');
+
+        $response->assertHasErrors('email');
 
         $this->assertGuest();
     }
@@ -52,7 +54,8 @@ class AuthenticationTest extends TestCase
 
         $response = $this->actingAs($user)->post('/logout');
 
-        $this->assertGuest();
         $response->assertRedirect('/');
+
+        $this->assertGuest();
     }
 }
