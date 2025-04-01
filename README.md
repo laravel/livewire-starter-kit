@@ -8,10 +8,10 @@ Livewire is a powerful way of building dynamic, reactive, frontend UIs using jus
 
 This Livewire starter kit utilizes Livewire 3, Laravel Volt (optionally), TypeScript, Tailwind, and the [Flux UI](https://fluxui.dev) component library.
 
-If you are looking for the alternate configurations of this Starter Kit, they can be found in the following branches:
+If you are looking for the alternate configurations of this starter kit, they can be found in the following branches:
 
 - [components](https://github.com/laravel/livewire-starter-kit/tree/components) - if Volt is not selected
-- [workos](https://github.com/laravel/livewire-starter-kit/tree/workos) - if WorkOS is selected for Authentication
+- [workos](https://github.com/laravel/livewire-starter-kit/tree/workos) - if WorkOS is selected for authentication
 
 ## Official Documentation
 
