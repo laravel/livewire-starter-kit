@@ -10,7 +10,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/css/guest.css',
+                'resources/css/guest.css'
             ],
             refresh: [`resources/views/**/*`],
         }),
