@@ -12,12 +12,10 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     public function sendPasswordResetLink(): void
     {
-        $validated = $this->validate([
+        $this->validate([
             'email' => ['required', 'string', 'email'],
         ]);
-
-        $validated['email'] = strtolower($validated['email']);
-
+        $this->email = mb_strtolower($this->email);
         Password::sendResetLink($this->only('email'));
 
         session()->flash('status', __('A reset link will be sent if the account exists.'));

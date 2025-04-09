@@ -25,7 +25,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $validated['email'] = strtolower($validated['email']);
+        $validated['email'] = mb_strtolower($validated['email']);
         $validated['password'] = Hash::make($validated['password']);
 
         event(new Registered(($user = User::create($validated))));
