@@ -12,9 +12,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     public function sendPasswordResetLink(): void
     {
-        $this->validate([
+        $validated = $this->validate([
             'email' => ['required', 'string', 'email'],
         ]);
+
+        $validated['email'] = strtolower($validated['email']);
 
         Password::sendResetLink($this->only('email'));
 
