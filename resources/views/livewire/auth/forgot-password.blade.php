@@ -15,7 +15,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $this->validate([
             'email' => ['required', 'string', 'email'],
         ]);
-
+        $this->email = mb_strtolower($this->email);
         Password::sendResetLink($this->only('email'));
 
         session()->flash('status', __('A reset link will be sent if the account exists.'));
