@@ -3,6 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
 
@@ -32,4 +33,27 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
     }
+
+    public function test_new_user_email_is_stored_as_lowercase_even_if_input_is_uppercase(): void
+    {
+        $uppercaseEmail = 'TEST@EXAMPLE.COM';
+
+        $response = Volt::test('auth.register')
+            ->set('name', 'Test User')
+            ->set('email', $uppercaseEmail)
+            ->set('password', 'password')
+            ->set('password_confirmation', 'password')
+            ->call('register');
+
+        $response
+            ->assertHasNoErrors()
+            ->assertRedirect(route('dashboard', absolute: false));
+
+        $this->assertAuthenticated();
+
+        $this->assertDatabaseHas('users', [
+            'email' => Str::lower($uppercaseEmail),
+        ]);
+    }
+
 }
