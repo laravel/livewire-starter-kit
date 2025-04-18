@@ -64,3 +64,14 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* Remove the increment/decrement buttons from pass code number input */
+.input-otp input::-webkit-outer-spin-button,
+.input-otp input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+.input-otp input[type=number] {
+  -moz-appearance: textfield;
+}
