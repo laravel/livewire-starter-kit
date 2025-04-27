@@ -50,6 +50,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             required
             autocomplete="new-password"
             :placeholder="__('Password')"
+            viewable
         />
 
         <flux:button variant="primary" type="submit" class="w-full">{{ __('Confirm') }}</flux:button>
