@@ -31,5 +31,8 @@ Route::middleware('auth')->group(function () {
         ->name('password.confirm');
 });
 
+Volt::route('two-factor-challenge', 'auth.two-factor-challenge')
+        ->name('two-factor-challenge');
+
 Route::post('logout', App\Livewire\Actions\Logout::class)
     ->name('logout');
