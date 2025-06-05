@@ -4,6 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Livewire\Volt\Volt as LivewireVolt;
 use Tests\TestCase;
 
@@ -47,6 +48,26 @@ class AuthenticationTest extends TestCase
 
         $this->assertGuest();
     }
+
+    public function test_user_can_authenticate_with_uppercase_email(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'user@example.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = LivewireVolt::test('auth.login')
+            ->set('email', Str::upper($user->email)) // USER@EXAMPLE.COM
+            ->set('password', 'password')
+            ->call('login');
+
+        $response
+            ->assertHasNoErrors()
+            ->assertRedirect(route('dashboard', absolute: false));
+
+        $this->assertAuthenticatedAs($user);
+    }
+
 
     public function test_users_can_logout(): void
     {
