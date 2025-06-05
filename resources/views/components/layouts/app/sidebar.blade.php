@@ -32,9 +32,9 @@
             <!-- Desktop User Menu -->
             <flux:dropdown position="bottom" align="start">
                 <flux:profile
-                    icon:trailing="chevrons-up-down"
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
+                    icon:trailing="chevrons-up-down"
                 />
 
                 <flux:menu class="w-[220px]">
