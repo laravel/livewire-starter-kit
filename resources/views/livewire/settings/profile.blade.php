@@ -8,7 +8,7 @@ use Livewire\Volt\Component;
 
 new class extends Component {
     public string $name = '';
-    public string $email = '';
+    public string $unverified_email = '';
 
     /**
      * Mount the component.
@@ -16,7 +16,7 @@ new class extends Component {
     public function mount(): void
     {
         $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $this->unverified_email = Auth::user()->unverified_email ?? Auth::user()->email;
     }
 
     /**
@@ -29,19 +29,19 @@ new class extends Component {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
 
-            'email' => [
+            'unverified_email' => [
                 'required',
                 'string',
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($user->id)
+                Rule::unique(User::class, 'email')->ignore($user->id)
             ],
         ]);
 
         $user->fill($validated);
 
-        if ($user->isDirty('email')) {
+        if ($user->isDirty('unverified_email')) {
             $user->email_verified_at = null;
         }
 
@@ -77,7 +77,7 @@ new class extends Component {
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
             <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+                <flux:input wire:model="unverified_email" :label="__('Email')" type="email" required autocomplete="email" />
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
                     <div>
