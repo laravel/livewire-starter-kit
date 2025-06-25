@@ -26,7 +26,7 @@ class ProfileUpdateTest extends TestCase
 
         $response = Volt::test('settings.profile')
             ->set('name', 'Test User')
-            ->set('email', 'test@example.com')
+            ->set('unverified_email', 'test@example.com')
             ->call('updateProfileInformation');
 
         $response->assertHasNoErrors();
@@ -34,7 +34,7 @@ class ProfileUpdateTest extends TestCase
         $user->refresh();
 
         $this->assertEquals('Test User', $user->name);
-        $this->assertEquals('test@example.com', $user->email);
+        $this->assertEquals('test@example.com', $user->unverified_email);
         $this->assertNull($user->email_verified_at);
     }
 
@@ -46,7 +46,7 @@ class ProfileUpdateTest extends TestCase
 
         $response = Volt::test('settings.profile')
             ->set('name', 'Test User')
-            ->set('email', $user->email)
+            ->set('unverified_email', $user->email)
             ->call('updateProfileInformation');
 
         $response->assertHasNoErrors();

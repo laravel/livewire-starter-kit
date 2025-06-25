@@ -56,4 +56,53 @@ class EmailVerificationTest extends TestCase
 
         $this->assertFalse($user->fresh()->hasVerifiedEmail());
     }
+
+    public function test_unverified_email_resets_when_another_user_verifies_their_registration_email(): void
+    {
+        $unverifiedUser = User::factory()->unverified()->create([
+            'unverified_email' => 'unverified@example.com',
+        ]);
+
+        $user = User::factory()->unverified()->create([
+            'email' => $unverifiedUser->unverified_email,
+        ]);
+
+        Event::fake();
+
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->email)]
+        );
+
+        $response = $this->actingAs($user)->get($verificationUrl);
+
+        $this->assertTrue($user->fresh()->hasVerifiedEmail());
+        $this->assertNull($user->fresh()->unverified_email);
+        $this->assertNull($unverifiedUser->fresh()->unverified_email);
+    }
+
+    public function test_unverified_user_deleted_when_another_user_verifies_their_new_email(): void
+    {
+        $unverifiedUser = User::factory()->unverified()->create();
+
+        $user = User::factory()->unverified()->create([
+            'unverified_email' => $unverifiedUser->email,
+        ]);
+
+        Event::fake();
+
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->email)]
+        );
+
+        $response = $this->actingAs($user)->get($verificationUrl);
+
+        $this->assertTrue($user->fresh()->hasVerifiedEmail());
+        $this->assertNull($user->fresh()->unverified_email);
+        $this->assertEquals($user->fresh()->email, $unverifiedUser->email);
+        $this->assertNull($unverifiedUser->fresh());
+    }
 }
