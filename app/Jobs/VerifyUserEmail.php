@@ -3,17 +3,15 @@
 namespace App\Jobs;
 
 use App\Models\User;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 
 readonly class VerifyUserEmail
 {
     public function __construct(
         private User $user
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {
@@ -25,6 +23,8 @@ readonly class VerifyUserEmail
             $this->purgeConflicts();
             $this->applyVerification();
         });
+
+        event(new Verified($this->user));
     }
 
     /**
