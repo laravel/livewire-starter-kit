@@ -39,6 +39,10 @@ new class extends Component {
             ],
         ]);
 
+        if ($validated['unverified_email'] === Auth::user()->email) {
+            unset($validated['unverified_email']);
+        }
+
         $user->fill($validated);
 
         if ($user->isDirty('unverified_email')) {
