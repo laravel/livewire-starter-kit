@@ -24,7 +24,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     {
         $this->token = $token;
 
-        $this->email = request()->string('email');
+        $this->email = Str::lower(request()->string('email'));
     }
 
     /**
@@ -37,6 +37,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
+        $this->email = Str::lower($this->email);
 
         // Here we will attempt to reset the user's password. If it is successful we
         // will update the password on an actual user model and persist it to the
