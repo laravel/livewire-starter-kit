@@ -24,11 +24,49 @@ class RoleSeeder extends Seeder
             'Materials'
         ];
 
-        foreach ($roles as $role) {
-            Role::create(['name' => $role]);
+        foreach ($roles as $roleName) {
+            $role = Role::firstOrCreate(['name' => $roleName]);
+            
+            // Asignar permisos según el rol
+            switch ($roleName) {
+                case 'Admin':
+                    // Admin tiene todos los permisos
+                    $role->syncPermissions(Permission::all());
+                    break;
+                    
+                case 'HR':
+                    // HR puede gestionar usuarios y ver reportes
+                    $role->syncPermissions([
+                        'view-dashboard',
+                        'view-users',
+                        'create-users',
+                        'edit-users',
+                        'delete-users',
+                        'view-roles',
+                        'view-departments',
+                        'view-areas',
+                        'view-reports',
+                        'create-reports',
+                        'export-reports',
+                    ]);
+                    break;
+                    
+                case 'Maintenance':
+                case 'Production':
+                case 'Shipping':
+                case 'Warehouse':
+                case 'Materials':
+                    // Roles operativos tienen permisos básicos
+                    $role->syncPermissions([
+                        'view-dashboard',
+                        'view-users',
+                        'view-reports',
+                    ]);
+                    break;
+            }
         }
 
         // Log the created roles
-        $this->command->info('Roles created successfully!');
+        $this->command->info('Roles y permisos asignados correctamente!');
     }
 }

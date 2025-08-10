@@ -59,9 +59,9 @@ class Area extends Model
     /**
      * Un área tiene múltiples mesas semi-automáticas
      */
-    public function semiAutomaticTables()
+    public function semiAutomatics()
     {
-        return $this->hasMany(SemiAutomaticTable::class);
+        return $this->hasMany(Semi_Automatic::class);
     }
 
 
@@ -132,7 +132,7 @@ class Area extends Model
     {
         return $this->machines()->count() === 0
             && $this->tables()->count() === 0
-            && $this->semiAutomaticTables()->count() === 0;
+            && $this->semiAutomatics()->count() === 0;
     }
 
     /**
@@ -145,9 +145,9 @@ class Area extends Model
             'active_machines' => $this->machines()->where('active', true)->count(),
             'total_tables' => $this->tables()->count(),
             'active_tables' => $this->tables()->where('active', true)->count(),
-            'total_semi_automatic' => $this->semiAutomaticTables()->count(),
-            'active_semi_automatic' => $this->semiAutomaticTables()->where('active', true)->count(),
-            'total_equipment' => $this->machines()->count() + $this->tables()->count() + $this->semiAutomaticTables()->count(),
+            'total_semi_automatic' => $this->semiAutomatics()->count(),
+            'active_semi_automatic' => $this->semiAutomatics()->where('active', true)->count(),
+            'total_equipment' => $this->machines()->count() + $this->tables()->count() + $this->semiAutomatics()->count(),
         ];
     }
 
@@ -166,7 +166,7 @@ class Area extends Model
             return $table;
         });
 
-        $semiAutomatic = $this->semiAutomaticTables->map(function ($table) {
+        $semiAutomatic = $this->semiAutomatics->map(function ($table) {
             $table->equipment_type = 'semi_automatic';
             return $table;
         });

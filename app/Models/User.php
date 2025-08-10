@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -62,7 +63,7 @@ class User extends Authenticatable
     }
 
     /**
-     * RELACIONSHIPS
+     * RELASIONSHIPS
      */
 
     public function areas(){
@@ -101,11 +102,11 @@ class User extends Authenticatable
      */
 
     public function canSupervise(Area $area){
-        return $this->areas()->where('íd', $area->id)->exists();
+        return $this->areas()->where('id', $area->id)->exists();
     }
 
     public function getMachinesSupervised(){
-        return Machine::whereIn('area_id', $this->area->pluck('id'));
+        return Machine::whereIn('area_id', $this->areas->pluck('id'));
     }
 
 
@@ -113,20 +114,18 @@ class User extends Authenticatable
     Get Stats
      */
     public function getSupervisorStats(){
-    $areas = $this->areas()->count();
-    $machies = $this->getMachinesSupervised()->count();
-    $tables = Table::whereIn('area_id', $this->areas->pluck('id'))->count();
-    $semiAutomatic = SemiAutomaticTable::whereIn('area_id', $this->areas->pluck('id'))->count();
+        $areas = $this->areas()->count();
+        $machines = $this->getMachinesSupervised()->count();
+        $tables = Table::whereIn('area_id', $this->areas->pluck('id'))->count();
+        $semiAutomatic = Semi_Automatic::whereIn('area_id', $this->areas->pluck('id'))->count();
 
         return [
             'areas_supervised' => $areas,
-            'machines_supervised' => $machies,
+            'machines_supervised' => $machines,
             'tables_supervised' => $tables,
             'semi_automatic_supervised' => $semiAutomatic,
-            'total_supervised' => $areas + $machies + $tables + $semiAutomatic,
+            'total_supervised' => $areas + $machines + $tables + $semiAutomatic,
         ];
-
-
     }
 }
 

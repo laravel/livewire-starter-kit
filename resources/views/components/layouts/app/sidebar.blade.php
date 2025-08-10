@@ -12,22 +12,20 @@
             </a>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
+                <flux:navlist.group :heading="__('Dashboard')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                    <flux:navlist.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
+                </flux:navlist.group>
+                
+                <flux:navlist.group :heading="__('Administración')" class="grid">                                        
+                    <flux:navlist.item icon="shield-check" :href="route('departments.index')" :current="request()->routeIs('departments.*')" wire:navigate>{{ __('Departamentos') }}</flux:navlist.item>
+                    <flux:navlist.item icon="shield-check" :href="route('areas.index')" :current="request()->routeIs('areas.*')" wire:navigate>{{ __('Areas') }}</flux:navlist.item>
+                    <flux:navlist.item icon="shield-check" :href="route('roles.index')" :current="request()->routeIs('roles.*')" wire:navigate>{{ __('Roles') }}</flux:navlist.item>
+                    <flux:navlist.item icon="key" :href="route('permissions.index')" :current="request()->routeIs('permissions.*')" wire:navigate>{{ __('Permisos') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
-            <flux:spacer />
-
-            <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
-            </flux:navlist>
+            <flux:spacer />            
 
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
@@ -126,6 +124,8 @@
         </flux:header>
 
         {{ $slot }}
+
+        @livewire('components.toast-notification')
 
         @fluxScripts
     </body>

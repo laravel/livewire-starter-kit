@@ -37,9 +37,9 @@ class Department extends Model
     return $this->hasManyThrough(Table::class, Area::class);
     }
 
-    public function semiAutomatics(): HasMany
+    public function semiAutomatics()
     {
-        return $this->hasManyThrough(SemiAutomatic::class, Area::class);
+        return $this->hasManyThrough(Semi_Automatic::class, Area::class);
     }
 
 
@@ -84,10 +84,10 @@ class Department extends Model
             'total_areas' => $this->areas()->count(),
             'total_machines' => $this->machines()->count(),
             'total_tables' => $this->tables()->count(),
-            'total_semi_automatic' => $this->semiAutomaticTables()->count(),
+            'total_semi_automatic' => $this->semiAutomatics()->count(),
             'active_machines' => $this->machines()->where('active', true)->count(),
             'active_tables' => $this->tables()->where('active', true)->count(),
-            'active_semi_automatic' => $this->semiAutomaticTables()->where('active', true)->count(),
+            'active_semi_automatic' => $this->semiAutomatics()->where('active', true)->count(),
         ];
     }
 
