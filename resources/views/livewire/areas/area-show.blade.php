@@ -14,16 +14,42 @@ new class extends Component {
     }
 }; ?>
 
-<div>
-    <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
-        <div class="px-4 py-5 sm:px-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                {{ $area->name }}
-            </h3>
-            <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
-                Detalles del área
-            </p>
+<div class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $area->name }}</h1>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                        Detalles del área y equipos asociados
+                    </p>
+                </div>
+                <div class="mt-4 sm:mt-0 space-x-3 flex">
+                    <a href="{{ route('areas.edit', $area) }}" 
+                       class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Editar
+                    </a>
+                    <a href="{{ route('areas.index') }}" 
+                       class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Volver a la lista
+                    </a>
+                </div>
+            </div>
         </div>
+        
+        <!-- Información del Área -->
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
+            <div class="px-6 py-5">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                    Información del Área
+                </h3>
         <div class="border-t border-gray-200 dark:border-gray-700">
             <dl>
                 <div class="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -68,10 +94,13 @@ new class extends Component {
                 </div>
             </dl>
         </div>
-    </div>
+            </div>
+        </div>
 
-    <div class="mt-6">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Estadísticas</h3>
+        <!-- Estadísticas -->
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
+            <div class="px-6 py-5">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Estadísticas</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
                 <div class="px-4 py-5 sm:p-6">
@@ -151,10 +180,13 @@ new class extends Component {
                 </div>
             </div>
         </div>
-    </div>
+            </div>
+        </div>
     
-    <div class="mt-6">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Equipos en esta área</h3>
+        <!-- Equipos -->
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-6 py-5">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Equipos en esta área</h3>
         
         @if($area->getAllEquipment()->count() > 0)
             <div class="overflow-x-auto">
@@ -208,5 +240,7 @@ new class extends Component {
         @else
             <p class="text-gray-500 dark:text-gray-400">No hay equipos asociados a esta área.</p>
         @endif
+            </div>
+        </div>
     </div>
 </div>

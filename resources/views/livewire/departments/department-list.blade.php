@@ -14,6 +14,13 @@ new class extends Component {
     public $deleteId = null;
     public $confirmingDeletion = false;
 
+    public function mount()
+    {
+        // Este método se ejecuta cuando el componente se monta inicialmente
+        // Aquí puedes inicializar cualquier variable que necesites
+        $this->resetPage();
+    }
+
     public function updatingSearch()
     {
         $this->resetPage();
@@ -67,8 +74,16 @@ new class extends Component {
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
         
+        // Obtener estadísticas
+        $totalDepartments = Department::count();
+        $totalAreas = \App\Models\Area::count();
+        $totalEquipment = \App\Models\Machine::count() + \App\Models\Table::count() + \App\Models\Semi_Automatic::count();
+        
         return view('livewire.departments.department-list', [
             'departments' => $departments,
+            'totalDepartments' => $totalDepartments,
+            'totalAreas' => $totalAreas,
+            'totalEquipment' => $totalEquipment,
         ]);
     }
 }; ?>

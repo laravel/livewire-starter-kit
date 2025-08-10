@@ -16,7 +16,10 @@
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
                 </flux:navlist.group>
-                
+
+                <flux:navlist.group :heading="__('Production')" class="grid">
+
+                </flux:navlist.group>
                 <flux:navlist.group :heading="__('Administración')" class="grid">                                        
                     <flux:navlist.item icon="shield-check" :href="route('departments.index')" :current="request()->routeIs('departments.*')" wire:navigate>{{ __('Departamentos') }}</flux:navlist.item>
                     <flux:navlist.item icon="shield-check" :href="route('areas.index')" :current="request()->routeIs('areas.*')" wire:navigate>{{ __('Areas') }}</flux:navlist.item>
