@@ -45,6 +45,24 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('areas/create', 'areas.area-create')->name('areas.create');
     Volt::route('areas/{area}', 'areas.area-show')->name('areas.show');
     Volt::route('areas/{area}/edit', 'areas.area-edit')->name('areas.edit');
+    
+    // Rutas para la gestión de máquinas
+    Volt::route('machines', 'machines.machine-list')->name('machines.index');
+    Volt::route('machines/create', 'machines.machine-create')->name('machines.create');
+    Volt::route('machines/{machine}', 'machines.machine-show')->name('machines.show');
+    Volt::route('machines/{machine}/edit', 'machines.machine-edit')->name('machines.edit');
+    
+    // Rutas para la gestión de semi-automáticos
+    Volt::route('semi-automatics', 'semi-automatics.semi-automatic-list')->name('semi-automatics.index');
+    Volt::route('semi-automatics/create', 'semi-automatics.semi-automatic-create')->name('semi-automatics.create');
+    Volt::route('semi-automatics/{semiAutomatic}', 'semi-automatics.semi-automatic-show')->name('semi-automatics.show');
+    Volt::route('semi-automatics/{semiAutomatic}/edit', 'semi-automatics.semi-automatic-edit')->name('semi-automatics.edit');
+    
+    // Rutas para la gestión de mesas
+    Volt::route('tables', 'tables.table-list')->name('tables.index');
+    Volt::route('tables/create', 'tables.table-create')->name('tables.create');
+    Volt::route('tables/{table}', 'tables.table-show')->name('tables.show');
+    Volt::route('tables/{table}/edit', 'tables.table-edit')->name('tables.edit');
 });
 
 require __DIR__.'/auth.php';

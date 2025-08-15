@@ -18,7 +18,9 @@
                 </flux:navlist.group>
 
                 <flux:navlist.group :heading="__('Production')" class="grid">
-
+                    <flux:navlist.item icon="cog-6-tooth" :href="route('machines.index')" :current="request()->routeIs('machines.*')" wire:navigate>{{ __('Máquinas') }}</flux:navlist.item>
+                    <flux:navlist.item icon="cpu-chip" :href="route('semi-automatics.index')" :current="request()->routeIs('semi-automatics.*')" wire:navigate>{{ __('Semi-Automáticos') }}</flux:navlist.item>
+                    <flux:navlist.item icon="table-cells" :href="route('tables.index')" :current="request()->routeIs('tables.*')" wire:navigate>{{ __('Mesas') }}</flux:navlist.item>
                 </flux:navlist.group>
                 <flux:navlist.group :heading="__('Administración')" class="grid">                                        
                     <flux:navlist.item icon="shield-check" :href="route('departments.index')" :current="request()->routeIs('departments.*')" wire:navigate>{{ __('Departamentos') }}</flux:navlist.item>
