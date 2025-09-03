@@ -1,9 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use Laravel\Fortify\Actions\ConfirmPassword;
 
 new #[Layout('components.layouts.auth')] class extends Component {
     public string $password = '';
