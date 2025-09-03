@@ -1,97 +1,306 @@
 <?php
 
+use Laravel\Fortify\Features;
+use Laravel\Fortify\Fortify;
 use Livewire\Volt\Component;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
 use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 new class extends Component {
-    public $enabled = false;
-    public $confirmed = false;
+    public bool $twoFactorEnabled;
+    public bool $requiresConfirmation;
 
-    #[Validate('required|min:6')]
-    public $authCode;
+    public bool $showVerificationStep = false;
+    public bool $showRecoveryCodes = false;
 
-    public $secret = '';
-    public $codes = '';
-    public $qr = '';
-    public $showRecoveryCodes = true;
+    public string $qrCodeSvg = '';
+    public string $manualSetupKey = '';
+    public array $recoveryCodes = [];
 
-    public function mount()
+    #[Validate('required|string|min:6|max:6')]
+    public string $authCode = '';
+
+    public function getModalConfigProperty(): array
     {
-        if (is_null(auth()->user()->two_factor_confirmed_at)) {
-            app(DisableTwoFactorAuthentication::class)(auth()->user());
+        if ($this->twoFactorEnabled) {
+            return [
+                'title' => __('Two-Factor Authentication Enabled'),
+                'description' => __('Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.'),
+                'buttonText' => __('Close')
+            ];
+        }
+
+        if ($this->showVerificationStep) {
+            return [
+                'title' => __('Verify Authentication Code'),
+                'description' => __('Enter the 6-digit code from your authenticator app'),
+                'buttonText' => __('Continue')
+            ];
+        }
+
+        return [
+            'title' => __('Enable Two-Factor Authentication'),
+            'description' => __('To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app'),
+            'buttonText' => __('Continue')
+        ];
+    }
+
+    public function mount(DisableTwoFactorAuthentication $disableTwoFactorAuthentication): void
+    {
+        abort_unless(Features::enabled(Features::twoFactorAuthentication()), Response::HTTP_FORBIDDEN);
+
+        if (Fortify::confirmsTwoFactorAuthentication() && is_null(auth()->user()->two_factor_confirmed_at)) {
+            $disableTwoFactorAuthentication(auth()->user());
+        }
+
+        $this->twoFactorEnabled = auth()->user()->hasEnabledTwoFactorAuthentication();
+        $this->requiresConfirmation = Features::optionEnabled(Features::twoFactorAuthentication(), 'confirm');
+
+        if ($this->twoFactorEnabled) {
+            $this->loadRecoveryCodes();
+        }
+    }
+
+    public function enable(EnableTwoFactorAuthentication $enableTwoFactorAuthentication): void
+    {
+        $enableTwoFactorAuthentication(auth()->user());
+        $this->fetchSetupData();
+        if (!$this->requiresConfirmation) {
+            $this->twoFactorEnabled = true;
+        }
+        $this->dispatch('show-two-factor-modal');
+    }
+
+    public function fetchSetupData(): void
+    {
+        $user = auth()->user();
+        $this->qrCodeSvg = $user->twoFactorQrCodeSvg();
+        $this->manualSetupKey = decrypt($user->two_factor_secret);
+    }
+
+    public function proceedToVerification(): void
+    {
+        if ($this->requiresConfirmation) {
+            $this->showVerificationStep = true;
+            $this->resetErrorBag();
         } else {
-            $this->confirmed = true;
-            $this->showRecoveryCodes = false;
+            $this->closeModal();
         }
     }
 
-    public function enable()
+    public function backToSetup(): void
     {
-        app(EnableTwoFactorAuthentication::class)(auth()->user());
-        $this->qr = auth()->user()->twoFactorQrCodeSvg();
-        $this->secret = decrypt(auth()->user()->two_factor_secret);
-        $this->codes = json_decode(decrypt(auth()->user()->two_factor_recovery_codes), true);
-        $this->enabled = true;
+        $this->showVerificationStep = false;
+        $this->authCode = '';
+        $this->resetErrorBag();
     }
 
-
-    public function regenerateCodes(GenerateNewRecoveryCodes $generate)
+    public function confirmTwoFactor(ConfirmTwoFactorAuthentication $confirmTwoFactorAuthentication): void
     {
-        $generate(Auth::user());
-    }
-
-    #[On('submitCode')]
-    public function submitCode($code = null)
-    {
-        if ($code) {
-            $this->authCode = $code;
-        }
-
         $this->validate();
-        app(ConfirmTwoFactorAuthentication::class)(auth()->user(), $this->authCode);
-        $this->qr = null;
-        $this->secret = null;
+        $confirmTwoFactorAuthentication(auth()->user(), $this->authCode);
+        $this->twoFactorEnabled = true;
+        $this->loadRecoveryCodes();
+        $this->closeModal();
+        $this->dispatch('two-factor-enabled');
     }
 
-    public function disable()
+    public function regenerateRecoveryCodes(GenerateNewRecoveryCodes $generateNewRecoveryCodes): void
+    {
+        $generateNewRecoveryCodes(Auth::user());
+        $this->loadRecoveryCodes();
+    }
+
+    public function disable(): void
     {
         app(DisableTwoFactorAuthentication::class)(auth()->user());
-
-        $this->enabled = false;
-        $this->confirmed = false;
+        $this->twoFactorEnabled = false;
+        $this->clearSetupData();
     }
 
+    public function closeModal(): void
+    {
+        $this->showVerificationStep = false;
+        $this->authCode = '';
+        $this->resetErrorBag();
 
-}
+        if ($this->twoFactorEnabled) {
+            $this->clearSetupData();
+        }
 
-?>
+        $this->dispatch('hide-two-factor-modal');
+    }
+
+    public function clearSetupData(): void
+    {
+        $this->qrCodeSvg = '';
+        $this->manualSetupKey = '';
+        $this->recoveryCodes = [];
+    }
+
+    public function toggleRecoveryCodes(): void
+    {
+        if (!$this->recoveryCodes) {
+            $this->loadRecoveryCodes();
+        }
+        $this->showRecoveryCodes = !$this->showRecoveryCodes;
+    }
+
+    public function fetchRecoveryCodes(): void
+    {
+        if (!$this->recoveryCodes) {
+            $this->loadRecoveryCodes();
+        }
+    }
+
+    private function loadRecoveryCodes(): void
+    {
+        $this->recoveryCodes = json_decode(decrypt(auth()->user()->two_factor_recovery_codes), true);
+    }
+} ?>
 
 <section class="w-full">
     @include('partials.settings-heading')
-    <x-settings.layout :heading="__('Two Factor Authentication')" :subheading="__('Manage your two-factor authentication settings')">
-        <div x-data="{ showRecoveryCodes: '{{ $showRecoveryCodes }}', verify: false }"
-            class="flex flex-col w-full mx-auto text-sm">
-            @if(!$confirmed)
-                <div class="relative flex flex-col items-start rounded-xl justify-start space-y-5">
-                    <flux:badge color="red">Disabled</flux:badge>
-                    <p class="-translate-y-1 text-stone-500 dark:text-stone-400">When you enable 2FA, you’ll be prompted for
-                        a secure code during login, which can be retrieved from your phone's Google Authenticator app.</p>
-                    <flux:modal.trigger name="edit-profile">
-                        <div class="w-auto">
-                            <flux:button variant="primary" icon="shield-check" class="w-full" wire:click="enable()">
-                                {{ __('Enable') }}
-                            </flux:button>
-                        </div>
-                    </flux:modal.trigger>
-                </div>
+    <x-settings.layout :heading="__('Two Factor Authentication')"
+                       :subheading="__('Manage your two-factor authentication settings')">
+        <div class="flex flex-col w-full mx-auto text-sm space-y-6" wire:cloak>
+            @if(!$twoFactorEnabled)
+                <div class="relative flex flex-col items-start rounded-xl justify-start space-y-4">
+                    <flux:badge color="red">{{ __('Disabled') }}</flux:badge>
+                    <flux:text variant="subtle">
+                        {{ __('When you enable two-factor authentication, you will be prompted for a secure pin during login. This pin can be retrieved from a TOTP-supported application on your phone.') }}
+                    </flux:text>
 
-                <flux:modal name="edit-profile" class="md:w-full md:max-w-md">
-                    <div class="relative w-full items-center justify-center flex flex-col space-y-5">
+                    <div class="w-auto">
+                        <flux:button
+                            variant="primary"
+                            icon="shield-check"
+                            wire:click="enable"
+                            wire:loading.attr="disabled"
+                            wire:target="enable"
+                        >
+                            <span wire:loading.remove wire:target="enable">{{ __('Enable 2FA') }}</span>
+                            <span wire:loading wire:target="enable">{{ __('Enabling...') }}</span>
+                        </flux:button>
+                    </div>
+                </div>
+            @else
+                <div class="flex flex-col space-y-4">
+                    <div>
+                        <flux:badge color="green">{{ __('Enabled') }}</flux:badge>
+                    </div>
+                    <flux:text>
+                        {{ __('With two-factor authentication enabled, you will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
+                    </flux:text>
+
+                    <div
+                        class="flex flex-col gap-6 rounded-xl border border-zinc-200 dark:border-white/10 py-6 shadow-sm"
+                        x-data="{ showRecoveryCodes: {{ $showRecoveryCodes ? 'true' : 'false' }} }">
+                        <div class="flex flex-col gap-1.5 px-6">
+                            <div class="flex gap-2">
+                                <flux:icon name="lock-keyhole" class="size-4"/>
+                                <flux:heading>
+                                    {{ __('2FA Recovery Codes') }}
+                                </flux:heading>
+                            </div>
+                            <flux:text variant="subtle">
+                                {{ __('Recovery codes let you regain access if you lose your 2FA device. Store them in a secure password manager.') }}
+                            </flux:text>
+                        </div>
+                        <div class="px-6">
+                            <div class="flex flex-col gap-3 select-none sm:flex-row sm:items-center sm:justify-between">
+                                <flux:button
+                                    x-show="!showRecoveryCodes"
+                                    icon="eye"
+                                    variant="primary"
+                                    @click="showRecoveryCodes = true"
+                                    aria-expanded="false"
+                                    aria-controls="recovery-codes-section"
+                                >
+                                    {{ __('View Recovery Codes') }}
+                                </flux:button>
+                                <flux:button
+                                    x-show="showRecoveryCodes"
+                                    icon="eye-off"
+                                    variant="primary"
+                                    @click="showRecoveryCodes = false"
+                                    aria-expanded="true"
+                                    aria-controls="recovery-codes-section"
+                                >
+                                    {{ __('Hide Recovery Codes') }}
+                                </flux:button>
+                                <flux:button
+                                    x-show="showRecoveryCodes"
+                                    icon="arrow-path"
+                                    variant="filled"
+                                    wire:click="regenerateRecoveryCodes"
+                                    aria-describedby="regenerate-warning"
+                                >
+                                    <span wire:loading.remove
+                                          wire:target="regenerateRecoveryCodes">{{ __('Regenerate Codes') }}</span>
+                                    <span wire:loading
+                                          wire:target="regenerateRecoveryCodes">{{ __('Regenerating...') }}</span>
+                                </flux:button>
+                            </div>
+                            <div
+                                x-show="showRecoveryCodes"
+                                x-transition
+                                id="recovery-codes-section"
+                                class="relative overflow-hidden"
+                                x-bind:aria-hidden="!showRecoveryCodes"
+                            >
+                                <div class="mt-3 space-y-3">
+                                    <div
+                                        class="grid gap-1 rounded-lg p-4 bg-zinc-200 dark:bg-white/10 font-mono text-sm selection:bg-accent selection:text-accent-foreground"
+                                        role="list" aria-label="Recovery codes">
+
+                                        @foreach($recoveryCodes as $index => $code)
+                                            <div role="listitem"
+                                                 wire:loading
+                                                 class="animate-pulse h-4 opacity-20 rounded bg-zinc-200/80 dark:bg-white/30"
+                                            ></div>
+                                            <div role="listitem" wire:loading.class="hidden"
+                                                 class="select-text">{{ $code }}</div>
+                                        @endforeach
+
+                                    </div>
+                                    <flux:text variant="subtle" class="text-xs">
+                                        {!! __('Each recovery code can be used once to access your account and will be removed after use. If you need more, click <span class="font-bold">:regenerate</span> above.', ['regenerate' => __('Regenerate Codes')]) !!}
+                                    </flux:text>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inline relative">
+                        <flux:button
+                            variant="danger"
+                            icon="shield-ban"
+                            wire:click="disable"
+                            wire:loading.attr="disabled"
+                            wire:target="disable"
+                        >
+                            <span wire:loading.remove wire:target="disable">{{ __('Disable 2FA') }}</span>
+                            <span wire:loading wire:target="disable">{{ __('Disabling...') }}</span>
+                        </flux:button>
+                    </div>
+                </div>
+            @endif
+
+            <flux:modal
+                name="two-factor-modal"
+                class="max-w-md"
+                x-on:show-two-factor-modal.window="$flux.modal('two-factor-modal').show()"
+                x-on:hide-two-factor-modal.window="$flux.modal('two-factor-modal').close()"
+            >
+                <div class="space-y-6">
+                    <div class="flex flex-col items-center space-y-4">
                         <div
                             class="p-0.5 w-auto rounded-full border border-stone-100 dark:border-stone-600 bg-white dark:bg-stone-800 shadow-sm">
                             <div
@@ -108,155 +317,128 @@ new class extends Component {
                                         <div></div>
                                     @endfor
                                 </div>
-                                <flux:icon.scan-line class="size-6 relative z-20 dark:text-black" />
+                                <flux:icon.scan-line class="size-6 relative z-20 dark:text-black"/>
                             </div>
                         </div>
-                        <div class="space-y-2 flex flex-col items-center justify-center">
-                            <h2 class="text-xl font-medium text-stone-900 dark:text-stone-100">
-                                <span x-show="!verify">{{ __('Turn on 2-step Verification') }}</span>
-                                <span x-show="verify" x-cloak>{{ __('Verify Authentication Code') }}</span>
-                            </h2>
-                            <p class="text-stone-600 dark:text-stone-400">
-                                <span
-                                    x-show="!verify">{{ __('Open your authenticator app and choose Scan QR code') }}</span>
-                                <span x-show="verify"
-                                    x-cloak>{{ __('Enter the 6-digit code from your authenticator app') }}</span>
-                            </p>
+                        <div class="text-center space-y-2">
+                            <flux:heading size="lg">{{ $this->modalConfig['title'] }}</flux:heading>
+                            <flux:text>{{ $this->modalConfig['description'] }}</flux:text>
                         </div>
-                        <div x-show="!verify" class="w-full">
-                            <div class="relative max-w-md mx-auto overflow-hidden flex items-center p-8 pt-0">
-                                <div
-                                    class="border border-stone-200 dark:border-stone-700 rounded-lg relative overflow-hidden w-64 aspect-square mx-auto">
-                                    <div wire:loading.flex wire:target="enable"
-                                        class="bg-white dark:bg-stone-700 animate-pulse flex items-center justify-center absolute inset-0 w-full h-auto aspect-square z-10">
-                                        <flux:icon.loader-circle class="size-6 animate-spin" />
-                                    </div>
-                                    <div wire:loading.remove wire:target="enable"
-                                        class="relative z-10 flex items-center justify-center p-4">
-                                        <div class="flex aspect-square size-full items-center justify-center">
-                                            {!! $qr !!}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    </div>
 
-                            <div class="flex items-center space-x-5 w-full">
-                                <flux:button variant="primary" class="w-full"
-                                    x-on:click="verify = true; $wire.call('$refresh')">{{ __('Continue') }}</flux:button>
-                            </div>
-                            <div class="flex items-center relative w-full justify-center py-2">
-                                <div class="w-full absolute inset-0 top-1/2 bg-stone-200 dark:bg-stone-600 h-px"></div>
-                                <span
-                                    class="px-2 py-1 bg-white dark:bg-stone-800 relative">{{ __('or, enter the code manually') }}</span>
-                            </div>
-                            <div class="flex items-center justify-center w-full space-x-2" x-data="{
-                                                copied: false,
-                                                copyToClipboard() {
-                                                    if (navigator && navigator.clipboard) {
-                                                        navigator.clipboard.writeText('{{ $secret }}');
-                                                    } else {
-                                                        console.warn('Clipboard API is only available in secure contexts (HTTPS) or localhost.');
-                                                    }
-                                                    this.copied = true;
-                                                    setTimeout(() => {
-                                                        this.copied = false;
-                                                    }, 1500);
-                                                }
-                                            }">
+                    @if(!$showVerificationStep)
+                        <div class="space-y-6">
+                            <div class="flex justify-center">
                                 <div
-                                    class="w-full rounded-xl flex items-stretch border dark:border-stone-700 overflow-hidden">
-                                    <div wire:loading.flex wire:target="enable"
-                                        class="w-full h-full flex items-center justify-center bg-stone-100 dark:bg-stone-700 p-3">
-                                        <flux:icon.loader-circle class="size-4 animate-spin" />
-                                    </div>
-                                    @if($enabled)
-                                        <input wire:loading.remove wire:target="enable" type="text" readonly
-                                            value="{{ $secret }}" class="w-full h-full p-3 text-black dark:text-stone-100" />
-                                        <button wire:loading.remove wire:target="enable" x-on:click="copyToClipboard()"
-                                            class="block relative border-l border-stone-200 dark:border-stone-600 px-3 hover:bg-stone-100 dark:hover:bg-stone-600 h-auto">
-                                            <flux:icon x-show="!copied" icon="copy" class="w-4"></flux:icon>
-                                            <flux:icon x-show="copied" icon="check" class="w-4 text-green-500"></flux:icon>
-                                        </button>
+                                    class="border border-stone-200 dark:border-stone-700 rounded-lg relative overflow-hidden w-64 aspect-square">
+                                    @if(empty($qrCodeSvg))
+                                        <div
+                                            class="bg-white dark:bg-stone-700 animate-pulse flex items-center justify-center absolute inset-0">
+                                            <flux:icon.loader-circle class="size-6 animate-spin"/>
+                                        </div>
+                                    @else
+                                        <div class="p-4 flex items-center justify-center h-full">
+                                            {!! $qrCodeSvg !!}
+                                        </div>
                                     @endif
                                 </div>
                             </div>
-                        </div>
 
-                        <div x-show="verify" x-cloak
-                            class="relative flex w-auto flex-col items-center justify-center space-y-5">
-                            <x-input-otp :digits="6" wire:model="authCode" id="two_factor_auth_code"
-                                eventCallback="submitCode" />
-                            @error('code')
-                                <p class="my-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                            <div class="flex items-center space-x-5 w-full">
-                                <flux:button variant="outline" class="w-full" x-on:click="verify = false">{{ __('Back') }}
+                            <div>
+                                <flux:button
+                                    variant="primary"
+                                    class="w-full"
+                                    wire:click="proceedToVerification"
+                                    :disabled="empty($qrCodeSvg)"
+                                >
+                                    {{ $this->modalConfig['buttonText'] }}
                                 </flux:button>
-                                <flux:button variant="primary" class="w-full" wire:click="submitCode({{ $this->authCode }})"
-                                    wire:target="submitCode">{{ __('Confirm') }}</flux:button>
                             </div>
-                        </div>
-                    </div>
-                </flux:modal>
-            @else
-                <div class="flex flex-col space-y-5">
-                    <div class="relative">
-                        <flux:badge color="green">Enabled</flux:badge>
-                    </div>
-                    <p>With two factor authentication enabled, you’ll be prompted for a secure, random token during login,
-                        which you can retrieve from your Google Authenticator app.</p>
 
-                    <div>
-                        <flux:callout icon="lock-keyhole-open" color="gray" inline class="rounded-b-none">
-                            <flux:callout.heading>2FA Recovery Codes</flux:callout.heading>
-                            <flux:callout.text>
-                                Recovery codes let you regain access if you lose your 2FA device. Store them in a secure
-                                password manager.
-                            </flux:callout.text>
-                        </flux:callout>
-                        <div
-                            class="bg-stone-100 dark:bg-stone-800 rounded-b-xl border-t-0 border border-stone-200 dark:border-stone-700 text-sm">
-                            <div x-on:click="showRecoveryCodes = !showRecoveryCodes"
-                                class="h-10 group cursor-pointer flex items-center select-none justify-between px-5 text-xs"
-                                x-cloak>
-                                <div :class="{ 'opacity-40 group-hover:opacity-60': !showRecoveryCodes, 'opacity-60': showRecoveryCodes }"
-                                    class="relative">
-                                    <span x-show="!showRecoveryCodes" class="flex items-center space-x-1">
-                                        <flux:icon.eye class="size-4" /> <span>View My Recovery Codes</span>
+                            <div class="space-y-4">
+                                <div class="relative flex w-full items-center justify-center">
+                                    <div
+                                        class="absolute inset-0 top-1/2 h-px w-full bg-stone-200 dark:bg-stone-600"></div>
+                                    <span
+                                        class="relative bg-white dark:bg-stone-800 px-2 text-sm text-stone-600 dark:text-stone-400">
+                                        {{ __('or, enter the code manually') }}
                                     </span>
-                                    <span x-show="showRecoveryCodes" class="flex items-center space-x-1"
-                                        x-cloak><flux:icon.eye-off class="size-4" /> <span>Hide Recovery Codes</span></span>
                                 </div>
-                                <flux:button x-show="showRecoveryCodes" size="xs" variant="filled" class="text-stone-600"
-                                    wire:click="regenerateCodes"
-                                    x-on:click="$event.preventDefault(); $event.stopPropagation();">
-                                    {{ __('Regenerate Codes') }}
-                                </flux:button>
-                            </div>
-                            <div x-show="showRecoveryCodes" class="relative" x-collapse x-cloak>
-                                <div
-                                    class="grid max-w-xl gap-1 px-4 py-4 font-mono text-sm bg-stone-200 dark:bg-stone-900 dark:text-stone-100">
-                                    @foreach (json_decode(decrypt(auth()->user()->two_factor_recovery_codes), true) as $code)
-                                        <div>{{ $code }}</div>
-                                    @endforeach
+
+                                <div class="flex items-center space-x-2"
+                                     x-data="{ copied: false, copyToClipboard() {
+                                         if (navigator && navigator.clipboard) {
+                                             navigator.clipboard.writeText('{{ $manualSetupKey }}');
+                                         }
+                                         this.copied = true;
+                                         setTimeout(() => this.copied = false, 1500);
+                                     }}">
+                                    <div
+                                        class="w-full rounded-xl flex items-stretch border dark:border-stone-700 overflow-hidden">
+                                        @if(empty($manualSetupKey))
+                                            <div
+                                                class="w-full flex items-center justify-center bg-stone-100 dark:bg-stone-700 p-3">
+                                                <flux:icon.loader-circle class="size-4 animate-spin"/>
+                                            </div>
+                                        @else
+                                            <input
+                                                type="text"
+                                                readonly
+                                                value="{{ $manualSetupKey }}"
+                                                class="w-full p-3 bg-transparent text-stone-900 dark:text-stone-100 outline-none"
+                                            />
+                                            <button
+                                                x-on:click="copyToClipboard()"
+                                                class="border-l border-stone-200 dark:border-stone-600 px-3 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
+                                            >
+                                                <flux:icon x-show="!copied" icon="copy" class="w-4"></flux:icon>
+                                                <flux:icon x-show="copied" icon="check"
+                                                           class="w-4 text-green-500"></flux:icon>
+                                            </button>
+                                        @endif
+                                    </div>
                                 </div>
-                                <p class="px-4 py-3 text-xs select-none text-stone-500 dark:text-stone-400">
-                                    You have {{ count(json_decode(decrypt(auth()->user()->two_factor_recovery_codes))) }}
-                                    recovery codes left. Each can be used once to access your account and will be removed
-                                    after use. If you need more, click <span class="font-bold">Regenerate Codes</span>
-                                    above.</p>
                             </div>
                         </div>
-                    </div>
-                    <div class="inline relative">
-                        <flux:button variant="danger" type="submit" class="w-auto" wire:click="disable">
-                            {{ __('Disable 2FA') }}
-                        </flux:button>
-                    </div>
+                    @else
+                        <div class="space-y-6">
+                            <div class="flex flex-col items-center space-y-3">
+                                <x-input-otp
+                                    :digits="6"
+                                    name="authCode"
+                                    wire:model="authCode"
+                                    autocomplete="one-time-code"
+                                />
+                                @error('authCode')
+                                <p class="text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="flex items-center space-x-3">
+                                <flux:button
+                                    variant="outline"
+                                    class="flex-1"
+                                    wire:click="backToSetup"
+                                >
+                                    {{ __('Back') }}
+                                </flux:button>
+                                <flux:button
+                                    variant="primary"
+                                    class="flex-1"
+                                    wire:click="confirmTwoFactor"
+                                    wire:loading.attr="disabled"
+                                    wire:target="confirmTwoFactor"
+                                >
+                                    <span wire:loading.remove
+                                          wire:target="confirmTwoFactor">{{ __('Confirm') }}</span>
+                                    <span wire:loading
+                                          wire:target="confirmTwoFactor">{{ __('Confirming...') }}</span>
+                                </flux:button>
+                            </div>
+                        </div>
+                    @endif
                 </div>
-
-            @endif
+            </flux:modal>
         </div>
-
     </x-settings.layout>
 </section>
