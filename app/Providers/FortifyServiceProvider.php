@@ -24,7 +24,6 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Fortify::ignoreRoutes();
         Fortify::twoFactorChallengeView(fn () => view('livewire.auth.two-factor-challenge'));
 
         RateLimiter::for('two-factor', function (Request $request) {
