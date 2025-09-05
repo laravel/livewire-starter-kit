@@ -19,7 +19,7 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/password', 'settings.password')->name('settings.password');
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 
-    $twoFactorMiddleware = Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword')
+    $twoFactorMiddleware = Features::canManageTwoFactorAuthentication() && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword')
         ? ['password.confirm']
         : [];
 
@@ -28,4 +28,4 @@ Route::middleware(['auth'])->group(function () {
         ->name('settings.two-factor');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

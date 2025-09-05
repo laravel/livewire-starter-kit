@@ -4,8 +4,6 @@ namespace Tests\Feature\Settings;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Routing\Route;
-use Illuminate\Support\Facades\Artisan;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
@@ -78,6 +76,9 @@ class TwoFactorAuthenticationTest extends TestCase
             ->call('enable');
 
         $component->assertSet('twoFactorEnabled', false);
+        $component->assertSet('showModal', true);
+        
+        // Test that the QR code and setup key are loaded in the same component
         $this->assertNotEmpty($component->get('qrCodeSvg'));
         $this->assertNotEmpty($component->get('manualSetupKey'));
 
@@ -100,10 +101,13 @@ class TwoFactorAuthenticationTest extends TestCase
 
         $component = Volt::test('settings.two-factor')
             ->call('enable')
-            ->assertSet('twoFactorEnabled', true);
+            ->assertSet('twoFactorEnabled', true)
+            ->assertSet('showModal', true);
 
+        // Test that the QR code and setup key are loaded in the same component
         $this->assertNotEmpty($component->get('qrCodeSvg'));
         $this->assertNotEmpty($component->get('manualSetupKey'));
+        $this->assertFalse($component->get('requiresConfirmation'));
 
         $user->refresh();
         $this->assertNotNull($user->two_factor_secret);

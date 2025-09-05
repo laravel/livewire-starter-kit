@@ -33,7 +33,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $user = $this->validateCredentials();
 
-        if (Features::enabled(Features::twoFactorAuthentication()) && $user->hasEnabledTwoFactorAuthentication()) {
+        if (Features::canManageTwoFactorAuthentication() && $user->hasEnabledTwoFactorAuthentication()) {
             Session::put([
                 'login.id' => $user->getKey(),
                 'login.remember' => $this->remember,
