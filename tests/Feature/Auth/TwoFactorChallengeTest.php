@@ -4,7 +4,6 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
@@ -15,7 +14,7 @@ class TwoFactorChallengeTest extends TestCase
 
     public function test_two_factor_challenge_redirects_when_not_authenticated(): void
     {
-        if (!Features::canManageTwoFactorAuthentication()) {
+        if (! Features::canManageTwoFactorAuthentication()) {
             $this->markTestSkipped('Two-factor authentication is not enabled.');
         }
 
@@ -26,7 +25,7 @@ class TwoFactorChallengeTest extends TestCase
 
     public function test_two_factor_challenge_renders_correct_livewire_component(): void
     {
-        if (!Features::canManageTwoFactorAuthentication()) {
+        if (! Features::canManageTwoFactorAuthentication()) {
             $this->markTestSkipped('Two-factor authentication is not enabled.');
         }
 
@@ -53,7 +52,7 @@ class TwoFactorChallengeTest extends TestCase
 
     public function test_two_factor_authentication_is_rate_limited(): void
     {
-        if (!Features::enabled(Features::twoFactorAuthentication())) {
+        if (! Features::enabled(Features::twoFactorAuthentication())) {
             $this->markTestSkipped('Two-factor authentication is not enabled.');
         }
 
@@ -70,7 +69,7 @@ class TwoFactorChallengeTest extends TestCase
             'two_factor_confirmed_at' => now(),
         ])->save();
 
-        collect(range(1, 5))->each(function () use ($user) {
+        collect(range(1, 5))->each(function () {
             $this->post(route('two-factor.login.store'), ['code' => '21212'])
                 ->assertRedirect(route('two-factor.login'))
                 ->assertSessionHasErrors('code');

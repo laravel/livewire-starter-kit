@@ -28,4 +28,4 @@ Route::middleware(['auth'])->group(function () {
         ->name('settings.two-factor');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
