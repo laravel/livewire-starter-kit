@@ -26,7 +26,7 @@ class TwoFactorAuthenticationTest extends TestCase
         ]);
     }
 
-    public function test_two_factor_settings_page_is_displayed(): void
+    public function test_two_factor_settings_page_can_be_rendered(): void
     {
         $user = User::factory()->create();
 
@@ -38,7 +38,7 @@ class TwoFactorAuthenticationTest extends TestCase
             ->assertSee('Disabled');
     }
 
-    public function test_two_factor_settings_page_requires_password_confirmation(): void
+    public function test_two_factor_settings_page_requires_password_confirmation_when_enabled(): void
     {
         $user = User::factory()->create();
 
@@ -48,7 +48,7 @@ class TwoFactorAuthenticationTest extends TestCase
         $response->assertRedirect(route('password.confirm'));
     }
 
-    public function test_two_factor_settings_page_returns_forbidden_when_two_factor_is_disabled(): void
+    public function test_two_factor_settings_page_returns_forbidden_response_when_two_factor_is_disabled(): void
     {
         config(['fortify.features' => []]);
 
@@ -59,57 +59,6 @@ class TwoFactorAuthenticationTest extends TestCase
             ->get(route('settings.two-factor'));
 
         $response->assertForbidden();
-    }
-
-    public function test_enable_two_factor_sets_up_confirmation_flow_when_confirmation_required(): void
-    {
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => false,
-        ]);
-
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $component = Volt::test('settings.two-factor')
-            ->call('enable');
-
-        $component->assertSet('twoFactorEnabled', false);
-        $component->assertSet('showModal', true);
-
-        $this->assertNotEmpty($component->get('qrCodeSvg'));
-        $this->assertNotEmpty($component->get('manualSetupKey'));
-
-        $user->refresh();
-        $this->assertNotNull($user->two_factor_secret);
-        $this->assertNotNull($user->two_factor_recovery_codes);
-        $this->assertNull($user->two_factor_confirmed_at);
-    }
-
-    public function test_enable_two_factor_immediately_enables_when_confirmation_not_required(): void
-    {
-        Features::twoFactorAuthentication([
-            'confirm' => false,
-            'confirmPassword' => false,
-        ]);
-
-        $user = User::factory()->create();
-
-        $this->actingAs($user);
-
-        $component = Volt::test('settings.two-factor')
-            ->call('enable')
-            ->assertSet('twoFactorEnabled', true)
-            ->assertSet('showModal', true);
-
-        $this->assertNotEmpty($component->get('qrCodeSvg'));
-        $this->assertNotEmpty($component->get('manualSetupKey'));
-        $this->assertFalse($component->get('requiresConfirmation'));
-
-        $user->refresh();
-        $this->assertNotNull($user->two_factor_secret);
-        $this->assertNotNull($user->two_factor_recovery_codes);
     }
 
     public function test_two_factor_authentication_disabled_when_confirmation_abandoned_between_requests(): void

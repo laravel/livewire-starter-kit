@@ -30,8 +30,8 @@ new class extends Component {
 
     public bool $showVerificationStep = false;
 
-    #[Validate('required|string|min:6|max:6')]
-    public string $authCode = '';
+    #[Validate('required|string|min:6|max:6', onUpdate: false)]
+    public string $code = '';
 
     public function mount(DisableTwoFactorAuthentication $disableTwoFactorAuthentication): void
     {
@@ -64,7 +64,7 @@ new class extends Component {
     public function confirmTwoFactor(ConfirmTwoFactorAuthentication $confirmTwoFactorAuthentication): void
     {
         $this->validate();
-        $confirmTwoFactorAuthentication(auth()->user(), $this->authCode);
+        $confirmTwoFactorAuthentication(auth()->user(), $this->code);
         $this->closeModal();
         $this->twoFactorEnabled = true;
     }
@@ -107,14 +107,14 @@ new class extends Component {
     public function resetVerification(): void
     {
         $this->showVerificationStep = false;
-        $this->authCode = '';
+        $this->code = '';
         $this->resetErrorBag();
     }
 
     public function closeModal(): void
     {
         $this->showVerificationStep = false;
-        $this->authCode = '';
+        $this->code = '';
         $this->qrCodeSvg = '';
         $this->manualSetupKey = '';
         $this->resetErrorBag();
@@ -154,11 +154,8 @@ new class extends Component {
                         icon="shield-check"
                         icon:variant="outline"
                         wire:click="enable"
-                        wire:loading.attr="disabled"
-                        wire:target="enable"
                     >
-                        <span wire:loading.remove wire:target="enable">{{ __('Enable 2FA') }}</span>
-                        <span wire:loading wire:target="enable">{{ __('Enabling...') }}</span>
+                        {{ __('Enable 2FA') }}
                     </flux:button>
                 </div>
             @else
@@ -180,11 +177,7 @@ new class extends Component {
                             icon="shield-exclamation"
                             icon:variant="outline"
                             wire:click="disable"
-                            wire:loading.attr="disabled"
-                            wire:target="disable"
-                        >
-                            <span wire:loading.remove wire:target="disable">{{ __('Disable 2FA') }}</span>
-                            <span wire:loading wire:target="disable">{{ __('Disabling...') }}</span>
+                        >{{ __('Disable 2FA') }}
                         </flux:button>
                     </div>
                 </div>
@@ -194,7 +187,7 @@ new class extends Component {
 
     <flux:modal
         name="two-factor-setup-modal"
-        class="max-w-md"
+        class="max-w-md min-w-md"
         @close="closeModal"
         wire:model="showModal"
     >
@@ -309,11 +302,11 @@ new class extends Component {
                     <div class="flex flex-col items-center space-y-3">
                         <x-input-otp
                             :digits="6"
-                            name="authCode"
-                            wire:model="authCode"
+                            name="code"
+                            wire:model="code"
                             autocomplete="one-time-code"
                         />
-                        @error('authCode')
+                        @error('code')
                         <p class="text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -330,13 +323,8 @@ new class extends Component {
                             variant="primary"
                             class="flex-1"
                             wire:click="confirmTwoFactor"
-                            wire:loading.delay.attr="disabled"
-                            wire:target="confirmTwoFactor"
                         >
-                            <span wire:loading.remove
-                                  wire:target="confirmTwoFactor">{{ __('Confirm') }}</span>
-                            <span wire:loading
-                                  wire:target="confirmTwoFactor">{{ __('Confirming...') }}</span>
+                            {{ __('Confirm') }}
                         </flux:button>
                     </div>
                 </div>

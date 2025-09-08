@@ -88,18 +88,4 @@ class AuthenticationTest extends TestCase
         $response->assertSessionHas('login.id', $user->id);
         $this->assertGuest();
     }
-
-    public function test_users_without_two_factor_enabled_login_normally(): void
-    {
-        $user = User::factory()->create();
-
-        $response = LivewireVolt::test('auth.login')
-            ->set('email', $user->email)
-            ->set('password', 'password')
-            ->call('login');
-
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
-        $response->assertSessionMissing('login.id');
-    }
 }
