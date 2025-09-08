@@ -77,8 +77,7 @@ class TwoFactorAuthenticationTest extends TestCase
 
         $component->assertSet('twoFactorEnabled', false);
         $component->assertSet('showModal', true);
-        
-        // Test that the QR code and setup key are loaded in the same component
+
         $this->assertNotEmpty($component->get('qrCodeSvg'));
         $this->assertNotEmpty($component->get('manualSetupKey'));
 
@@ -104,7 +103,6 @@ class TwoFactorAuthenticationTest extends TestCase
             ->assertSet('twoFactorEnabled', true)
             ->assertSet('showModal', true);
 
-        // Test that the QR code and setup key are loaded in the same component
         $this->assertNotEmpty($component->get('qrCodeSvg'));
         $this->assertNotEmpty($component->get('manualSetupKey'));
         $this->assertFalse($component->get('requiresConfirmation'));

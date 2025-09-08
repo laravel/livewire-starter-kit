@@ -11,7 +11,6 @@ use Livewire\Attributes\Validate;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 new class extends Component {
@@ -21,13 +20,13 @@ new class extends Component {
     #[Locked]
     public bool $requiresConfirmation;
 
-    public bool $showModal = false;
-
     #[Locked]
     public string $qrCodeSvg = '';
 
     #[Locked]
     public string $manualSetupKey = '';
+
+    public bool $showModal = false;
 
     public bool $showVerificationStep = false;
 
@@ -48,28 +47,26 @@ new class extends Component {
 
     public function enable(EnableTwoFactorAuthentication $enableTwoFactorAuthentication): void
     {
-        $user = auth()->user();
-        $enableTwoFactorAuthentication($user);
+        $enableTwoFactorAuthentication(auth()->user());
         if (!$this->requiresConfirmation) {
             $this->twoFactorEnabled = true;
         }
-
         $this->loadTwoFactorData();
         $this->showModal = true;
     }
 
-    public function disable(): void
+    public function disable(DisableTwoFactorAuthentication $disableTwoFactorAuthentication): void
     {
-        app(DisableTwoFactorAuthentication::class)(auth()->user());
+        $disableTwoFactorAuthentication(auth()->user());
         $this->twoFactorEnabled = false;
     }
 
-    private function loadTwoFactorData(): void
+    public function confirmTwoFactor(ConfirmTwoFactorAuthentication $confirmTwoFactorAuthentication): void
     {
-        $user = auth()->user();
-
-        $this->qrCodeSvg = $user->twoFactorQrCodeSvg();
-       $this->manualSetupKey = decrypt($user->two_factor_secret);
+        $this->validate();
+        $confirmTwoFactorAuthentication(auth()->user(), $this->authCode);
+        $this->closeModal();
+        $this->twoFactorEnabled = true;
     }
 
     public function getModalConfigProperty(): array
@@ -114,14 +111,6 @@ new class extends Component {
         $this->resetErrorBag();
     }
 
-    public function confirmTwoFactor(ConfirmTwoFactorAuthentication $confirmTwoFactorAuthentication): void
-    {
-        $this->validate();
-        $confirmTwoFactorAuthentication(auth()->user(), $this->authCode);
-        $this->closeModal();
-        $this->twoFactorEnabled = true;
-    }
-
     public function closeModal(): void
     {
         $this->showVerificationStep = false;
@@ -136,6 +125,13 @@ new class extends Component {
         }
     }
 
+    private function loadTwoFactorData(): void
+    {
+        $user = auth()->user();
+
+        $this->qrCodeSvg = $user->twoFactorQrCodeSvg();
+        $this->manualSetupKey = decrypt($user->two_factor_secret);
+    }
 } ?>
 
 <section class="w-full">
@@ -220,7 +216,7 @@ new class extends Component {
                                 <div></div>
                             @endfor
                         </div>
-                        <flux:icon.qr-code class="relative z-20 dark:text-black"/>
+                        <flux:icon.qr-code class="relative z-20"/>
                     </div>
                 </div>
                 <div class="text-center space-y-2">
@@ -281,7 +277,7 @@ new class extends Component {
                                  }
                              }">
                             <div
-                                class="w-full rounded-xl flex items-stretch border dark:border-stone-700 overflow-hidden">
+                                class="w-full rounded-xl flex items-stretch border dark:border-stone-700">
                                 @if(empty($manualSetupKey))
                                     <div
                                         class="w-full flex items-center justify-center bg-stone-100 dark:bg-stone-700 p-3">
@@ -334,7 +330,7 @@ new class extends Component {
                             variant="primary"
                             class="flex-1"
                             wire:click="confirmTwoFactor"
-                            wire:loading.attr="disabled"
+                            wire:loading.delay.attr="disabled"
                             wire:target="confirmTwoFactor"
                         >
                             <span wire:loading.remove

@@ -66,18 +66,20 @@ new class extends Component {
                 >
                     {{ __('Hide Recovery Codes') }}
                 </flux:button>
-                <flux:button
+                 <flux:button
                     x-show="showRecoveryCodes"
                     icon="arrow-path"
                     variant="filled"
                     wire:click="regenerateRecoveryCodes"
-                    aria-describedby="regenerate-warning"
+                    wire:loading.delay.attr="disabled"
+                    wire:target="regenerateRecoveryCodes"
                 >
-                        <span wire:loading.remove
-                              wire:target="regenerateRecoveryCodes">{{ __('Regenerate Codes') }}</span>
+                    <span wire:loading.remove
+                          wire:target="regenerateRecoveryCodes">{{ __('Regenerate Codes') }}</span>
                     <span wire:loading
-                          wire:target="regenerateRecoveryCodes">{{ __('Regenerating...') }}</span>
+                          wire:target="regenerateRecoveryCodes">{{ __('Regenerating Codes...') }}</span>
                 </flux:button>
+
             </div>
             <div
                 x-show="showRecoveryCodes"
@@ -91,7 +93,7 @@ new class extends Component {
                          role="list"
                          aria-label="Recovery codes">
                         @foreach($recoveryCodes as $code)
-                            <div role="listitem" class="select-text transition-opacity"
+                            <div role="listitem" class="select-text"
                                  wire:loading.class="opacity-50 animate-pulse">
                                 {{ $code }}
                             </div>
