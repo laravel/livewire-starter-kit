@@ -16,7 +16,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             'password' => ['required', 'string'],
         ]);
 
-         if (! Auth::guard('web')->validate([
+        if (! Auth::guard('web')->validate([
             'email' => Auth::user()->email,
             'password' => $this->password,
         ])) {
@@ -30,6 +30,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 }; ?>
+
 <div class="flex flex-col gap-6">
     <x-auth-header
         :title="__('Confirm password')"
