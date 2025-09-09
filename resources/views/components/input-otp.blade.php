@@ -1,19 +1,17 @@
 @props([
     'digits' => 6,
-    'eventCallback' => null,
     'name' => 'code',
 ])
 
 <div x-data="{
     totalDigits: @js($digits),
-    eventCallback: @js($eventCallback),
     init() {
-        setTimeout(() => {
+        $nextTick(() => {
             const firstInput = this.$refs.input1;
             if (firstInput) {
                 firstInput.focus();
             }
-        }, 100);
+        });
     },
     get digitIndices() {
         return Array.from({ length: this.totalDigits }, (_, i) => i + 1);
@@ -38,12 +36,6 @@
     },
     onComplete() {
         this.updateHiddenField();
-
-        if (this.eventCallback) {
-            window.dispatchEvent(new CustomEvent(this.eventCallback, {
-                detail: { code: this.getCode() }
-            }));
-        }
     },
     handleNumberKey(index, key) {
         this.getInput(index).value = key;
@@ -52,12 +44,12 @@
             this.getInput(index + 1).focus();
         }
 
-        setTimeout(() => {
+        $nextTick(() => {
             this.updateHiddenField();
             if (index === this.totalDigits && this.isComplete()) {
                 this.onComplete();
             }
-        }, 100);
+        });
     },
     handleBackspace(index) {
         const currentInput = this.getInput(index);
@@ -68,7 +60,7 @@
             previousInput.value = '';
             previousInput.focus();
         }
-        setTimeout(() => this.updateHiddenField(), 100);
+        this.updateHiddenField();
     },
     handleKeyDown(index, event) {
         const key = event.key;
@@ -97,10 +89,8 @@
         this.getInput(nextIndex).focus();
 
         if (numericOnly.length >= this.totalDigits) {
-            setTimeout(() => {
-                this.updateHiddenField();
-                this.onComplete();
-            }, 100);
+           this.updateHiddenField();
+           this.onComplete();
         }
     },
     clearAll() {
@@ -111,9 +101,9 @@
         this.$refs.input1.focus();
     }
 }"
-@focus-auth-2fa-auth-code.window="$refs.input1 && $refs.input1.focus()"
-@clear-auth-2fa-auth-code.window="clearAll()"
-class="relative">
+     @focus-auth-2fa-auth-code.window="$refs.input1 && $refs.input1.focus()"
+     @clear-auth-2fa-auth-code.window="clearAll()"
+     class="relative">
 
     <div class="flex items-center">
         @for ($x = 1; $x <= $digits; $x++)
@@ -137,7 +127,7 @@ class="relative">
     </div>
 
     <input
-        {{ $attributes->except(['eventCallback', 'digits']) }}
+        {{ $attributes->except(['digits']) }}
         type="hidden"
         class="hidden"
         x-ref="code"
