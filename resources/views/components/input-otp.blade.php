@@ -34,9 +34,6 @@
         this.$refs.code.dispatchEvent(new Event('input', { bubbles: true }));
         this.$refs.code.dispatchEvent(new Event('change', { bubbles: true }));
     },
-    onComplete() {
-        this.updateHiddenField();
-    },
     handleNumberKey(index, key) {
         this.getInput(index).value = key;
 
@@ -46,9 +43,6 @@
 
         $nextTick(() => {
             this.updateHiddenField();
-            if (index === this.totalDigits && this.isComplete()) {
-                this.onComplete();
-            }
         });
     },
     handleBackspace(index) {
@@ -90,7 +84,6 @@
 
         if (numericOnly.length >= this.totalDigits) {
            this.updateHiddenField();
-           this.onComplete();
         }
     },
     clearAll() {
@@ -118,7 +111,7 @@
                 @keydown="handleKeyDown({{ $x }}, $event)"
                 @focus="$el.select()"
                 @input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0, 1)"
-                class="flex h-10 w-10 items-center justify-center border border-zinc-300 bg-accent-foreground text-center text-sm font-medium text-accent-content transition-colors placeholder:text-zinc-500 focus:border-accent focus:border-2 focus:outline-none focus:relative focus:z-10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:focus:border-accent
+                class="flex h-10 w-10 items-center justify-center border border-zinc-300 bg-accent-foreground text-center text-sm font-medium text-accent-content transition-colors focus:border-accent focus:border-2 focus:outline-none focus:relative focus:z-10 dark:border-zinc-700 dark:focus:border-accent
                     @if($x == 1) rounded-l-md @endif
                     @if($x == $digits) rounded-r-md @endif
                     @if($x > 1) -ml-px @endif"
@@ -129,7 +122,6 @@
     <input
         {{ $attributes->except(['digits']) }}
         type="hidden"
-        class="hidden"
         x-ref="code"
         name="{{ $name }}"
         minlength="{{ $digits }}"
