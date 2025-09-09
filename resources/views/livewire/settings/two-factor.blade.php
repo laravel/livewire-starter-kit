@@ -30,7 +30,7 @@ new class extends Component {
 
     public bool $showVerificationStep = false;
 
-    #[Validate('required|string|min:6|max:6', onUpdate: false)]
+    #[Validate('required|string|size:6', onUpdate: false)]
     public string $code = '';
 
     public function mount(DisableTwoFactorAuthentication $disableTwoFactorAuthentication): void
