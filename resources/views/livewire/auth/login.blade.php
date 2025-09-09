@@ -40,6 +40,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             ]);
 
             $this->redirect(route('two-factor.login'), navigate: true);
+
             return;
         }
 
@@ -56,7 +57,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     protected function validateCredentials(): User
     {
-        /** @var User $user */
         $user = Auth::getProvider()->retrieveByCredentials(['email' => $this->email, 'password' => $this->password]);
 
         if (! $user || ! Auth::getProvider()->validateCredentials($user, ['password' => $this->password])) {

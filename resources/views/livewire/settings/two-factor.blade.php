@@ -99,9 +99,11 @@ new class extends Component {
         if ($this->requiresConfirmation) {
             $this->showVerificationStep = true;
             $this->resetErrorBag();
-        } else {
-            $this->closeModal();
+
+            return;
         }
+
+        $this->closeModal();
     }
 
     public function resetVerification(): void
@@ -209,7 +211,7 @@ new class extends Component {
                                 <div></div>
                             @endfor
                         </div>
-                        <flux:icon.qr-code class="relative z-20"/>
+                        <flux:icon.qr-code class="relative z-20 dark:text-accent-foreground"/>
                     </div>
                 </div>
                 <div class="text-center space-y-2">

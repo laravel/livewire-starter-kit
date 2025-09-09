@@ -24,13 +24,13 @@ new class extends Component {
     private function loadRecoveryCodes(): void
     {
         $user = auth()->user();
-        if ($user && $user->hasEnabledTwoFactorAuthentication() && $user->two_factor_recovery_codes) {
+        if ($user->hasEnabledTwoFactorAuthentication() && $user->two_factor_recovery_codes) {
             $this->recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
         }
     }
 }; ?>
 
-<div class="rounded-xl border border-zinc-200 dark:border-white/10 py-6 shadow-sm space-y-6"
+<div class="rounded-xl border border-zinc-200 dark:border-white/10 py-6 shadow-sm space-y-6" wire:cloak
      x-data="{ showRecoveryCodes: false }">
     @if(!empty($recoveryCodes))
         <div class="px-6 space-y-2">
@@ -66,18 +66,13 @@ new class extends Component {
                 >
                     {{ __('Hide Recovery Codes') }}
                 </flux:button>
-                 <flux:button
+                <flux:button
                     x-show="showRecoveryCodes"
                     icon="arrow-path"
                     variant="filled"
                     wire:click="regenerateRecoveryCodes"
-                    wire:loading.delay.attr="disabled"
-                    wire:target="regenerateRecoveryCodes"
                 >
-                    <span wire:loading.remove
-                          wire:target="regenerateRecoveryCodes">{{ __('Regenerate Codes') }}</span>
-                    <span wire:loading
-                          wire:target="regenerateRecoveryCodes">{{ __('Regenerating Codes...') }}</span>
+                    {{ __('Regenerate Codes') }}
                 </flux:button>
 
             </div>
@@ -100,7 +95,7 @@ new class extends Component {
                         @endforeach
                     </div>
                     <flux:text variant="subtle" class="text-xs">
-                        {!! __('Each recovery code can be used once to access your account and will be removed after use. If you need more, click <span class="font-semibold">:regenerate</span> above.', ['regenerate' => __('Regenerate Codes')]) !!}
+                        {{ __('Each recovery code can be used once to access your account and will be removed after use. If you need more, click Regenerate Codes above.') }}
                     </flux:text>
                 </div>
             </div>
