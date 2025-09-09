@@ -74,7 +74,6 @@ new class extends Component {
                 >
                     {{ __('Regenerate Codes') }}
                 </flux:button>
-
             </div>
             <div
                 x-show="showRecoveryCodes"

@@ -146,17 +146,10 @@ new class extends Component {
                     <div class="flex items-center gap-3">
                         <flux:badge color="red">{{ __('Disabled') }}</flux:badge>
                     </div>
-
                     <flux:text variant="subtle">
                         {{ __('When you enable two-factor authentication, you will be prompted for a secure pin during login. This pin can be retrieved from a TOTP-supported application on your phone.') }}
                     </flux:text>
-
-                    <flux:button
-                        variant="primary"
-                        icon="shield-check"
-                        icon:variant="outline"
-                        wire:click="enable"
-                    >
+                    <flux:button variant="primary" icon="shield-check" icon:variant="outline" wire:click="enable">
                         {{ __('Enable 2FA') }}
                     </flux:button>
                 </div>
@@ -165,28 +158,22 @@ new class extends Component {
                     <div class="flex items-center gap-3">
                         <flux:badge color="green">{{ __('Enabled') }}</flux:badge>
                     </div>
-
                     <flux:text>
                         {{ __('With two-factor authentication enabled, you will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
                     </flux:text>
-
                     @if($twoFactorEnabled)
                         <livewire:settings.two-factor.recovery-codes :$requiresConfirmation/>
                     @endif
                     <div class="flex justify-start">
-                        <flux:button
-                            variant="danger"
-                            icon="shield-exclamation"
-                            icon:variant="outline"
-                            wire:click="disable"
-                        >{{ __('Disable 2FA') }}
+                        <flux:button variant="danger" icon="shield-exclamation" icon:variant="outline"
+                                     wire:click="disable">
+                            {{ __('Disable 2FA') }}
                         </flux:button>
                     </div>
                 </div>
             @endif
         </div>
     </x-settings.layout>
-
     <flux:modal
         name="two-factor-setup-modal"
         class="max-w-md md:min-w-md"
@@ -219,7 +206,6 @@ new class extends Component {
                     <flux:text>{{ $this->modalConfig['description'] }}</flux:text>
                 </div>
             </div>
-
             @if(!$showVerificationStep)
                 <div class="space-y-6">
                     <div class="flex justify-center">
@@ -237,7 +223,6 @@ new class extends Component {
                             @endif
                         </div>
                     </div>
-
                     <div>
                         <flux:button
                             variant="primary"
@@ -257,7 +242,6 @@ new class extends Component {
                                 {{ __('or, enter the code manually') }}
                             </span>
                         </div>
-
                         <div class="flex items-center space-x-2"
                              x-data="{
                                  copied: false,
@@ -271,26 +255,19 @@ new class extends Component {
                                      }
                                  }
                              }">
-                            <div
-                                class="w-full rounded-xl flex items-stretch border dark:border-stone-700">
+                            <div class="w-full rounded-xl flex items-stretch border dark:border-stone-700">
                                 @if(empty($manualSetupKey))
                                     <div
                                         class="w-full flex items-center justify-center bg-stone-100 dark:bg-stone-700 p-3">
                                         <flux:icon.loading variant="mini"/>
                                     </div>
                                 @else
-                                    <input
-                                        type="text"
-                                        readonly
-                                        value="{{ $manualSetupKey }}"
-                                        class="w-full p-3 bg-transparent text-stone-900 dark:text-stone-100 outline-none"
+                                    <input type="text" readonly value="{{ $manualSetupKey }}"
+                                           class="w-full p-3 bg-transparent text-stone-900 dark:text-stone-100 outline-none"
                                     />
-                                    <button
-                                        @click="copy()"
-                                        class="border-l border-stone-200 dark:border-stone-600 px-3 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
-                                    >
-                                        <flux:icon.document-duplicate x-show="!copied"
-                                                                      variant="outline"></flux:icon>
+                                    <button @click="copy()"
+                                            class="border-l border-stone-200 dark:border-stone-600 px-3 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors">
+                                        <flux:icon.document-duplicate x-show="!copied" variant="outline"></flux:icon>
                                         <flux:icon.check x-show="copied" variant="solid"
                                                          class="text-green-500"></flux:icon>
                                     </button>
