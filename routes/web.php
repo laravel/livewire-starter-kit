@@ -25,7 +25,7 @@ Route::middleware(['auth'])->group(function () {
 
     Volt::route('settings/two-factor', 'settings.two-factor')
         ->middleware($twoFactorMiddleware)
-        ->name('settings.two-factor');
+        ->name('two-factor.show');
 });
 
 require __DIR__ . '/auth.php';

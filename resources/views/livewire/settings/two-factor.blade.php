@@ -187,7 +187,7 @@ new class extends Component {
 
     <flux:modal
         name="two-factor-setup-modal"
-        class="max-w-md min-w-md"
+        class="max-w-md md:min-w-md"
         @close="closeModal"
         wire:model="showModal"
     >
@@ -307,7 +307,9 @@ new class extends Component {
                             autocomplete="one-time-code"
                         />
                         @error('code')
-                        <p class="text-sm text-red-600">{{ $message }}</p>
+                        <flux:text color="red">
+                            {{ $message }}
+                        </flux:text>
                         @enderror
                     </div>
 
@@ -323,6 +325,7 @@ new class extends Component {
                             variant="primary"
                             class="flex-1"
                             wire:click="confirmTwoFactor"
+                            x-bind:disabled="$wire.code.length < 6"
                         >
                             {{ __('Confirm') }}
                         </flux:button>

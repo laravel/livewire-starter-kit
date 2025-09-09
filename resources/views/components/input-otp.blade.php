@@ -7,79 +7,92 @@
 <div x-data="{
     total_digits: @js($digits),
     eventCallback: @js($eventCallback),
+    UPDATE_DELAY: 100,
+    getInputRef(index) {
+        return this.$refs['input' + index];
+    },
+    updateHiddenInput() {
+        this.$refs.code.value = this.generateCode();
+        this.$refs.code.dispatchEvent(new Event('input', { bubbles: true }));
+        this.$refs.code.dispatchEvent(new Event('change', { bubbles: true }));
+    },
+    isAllInputsFilled() {
+        return [...Array(this.total_digits).keys()].every(i =>
+            this.getInputRef(i + 1).value !== ''
+        );
+    },
+    isNumericKey(key) {
+        return !isNaN(parseInt(key)) && parseInt(key) >= 0 && parseInt(key) <= 9;
+    },
     moveCursorNext(index, digits, evt) {
-        if (!isNaN(parseInt(evt.key)) && parseInt(evt.key) >= 0 && parseInt(evt.key) <= 9 && index != digits) {
+        if (this.isNumericKey(evt.key) && index !== digits) {
             evt.preventDefault();
             evt.stopPropagation();
-            this.$refs['input' + index].value = evt.key;
-            this.$refs['input' + (index + 1)].focus();
-        } else {
-            if (evt.key === 'Backspace') {
-                evt.preventDefault();
-                evt.stopPropagation();
-                
-                // Clear current input if it has a value
-                if (this.$refs['input' + index].value !== '') {
-                    this.$refs['input' + index].value = '';
-                } 
-                // Otherwise, move to previous input if possible and clear it
-                else if (index > 1) {
-                    this.$refs['input' + (index - 1)].value = '';
-                    this.$refs['input' + (index - 1)].focus();
-                }
+            this.getInputRef(index).value = evt.key;
+            this.getInputRef(index + 1).focus();
+        } else if (evt.key === 'Backspace') {
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            if (this.getInputRef(index).value !== '') {
+                this.getInputRef(index).value = '';
+            } else if (index > 1) {
+                this.getInputRef(index - 1).value = '';
+                this.getInputRef(index - 1).focus();
             }
         }
         setTimeout(() => {
-            this.$refs.code.value = this.generateCode();
-            // Dispatch both input and change events to ensure Livewire picks up the change
-            this.$refs.code.dispatchEvent(new Event('input', { bubbles: true }));
-            this.$refs.code.dispatchEvent(new Event('change', { bubbles: true }));
-            
-            if (index === digits && [...Array(digits).keys()].every(i => this.$refs['input' + (i + 1)].value !== '')) {
+            this.updateHiddenInput();
+
+            if (index === digits && this.isAllInputsFilled()) {
                 this.submitCallback();
             }
-        }, 100);
+        }, this.UPDATE_DELAY);
     },
     submitCallback() {
         if (this.eventCallback) {
-            window.dispatchEvent(new CustomEvent(this.eventCallback, { detail: { code: this.generateCode() } }));
+            window.dispatchEvent(new CustomEvent(this.eventCallback, {
+                detail: { code: this.generateCode() }
+            }));
         }
     },
     pasteValue(event) {
         event.preventDefault();
-        let paste = (event.clipboardData || window.clipboardData).getData('text');
-        for (let i = 0; i < paste.length; i++) {
+        const clipboardData = (event.clipboardData || window.clipboardData).getData('text');
+        for (let i = 0; i < clipboardData.length; i++) {
             if (i < this.total_digits) {
-                this.$refs['input' + (i + 1)].value = paste[i];
+                this.getInputRef(i + 1).value = clipboardData[i];
             }
         }
-
-        let focusLastInput = (paste.length <= this.total_digits) ? paste.length : this.total_digits;
-        this.$refs['input' + focusLastInput].focus();
-
-        if (paste.length >= this.total_digits) {
+        const focusIndex = Math.min(clipboardData.length, this.total_digits);
+        this.getInputRef(focusIndex).focus();
+        if (clipboardData.length >= this.total_digits) {
             setTimeout(() => {
-                this.$refs.code.value = this.generateCode();
-                // Dispatch both input and change events to ensure Livewire picks up the change
-                this.$refs.code.dispatchEvent(new Event('input', { bubbles: true }));
-                this.$refs.code.dispatchEvent(new Event('change', { bubbles: true }));
+                this.updateHiddenInput();
                 this.submitCallback();
-            }, 100);
+            }, this.UPDATE_DELAY);
         }
     },
     generateCode() {
         let code = '';
         for (let i = 1; i <= this.total_digits; i++) {
-            code += this.$refs['input' + i].value;
+            code += this.getInputRef(i).value;
         }
         return code;
     },
-}" x-init="setTimeout(() => {
-    $refs.input1.focus();
-}, 100);" @focus-auth-2fa-auth-code.window="$refs.input1.focus()"
-    @clear-auth-2fa-auth-code.window="for (let i = 1; i <= total_digits; i++) { $refs['input' + i].value = ''; } $refs.code.value = ''; $refs.input1.focus();"
-    class="relative">
 
+    clearAllInputs() {
+        for (let i = 1; i <= this.total_digits; i++) {
+            this.getInputRef(i).value = '';
+        }
+        this.$refs.code.value = '';
+        this.$refs.input1.focus();
+    }
+}"
+x-init="setTimeout(() => { $refs.input1.focus(); }, 100);"
+@focus-auth-2fa-auth-code.window="$refs.input1.focus()"
+@clear-auth-2fa-auth-code.window="clearAllInputs()"
+class="relative">
     <div class="flex items-center">
         @for ($x = 1; $x <= $digits; $x++)
             <input x-ref="input{{ $x }}"
