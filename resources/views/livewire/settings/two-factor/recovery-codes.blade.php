@@ -32,7 +32,7 @@ new class extends Component {
 
 <div class="rounded-xl border border-zinc-200 dark:border-white/10 py-6 shadow-sm space-y-6" wire:cloak
      x-data="{ showRecoveryCodes: false }">
-    @if(!empty($recoveryCodes))
+    @if (filled($recoveryCodes))
         <div class="px-6 space-y-2">
             <div class="flex items-center gap-2">
                 <flux:icon.lock-closed variant="outline" class="size-4"/>

@@ -141,7 +141,23 @@ new class extends Component {
     <x-settings.layout :heading="__('Two Factor Authentication')"
                        :subheading="__('Manage your two-factor authentication settings')">
         <div class="flex flex-col w-full mx-auto text-sm space-y-6" wire:cloak>
-            @if(!$twoFactorEnabled)
+            @if ($twoFactorEnabled)
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <flux:badge color="green">{{ __('Enabled') }}</flux:badge>
+                    </div>
+                    <flux:text>
+                        {{ __('With two-factor authentication enabled, you will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
+                    </flux:text>
+                    <livewire:settings.two-factor.recovery-codes :$requiresConfirmation/>
+                    <div class="flex justify-start">
+                        <flux:button variant="danger" icon="shield-exclamation" icon:variant="outline"
+                                     wire:click="disable">
+                            {{ __('Disable 2FA') }}
+                        </flux:button>
+                    </div>
+                </div>
+            @else
                 <div class="space-y-4">
                     <div class="flex items-center gap-3">
                         <flux:badge color="red">{{ __('Disabled') }}</flux:badge>
@@ -152,24 +168,6 @@ new class extends Component {
                     <flux:button variant="primary" icon="shield-check" icon:variant="outline" wire:click="enable">
                         {{ __('Enable 2FA') }}
                     </flux:button>
-                </div>
-            @else
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3">
-                        <flux:badge color="green">{{ __('Enabled') }}</flux:badge>
-                    </div>
-                    <flux:text>
-                        {{ __('With two-factor authentication enabled, you will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
-                    </flux:text>
-                    @if($twoFactorEnabled)
-                        <livewire:settings.two-factor.recovery-codes :$requiresConfirmation/>
-                    @endif
-                    <div class="flex justify-start">
-                        <flux:button variant="danger" icon="shield-exclamation" icon:variant="outline"
-                                     wire:click="disable">
-                            {{ __('Disable 2FA') }}
-                        </flux:button>
-                    </div>
                 </div>
             @endif
         </div>
@@ -206,12 +204,46 @@ new class extends Component {
                     <flux:text>{{ $this->modalConfig['description'] }}</flux:text>
                 </div>
             </div>
-            @if(!$showVerificationStep)
+            @if ($showVerificationStep)
+                <div class="space-y-6">
+                    <div class="flex flex-col items-center space-y-3">
+                        <x-input-otp
+                            :digits="6"
+                            name="code"
+                            wire:model="code"
+                            autocomplete="one-time-code"
+                        />
+                        @error('code')
+                        <flux:text color="red">
+                            {{ $message }}
+                        </flux:text>
+                        @enderror
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <flux:button
+                            variant="outline"
+                            class="flex-1"
+                            wire:click="resetVerification"
+                        >
+                            {{ __('Back') }}
+                        </flux:button>
+                        <flux:button
+                            variant="primary"
+                            class="flex-1"
+                            wire:click="confirmTwoFactor"
+                            x-bind:disabled="$wire.code.length < 6"
+                        >
+                            {{ __('Confirm') }}
+                        </flux:button>
+                    </div>
+                </div>
+            @else
                 <div class="space-y-6">
                     <div class="flex justify-center">
                         <div
                             class="border border-stone-200 dark:border-stone-700 rounded-lg relative overflow-hidden w-64 aspect-square">
-                            @if(empty($qrCodeSvg))
+                            @if (empty($qrCodeSvg))
                                 <div
                                     class="bg-white dark:bg-stone-700 animate-pulse flex items-center justify-center absolute inset-0">
                                     <flux:icon.loading/>
@@ -256,7 +288,7 @@ new class extends Component {
                                  }
                              }">
                             <div class="w-full rounded-xl flex items-stretch border dark:border-stone-700">
-                                @if(empty($manualSetupKey))
+                                @if (empty($manualSetupKey))
                                     <div
                                         class="w-full flex items-center justify-center bg-stone-100 dark:bg-stone-700 p-3">
                                         <flux:icon.loading variant="mini"/>
@@ -274,40 +306,6 @@ new class extends Component {
                                 @endif
                             </div>
                         </div>
-                    </div>
-                </div>
-            @else
-                <div class="space-y-6">
-                    <div class="flex flex-col items-center space-y-3">
-                        <x-input-otp
-                            :digits="6"
-                            name="code"
-                            wire:model="code"
-                            autocomplete="one-time-code"
-                        />
-                        @error('code')
-                        <flux:text color="red">
-                            {{ $message }}
-                        </flux:text>
-                        @enderror
-                    </div>
-
-                    <div class="flex items-center space-x-3">
-                        <flux:button
-                            variant="outline"
-                            class="flex-1"
-                            wire:click="resetVerification"
-                        >
-                            {{ __('Back') }}
-                        </flux:button>
-                        <flux:button
-                            variant="primary"
-                            class="flex-1"
-                            wire:click="confirmTwoFactor"
-                            x-bind:disabled="$wire.code.length < 6"
-                        >
-                            {{ __('Confirm') }}
-                        </flux:button>
                     </div>
                 </div>
             @endif

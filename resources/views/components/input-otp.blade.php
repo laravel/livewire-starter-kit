@@ -112,9 +112,9 @@
                 @focus="$el.select()"
                 @input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0, 1)"
                 class="flex h-10 w-10 items-center justify-center border border-zinc-300 bg-accent-foreground text-center text-sm font-medium text-accent-content transition-colors focus:border-accent focus:border-2 focus:outline-none focus:relative focus:z-10 dark:border-zinc-700 dark:focus:border-accent
-                    @if($x == 1) rounded-l-md @endif
-                    @if($x == $digits) rounded-r-md @endif
-                    @if($x > 1) -ml-px @endif"
+                    @if ($x == 1) rounded-l-md @endif
+                    @if ($x == $digits) rounded-r-md @endif
+                    @if ($x > 1) -ml-px @endif"
             />
         @endfor
     </div>
