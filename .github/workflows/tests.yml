@@ -51,4 +51,4 @@ jobs:
         run: npm run build
 
       - name: Run Tests
-        run: ./vendor/bin/phpunit
+        run: ./vendor/bin/pest
