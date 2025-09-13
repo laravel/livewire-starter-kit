@@ -1,6 +1,6 @@
 @php
-use \App\Support\Sidebar;
-$sidebar = config('ui.sidebar', []);
+    use App\Support\Sidebar;
+    $sidebar = config('ui.sidebar', []);
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
@@ -24,8 +24,7 @@ $sidebar = config('ui.sidebar', []);
                         @foreach ($section['items'] as $item)
                             @if (Sidebar::shouldRender($item))
                                 <flux:navlist.item href="{{ Sidebar::href($item) }}"
-                                    :current="request()->routeIs(Sidebar::currentPattern($item))"
-                                    wire:navigate>
+                                    :current="request()->routeIs(Sidebar::currentPattern($item))" wire:navigate>
                                     <span class="inline-flex items-center gap-2">
                                         @if (Sidebar::isFluxIcon($item))
                                             <flux:icon :name="$item['icon']" class="inline-block w-5 h-5" />
@@ -67,12 +66,14 @@ $sidebar = config('ui.sidebar', []);
                 <flux:navlist.item class="cursor-pointer" x-data x-on:click="$flux.dark = ! $flux.dark">
                     <template x-if="$flux.dark">
                         <span class="flex items-center">
-                            <flux:icon.sun class="inline-block align-middle me-2 text-yellow-500" /> {{ __('Light Mode') }}
+                            <flux:icon.sun class="inline-block align-middle me-2 text-yellow-500" />
+                            {{ __('Light Mode') }}
                         </span>
                     </template>
                     <template x-if="!$flux.dark">
                         <span class="flex items-center">
-                            <flux:icon.moon class="inline-block align-middle me-2 text-blue-500" /> {{ __('Dark Mode') }}
+                            <flux:icon.moon class="inline-block align-middle me-2 text-blue-500" />
+                            {{ __('Dark Mode') }}
                         </span>
                     </template>
                 </flux:navlist.item>
@@ -99,13 +100,12 @@ $sidebar = config('ui.sidebar', []);
                                 <span class="truncate text-xs">{{ auth()->user()->email }}</span>
                             </div>
                         </div>
-                    </div>
                 </flux:menu.radio.group>
 
                 <flux:menu.separator />
 
                 <flux:menu.radio.group>
-                    <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}
+                    <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>{{ __('Settings') }}
                     </flux:menu.item>
                 </flux:menu.radio.group>
 
@@ -113,7 +113,8 @@ $sidebar = config('ui.sidebar', []);
 
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf
-                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                    <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full"
+                        data-test="logout-button">
                         {{ __('Log Out') }}
                     </flux:menu.item>
                 </form>
@@ -140,6 +141,7 @@ $sidebar = config('ui.sidebar', []);
                                     {{ auth()->user()->initials() }}
                                 </span>
                             </span>
+                            </span>
 
                             <div class="grid flex-1 text-start text-sm leading-tight">
                                 <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
@@ -152,11 +154,9 @@ $sidebar = config('ui.sidebar', []);
                 <flux:menu.separator />
 
                 <flux:menu.radio.group>
-                    <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}
+                    <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>{{ __('Settings') }}
                     </flux:menu.item>
                 </flux:menu.radio.group>
-
-                <flux:menu.separator />
 
                 <form method="POST" action="{{ route('logout') }}" class="w-full">
                     @csrf
@@ -168,7 +168,6 @@ $sidebar = config('ui.sidebar', []);
         </flux:dropdown>
     </flux:header>
 
-    {{ $slot }}
 
     @fluxScripts
 </body>
