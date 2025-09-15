@@ -3,6 +3,7 @@
 use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
@@ -12,12 +13,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     public function sendVerification(): void
     {
-        if (Auth::user()->hasVerifiedEmail()) {
-            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
-
-            return;
-        }
-
         Auth::user()->sendEmailVerificationNotification();
 
         Session::flash('status', 'verification-link-sent');
@@ -31,6 +26,18 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $logout();
 
         $this->redirect('/', navigate: true);
+    }
+
+    /**
+     * Handle the component's rendering hook.
+     */
+    public function rendering(View $view): void
+    {
+        if (Auth::user()->hasVerifiedEmail()) {
+            $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+
+            return;
+        }
     }
 }; ?>
 
@@ -50,7 +57,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             {{ __('Resend verification email') }}
         </flux:button>
 
-        <flux:link class="text-sm cursor-pointer" wire:click="logout">
+        <flux:link class="text-sm cursor-pointer" wire:click="logout" data-test="logout-button">
             {{ __('Log out') }}
         </flux:link>
     </div>

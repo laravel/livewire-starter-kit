@@ -107,7 +107,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         />
 
         <div class="flex items-center justify-end">
-            <flux:button type="submit" variant="primary" class="w-full">
+            <flux:button type="submit" variant="primary" class="w-full" data-test="reset-password-button">
                 {{ __('Reset password') }}
             </flux:button>
         </div>
