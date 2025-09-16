@@ -1,16 +1,13 @@
 <?php
 
-use Flux\Flux;
-use Laravel\Fortify\Features;
-use Laravel\Fortify\Fortify;
-use Livewire\Attributes\Reactive;
-use Livewire\Volt\Component;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\On;
-use Livewire\Attributes\Validate;
+use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
-use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
+use Laravel\Fortify\Features;
+use Laravel\Fortify\Fortify;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Validate;
+use Livewire\Volt\Component;
 use Symfony\Component\HttpFoundation\Response;
 
 new class extends Component {
@@ -48,8 +45,8 @@ new class extends Component {
     public function enable(EnableTwoFactorAuthentication $enableTwoFactorAuthentication): void
     {
         $enableTwoFactorAuthentication(auth()->user());
-        if (!$this->requiresConfirmation) {
-            $this->twoFactorEnabled = true;
+        if (! $this->requiresConfirmation) {
+            $this->twoFactorEnabled = auth()->user()->hasEnabledTwoFactorAuthentication();
         }
         $this->loadTwoFactorData();
         $this->showModal = true;
@@ -75,7 +72,7 @@ new class extends Component {
             return [
                 'title' => __('Two-Factor Authentication Enabled'),
                 'description' => __('Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.'),
-                'buttonText' => __('Close')
+                'buttonText' => __('Close'),
             ];
         }
 
@@ -83,14 +80,14 @@ new class extends Component {
             return [
                 'title' => __('Verify Authentication Code'),
                 'description' => __('Enter the 6-digit code from your authenticator app'),
-                'buttonText' => __('Continue')
+                'buttonText' => __('Continue'),
             ];
         }
 
         return [
             'title' => __('Enable Two-Factor Authentication'),
             'description' => __('To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app'),
-            'buttonText' => __('Continue')
+            'buttonText' => __('Continue'),
         ];
     }
 
@@ -122,8 +119,8 @@ new class extends Component {
         $this->resetErrorBag();
         $this->showModal = false;
 
-        if (!$this->requiresConfirmation) {
-            $this->twoFactorEnabled = true;
+        if (! $this->requiresConfirmation) {
+            $this->twoFactorEnabled = auth()->user()->hasEnabledTwoFactorAuthentication();
         }
     }
 
@@ -131,7 +128,7 @@ new class extends Component {
     {
         $user = auth()->user();
 
-        $this->qrCodeSvg = $user->twoFactorQrCodeSvg();
+        $this->qrCodeSvg = $user?->twoFactorQrCodeSvg();
         $this->manualSetupKey = decrypt($user->two_factor_secret);
     }
 } ?>
@@ -165,7 +162,11 @@ new class extends Component {
                     <flux:text variant="subtle">
                         {{ __('When you enable two-factor authentication, you will be prompted for a secure pin during login. This pin can be retrieved from a TOTP-supported application on your phone.') }}
                     </flux:text>
-                    <flux:button variant="primary" icon="shield-check" icon:variant="outline" wire:click="enable">
+                    <flux:button
+                        variant="primary"
+                        icon="shield-check"
+                        icon:variant="outline"
+                        wire:click="enable">
                         {{ __('Enable 2FA') }}
                     </flux:button>
                 </div>
@@ -279,7 +280,7 @@ new class extends Component {
                                  copied: false,
                                  async copy() {
                                      try {
-                                         await navigator.clipboard.writeText('{{ $manualSetupKey }}');
+                                         await navigator.clipboard.writeText($wire.$manualSetupKey);
                                          this.copied = true;
                                          setTimeout(() => this.copied = false, 1500);
                                      } catch (e) {
@@ -294,14 +295,21 @@ new class extends Component {
                                         <flux:icon.loading variant="mini"/>
                                     </div>
                                 @else
-                                    <input type="text" readonly value="{{ $manualSetupKey }}"
-                                           class="w-full p-3 bg-transparent text-stone-900 dark:text-stone-100 outline-none"
+                                    <input
+                                        type="text"
+                                        readonly
+                                        value="{{ $manualSetupKey }}"
+                                        class="w-full p-3 bg-transparent text-stone-900 dark:text-stone-100 outline-none"
                                     />
-                                    <button @click="copy()"
-                                            class="border-l border-stone-200 dark:border-stone-600 px-3 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors">
+                                    <button
+                                        @click="copy()"
+                                        class="border-l border-stone-200 dark:border-stone-600 px-3 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors">
                                         <flux:icon.document-duplicate x-show="!copied" variant="outline"></flux:icon>
-                                        <flux:icon.check x-show="copied" variant="solid"
-                                                         class="text-green-500"></flux:icon>
+                                        <flux:icon.check
+                                            x-show="copied"
+                                            variant="solid"
+                                            class="text-green-500"
+                                        ></flux:icon>
                                     </button>
                                 @endif
                             </div>

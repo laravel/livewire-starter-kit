@@ -2,7 +2,6 @@
     'digits' => 6,
     'name' => 'code',
 ])
-
 <div x-data="{
     totalDigits: @js($digits),
     digitIndices: @js(range(1, $digits)),
@@ -40,13 +39,14 @@
     },
     handleBackspace(index) {
         const currentInput = this.getInput(index);
-        if (index <= 1) {
-            return;
-        }
 
         if (currentInput.value !== '') {
             currentInput.value = '';
             this.updateHiddenField();
+            return;
+        }
+
+        if (index <= 1) {
             return;
         }
 
@@ -62,7 +62,7 @@
             this.handleNumberKey(index, key);
             return;
         }
-            
+
         if (key === 'Backspace') {
             event.preventDefault();
             this.handleBackspace(index);
@@ -80,7 +80,6 @@
                  this.setValue(index, numericOnly[index - 1]);
             });
         const nextIndex = Math.min(digitsToFill + 1, this.totalDigits);
-        this.getInput(nextIndex).focus();
 
         if (numericOnly.length >= this.totalDigits) {
            this.updateHiddenField();

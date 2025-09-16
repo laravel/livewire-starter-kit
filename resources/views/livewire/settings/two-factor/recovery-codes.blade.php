@@ -1,10 +1,8 @@
 <?php
 
 use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
-use Livewire\Volt\Component;
-use Livewire\Attributes\Reactive;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\On;
+use Livewire\Volt\Component;
 
 new class extends Component {
     #[Locked]
