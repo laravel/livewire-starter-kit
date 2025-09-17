@@ -128,8 +128,14 @@ new class extends Component {
     {
         $user = auth()->user();
 
-        $this->qrCodeSvg = $user?->twoFactorQrCodeSvg();
-        $this->manualSetupKey = decrypt($user->two_factor_secret);
+        try {
+            $this->qrCodeSvg = $user?->twoFactorQrCodeSvg();
+            $this->manualSetupKey = decrypt($user->two_factor_secret);
+        } catch (Exception) {
+            $this->addError('setupData', 'Failed to fetch setup data.');
+            $this->qrCodeSvg = '';
+            $this->manualSetupKey = '';
+        }
     }
 } ?>
 
@@ -240,7 +246,9 @@ new class extends Component {
                     </div>
                 </div>
             @else
-                <div class="space-y-6">
+                @error('setupData')
+                    <flux:callout variant="danger" icon="x-circle" heading="{{$message}}"/>
+                @enderror
                     <div class="flex justify-center">
                         <div
                             class="border border-stone-200 dark:border-stone-700 rounded-lg relative overflow-hidden w-64 aspect-square">
@@ -254,10 +262,11 @@ new class extends Component {
                                     {!! $qrCodeSvg !!}
                                 </div>
                             @endif
-                        </div>
+                         </div>
                     </div>
                     <div>
                         <flux:button
+                            :disabled="$errors->has('setupData')"
                             variant="primary"
                             class="w-full"
                             wire:click="handleNextAction"
@@ -265,29 +274,28 @@ new class extends Component {
                             {{ $this->modalConfig['buttonText'] }}
                         </flux:button>
                     </div>
-
                     <div class="space-y-4">
-                        <div class="relative flex w-full items-center justify-center">
-                            <div
-                                class="absolute inset-0 top-1/2 h-px w-full bg-stone-200 dark:bg-stone-600"></div>
-                            <span
-                                class="relative bg-white dark:bg-stone-800 px-2 text-sm text-stone-600 dark:text-stone-400">
-                                {{ __('or, enter the code manually') }}
-                            </span>
-                        </div>
-                        <div class="flex items-center space-x-2"
-                             x-data="{
-                                 copied: false,
-                                 async copy() {
-                                     try {
-                                         await navigator.clipboard.writeText($wire.$manualSetupKey);
-                                         this.copied = true;
-                                         setTimeout(() => this.copied = false, 1500);
-                                     } catch (e) {
-                                         console.warn('Could not copy to clipboard');
-                                     }
-                                 }
-                             }">
+                            <div class="relative flex w-full items-center justify-center">
+                                <div
+                                    class="absolute inset-0 top-1/2 h-px w-full bg-stone-200 dark:bg-stone-600"></div>
+                                <span
+                                    class="relative bg-white dark:bg-stone-800 px-2 text-sm text-stone-600 dark:text-stone-400">
+                                    {{ __('or, enter the code manually') }}
+                                </span>
+                            </div>
+                            <div class="flex items-center space-x-2"
+                                x-data="{
+                                    copied: false,
+                                    async copy() {
+                                    try {
+                                        await navigator.clipboard.writeText('{{$manualSetupKey}}');
+                                            this.copied = true;
+                                            setTimeout(() => this.copied = false, 1500);
+                                        } catch (e) {
+                                            console.warn('Could not copy to clipboard');
+                                        }
+                                    }
+                            }">
                             <div class="w-full rounded-xl flex items-stretch border dark:border-stone-700">
                                 @if (empty($manualSetupKey))
                                     <div
@@ -303,7 +311,7 @@ new class extends Component {
                                     />
                                     <button
                                         @click="copy()"
-                                        class="border-l border-stone-200 dark:border-stone-600 px-3 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors">
+                                        class="border-l border-stone-200 dark:border-stone-600 px-3 transition-colors cursor-pointer">
                                         <flux:icon.document-duplicate x-show="!copied" variant="outline"></flux:icon>
                                         <flux:icon.check
                                             x-show="copied"
@@ -315,7 +323,6 @@ new class extends Component {
                             </div>
                         </div>
                     </div>
-                </div>
             @endif
         </div>
     </flux:modal>
