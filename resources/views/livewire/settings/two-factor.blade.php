@@ -154,8 +154,12 @@ new class extends Component {
                     </flux:text>
                     <livewire:settings.two-factor.recovery-codes :$requiresConfirmation/>
                     <div class="flex justify-start">
-                        <flux:button variant="danger" icon="shield-exclamation" icon:variant="outline"
-                                     wire:click="disable">
+                        <flux:button
+                            variant="danger"
+                            icon="shield-exclamation"
+                            icon:variant="outline"
+                            wire:click="disable"
+                        >
                             {{ __('Disable 2FA') }}
                         </flux:button>
                     </div>
