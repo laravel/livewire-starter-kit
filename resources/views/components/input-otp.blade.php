@@ -79,8 +79,6 @@
             .forEach(index => {
                  this.setValue(index, numericOnly[index - 1]);
             });
-        const nextIndex = Math.min(digitsToFill + 1, this.totalDigits);
-
         if (numericOnly.length >= this.totalDigits) {
            this.updateHiddenField();
         }
