@@ -1,6 +1,8 @@
 <x-layouts.auth>
     <div class="flex flex-col gap-6">
         <div
+            class="relative w-full h-auto"
+            x-cloak
             x-data="{
                 showRecoveryInput: @js($errors->has('recovery_code')),
                 code: '',
@@ -12,13 +14,11 @@
                     $dispatch('clear-2fa-auth-code');
                     $nextTick(() => {
                         this.showRecoveryInput
-                        ? this.$refs.recovery_code?.focus()
-                        : $dispatch('focus-2fa-auth-code');
+                            ? this.$refs.recovery_code?.focus()
+                            : $dispatch('focus-2fa-auth-code');
                     });
                 },
             }"
-            x-cloak
-            class="relative w-full h-auto"
         >
             <div x-show="!showRecoveryInput">
                 <x-auth-header
