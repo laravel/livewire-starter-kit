@@ -10,7 +10,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 use Symfony\Component\HttpFoundation\Response;
 
-new class extends Compone1nt {
+new class extends Component {
     #[Locked]
     public bool $twoFactorEnabled;
 
