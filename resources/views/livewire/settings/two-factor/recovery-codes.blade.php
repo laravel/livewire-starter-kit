@@ -22,6 +22,7 @@ new class extends Component {
     private function loadRecoveryCodes(): void
     {
         $user = auth()->user();
+
         if ($user->hasEnabledTwoFactorAuthentication() && $user->two_factor_recovery_codes) {
             try {
                 $this->recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
@@ -33,8 +34,11 @@ new class extends Component {
     }
 }; ?>
 
-<div class="rounded-xl border border-zinc-200 dark:border-white/10 py-6 shadow-sm space-y-6" wire:cloak
-     x-data="{ showRecoveryCodes: false }">
+<div
+    class="py-6 space-y-6 border shadow-sm rounded-xl border-zinc-200 dark:border-white/10"
+    wire:cloak
+    x-data="{ showRecoveryCodes: false }"
+>
     <div class="px-6 space-y-2">
         <div class="flex items-center gap-2">
             <flux:icon.lock-closed variant="outline" class="size-4"/>
@@ -57,6 +61,7 @@ new class extends Component {
             >
                 {{ __('View Recovery Codes') }}
             </flux:button>
+
             <flux:button
                 x-show="showRecoveryCodes"
                 icon="eye-slash"
@@ -68,7 +73,8 @@ new class extends Component {
             >
                 {{ __('Hide Recovery Codes') }}
             </flux:button>
-            @if(filled($recoveryCodes))
+
+            @if (filled($recoveryCodes))
                 <flux:button
                     x-show="showRecoveryCodes"
                     icon="arrow-path"
@@ -90,13 +96,19 @@ new class extends Component {
                 @error('recoveryCodes')
                     <flux:callout variant="danger" icon="x-circle" heading="{{$message}}"/>
                 @enderror
-                @if(filled($recoveryCodes))
-                    <div class="grid gap-1 rounded-lg p-4 bg-zinc-100 dark:bg-white/5 font-mono text-sm"
-                         role="list"
-                         aria-label="Recovery codes">
+
+                @if (filled($recoveryCodes))
+                    <div
+                        class="grid gap-1 p-4 font-mono text-sm rounded-lg bg-zinc-100 dark:bg-white/5"
+                        role="list"
+                        aria-label="Recovery codes"
+                    >
                         @foreach($recoveryCodes as $code)
-                            <div role="listitem" class="select-text"
-                                 wire:loading.class="opacity-50 animate-pulse">
+                            <div
+                                role="listitem"
+                                class="select-text"
+                                wire:loading.class="opacity-50 animate-pulse"
+                            >
                                 {{ $code }}
                             </div>
                         @endforeach
@@ -109,4 +121,3 @@ new class extends Component {
         </div>
     </div>
 </div>
-
