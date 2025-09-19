@@ -218,6 +218,7 @@ new class extends Component {
                     <flux:text>{{ $this->modalConfig['description'] }}</flux:text>
                 </div>
             </div>
+
             @if ($showVerificationStep)
                 <div class="space-y-6">
                     <div class="flex flex-col items-center space-y-3">
@@ -304,8 +305,7 @@ new class extends Component {
                     >
                         <div class="flex items-stretch w-full border rounded-xl dark:border-stone-700">
                             @empty($manualSetupKey)
-                                <div
-                                    class="flex items-center justify-center w-full p-3 bg-stone-100 dark:bg-stone-700">
+                                <div class="flex items-center justify-center w-full p-3 bg-stone-100 dark:bg-stone-700">
                                     <flux:icon.loading variant="mini"/>
                                 </div>
                             @else
@@ -317,7 +317,8 @@ new class extends Component {
                                 />
                                 <button
                                     @click="copy()"
-                                    class="px-3 transition-colors border-l cursor-pointer border-stone-200 dark:border-stone-600">
+                                    class="px-3 transition-colors border-l cursor-pointer border-stone-200 dark:border-stone-600"
+                                >
                                     <flux:icon.document-duplicate x-show="!copied" variant="outline"></flux:icon>
                                     <flux:icon.check
                                         x-show="copied"

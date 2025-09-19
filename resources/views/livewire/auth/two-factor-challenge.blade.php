@@ -26,6 +26,7 @@
                     :description="__('Enter the authentication code provided by your authenticator application.')"
                 />
             </div>
+
             <div x-show="showRecoveryInput">
                 <x-auth-header
                     :title="__('Recovery Code')"
