@@ -58,6 +58,7 @@
     },
     handleKeyDown(index, event) {
         const key = event.key;
+
         if (/^[0-9]$/.test(key)) {
             event.preventDefault();
             this.handleNumberKey(index, key);
@@ -75,11 +76,13 @@
         const pastedText = (event.clipboardData || window.clipboardData).getData('text');
         const numericOnly = pastedText.replace(/[^0-9]/g, '');
         const digitsToFill = Math.min(numericOnly.length, this.totalDigits);
+
         this.digitIndices
             .slice(0, digitsToFill)
             .forEach(index => {
                  this.setValue(index, numericOnly[index - 1]);
             });
+
         if (numericOnly.length >= this.totalDigits) {
            this.updateHiddenField();
         }
