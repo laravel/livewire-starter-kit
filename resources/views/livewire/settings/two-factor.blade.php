@@ -107,19 +107,20 @@ new class extends Component {
 
     public function resetVerification(): void
     {
-        $this->showVerificationStep = false;
-        $this->code = '';
+        $this->reset('code', 'showVerificationStep');
         $this->resetErrorBag();
     }
 
     public function closeModal(): void
     {
-        $this->showVerificationStep = false;
-        $this->code = '';
-        $this->qrCodeSvg = '';
-        $this->manualSetupKey = '';
+        $this->reset(
+            'code',
+            'showVerificationStep',
+            'manualSetupKey',
+            'qrCodeSvg',
+            'showModal',
+        );
         $this->resetErrorBag();
-        $this->showModal = false;
 
         if (! $this->requiresConfirmation) {
             $this->twoFactorEnabled = auth()->user()->hasEnabledTwoFactorAuthentication();
@@ -135,8 +136,7 @@ new class extends Component {
             $this->manualSetupKey = decrypt($user->two_factor_secret);
         } catch (Exception) {
             $this->addError('setupData', 'Failed to fetch setup data.');
-            $this->qrCodeSvg = '';
-            $this->manualSetupKey = '';
+            $this->reset('qrCodeSvg', 'manualSetupKey');
         }
     }
 } ?>
