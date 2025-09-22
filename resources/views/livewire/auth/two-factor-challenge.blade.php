@@ -9,9 +9,12 @@
                 recovery_code: '',
                 toggleInput() {
                     this.showRecoveryInput = !this.showRecoveryInput;
+
                     this.code = '';
                     this.recovery_code = '';
+
                     $dispatch('clear-2fa-auth-code');
+            
                     $nextTick(() => {
                         this.showRecoveryInput
                             ? this.$refs.recovery_code?.focus()
