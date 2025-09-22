@@ -49,17 +49,6 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_users_can_logout(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->post(route('logout'));
-
-        $response->assertRedirect(route('home'));
-
-        $this->assertGuest();
-    }
-
     public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge(): void
     {
         if (! Features::canManageTwoFactorAuthentication()) {
@@ -86,6 +75,17 @@ class AuthenticationTest extends TestCase
 
         $response->assertRedirect(route('two-factor.login'));
         $response->assertSessionHas('login.id', $user->id);
+        $this->assertGuest();
+    }
+
+    public function test_users_can_logout(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('logout'));
+
+        $response->assertRedirect(route('home'));
+
         $this->assertGuest();
     }
 }
