@@ -56,8 +56,10 @@
             }
 
             const previousInput = this.getInput(index - 1);
+    
             previousInput.value = '';
             previousInput.focus();
+
             this.updateHiddenField();
         },
         handleKeyDown(index, event) {
@@ -77,6 +79,7 @@
         },
         handlePaste(event) {
             event.preventDefault();
+
             const pastedText = (event.clipboardData || window.clipboardData).getData('text');
             const numericOnly = pastedText.replace(/[^0-9]/g, '');
             const digitsToFill = Math.min(numericOnly.length, this.totalDigits);
@@ -88,13 +91,14 @@
                 });
 
             if (numericOnly.length >= this.totalDigits) {
-            this.updateHiddenField();
+                this.updateHiddenField();
             }
         },
         clearAll() {
             this.digitIndices.forEach(index => {
                 this.setValue(index, '');
             });
+
             this.$refs.code.value = '';
             this.$refs.input1?.focus();
         }
