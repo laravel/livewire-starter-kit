@@ -8,17 +8,27 @@ new class extends Component {
     #[Locked]
     public array $recoveryCodes = [];
 
+    /**
+     * Mount the component.
+     */
     public function mount(): void
     {
         $this->loadRecoveryCodes();
     }
 
+    /**
+     * Generate new recovery codes for the user.
+     */
     public function regenerateRecoveryCodes(GenerateNewRecoveryCodes $generateNewRecoveryCodes): void
     {
         $generateNewRecoveryCodes(auth()->user());
+
         $this->loadRecoveryCodes();
     }
 
+    /**
+     * Load the recovery codes for the user.
+     */
     private function loadRecoveryCodes(): void
     {
         $user = auth()->user();
@@ -28,6 +38,7 @@ new class extends Component {
                 $this->recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
             } catch (Exception) {
                 $this->addError('recoveryCodes', 'Failed to load recovery codes');
+
                 $this->recoveryCodes = [];
             }
         }
@@ -48,6 +59,7 @@ new class extends Component {
             {{ __('Recovery codes let you regain access if you lose your 2FA device. Store them in a secure password manager.') }}
         </flux:text>
     </div>
+
     <div class="px-6">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <flux:button
@@ -85,6 +97,7 @@ new class extends Component {
                 </flux:button>
             @endif
         </div>
+
         <div
             x-show="showRecoveryCodes"
             x-transition

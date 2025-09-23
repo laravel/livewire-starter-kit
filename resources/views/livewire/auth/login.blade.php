@@ -22,6 +22,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
     public bool $remember = false;
 
+    /**
+     * Handle an incoming authentication request.
+     */
     public function login(): void
     {
         $this->validate();
@@ -49,6 +52,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 
+    /**
+     * Validate the user's credentials.
+     */
     protected function validateCredentials(): User
     {
         $user = Auth::getProvider()->retrieveByCredentials(['email' => $this->email, 'password' => $this->password]);
@@ -64,6 +70,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
         return $user;
     }
 
+    /**
+     * Ensure the authentication request is not rate limited.
+     */
     protected function ensureIsNotRateLimited(): void
     {
         if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
@@ -82,6 +91,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
         ]);
     }
 
+    /**
+     * Get the authentication rate limiting throttle key.
+     */
     protected function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
@@ -91,9 +103,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
 <div class="flex flex-col gap-6">
     <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
 
+    <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
 
     <form method="POST" wire:submit="login" class="flex flex-col gap-6">
+        <!-- Email Address -->
         <flux:input
             wire:model="email"
             :label="__('Email address')"
@@ -104,6 +118,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             placeholder="email@example.com"
         />
 
+        <!-- Password -->
         <div class="relative">
             <flux:input
                 wire:model="password"
@@ -122,6 +137,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             @endif
         </div>
 
+        <!-- Remember Me -->
         <flux:checkbox wire:model="remember" :label="__('Remember me')" />
 
         <div class="flex items-center justify-end">

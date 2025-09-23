@@ -57,6 +57,7 @@
                             </flux:text>
                         @enderror
                     </div>
+
                     <div x-show="showRecoveryInput">
                         <div class="my-5">
                             <flux:input
