@@ -164,14 +164,14 @@ new class extends Component {
         if ($this->showVerificationStep) {
             return [
                 'title' => __('Verify Authentication Code'),
-                'description' => __('Enter the 6-digit code from your authenticator app'),
+                'description' => __('Enter the 6-digit code from your authenticator app.'),
                 'buttonText' => __('Continue'),
             ];
         }
 
         return [
             'title' => __('Enable Two-Factor Authentication'),
-            'description' => __('To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app'),
+            'description' => __('To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app.'),
             'buttonText' => __('Continue'),
         ];
     }
