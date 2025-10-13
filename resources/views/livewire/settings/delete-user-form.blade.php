@@ -1,6 +1,5 @@
 <?php
 
-use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Component;
 
@@ -10,15 +9,26 @@ new class extends Component {
     /**
      * Delete the currently authenticated user.
      */
-    public function deleteUser(Logout $logout): void
+    public function deleteUser(): void
     {
         $this->validate([
             'password' => ['required', 'string', 'current_password'],
         ]);
 
-        tap(Auth::user(), $logout(...))->delete();
+        tap(Auth::user(), $this->logout(...))->delete();
 
         $this->redirect('/', navigate: true);
+    }
+
+    /**
+     * Log out the current User
+     */
+    private function logout(): void
+    {
+        Auth::guard('web')->logout();
+
+        Session::invalidate();
+        Session::regenerateToken();
     }
 }; ?>
 
