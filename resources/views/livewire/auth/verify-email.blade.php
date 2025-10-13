@@ -35,8 +35,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
     {
         if (Auth::user()->hasVerifiedEmail()) {
             $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
-
-            return;
         }
     }
 }; ?>
@@ -57,8 +55,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
             {{ __('Resend verification email') }}
         </flux:button>
 
-        <flux:link class="text-sm cursor-pointer" wire:click="logout" data-test="logout-button">
-            {{ __('Log out') }}
-        </flux:link>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <flux:link class="text-sm cursor-pointer" wire:click="logout" data-test="logout-button">
+                {{ __('Log out') }}
+            </flux:link>
+        </form>
     </div>
 </div>

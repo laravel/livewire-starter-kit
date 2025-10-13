@@ -5,7 +5,6 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Fortify\Features;
-use Livewire\Volt\Volt;
 use Tests\TestCase;
 
 class TwoFactorChallengeTest extends TestCase
@@ -36,17 +35,9 @@ class TwoFactorChallengeTest extends TestCase
 
         $user = User::factory()->create();
 
-        $user->forceFill([
-            'two_factor_secret' => encrypt('test-secret'),
-            'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
-            'two_factor_confirmed_at' => now(),
-        ])->save();
-
-        Volt::test('auth.login')
-            ->set('email', $user->email)
-            ->set('password', 'password')
-            ->call('login')
-            ->assertRedirect(route('two-factor.login'))
-            ->assertOk();
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('two-factor.login'));
     }
 }
