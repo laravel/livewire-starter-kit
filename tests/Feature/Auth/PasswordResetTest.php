@@ -2,13 +2,10 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Livewire\Auth\ForgotPassword;
-use App\Livewire\Auth\ResetPassword;
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class PasswordResetTest extends TestCase
@@ -17,8 +14,7 @@ class PasswordResetTest extends TestCase
 
     public function test_reset_password_link_screen_can_be_rendered(): void
     {
-        $response = $this->get('/forgot-password');
-
+        $response = $this->get(route('password.request'));
         $response->assertStatus(200);
     }
 
@@ -28,11 +24,9 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        Livewire::test(ForgotPassword::class)
-            ->set('email', $user->email)
-            ->call('sendPasswordResetLink');
+        $this->post(route('password.request'), ['email' => $user->email]);
 
-        Notification::assertSentTo($user, ResetPasswordNotification::class);
+        Notification::assertSentTo($user, ResetPassword::class);
     }
 
     public function test_reset_password_screen_can_be_rendered(): void
@@ -41,13 +35,10 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        Livewire::test(ForgotPassword::class)
-            ->set('email', $user->email)
-            ->call('sendPasswordResetLink');
+        $this->post(route('password.request'), ['email' => $user->email]);
 
-        Notification::assertSentTo($user, ResetPasswordNotification::class, function ($notification) {
-            $response = $this->get('/reset-password/'.$notification->token);
-
+        Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
+            $response = $this->get(route('password.reset', $notification->token));
             $response->assertStatus(200);
 
             return true;
@@ -60,19 +51,18 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        Livewire::test(ForgotPassword::class)
-            ->set('email', $user->email)
-            ->call('sendPasswordResetLink');
+        $this->post(route('password.request'), ['email' => $user->email]);
 
-        Notification::assertSentTo($user, ResetPasswordNotification::class, function ($notification) use ($user) {
-            $response = Livewire::test(ResetPassword::class, ['token' => $notification->token])
-                ->set('email', $user->email)
-                ->set('password', 'password')
-                ->set('password_confirmation', 'password')
-                ->call('resetPassword');
+        Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {
+            $response = $this->post(route('password.update'), [
+                'token' => $notification->token,
+                'email' => $user->email,
+                'password' => 'password',
+                'password_confirmation' => 'password',
+            ]);
 
             $response
-                ->assertHasNoErrors()
+                ->assertSessionHasNoErrors()
                 ->assertRedirect(route('login', absolute: false));
 
             return true;
