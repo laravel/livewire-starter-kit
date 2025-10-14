@@ -19,7 +19,7 @@ Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
     Route::get('settings/profile', Profile::class)->name('settings.profile');
-    Route::get('settings/password', Password::class)->name('settings.password');
+    Route::get('settings/password', Password::class)->name('settings.user-password');
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 
     Route::get('settings/two-factor', TwoFactor::class)
