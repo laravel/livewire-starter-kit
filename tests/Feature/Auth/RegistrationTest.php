@@ -2,9 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Livewire\Auth\Register;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
