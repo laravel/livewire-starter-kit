@@ -18,9 +18,9 @@ Route::view('dashboard', 'dashboard')
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
-    Route::get('settings/profile', Profile::class)->name('settings.profile');
-    Route::get('settings/password', Password::class)->name('settings.password');
-    Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
+    Route::get('settings/profile', Profile::class)->name('profile.edit');
+    Route::get('settings/password', Password::class)->name('user-password.edit');
+    Route::get('settings/appearance', Appearance::class)->name('appearance.edit');
 
     Route::get('settings/two-factor', TwoFactor::class)
         ->middleware(
@@ -33,5 +33,3 @@ Route::middleware(['auth'])->group(function () {
         )
         ->name('two-factor.show');
 });
-
-require __DIR__.'/auth.php';
