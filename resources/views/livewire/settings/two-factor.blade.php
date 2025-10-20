@@ -132,7 +132,9 @@
                             </div>
                         @else
                             <div class="flex items-center justify-center h-full p-4">
-                                {!! $qrCodeSvg !!}
+                                <div class="bg-white p-3 rounded">
+                                    {!! $qrCodeSvg !!}
+                                </div>
                             </div>
                         @endempty
                     </div>
