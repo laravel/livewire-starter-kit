@@ -30,7 +30,7 @@
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
-            <x-desktop-user-menu />
+            <x-desktop-user-menu class="hidden lg:block" />
         </flux:sidebar>
 
 
