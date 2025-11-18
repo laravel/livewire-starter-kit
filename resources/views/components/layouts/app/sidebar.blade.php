@@ -22,11 +22,11 @@
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Production')" class="grid">
-                <flux:navlist.item icon="folder-open" :href="route('holidays.index')"
+                <flux:navlist.item icon="calendar-days" :href="route('holidays.index')"
                     :current="request()->routeIs('holidays.*')" wire:navigate>{{ __('Holidays') }}</flux:navlist.item>
             </flux:navlist.group>
             <flux:navlist.group :heading="__('Administración')" class="grid">
-                <flux:navlist.item icon="shield-check" :href="route('departments.index')"
+                <flux:navlist.item icon="rectangle-group" :href="route('departments.index')"
                     :current="request()->routeIs('departments.*')" wire:navigate>{{ __('Departamentos') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="shield-check" :href="route('areas.index')"
