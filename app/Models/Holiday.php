@@ -15,9 +15,22 @@ class Holiday extends Model
         'description',
     ];
 
+    public function upcommingHolidays()
+    {
+        return $this->where('date', '>=', now())->orderBy('date', 'asc')->get();
+    }
+    /**
+     * Scope a query to search holidays by name or description.
+     */
     public function scopeSearch($query, $term)
     {
         return $query->where('name', 'like', "%{$term}%")
                      ->orWhere('description', 'like', "%{$term}%");
     }
+
+    public function scopeDate($query, $date)
+    {
+        return $query->where('date', $date);
+    }
+
 }
