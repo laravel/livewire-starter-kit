@@ -11,6 +11,7 @@
             <flux:input
                 name="name"
                 :label="__('Name')"
+                :value="old('name')"
                 type="text"
                 required
                 autofocus
@@ -22,6 +23,7 @@
             <flux:input
                 name="email"
                 :label="__('Email address')"
+                :value="old('email')"
                 type="email"
                 required
                 autocomplete="email"
