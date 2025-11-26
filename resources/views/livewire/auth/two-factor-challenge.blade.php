@@ -43,19 +43,8 @@
                 <div class="space-y-5 text-center">
                     <div x-show="!showRecoveryInput">
                         <div class="flex items-center justify-center my-5">
-                            <x-input-otp
-                                name="code"
-                                digits="6"
-                                autocomplete="one-time-code"
-                                x-model="code"
-                            />
+                            <flux:otp x-model="code" length="6" name="code" submit="auto" />
                         </div>
-
-                        @error('code')
-                            <flux:text color="red">
-                                {{ $message }}
-                            </flux:text>
-                        @enderror
                     </div>
 
                     <div x-show="showRecoveryInput">
