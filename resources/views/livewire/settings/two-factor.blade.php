@@ -87,17 +87,7 @@
             @if ($showVerificationStep)
                 <div class="space-y-6">
                     <div class="flex flex-col items-center space-y-3">
-                        <x-input-otp
-                            :digits="6"
-                            name="code"
-                            wire:model="code"
-                            autocomplete="one-time-code"
-                        />
-                        @error('code')
-                            <flux:text color="red">
-                                {{ $message }}
-                            </flux:text>
-                        @enderror
+                        <flux:otp wire:model="code" length="6" submit="auto" />
                     </div>
 
                     <div class="flex items-center space-x-3">
