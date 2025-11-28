@@ -266,7 +266,14 @@ new class extends Component {
             @if ($showVerificationStep)
                 <div class="space-y-6">
                     <div class="flex flex-col items-center space-y-3">
-                        <flux:otp wire:model="code" length="6" submit="auto" />
+                        <flux:otp
+                            wire:model="code"
+                            length="6"
+                            label="OTP Code"
+                            label:sr-only
+                            error:class="text-center"
+                            class="mx-auto"
+                        />
                     </div>
 
                     <div class="flex items-center space-x-3">
