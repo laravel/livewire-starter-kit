@@ -49,9 +49,7 @@
                                 name="code"
                                 label="OTP Code"
                                 label:sr-only
-                                error:class="text-center"
                                 class="mx-auto"
-                                submit="auto"
                              />
                         </div>
                     </div>
