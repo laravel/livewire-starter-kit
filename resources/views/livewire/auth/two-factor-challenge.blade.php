@@ -14,7 +14,7 @@
                     this.recovery_code = '';
 
                     $dispatch('clear-2fa-auth-code');
-            
+
                     $nextTick(() => {
                         this.showRecoveryInput
                             ? this.$refs.recovery_code?.focus()
@@ -43,7 +43,14 @@
                 <div class="space-y-5 text-center">
                     <div x-show="!showRecoveryInput">
                         <div class="flex items-center justify-center my-5">
-                            <flux:otp x-model="code" length="6" name="code" submit="auto" />
+                            <flux:otp
+                                x-model="code"
+                                length="6"
+                                name="code"
+                                label="OTP Code"
+                                label:sr-only
+                                class="mx-auto"
+                             />
                         </div>
                     </div>
 
