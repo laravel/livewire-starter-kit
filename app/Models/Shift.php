@@ -1,0 +1,137 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Shift extends Model
+{
+    /** @use HasFactory<\Database\Factories\ShiftFactory> */
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'start_time',
+        'end_time',
+        'active',
+        'comments',
+    ];
+
+    protected $casts = [
+        'active' => 'boolean',
+        'start_time' => 'datetime:H:i',
+        'end_time' => 'datetime:H:i',
+    ];
+
+    /**
+     * Relationships with other models
+     */
+
+    //pending
+    /* public function Employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
+    } */
+
+
+    public function ProuctionSessions(): HasMany
+    {
+        return $this->hasMany(ProductionSession::class);
+    }
+
+    public function BreakTimes(): HasMany
+    {
+        return $this->hasMany(BreakTime::class);
+    }
+
+    /**
+     * Scopes
+     */
+
+    // Solo turnos activos
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
+    }
+
+    // Solo turnos inactivos
+    public function scopeInactive($query)
+    {
+        return $query->where('active', false);
+    }
+
+    // Buscar turnos por nombre
+    public function scopeSearch($query, $search)
+    {
+        return $query->where('name', 'like', "%{$search}%");
+    }
+
+    // Ordenar por campo dinámico
+    public function scopeSortByField($query, $field = 'name', $direction = 'asc')
+    {
+        return $query->orderBy($field, $direction);
+    }
+
+    // Filtrar por rango de tiempo
+    public function scopeByTimeRange($query, $startTime = null, $endTime = null)
+    {
+        if ($startTime) {
+            $query->where('start_time', '>=', $startTime);
+        }
+        if ($endTime) {
+            $query->where('end_time', '<=', $endTime);
+        }
+        return $query;
+    }
+
+    // Ordenar por hora de inicio
+    public function scopeOrderByTime($query, $direction = 'asc')
+    {
+        return $query->orderBy('start_time', $direction);
+    }
+
+    /**
+     * Auxiliar methods
+     */
+
+    // Método unificado para verificar si se puede eliminar
+    public function canBeDeleted()
+    {
+        return $this->Employees()->count() === 0
+            && $this->ProuctionSessions()->count() === 0
+            && $this->BreakTimes()->count() === 0;
+    }
+
+    // Métodos individuales (mantener por compatibilidad)
+    public function canBeDeletedProductionSessions()
+    {
+        return $this->ProuctionSessions()->count() == 0;
+    }
+
+    public function canBeDeletedBreakTimes()
+    {
+        return $this->BreakTimes()->count() == 0;
+    }
+
+    //pending migratio  model and controller
+    /* public function getStats()
+    {
+        return [
+            'total_employees' => $this->Employees()->count(),
+            'active_employees' => $this->Employees()->where('active', true)->count(),
+        ];
+    }
+
+    public function getEmployeeStats()
+    {
+        return [
+            'total_production_sessions' => $this->ProuctionSessions()->count(),
+            'active_production_sessions' => $this->ProuctionSessions()->where('active', true)->count(),
+            'total_break_times' => $this->BreakTimes()->count(),
+            'active_break_times' => $this->BreakTimes()->where('active', true)->count(),
+        ];
+    } */
+
+}

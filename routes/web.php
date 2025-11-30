@@ -5,6 +5,7 @@ use Livewire\Volt\Volt;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\POController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\ShiftController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -50,6 +51,9 @@ Route::middleware(['auth'])->group(function () {
 
     //Rutas para la gestion de Holidays
     Route::resource('/holidays', HolidayController::class)->only(['index','create','show','edit']);
+
+    //Rutas para gestionar Shifts
+    Route::resource('/shifts', ShiftController::class)->only(['index','create','show','edit']);
 
 });
 
