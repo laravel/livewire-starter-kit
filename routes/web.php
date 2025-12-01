@@ -55,6 +55,11 @@ Route::middleware(['auth'])->group(function () {
     //Rutas para gestionar Shifts
     Route::resource('/shifts', ShiftController::class)->only(['index','create','show','edit']);
 
+    //Rutas para gestionar Break Times
+    Volt::route('break-times', 'breaktimes.breaktime-list')->name('break-times.index');
+    Volt::route('break-times/create', 'breaktimes.breaktime-create')->name('break-times.create');
+    Volt::route('break-times/{breakTime}', 'breaktimes.breaktime-show')->name('break-times.show');
+    Volt::route('break-times/{breakTime}/edit', 'breaktimes.breaktime-edit')->name('break-times.edit');
 });
 
 require __DIR__.'/auth.php';
