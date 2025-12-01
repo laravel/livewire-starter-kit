@@ -21,16 +21,23 @@
                     wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
             </flux:navlist.group>
 
-                <flux:navlist.group :heading="__('Production')" class="grid">
-
-                </flux:navlist.group>
-                <flux:navlist.group :heading="__('Administración')" class="grid">                                        
-                    <flux:navlist.item icon="shield-check" :href="route('departments.index')" :current="request()->routeIs('departments.*')" wire:navigate>{{ __('Departamentos') }}</flux:navlist.item>
-                    <flux:navlist.item icon="shield-check" :href="route('areas.index')" :current="request()->routeIs('areas.*')" wire:navigate>{{ __('Areas') }}</flux:navlist.item>
-                    <flux:navlist.item icon="shield-check" :href="route('roles.index')" :current="request()->routeIs('roles.*')" wire:navigate>{{ __('Roles') }}</flux:navlist.item>
-                    <flux:navlist.item icon="key" :href="route('permissions.index')" :current="request()->routeIs('permissions.*')" wire:navigate>{{ __('Permisos') }}</flux:navlist.item>
-                </flux:navlist.group>
-            </flux:navlist>
+            <flux:navlist.group :heading="__('Production')" class="grid">
+                <flux:navlist.item icon="calendar-days" :href="route('holidays.index')"
+                    :current="request()->routeIs('holidays.*')" wire:navigate>{{ __('Holidays') }}</flux:navlist.item>
+            </flux:navlist.group>
+            <flux:navlist.group :heading="__('Administración')" class="grid">
+                <flux:navlist.item icon="rectangle-group" :href="route('departments.index')"
+                    :current="request()->routeIs('departments.*')" wire:navigate>{{ __('Departamentos') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="shield-check" :href="route('areas.index')"
+                    :current="request()->routeIs('areas.*')" wire:navigate>{{ __('Areas') }}</flux:navlist.item>
+                <flux:navlist.item icon="shield-check" :href="route('roles.index')"
+                    :current="request()->routeIs('roles.*')" wire:navigate>{{ __('Roles') }}</flux:navlist.item>
+                <flux:navlist.item icon="key" :href="route('permissions.index')"
+                    :current="request()->routeIs('permissions.*')" wire:navigate>{{ __('Permisos') }}
+                </flux:navlist.item>
+            </flux:navlist.group>
+        </flux:navlist>
 
         <flux:spacer />
 

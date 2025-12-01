@@ -5,6 +5,7 @@ use Livewire\Volt\Volt;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\POController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\ShiftController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -43,10 +44,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/departments/{department}/edit', [\App\Http\Controllers\DepartmentController::class, 'edit'])->name('departments.edit');
 
     // Rutas para la gestión de áreas
-    Volt::route('areas', 'areas.area-list')->name('areas.index');
-    Volt::route('areas/create', 'areas.area-create')->name('areas.create');
-    Volt::route('areas/{area}', 'areas.area-show')->name('areas.show');
-    Volt::route('areas/{area}/edit', 'areas.area-edit')->name('areas.edit');
+    Route::get('/areas', [\App\Http\Controllers\AreaController::class, 'index'])->name('areas.index');
+    Route::get('/areas/create', [\App\Http\Controllers\AreaController::class, 'create'])->name('areas.create');
+    Route::get('/areas/{area}', [\App\Http\Controllers\AreaController::class, 'show'])->name('areas.show');
+    Route::get('/areas/{area}/edit', [\App\Http\Controllers\AreaController::class, 'edit'])->name('areas.edit');
+
+    //Rutas para la gestion de Holidays
+    Route::resource('/holidays', HolidayController::class)->only(['index','create','show','edit']);
+
 });
 
 require __DIR__.'/auth.php';
