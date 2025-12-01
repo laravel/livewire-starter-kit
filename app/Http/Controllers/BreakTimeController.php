@@ -13,7 +13,7 @@ class BreakTimeController extends Controller
      */
     public function index()
     {
-        //
+        return view('breaktimes.index');
     }
 
     /**
@@ -21,15 +21,7 @@ class BreakTimeController extends Controller
      */
     public function create()
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreBreakTimeRequest $request)
-    {
-        //
+        return view('breaktimes.create');
     }
 
     /**
@@ -37,7 +29,7 @@ class BreakTimeController extends Controller
      */
     public function show(BreakTime $breakTime)
     {
-        //
+        return view('breaktimes.show', compact('breakTime'));
     }
 
     /**
@@ -45,22 +37,6 @@ class BreakTimeController extends Controller
      */
     public function edit(BreakTime $breakTime)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateBreakTimeRequest $request, BreakTime $breakTime)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(BreakTime $breakTime)
-    {
-        //
+        return view('breaktimes.edit', compact('breakTime'));
     }
 }
