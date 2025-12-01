@@ -5,14 +5,14 @@ use App\Models\Shift;
 
 new class extends Component {
     public Shift $shift;
-    //public $stats; penging
+    //public $stats; pending
     //public $employeeStats; pending
 
     public function mount(Shift $shift)
     {
-        $this->shift = $shift;
-        //$this->stats = $shift->getStats(); penging
-        //$this->employeeStats = $shift->getEmployeeStats(); penging
+        $this->shift = $shift->load('BreakTimes');
+        //$this->stats = $shift->getStats(); pending
+        //$this->employeeStats = $shift->getEmployeeStats(); pending
     }
 }; ?>
 
@@ -202,7 +202,7 @@ new class extends Component {
                                 Total Descansos
                             </dt>
                             <dd class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">
-                                0{{-- {{ $employeeStats['total_break_times'] }} //pending --}}
+                                {{ $shift->BreakTimes->count() }}
                             </dd>
                         </dl>
                     </div>
@@ -215,7 +215,7 @@ new class extends Component {
                                 Descansos Activos
                             </dt>
                             <dd class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">
-                                0{{-- {{ $employeeStats['active_break_times'] }} //pending --}}
+                                {{ $shift->BreakTimes->where('active', true)->count() }}
                             </dd>
                         </dl>
                     </div>
@@ -299,6 +299,143 @@ new class extends Component {
                     </p>
                 </div>
             @endif --}}
+        </div>
+
+        <!-- Tabla de Break Times -->
+        <div class="mt-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Descansos en este turno</h3>
+                @if (Route::has('break-times.create'))
+                    <a href="{{ route('break-times.create', ['shift_id' => $shift->id]) }}"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Nuevo Descanso
+                    </a>
+                @endif
+            </div>
+
+            @if ($shift->BreakTimes->count() > 0)
+                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-800">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Nombre
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Horario
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Duración
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Estado
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                        Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
+                                @foreach ($shift->BreakTimes as $breakTime)
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                {{ $breakTime->name }}
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                                                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                {{ \Carbon\Carbon::parse($breakTime->start_break_time)->format('H:i') }} -
+                                                {{ \Carbon\Carbon::parse($breakTime->end_break_time)->format('H:i') }}
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                @php
+                                                    $start = \Carbon\Carbon::parse($breakTime->start_break_time);
+                                                    $end = \Carbon\Carbon::parse($breakTime->end_break_time);
+                                                    $duration = $start->diff($end);
+                                                @endphp
+                                                {{ $duration->h > 0 ? $duration->h . 'h ' : '' }}{{ $duration->i }}min
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if ($breakTime->active)
+                                                <span
+                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                    Activo
+                                                </span>
+                                            @else
+                                                <span
+                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                                    Inactivo
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <div class="flex space-x-2">
+                                                @if (Route::has('break-times.show'))
+                                                    <a href="{{ route('break-times.show', $breakTime) }}"
+                                                        class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                                        Ver
+                                                    </a>
+                                                @endif
+                                                @if (Route::has('break-times.edit'))
+                                                    <a href="{{ route('break-times.edit', $breakTime) }}"
+                                                        class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                                                        Editar
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @else
+                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg p-6">
+                    <div class="text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay descansos</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            No hay descansos asignados a este turno.
+                        </p>
+                        @if (Route::has('break-times.create'))
+                            <div class="mt-6">
+                                <a href="{{ route('break-times.create', ['shift_id' => $shift->id]) }}"
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Agregar Descanso
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </div>

@@ -65,7 +65,10 @@ class Shift extends Model
     // Buscar turnos por nombre
     public function scopeSearch($query, $search)
     {
-        return $query->where('name', 'like', "%{$search}%");
+        return $query->where('name', 'like', "%{$search}%")
+        ->orWhere('start_time', 'like', "%{$search}%")
+        ->orWhere('end_time', 'like', "%{$search}%")
+        ->orWhere('comments', 'like', "%{$search}%");
     }
 
     // Ordenar por campo dinámico
