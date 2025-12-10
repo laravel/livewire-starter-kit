@@ -38,7 +38,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Turnos</p>
-                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ App\Models\Shift::count() }}
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ \App\Models\Shift::count() }}
                         </p>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Turnos Activos</p>
                         <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ App\Models\Shift::where('active', true)->count() }}</p>
+                            {{ \App\Models\Shift::where('active', true)->count() }}</p>
                     </div>
                 </div>
             </div>
