@@ -1,17 +1,31 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+<<<<<<< HEAD
 use Livewire\Volt\Volt;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\POController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\BreakTimeController;
+=======
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Rutas públicas y redirecciones principales.
+| Las rutas de admin y employee están en sus archivos respectivos.
+|
+*/
+>>>>>>> 594aa2ae8968ad0d72db7a5a4977ef862ef188c0
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+<<<<<<< HEAD
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -66,5 +80,12 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('/parts', PartController::class)->only(['index','create','show','edit']);
 
 });
+=======
+// Redirigir dashboard general según el rol del usuario
+Route::get('/dashboard', function () {
+    // Por defecto redirige a admin, puedes agregar lógica de roles aquí
+    return redirect()->route('admin.dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+>>>>>>> 594aa2ae8968ad0d72db7a5a4977ef862ef188c0
 
 require __DIR__.'/auth.php';

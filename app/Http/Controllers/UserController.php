@@ -12,7 +12,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('users.index');
+        return view('livewire.admin.users.user-list');
     }
 
     /**
@@ -20,7 +20,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+        return view('livewire.admin.users.user-create');
     }
 
     /**
@@ -28,6 +28,6 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        return view('livewire.users.user-edit', compact('user'));
     }
 }

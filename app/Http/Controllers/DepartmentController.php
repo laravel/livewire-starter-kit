@@ -12,7 +12,7 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        return view('departments.index');
+        return view('livewire.admin.departments.department-list');
     }
 
     /**
@@ -20,7 +20,7 @@ class DepartmentController extends Controller
      */
     public function create()
     {
-        return view('departments.create');
+        return view('livewire.admin.departments.department-create');
     }
 
     /**
@@ -28,7 +28,7 @@ class DepartmentController extends Controller
      */
     public function show(Department $department)
     {
-        return view('departments.show', compact('department'));
+        return view('livewire.admin.departments.department-show', compact('department'));
     }
 
     /**
@@ -36,6 +36,6 @@ class DepartmentController extends Controller
      */
     public function edit(Department $department)
     {
-        return view('departments.edit', compact('department'));
+        return view('livewire.admin.departments.department-edit', compact('department'));
     }
 }
