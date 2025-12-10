@@ -26,6 +26,8 @@
                     :current="request()->routeIs('admin.holidays.*')" wire:navigate>{{ __('Holidays') }}</flux:navlist.item>
                 <flux:navlist.item icon="clock" :href="route('admin.shifts.index')"
                     :current="request()->routeIs('admin.shifts.*')" wire:navigate>{{ __('Turnos') }}</flux:navlist.item>
+                <flux:navlist.item icon="pause-circle" :href="route('admin.break-times.index')"
+                    :current="request()->routeIs('admin.break-times.*')" wire:navigate>{{ __('Descansos') }}</flux:navlist.item>
             </flux:navlist.group>
             <flux:navlist.group :heading="__('Administración')" class="grid">
                 <flux:navlist.item icon="rectangle-group" :href="route('admin.departments.index')"
