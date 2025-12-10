@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\POController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\BreakTimeController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -56,10 +57,14 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('/shifts', ShiftController::class)->only(['index','create','show','edit']);
 
     //Rutas para gestionar Break Times
-    Volt::route('break-times', 'breaktimes.breaktime-list')->name('break-times.index');
-    Volt::route('break-times/create', 'breaktimes.breaktime-create')->name('break-times.create');
-    Volt::route('break-times/{breakTime}', 'breaktimes.breaktime-show')->name('break-times.show');
-    Volt::route('break-times/{breakTime}/edit', 'breaktimes.breaktime-edit')->name('break-times.edit');
+    Route::resource('break-times', BreakTimeController::class)->only(['index','create','show','edit']);
+
+    //Rutas para gestionar Empleados
+    Route::resource('empleados', EmployeeController::class)->only(['index','create','show','edit']);
+
+    //Rutas para gestionar Parts
+    Route::resource('/parts', PartController::class)->only(['index','create','show','edit']);
+
 });
 
 require __DIR__.'/auth.php';
