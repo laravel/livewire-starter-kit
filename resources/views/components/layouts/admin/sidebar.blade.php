@@ -133,7 +133,7 @@
 
     {{ $slot }}
 
-    @livewire('admin.components.toast-notification')
+    @livewire('components.toast-notification')
 
     @fluxScripts
 </body>

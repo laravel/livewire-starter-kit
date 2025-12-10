@@ -13,7 +13,7 @@ class AreaController extends Controller
      */
     public function index()
     {
-        return view('areas.index');
+        return view('livewire.admin.areas.area-list');
     }
 
     /**
@@ -22,7 +22,7 @@ class AreaController extends Controller
     public function create()
     {
         $departments = Department::orderBy('name')->get();
-        return view('areas.create', compact('departments'));
+        return view('livewire.admin.areas.area-create', compact('departments'));
     }
 
     /**
@@ -30,7 +30,7 @@ class AreaController extends Controller
      */
     public function show(Area $area)
     {
-        return view('areas.show', compact('area'));
+        return view('livewire.admin.areas.area-show', compact('area'));
     }
 
     /**
@@ -39,6 +39,6 @@ class AreaController extends Controller
     public function edit(Area $area)
     {
         $departments = Department::orderBy('name')->get();
-        return view('areas.edit', compact('area', 'departments'));
+        return view('livewire.admin.areas.area-edit', compact('area', 'departments'));
     }
 }

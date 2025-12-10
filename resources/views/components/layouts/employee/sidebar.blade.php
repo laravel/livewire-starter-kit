@@ -9,34 +9,17 @@
     <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-        <a href="{{ route('admin.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+        <a href="{{ route('employee.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
             <x-app-logo />
         </a>
 
         <flux:navlist variant="outline">
-            <flux:navlist.group :heading="__('Dashboard')" class="grid">
-                <flux:navlist.item icon="home" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')"
+            <flux:navlist.group :heading="__('Mi Panel')" class="grid">
+                <flux:navlist.item icon="home" :href="route('employee.dashboard')" :current="request()->routeIs('employee.dashboard')"
                     wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
-                <flux:navlist.item icon="users" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.*')"
-                    wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
             </flux:navlist.group>
 
-            <flux:navlist.group :heading="__('Production')" class="grid">
-                <flux:navlist.item icon="calendar-days" :href="route('admin.holidays.index')"
-                    :current="request()->routeIs('admin.holidays.*')" wire:navigate>{{ __('Holidays') }}</flux:navlist.item>
-            </flux:navlist.group>
-            <flux:navlist.group :heading="__('Administración')" class="grid">
-                <flux:navlist.item icon="rectangle-group" :href="route('admin.departments.index')"
-                    :current="request()->routeIs('admin.departments.*')" wire:navigate>{{ __('Departamentos') }}
-                </flux:navlist.item>
-                <flux:navlist.item icon="shield-check" :href="route('admin.areas.index')"
-                    :current="request()->routeIs('admin.areas.*')" wire:navigate>{{ __('Areas') }}</flux:navlist.item>
-                <flux:navlist.item icon="shield-check" :href="route('admin.roles.index')"
-                    :current="request()->routeIs('admin.roles.*')" wire:navigate>{{ __('Roles') }}</flux:navlist.item>
-                <flux:navlist.item icon="key" :href="route('admin.permissions.index')"
-                    :current="request()->routeIs('admin.permissions.*')" wire:navigate>{{ __('Permisos') }}
-                </flux:navlist.item>
-            </flux:navlist.group>
+            {{-- Aquí puedes agregar más opciones para empleados --}}
         </flux:navlist>
 
         <flux:spacer />
@@ -68,7 +51,7 @@
                 <flux:menu.separator />
 
                 <flux:menu.radio.group>
-                    <flux:menu.item :href="route('admin.settings.profile')" icon="cog" wire:navigate>
+                    <flux:menu.item :href="route('employee.settings.profile')" icon="cog" wire:navigate>
                         {{ __('Settings') }}</flux:menu.item>
                 </flux:menu.radio.group>
 
@@ -115,7 +98,7 @@
                 <flux:menu.separator />
 
                 <flux:menu.radio.group>
-                    <flux:menu.item :href="route('admin.settings.profile')" icon="cog" wire:navigate>
+                    <flux:menu.item :href="route('employee.settings.profile')" icon="cog" wire:navigate>
                         {{ __('Settings') }}</flux:menu.item>
                 </flux:menu.radio.group>
 
@@ -133,7 +116,7 @@
 
     {{ $slot }}
 
-    @livewire('admin.components.toast-notification')
+    @livewire('components.toast-notification')
 
     @fluxScripts
 </body>

@@ -9,21 +9,21 @@ class HolidayController extends Controller
 {
     public function index()
     {
-        return view('holidays.index');
+        return view('livewire.admin.holidays.holiday-list');
     }
 
     public function create()
     {
-        return view('holidays.create');
+        return view('livewire.admin.holidays.holiday-create');
     }
 
     public function show(Holiday $holiday)
     {
-        return view('holidays.show', compact('holiday'));
+        return view('livewire.admin.holidays.holiday-show', compact('holiday'));
     }
 
     public function edit(Holiday $holiday)
     {
-        return view('holidays.edit', compact('holiday'));
+        return view('livewire.admin.holidays.holiday-edit', compact('holiday'));
     }
 }
