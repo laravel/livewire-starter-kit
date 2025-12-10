@@ -25,24 +25,15 @@
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Production')" class="grid">
-                <<<<<<<<< Temporary merge branch 1 <flux:navlist.item icon="calendar-days"
-                    :href="route('holidays.index')" :current="request()->routeIs('holidays.*')" wire:navigate>
-                    {{ __('Holidays') }}</flux:navlist.item>
-                    <flux:navlist.item icon="clock" :href="route('shifts.index')"
-                        :current="request()->routeIs('shifts.*')" wire:navigate>{{ __('Turnos') }}</flux:navlist.item>
-                    <flux:navlist.item icon="pause-circle" :href="route('break-times.index')"
-                        :current="request()->routeIs('break-times.*')" wire:navigate>{{ __('Descansos') }}
-                    </flux:navlist.item>
-                    =========
-                    <flux:navlist.item icon="calendar-days" :href="route('admin.holidays.index')"
-                        :current="request()->routeIs('admin.holidays.*')" wire:navigate>{{ __('Holidays') }}
-                    </flux:navlist.item>
-                    <<<<<<< HEAD>>>>>>> 594aa2ae8968ad0d72db7a5a4977ef862ef188c0
-                        =======
-                        <flux:navlist.item icon="clock" :href="route('admin.shifts.index')"
-                            :current="request()->routeIs('admin.shifts.*')" wire:navigate>{{ __('Turnos') }}
-                        </flux:navlist.item>
-                        >>>>>>>>> Temporary merge branch 2
+                <flux:navlist.item icon="calendar-days" :href="route('admin.holidays.index')"
+                    :current="request()->routeIs('admin.holidays.*')" wire:navigate>{{ __('Holidays') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="clock" :href="route('admin.shifts.index')"
+                    :current="request()->routeIs('admin.shifts.*')" wire:navigate>{{ __('Turnos') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="pause-circle" :href="route('admin.break-times.index')"
+                    :current="request()->routeIs('admin.break-times.*')" wire:navigate>{{ __('Descansos') }}
+                </flux:navlist.item>
             </flux:navlist.group>
             <flux:navlist.group :heading="__('Administración')" class="grid">
                 <flux:navlist.item icon="rectangle-group" :href="route('admin.departments.index')"
