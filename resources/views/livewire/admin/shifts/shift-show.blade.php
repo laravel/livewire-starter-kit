@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 
 use Livewire\Volt\Component;
@@ -16,6 +17,8 @@ new class extends Component {
     }
 }; ?>
 
+=======
+>>>>>>> 555ab2209e164dfdd7dadecfe262b2c5e57ef8a9
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <!-- Header -->
@@ -29,7 +32,7 @@ new class extends Component {
                 </div>
                 <div class="mt-4 sm:mt-0">
                     <div class="flex space-x-2">
-                        <a href="{{ route('shifts.edit', $shift) }}"
+                        <a href="{{ route('admin.shifts.edit', $shift) }}"
                             class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -38,7 +41,7 @@ new class extends Component {
                             </svg>
                             Editar
                         </a>
-                        <a href="{{ route('shifts.index') }}"
+                        <a href="{{ route('admin.shifts.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

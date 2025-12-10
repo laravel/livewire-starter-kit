@@ -14,7 +14,7 @@ use Livewire\Volt\Volt;
 */
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    
+
     // Dashboard Admin
     Route::view('/', 'admin.dashboard')->name('dashboard');
 
@@ -62,5 +62,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/shifts/create', \App\Livewire\Admin\Shifts\ShiftCreate::class)->name('shifts.create');
     Route::get('/shifts/{shift}', \App\Livewire\Admin\Shifts\ShiftShow::class)->name('shifts.show');
     Route::get('/shifts/{shift}/edit', \App\Livewire\Admin\Shifts\ShiftEdit::class)->name('shifts.edit');
+
+    // Gestión de descansos
+    // Route::get('/break-times', \App\Livewire\Admin\BreakTimes\BreakTimeList::class)->name('break-times.index');
+    // Route::get('/break-times/create', \App\Livewire\Admin\BreakTimes\BreakTimeCreate::class)->name('break-times.create');
+    // Route::get('/break-times/{breakTime}', \App\Livewire\Admin\BreakTimes\BreakTimeShow::class)->name('break-times.show');
+    // Route::get('/break-times/{breakTime}/edit', \App\Livewire\Admin\BreakTimes\BreakTimeEdit::class)->name('break-times.edit');
 
 });
