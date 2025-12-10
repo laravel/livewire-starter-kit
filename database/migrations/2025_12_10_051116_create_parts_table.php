@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('parts', function (Blueprint $table) {
             $table->id();
 
-            $table->string('number')->uniqide();
-            $table->string('item_number')->nullable();
+            $table->string('number')->unique();
+            $table->string('item_number')->unique();
             $table->string('unit_of_measure')->nullable();
             $table->tinyInteger('active')->default(1);
             $table->text('description')->nullable();
