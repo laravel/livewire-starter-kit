@@ -1,0 +1,30 @@
+# Diagrama de flujo: Preparación de kits para producción
+
+**Inicio**
+
+1. **Entrega de Órdenes**  
+   (llega correo con un archivo de Excel desde planeación)
+
+2. **Revisión de órdenes de trabajo acuerdo al dibujo**
+
+3. **¿OK?**
+   - **No** → Se solicita la corrección de la WO a SEIP (por/Correo) → **Fin**
+   
+   - **Sí** → Continuar al paso 4
+
+4. **Elaboracion de Kit's de acuerdo a la orden de trabajo y lores de Material**
+
+5. **Elaboración de de viajeros**
+
+6. **Identificar Kits listos para liberar (Se colocan en raca asignada)**
+
+7. **Revision de kit conform orden y viajero y se agregan documentos visuales**
+
+8. **¿Hay incidencia?**
+   - **Sí** → Se registra incidencia en FCA-44 y se hacen ajustes y se regresa al paso 7.
+   
+   - **No** → Continuar al paso 9
+
+9. **Se registra en FCM-25 y se entrega a ensamble y se actualiza Schedule**
+
+10. **Ensamble**

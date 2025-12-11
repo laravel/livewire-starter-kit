@@ -1,0 +1,25 @@
+# Diagrama de flujo: Inspección de Ensamble
+
+**Inicio**
+
+1. **Inspección de piezas**
+
+2. **¿Son Autorizadas?**
+   - **No** → Continuar al paso 3
+   - **Sí** → Se llena los Formatos FCA-07, FCA-33 y FEN-02 → Pesado y Registro, Empaque → **Fin**
+
+3. **¿Rechazo entre 5% y 14%?**
+   - **No** → Continuar al paso 4
+   - **Sí** → Llenar formato FCA-10 FCA-16, Acctiom Correctiva → Continuar al paso 5
+
+4. **¿Rechazo  Mayor al 15%?**
+   - **No** → Regresar al paso 2
+   - **Sí** → Del 15% o mas se llena formato FCA-10, FCA-16 y Acccion correctiva → Continuar al paso 5
+
+5. **Se contesta y se firma**
+
+6. **Se guarda FCA-10**
+
+7. **¿Se repite el problema?**
+   - **Sí** → Regresar al paso 3
+   - **No** → Acción Correctiva → **Fin**

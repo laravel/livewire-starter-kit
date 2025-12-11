@@ -1,0 +1,31 @@
+# Diagrama de flujo: Capacidad Disponible para Producción
+
+**Inicio**
+
+1. **Seleccionar turno**
+
+2. **Número de personas disponibles**
+
+3. **Seleccionar turnos**
+
+4. **Dias disponibles para trabajar descontando Dias Feriados**
+
+5. **Sumar total de horas disponibles**
+
+6. **Agregar # de parte y cantidad a lista**
+
+7. **Agregar número de PO y modalidad de ensamble**
+
+8. **Dividir la cantidad de WO entre el estándar**
+
+9. **Mostrar resultado de horas necesarias por producto**
+
+10. **Restar la cantidad de horas necesarias de # de parte a las horas totales**
+
+11. **¿Tengo horas disponibles?**
+    - **Sí**
+      - Regresa al paso: *Agregar # de parte y cantidad a lista*
+    - **No**
+      1. Revisar que los números de parte estén correctos
+      2. Generar lista de envío y enviar a Producción
+      3. **Fin**

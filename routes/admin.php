@@ -69,4 +69,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/break-times/{breakTime}', \App\Livewire\Admin\BreakTimes\BreakTimeShow::class)->name('break-times.show');
     Route::get('/break-times/{breakTime}/edit', \App\Livewire\Admin\BreakTimes\BreakTimeEdit::class)->name('break-times.edit');
 
+    // Gestión de estados de Work Orders
+    Route::get('/statuses-wo', \App\Livewire\Admin\StatusesWO\StatusWOList::class)->name('statuses-wo.index');
+    Route::get('/statuses-wo/create', \App\Livewire\Admin\StatusesWO\StatusWOCreate::class)->name('statuses-wo.create');
+    Route::get('/statuses-wo/{statusWO}/edit', \App\Livewire\Admin\StatusesWO\StatusWOEdit::class)->name('statuses-wo.edit');
+
+    // Gestión de precios
+    Route::get('/prices', \App\Livewire\Admin\Prices\PriceList::class)->name('prices.index');
+    Route::get('/prices/create', \App\Livewire\Admin\Prices\PriceCreate::class)->name('prices.create');
+    Route::get('/prices/{price}/edit', \App\Livewire\Admin\Prices\PriceEdit::class)->name('prices.edit');
+
+    // Gestión de partes
+    Route::get('/parts', \App\Livewire\Admin\Parts\PartList::class)->name('parts.index');
+    Route::get('/parts/create', \App\Livewire\Admin\Parts\PartCreate::class)->name('parts.create');
+    Route::get('/parts/{part}', \App\Livewire\Admin\Parts\PartShow::class)->name('parts.show');
+    Route::get('/parts/{part}/edit', \App\Livewire\Admin\Parts\PartEdit::class)->name('parts.edit');
+
 });

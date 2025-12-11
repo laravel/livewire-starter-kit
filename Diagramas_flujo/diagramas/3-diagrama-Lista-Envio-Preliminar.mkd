@@ -1,0 +1,26 @@
+# Diagrama de flujo: Lista de Envío Preliminar
+
+**Inicio**
+
+1. **Lista de Envío Semanal con WO**  
+Lista de Envio Semanal con WO (# WO, Item #, Description, WO Qty, Send_Qty_Parts, Pending_Qty, Dude_date, Send_date, Open_date_WO, EQ, PR)
+
+2. **Se agregan los Lotes necesarios**
+
+3. **Ensamblar # parte**
+
+4. **Empaque # parte**
+
+5. **¿Se completó WO?**
+   - **Sí**
+     1. Se crea una Shipping List  
+     2. **Fin**
+
+   - **No**
+     1. Revisión de Lote
+     2. **¿Se requiere nuevo lote?**
+        - **Sí**
+          - Se agrega nuevo lote y regresa al paso de *Empaque # parte*
+        - **No**
+          - Se crea una Shipping List  
+          - **Fin**
