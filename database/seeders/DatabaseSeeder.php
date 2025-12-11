@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             StatusWOSeeder::class,
+            WorkOrderTestSeeder::class,
         ]);
     }
 }

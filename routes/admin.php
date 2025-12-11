@@ -20,9 +20,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Settings
     Route::redirect('settings', 'admin/settings/profile');
-    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
-    Volt::route('settings/password', 'settings.password')->name('settings.password');
-    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+    Volt::route('settings/profile', 'admin.settings.profile')->name('settings.profile');
+    Volt::route('settings/password', 'admin.settings.password')->name('settings.password');
+    Volt::route('settings/appearance', 'admin.settings.appearance')->name('settings.appearance');
 
     // Gestión de usuarios
     Route::get('/users', \App\Livewire\Admin\Users\UserList::class)->name('users.index');
