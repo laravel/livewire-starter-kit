@@ -85,4 +85,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/parts/{part}', \App\Livewire\Admin\Parts\PartShow::class)->name('parts.show');
     Route::get('/parts/{part}/edit', \App\Livewire\Admin\Parts\PartEdit::class)->name('parts.edit');
 
+    // Gestión de órdenes de compra (Purchase Orders)
+    Route::get('/purchase-orders', \App\Livewire\Admin\PurchaseOrders\POList::class)->name('purchase-orders.index');
+    Route::get('/purchase-orders/create', \App\Livewire\Admin\PurchaseOrders\POCreate::class)->name('purchase-orders.create');
+    Route::get('/purchase-orders/{purchaseOrder}', \App\Livewire\Admin\PurchaseOrders\POShow::class)->name('purchase-orders.show');
+    Route::get('/purchase-orders/{purchaseOrder}/edit', \App\Livewire\Admin\PurchaseOrders\POEdit::class)->name('purchase-orders.edit');
+
+    // Gestión de Work Orders
+    Route::get('/work-orders', \App\Livewire\Admin\WorkOrders\WOList::class)->name('work-orders.index');
+    Route::get('/work-orders/{workOrder}', \App\Livewire\Admin\WorkOrders\WOShow::class)->name('work-orders.show');
+    Route::get('/work-orders/{workOrder}/edit', \App\Livewire\Admin\WorkOrders\WOEdit::class)->name('work-orders.edit');
+
 });

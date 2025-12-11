@@ -35,6 +35,14 @@ class Part extends Model
     }
 
     /**
+     * Get the purchase orders for the part.
+     */
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
+
+    /**
      * Get the active price for this part.
      */
     public function activePrice(): ?Price
@@ -75,6 +83,6 @@ class Part extends Model
      */
     public function canBeDeleted(): bool
     {
-        return $this->prices()->count() === 0;
+        return $this->prices()->count() === 0 && $this->purchaseOrders()->count() === 0;
     }
 }

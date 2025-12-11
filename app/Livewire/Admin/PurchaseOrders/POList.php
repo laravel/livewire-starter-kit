@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Livewire\Admin\PurchaseOrders;
+
+use App\Models\PurchaseOrder;
+use App\Services\PurchaseOrderService;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class POList extends Component
+{
+    use WithPagination;
+
+    public string $search = '';
+    public string $sortField = 'po_date';
+    public string $sortDirection = 'desc';
+    public int $perPage = 10;
+    public ?int $deleteId = null;
+    public bool $confirmingDeletion = false;
+    public string $filterStatus = 'all';
+
+    protected PurchaseOrderService $purchaseOrderService;
+
+    public function boot(PurchaseOrderService $purchaseOrderService): void
+    {
+        $this->purchaseOrderService = $purchaseOrderService;
+    }
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function sortBy(string $field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+        }
+
+        $this->sortField = $field;
+    }
+
+    public function confirmDeletion(int $id): void
+    {
+        $po = PurchaseOrder::findOrFail($id);
+
+        if (!$po->canBeDeleted()) {
+            session()->flash('error', 'No se puede eliminar esta orden de compra porque tiene una orden de trabajo asociada.');
+            return;
+        }
+
+        $this->deleteId = $id;
+        $this->confirmingDeletion = true;
+    }
+
+    public function delete(): void
+    {
+        $po = PurchaseOrder::findOrFail($this->deleteId);
+
+        if (!$po->canBeDeleted()) {
+            session()->flash('error', 'No se puede eliminar esta orden de compra porque tiene una orden de trabajo asociada.');
+            $this->confirmingDeletion = false;
+            return;
+        }
+
+        $po->delete();
+
+        session()->flash('flash.banner', 'Orden de compra eliminada correctamente.');
+        session()->flash('flash.bannerStyle', 'success');
+
+        $this->confirmingDeletion = false;
+    }
+
+    public function approve(int $id): void
+    {
+        $po = PurchaseOrder::findOrFail($id);
+        $result = $this->purchaseOrderService->approveAndCreateWO($po);
+
+        if ($result['success']) {
+            session()->flash('flash.banner', $result['message']);
+            session()->flash('flash.bannerStyle', 'success');
+        } else {
+            session()->flash('error', $result['message']);
+        }
+    }
+
+    public function reject(int $id): void
+    {
+        $po = PurchaseOrder::findOrFail($id);
+        $this->purchaseOrderService->reject($po, 'Rechazada por el usuario.');
+
+        session()->flash('flash.banner', 'Orden de compra rechazada.');
+        session()->flash('flash.bannerStyle', 'warning');
+    }
+
+    public function render()
+    {
+        $query = PurchaseOrder::with('part')
+            ->search($this->search)
+            ->filterByStatus($this->filterStatus);
+
+        $purchaseOrders = $query->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage);
+
+        return view('livewire.admin.purchase-orders.po-list', [
+            'purchaseOrders' => $purchaseOrders,
+            'statuses' => PurchaseOrder::getStatuses(),
+        ]);
+    }
+}
