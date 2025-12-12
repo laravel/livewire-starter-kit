@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Part;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class PartFactory extends Factory
 {
+    protected $model = Part::class;
+
     /**
      * Define the model's default state.
      *
@@ -16,22 +19,33 @@ class PartFactory extends Factory
      */
     public function definition(): array
     {
-        $number = $this->faker->unique()->word();
-        if (Part::where('number', $number)->exists()) {
-            $number = $this->faker->unique()->word();
-        }
-        $itemNumber -$this->faker->unique()->word();
-        if (Part::where('item_number', $itemNumber)->exists()) {
-            $itemNumber = $this->faker->unique()->word();
-        }
-
         return [
-            'number' => $number,
-            'item_number' => $this->faker->word(),
-            'unit_of_measure' => $this->faker->word(),
-            'active' => $this->faker->boolean(),
+            'number' => 'PART-' . $this->faker->unique()->numerify('######'),
+            'item_number' => 'ITEM-' . $this->faker->unique()->numerify('######'),
+            'unit_of_measure' => $this->faker->randomElement(['PZA', 'KG', 'M', 'L', 'UN']),
+            'active' => $this->faker->boolean(80),
             'description' => $this->faker->sentence(),
-            'notes' => $this->faker->sentence(),
+            'notes' => $this->faker->optional()->sentence(),
         ];
+    }
+
+    /**
+     * Indicate that the part is active.
+     */
+    public function active(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'active' => true,
+        ]);
+    }
+
+    /**
+     * Indicate that the part is inactive.
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'active' => false,
+        ]);
     }
 }

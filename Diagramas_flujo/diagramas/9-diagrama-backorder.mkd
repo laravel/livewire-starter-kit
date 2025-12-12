@@ -1,0 +1,23 @@
+# Diagrama de flujo: BackOrder
+
+**Inicio**
+
+1. **¿WO se terminó?**
+   - **Sí** → **Fin**
+   - **No** → Continuar al paso 2
+
+2. **¿Se mandara Parcial?**
+   - **No** → Se manda la catidad que se produjo → Cierre de WO y se crea log de registro → **Fin**
+   - **Sí** → Continuar al paso 3
+
+3. **Capturar cantidad neta para general Invoice con todos los datos requeridos**
+
+4. **¿Canidad restante se integra al siguiente seman de producción?**
+   - **Sí** → Se carga el numero de parte con la catidad nueva restante del mismo WO → Se asgina la semana siguiente y se integra al schedule → **Fin**
+   - **No** → Continuar al paso 5
+
+5. **Se cierra el WO**
+
+6. **Se guarda registro y tambien el log**
+
+7. **Fin**

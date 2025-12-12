@@ -1,0 +1,18 @@
+# Diagrama de flujo: Recibir PO
+
+**Inicio**
+
+1. **Se recibe un correo con un PDF (Purchase Order) PO**
+
+2. **Revisión de # de parte y que el Unit Price sea el mismo que se tiene registrado**
+
+3. **¿Es el mismo Unit Price ya registrado?**
+   - **Sí**
+     1. Se agregan los datos de la PO (# WO, # Parte, description, Order Quantity, Unit Price, Dude Date, PO Date, Date, CU )
+     2. Se autoriza la PO y se crea un CRUD de POS
+     3. **Fin**
+
+   - **No**
+     1. Se contacta al cliente para hacer el cambio del Unit Price
+     2. Se cancela la PO hasta que se realice el cambio del Unit Price
+     3. **Fin**
