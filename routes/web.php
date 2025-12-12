@@ -11,7 +11,7 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
+/* Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -55,6 +55,6 @@ Route::middleware(['auth'])->group(function () {
     //Rutas para gestionar Shifts
     Route::resource('/shifts', ShiftController::class)->only(['index','create','show','edit']);
 
-});
+});*/
 
 require __DIR__.'/auth.php';

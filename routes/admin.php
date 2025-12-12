@@ -69,4 +69,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/break-times/{breakTime}', \App\Livewire\Admin\BreakTimes\BreakTimeShow::class)->name('break-times.show');
     Route::get('/break-times/{breakTime}/edit', \App\Livewire\Admin\BreakTimes\BreakTimeEdit::class)->name('break-times.edit');
 
+    // gestion de Partes
+    /* Route::get('/parts', \App\Livewire\Admin\Parts\PartList::class)->name('parts.index');
+    Route::get('/parts/create', \App\Livewire\Admin\Parts\PartCreate::class)->name('parts.create');
+    Route::get('/parts/{part}', \App\Livewire\Admin\Parts\PartShow::class)->name('parts.show');
+    Route::get('/parts/{part}/edit', \App\Livewire\Admin\Parts\PartEdit::class)->name('parts.edit'); */
+
 });
