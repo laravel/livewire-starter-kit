@@ -1,0 +1,282 @@
+
+### Part
+- **PK**: Part_ID
+- Number
+- Description
+- Item
+- notes
+- active
+- unit_measurement
+- timestamps()
+- Index idx_number
+- Index idx_description
+- Index idx_item
+- Index idx_family
+- Index idx_active
+
+### Holidays
+- **PK**: Holiday_ID
+- Name
+- Date
+- Comments
+
+### Statuses_WO
+- **PK**: ID
+- Name
+- Color
+- Comments
+
+### Standars
+- **PK**: ID
+- Name
+- units_per_hour
+- Description
+- Comments
+
+### Production_Standards
+- **PK**: ID
+- **FK**: Part_ID
+- **FK**: Standar_ID
+- Personal_Count
+- Comments
+
+### PO
+- **PK**: PO_ID
+- **FK**: Part_ID
+- Due_Date
+- WO_number
+- Amount
+- Date_Open
+- Comments
+
+## WO
+- **PK**: WO_ID
+- **FK**: PO_ID
+- Sent_Piezes
+- Shedule_Send_Date
+- Sent_Date
+- Opend_Date_WO
+- EQ
+- PR
+- Comments
+- **FK**: Status_id
+
+## Sent_List
+- **PK**: Sent_List_ID
+- Send_Date
+- **FK**: WO_ID
+- **FK**: Status_id
+- Comments
+
+## Lot
+- **PK**: Lot_ID
+- **FK**: WO_ID
+- Number
+- Description
+- Quantity
+- Comments
+
+### Price
+- **PK**: Part_ID
+- Unit_price
+- Product
+- Min_Order_Qty_1_to_999
+- 20_percentage_increase_1000_to_10999
+- 20_percentage_increase_11000_to_99999
+- 20_percentage_increase_100000_to_100
+- Comments
+
+### Instruction_work
+- **PK**: Part_ID
+- **FK**: IW_ID
+- ensamble_instruccion
+- machine_instruccion
+- doc1
+- doc2
+- doc3
+- Comments
+
+
+
+## Production_Capacity
+- **PK**: PC_ID
+- **FK**: Part_ID
+- **FK**: WO_ID
+- Hours_Per_Machine
+- Hours_Per_Person_2
+- Hours_Per_Person_3
+- **FK**: Shift_ID
+- **FK**: Over_Time_ID
+
+## Over_Time
+- **PK**: Over_Time_ID
+- Name
+- Start_Time
+- End_Time
+- Breaktime
+- Employees_Qty
+- Date
+- Comments
+
+## Shift
+- **PK** Shift_ID
+- Number
+- Name
+- Start_Time
+- End_Time
+- Breaktime
+- Comments
+- Active
+- timestamps()
+- Index idx_number_turn
+- Index idx_active
+- Index idx_name
+- **KEY** Field
+
+
+## Employee
+- **PK** Employee
+- Name
+- Last name
+- Position
+- Employee_number
+- Hiring_date
+- Comments
+- Active
+- timestamps()
+- Index idx_name
+- Index idx_employee_number
+- Index idx_active
+
+## Assembly
+- **PK** code
+- part_id
+- stantar_
+- Position
+- Employee_number
+- Hiring_date
+- Comments
+- Active
+- timestamps()
+- Index idx_name
+- Index idx_employee_number
+- Index idx_active
+
+## Production_lot
+- **PK** Lot_number
+- Last name
+- Position
+- Employee_number
+- Hiring_date
+- Comments
+- Active
+- timestamps()
+- Index idx_name
+- Index idx_employee_number
+- Index idx_active
+
+
+## Department
+- **PK**: Department_ID
+- Name
+- codigo
+- Description
+- Active
+- Comments
+- timestamps()
+- Index idx_name
+- Index idx_active
+
+## Area
+- **PK**: Area_ID
+- Name
+- Description
+- Comments
+- Codigo
+- Active
+- **FK**: User_ID
+- **FK**: Department_ID
+
+## Station
+- **PK**: Area_ID
+- Name
+- Description
+- Station_type
+- Codigo
+- Active
+- Maximum_capacity_emp
+- Technical_specs
+- **FK**: User_ID
+- timestamps()
+- Index idx_area
+- Index idx_codigo
+- Index idx_name
+
+## Profile
+- **PK**: Profile_ID
+- Name
+- Description
+- Comments
+- **FK**: User_ID
+- **FK**: Role_ID
+
+## User
+- **PK**: User_ID
+- Name
+- Last_Name
+- Account
+- Email
+- Password
+- Hiring_date
+- Employee_number
+- Active
+- **FK**: Shift_id
+- timestamps()
+
+## Role
+- **PK**: Role_ID
+- Name
+- Description
+
+## Table_Smi_automatic
+- **PK**: TSAutomatic_ID
+- Brand
+- Model
+- S/N
+- Active
+- Name
+- Code
+- Type
+- Number_invoice
+- Asset_number
+- mx_pediment
+- Comments
+- **FK**: Area_ID
+
+## Machine
+- **PK**: Machine_ID
+- Brand
+- Name
+- Model
+- S/N
+- Code
+- Asset_number
+- Mx_pediment
+- Type
+- Active
+- Comments
+- **FK**: Area_ID
+
+## Table
+- **PK**: Table_ID
+- Brand
+- Model
+- S/N
+- Name
+- Code
+- Asset_number
+- Mx_pediment
+- Type
+- Active
+- Comments
+- **FK**: Area_ID

@@ -1,0 +1,45 @@
+# Diagrama de flujo: Shipping List
+
+**Inicio**
+
+1. **Lista de Envíos**
+
+2. **Se creará un archivo de Excel con datos de envío**
+
+3. **Packing slip # (0001, 249)**
+
+4. **Fecha actual**
+
+5. **Work Order**  
+   (WO es WO # del WO original + número consecutivo, ejemplo: 001)
+
+6. **Total de Cajas**
+
+7. **Contar tipos de cajas**
+
+8. **¿Revisión de Empaque?**
+    - **No**
+    - **Agregar notas el porqué**
+    - **Status de Pending**
+    - **Fin**
+
+    - **Sí**
+    - Se agrega el usuario que revisó el empaque -> se continua con paso 9     
+
+9. **Inspeccion Empaque**
+      - **No**
+      - **Agregar notas el porqué**
+      - **Status Pending**
+      - **Fin**
+      - **Si** → Se continua con paso 10 
+
+10. **Se agrega el usuario que realizo la Inspeccion**
+
+11. **¿Revisión CM?**
+    - **No**
+    - **Agregar notas el porqué**
+    - **Status Pending**
+    - **Fin**
+    - **Sí**
+      1. **Crear Shipping List**
+      2. **Fin**

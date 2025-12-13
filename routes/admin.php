@@ -20,9 +20,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Settings
     Route::redirect('settings', 'admin/settings/profile');
-    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
-    Volt::route('settings/password', 'settings.password')->name('settings.password');
-    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+    Volt::route('settings/profile', 'admin.settings.profile')->name('settings.profile');
+    Volt::route('settings/password', 'admin.settings.password')->name('settings.password');
+    Volt::route('settings/appearance', 'admin.settings.appearance')->name('settings.appearance');
 
     // Gestión de usuarios
     Route::get('/users', \App\Livewire\Admin\Users\UserList::class)->name('users.index');
@@ -68,5 +68,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/break-times/create', \App\Livewire\Admin\BreakTimes\BreakTimeCreate::class)->name('break-times.create');
     Route::get('/break-times/{breakTime}', \App\Livewire\Admin\BreakTimes\BreakTimeShow::class)->name('break-times.show');
     Route::get('/break-times/{breakTime}/edit', \App\Livewire\Admin\BreakTimes\BreakTimeEdit::class)->name('break-times.edit');
+
+    // Gestión de estados de Work Orders
+    Route::get('/statuses-wo', \App\Livewire\Admin\StatusesWO\StatusWOList::class)->name('statuses-wo.index');
+    Route::get('/statuses-wo/create', \App\Livewire\Admin\StatusesWO\StatusWOCreate::class)->name('statuses-wo.create');
+    Route::get('/statuses-wo/{statusWO}/edit', \App\Livewire\Admin\StatusesWO\StatusWOEdit::class)->name('statuses-wo.edit');
+
+    // Gestión de precios
+    Route::get('/prices', \App\Livewire\Admin\Prices\PriceList::class)->name('prices.index');
+    Route::get('/prices/create', \App\Livewire\Admin\Prices\PriceCreate::class)->name('prices.create');
+    Route::get('/prices/{price}/edit', \App\Livewire\Admin\Prices\PriceEdit::class)->name('prices.edit');
+
+    // Gestión de partes
+    Route::get('/parts', \App\Livewire\Admin\Parts\PartList::class)->name('parts.index');
+    Route::get('/parts/create', \App\Livewire\Admin\Parts\PartCreate::class)->name('parts.create');
+    Route::get('/parts/{part}', \App\Livewire\Admin\Parts\PartShow::class)->name('parts.show');
+    Route::get('/parts/{part}/edit', \App\Livewire\Admin\Parts\PartEdit::class)->name('parts.edit');
+
+    // Gestión de órdenes de compra (Purchase Orders)
+    Route::get('/purchase-orders', \App\Livewire\Admin\PurchaseOrders\POList::class)->name('purchase-orders.index');
+    Route::get('/purchase-orders/create', \App\Livewire\Admin\PurchaseOrders\POCreate::class)->name('purchase-orders.create');
+    Route::get('/purchase-orders/{purchaseOrder}', \App\Livewire\Admin\PurchaseOrders\POShow::class)->name('purchase-orders.show');
+    Route::get('/purchase-orders/{purchaseOrder}/edit', \App\Livewire\Admin\PurchaseOrders\POEdit::class)->name('purchase-orders.edit');
+
+    // Gestión de Work Orders
+    Route::get('/work-orders', \App\Livewire\Admin\WorkOrders\WOList::class)->name('work-orders.index');
+    Route::get('/work-orders/{workOrder}', \App\Livewire\Admin\WorkOrders\WOShow::class)->name('work-orders.show');
+    Route::get('/work-orders/{workOrder}/edit', \App\Livewire\Admin\WorkOrders\WOEdit::class)->name('work-orders.edit');
 
 });

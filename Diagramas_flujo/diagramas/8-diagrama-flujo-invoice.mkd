@@ -1,0 +1,42 @@
+# Diagrama de flujo: Invoice
+
+**Inicio**
+
+1. **Recibe Shipping List**
+
+2. **Crear Invoice**
+
+3. **Datos generales para Invoice**
+
+4. **Número de Invoice**
+
+5. **Fecha actual**
+
+6. **Packing Slip**
+
+7. **Lista de productos**
+
+8. **Descripción, Item No.**
+
+9. **Fecha actual**
+
+---
+
+10. **¿Empleado o Máquina?**
+    - **Empleado (Sí)**
+      - Empleado = x01
+    - **Máquina (No)**
+      - Máquina = x20
+
+11. **Lot No.**
+
+12. **Total = Quantity × Unit Cost**
+
+13. **Sumar total de Cantidad producida**
+
+14. **Mostrar el total de la factura**
+
+15. **Agregar costos adicionales**  
+    (Machine Maintenance, Administration Fee)
+
+**Fin**
