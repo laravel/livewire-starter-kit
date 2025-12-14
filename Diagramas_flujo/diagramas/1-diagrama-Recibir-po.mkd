@@ -8,9 +8,10 @@
 
 3. **¿Es el mismo Unit Price ya registrado?**
    - **Sí**
-     1. Se agregan los datos de la PO (# WO, # Parte, description, Order Quantity, Unit Price, Dude Date, PO Date, Date, CU )
-     2. Se autoriza la PO y se crea un CRUD de POS
-     3. **Fin**
+     1. Se agregan los datos de la PO (# WO, # Parte, description, Order Quantity, Unit Price, Dude Date, PO Date, Date, CU, Status )
+     2. Se carga un PDF que sera la PO
+     3. Se autoriza la PO y se crea un CRUD de POS si el PO coincide con los precios -> se pasa a la siguiente area donde el PO cargado se tiene que tomar la firma del Gerente y generar el pdf con la firma del gerente y poder consultarlo y descargarlo (Utilizar libreria signature pad js).
+     4. **Fin**
 
    - **No**
      1. Se contacta al cliente para hacer el cambio del Unit Price
