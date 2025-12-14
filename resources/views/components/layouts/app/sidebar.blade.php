@@ -16,9 +16,23 @@
 
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Dashboard')" class="grid">
+<<<<<<< HEAD
                 <flux:navlist.item icon="home" :href="route('admin.dashboard')"
                     :current="request()->routeIs('admin.dashboard')" wire:navigate>{{ __('Dashboard') }}
                 </flux:navlist.item>
+=======
+<<<<<<< HEAD
+                <flux:navlist.item icon="home" :href="route('admin.dashboard')"
+                    :current="request()->routeIs('admin.dashboard')" wire:navigate>{{ __('Dashboard') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="users" :href="route('admin.users.index')"
+                    :current="request()->routeIs('admin.users.*')" wire:navigate>{{ __('Usuarios') }}
+                </flux:navlist.item>
+=======
+                <flux:navlist.item icon="home" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')"
+                    wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+>>>>>>> 02578f8c4622e8ead507e58841fbc4b15aa4b663
+>>>>>>> 91cd5a63e86938bb8ff7c6e4e5590fe0a99e4792
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Órdenes')" class="grid">
@@ -44,8 +58,17 @@
 
             <flux:navlist.group :heading="__('Producción')" class="grid">
                 <flux:navlist.item icon="calendar-days" :href="route('admin.holidays.index')"
+<<<<<<< HEAD
                     :current="request()->routeIs('admin.holidays.*')" wire:navigate>{{ __('Días Festivos') }}
                 </flux:navlist.item>
+=======
+<<<<<<< HEAD
+                    :current="request()->routeIs('admin.holidays.*')" wire:navigate>{{ __('Holidays') }}
+                </flux:navlist.item>
+=======
+                    :current="request()->routeIs('admin.holidays.*')" wire:navigate>{{ __('Días Festivos') }}</flux:navlist.item>
+>>>>>>> 02578f8c4622e8ead507e58841fbc4b15aa4b663
+>>>>>>> 91cd5a63e86938bb8ff7c6e4e5590fe0a99e4792
                 <flux:navlist.item icon="clock" :href="route('admin.shifts.index')"
                     :current="request()->routeIs('admin.shifts.*')" wire:navigate>{{ __('Turnos') }}
                 </flux:navlist.item>
@@ -61,9 +84,20 @@
                 <flux:navlist.item icon="rectangle-group" :href="route('admin.departments.index')"
                     :current="request()->routeIs('admin.departments.*')" wire:navigate>{{ __('Departamentos') }}
                 </flux:navlist.item>
+<<<<<<< HEAD
                 <flux:navlist.item icon="map-pin" :href="route('admin.areas.index')"
                     :current="request()->routeIs('admin.areas.*')" wire:navigate>{{ __('Áreas') }}
                 </flux:navlist.item>
+=======
+<<<<<<< HEAD
+                <flux:navlist.item icon="shield-check" :href="route('admin.areas.index')"
+                    :current="request()->routeIs('admin.areas.*')" wire:navigate>{{ __('Areas') }}
+                </flux:navlist.item>
+=======
+                <flux:navlist.item icon="map-pin" :href="route('admin.areas.index')"
+                    :current="request()->routeIs('admin.areas.*')" wire:navigate>{{ __('Áreas') }}</flux:navlist.item>
+>>>>>>> 02578f8c4622e8ead507e58841fbc4b15aa4b663
+>>>>>>> 91cd5a63e86938bb8ff7c6e4e5590fe0a99e4792
                 <flux:navlist.item icon="shield-check" :href="route('admin.roles.index')"
                     :current="request()->routeIs('admin.roles.*')" wire:navigate>{{ __('Roles') }}
                 </flux:navlist.item>
