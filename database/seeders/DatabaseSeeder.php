@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             StatusWOSeeder::class,
             WorkOrderTestSeeder::class,
+            StandardSeeder::class,
         ]);
     }
 }

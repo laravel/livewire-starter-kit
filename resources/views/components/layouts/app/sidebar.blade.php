@@ -40,6 +40,9 @@
                 <flux:navlist.item icon="currency-dollar" :href="route('admin.prices.index')"
                     :current="request()->routeIs('admin.prices.*')" wire:navigate>{{ __('Precios') }}
                 </flux:navlist.item>
+                <flux:navlist.item icon="chart-bar" :href="route('admin.standards.index')"
+                    :current="request()->routeIs('admin.standards.*')" wire:navigate>{{ __('Estándares') }}
+                </flux:navlist.item>
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Producción')" class="grid">

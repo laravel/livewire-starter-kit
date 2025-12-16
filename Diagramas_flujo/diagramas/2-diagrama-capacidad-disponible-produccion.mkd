@@ -17,6 +17,7 @@
 7. **Agregar número de PO y modalidad de ensamble**
 
 8. **Dividir la cantidad de WO entre el estándar**
+    - Estandar esta ligado a numero de parte y item de produccion (De pendiendo el numero de Item es el si se va a maquina o a semiautoamtica mesa o mesa de trabajo)
 
 9. **Mostrar resultado de horas necesarias por producto**
 

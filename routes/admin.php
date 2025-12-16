@@ -96,10 +96,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/work-orders/{workOrder}', \App\Livewire\Admin\WorkOrders\WOShow::class)->name('work-orders.show');
     Route::get('/work-orders/{workOrder}/edit', \App\Livewire\Admin\WorkOrders\WOEdit::class)->name('work-orders.edit');
 
-    // gestion de Partes
-    /* Route::get('/parts', \App\Livewire\Admin\Parts\PartList::class)->name('parts.index');
-    Route::get('/parts/create', \App\Livewire\Admin\Parts\PartCreate::class)->name('parts.create');
-    Route::get('/parts/{part}', \App\Livewire\Admin\Parts\PartShow::class)->name('parts.show');
-    Route::get('/parts/{part}/edit', \App\Livewire\Admin\Parts\PartEdit::class)->name('parts.edit'); */
+    // Gestion de Standards
+    Route::get('/standards', \App\Livewire\Admin\Standards\StandardList::class)->name('standards.index');
+    Route::get('/standards/create', \App\Livewire\Admin\Standards\StandardCreate::class)->name('standards.create');
+    Route::get('/standards/{standard}', \App\Livewire\Admin\Standards\StandardShow::class)->name('standards.show');
+    Route::get('/standards/{standard}/edit', \App\Livewire\Admin\Standards\StandardEdit::class)->name('standards.edit');
 
 });
