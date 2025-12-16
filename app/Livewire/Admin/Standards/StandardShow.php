@@ -39,11 +39,6 @@ class StandardShow extends Component
 
     public function delete(): void
     {
-        if (!$this->standard->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar este estándar porque tiene órdenes de compra asociadas.');
-            return;
-        }
-
         $this->standard->delete();
 
         session()->flash('flash.banner', 'Estándar eliminado correctamente.');

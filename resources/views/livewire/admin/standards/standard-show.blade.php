@@ -163,21 +163,13 @@
                                 @endif
                             </button>
 
-                            @if($standard->canBeDeleted())
-                                <button wire:click="delete" wire:confirm="¿Está seguro de que desea eliminar este estándar?" type="button"
-                                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                    Eliminar
-                                </button>
-                            @else
-                                <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                                    <p class="text-xs text-yellow-700 dark:text-yellow-300">
-                                        Este estándar no puede eliminarse porque tiene órdenes de compra asociadas.
-                                    </p>
-                                </div>
-                            @endif
+                            <button wire:click="delete" wire:confirm="¿Está seguro de que desea eliminar este estándar? Esta acción no se puede deshacer." type="button"
+                                class="w-full inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Eliminar
+                            </button>
                         </div>
                     </div>
                 </div>

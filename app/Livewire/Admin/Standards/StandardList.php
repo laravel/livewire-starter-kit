@@ -41,13 +41,6 @@ class StandardList extends Component
 
     public function confirmDeletion(int $id): void
     {
-        $standard = Standard::findOrFail($id);
-
-        if (!$standard->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar este estándar porque tiene órdenes de compra asociadas.');
-            return;
-        }
-
         $this->deleteId = $id;
         $this->confirmingDeletion = true;
     }
@@ -55,13 +48,6 @@ class StandardList extends Component
     public function delete(): void
     {
         $standard = Standard::findOrFail($this->deleteId);
-
-        if (!$standard->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar este estándar porque tiene órdenes de compra asociadas.');
-            $this->confirmingDeletion = false;
-            return;
-        }
-
         $standard->delete();
 
         session()->flash('flash.banner', 'Estándar eliminado correctamente.');

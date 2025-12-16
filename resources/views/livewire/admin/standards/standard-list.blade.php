@@ -223,11 +223,9 @@
                                             <a href="{{ route('admin.standards.edit', $standard) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" wire:navigate>
                                                 Editar
                                             </a>
-                                            @if($standard->canBeDeleted())
-                                                <button wire:click="confirmDeletion({{ $standard->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                                    Eliminar
-                                                </button>
-                                            @endif
+                                            <button wire:click="confirmDeletion({{ $standard->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                                Eliminar
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>

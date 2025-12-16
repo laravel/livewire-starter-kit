@@ -109,10 +109,11 @@ class Standard extends Model
 
     /**
      * Check if this standard can be deleted.
+     * Standards can always be deleted (soft delete maintains history).
      */
     public function canBeDeleted(): bool
     {
-        return !$this->part->purchaseOrders()->exists();
+        return true;
     }
 
     /**
