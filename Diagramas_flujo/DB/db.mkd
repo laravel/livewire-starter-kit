@@ -28,10 +28,74 @@
 
 ### Standars
 - **PK**: ID
-- Name
-- units_per_hour
+- **FK**:part_id
+- **FK**:work_table_id
+- **FK**:semi_auto_work_table_id
+- **FK**:machine_id
+- persons_1
+- persons_2
+- persons_3
+- effective_date
+- active
 - Description
-- Comments
+- Index work_table_id
+- Index semi_auto_work_table_id
+- Index machine_id
+- Index part_id
+- Index active
+- Index efective_date
+
+## WorkTable
+- **PK**: ID
+- **FK**: standard_id
+- **FK**: production_status_id
+- name
+- brand
+- model
+- s_n
+- asset_number
+- active
+- number_employees
+- description
+- Index statandar_di
+- Index production_status_id
+- Index name
+- Index active
+
+## SemiAutoWorkTable
+- **PK**: ID
+- **FK**: standard_id
+- **FK**: production_status_id
+- name
+- brand
+- model
+- s_n
+- asset_number
+- active
+- number_empleyees
+- description
+- Index statandar_di
+- Index production_status_id
+- Index name
+- Index active
+
+
+## Machine
+- **PK**: ID
+- **FK**: standard_id
+- **FK**: production_status_id
+- name
+- brand
+- model
+- s_n
+- asset_number
+- active
+- number_employees
+- description
+- Index statandar_di
+- Index production_status_id
+- Index name
+- Index active
 
 ### Production_Standards
 - **PK**: ID
