@@ -74,17 +74,24 @@
                             </dd>
                         </div>
 
-                        @if($standard->area)
+                        @if($standard->workTable)
                             <div>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Área</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ $standard->area->name }}</dd>
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Mesa de Trabajo</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ $standard->workTable->number }}</dd>
                             </div>
                         @endif
 
-                        @if($standard->department)
+                        @if($standard->semiAutoWorkTable)
                             <div>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Departamento</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ $standard->department->name }}</dd>
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Mesa Semi-Automática</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ $standard->semiAutoWorkTable->number }}</dd>
+                            </div>
+                        @endif
+
+                        @if($standard->machine)
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Máquina</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ $standard->machine->name }}</dd>
                             </div>
                         @endif
 
@@ -147,28 +154,31 @@
                     <div class="p-6">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Acciones</h2>
 
-                        <div class="space-y-2">
-                            <button wire:click="toggleActive" type="button"
-                                class="w-full inline-flex items-center justify-center px-4 py-2 bg-{{ $standard->active ? 'red' : 'green' }}-600 hover:bg-{{ $standard->active ? 'red' : 'green' }}-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
-                                @if($standard->active)
+                        <div class="space-y-3">
+                            @if($standard->active)
+                                <button wire:click="toggleActive" type="button"
+                                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                    Desactivar
-                                @else
+                                    Desactivar Estándar
+                                </button>
+                            @else
+                                <button wire:click="toggleActive" type="button"
+                                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                    Activar
-                                @endif
-                            </button>
+                                    Activar Estándar
+                                </button>
+                            @endif
 
                             <button wire:click="delete" wire:confirm="¿Está seguro de que desea eliminar este estándar? Esta acción no se puede deshacer." type="button"
-                                class="w-full inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                class="w-full inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
-                                Eliminar
+                                Eliminar Estándar
                             </button>
                         </div>
                     </div>

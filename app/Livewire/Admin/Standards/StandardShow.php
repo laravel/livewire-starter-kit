@@ -12,7 +12,7 @@ class StandardShow extends Component
 
     public function mount(Standard $standard): void
     {
-        $this->standard = $standard->load(['part', 'area', 'department']);
+        $this->standard = $standard->load(['part', 'workTable', 'semiAutoWorkTable', 'machine']);
         $this->calculateInfo();
     }
 
@@ -33,7 +33,7 @@ class StandardShow extends Component
         session()->flash('flash.banner', "Estándar {$status} correctamente.");
         session()->flash('flash.bannerStyle', 'success');
 
-        $this->standard = $this->standard->fresh(['part', 'area', 'department']);
+        $this->standard = $this->standard->fresh(['part', 'workTable', 'semiAutoWorkTable', 'machine']);
         $this->calculateInfo();
     }
 

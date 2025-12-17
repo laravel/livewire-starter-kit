@@ -4,9 +4,9 @@
         <div class="mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Estándares</h1>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Gestión de Estándares</h1>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Gestión de Estándares de Producción
+                        Administra los estándares de producción
                     </p>
                 </div>
                 <div class="mt-4 sm:mt-0">
@@ -92,20 +92,20 @@
         <!-- Search and Filters -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
             <div class="p-6">
-                <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                <div class="flex flex-col sm:flex-row gap-4">
                     <div class="flex-1">
                         <input
                             wire:model.live.debounce.300ms="search"
                             type="text"
-                            placeholder="Buscar por parte, área, departamento o descripción..."
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            placeholder="Buscar estándares..."
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                     </div>
 
                     <div>
                         <select
                             wire:model.live="filterStatus"
-                            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                             <option value="all">Todos los estados</option>
                             <option value="active">Activos</option>
@@ -116,7 +116,7 @@
                     <div>
                         <select
                             wire:model.live="perPage"
-                            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                             <option value="5">5 por página</option>
                             <option value="10">10 por página</option>
@@ -126,125 +126,154 @@
                     </div>
                 </div>
 
-                @if (session('error'))
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                        <strong class="font-bold">Error!</strong>
-                        <span class="block sm:inline">{{ session('error') }}</span>
-                    </div>
-                @endif
+            </div>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Parte
-                                </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Área
-                                </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Departamento
-                                </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Personas
-                                </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('effective_date')">
-                                    Fecha Efectiva
-                                    @if ($sortField === 'effective_date')
-                                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+            @if (session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">Error!</strong>
+                    <span class="block sm:inline">{{ session('error') }}</span>
+                </div>
+            @endif
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-900">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Parte
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Mesa de Trabajo
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Mesa Semi-Auto
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Máquina
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Personas
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('effective_date')">
+                                Fecha Efectiva
+                                @if ($sortField === 'effective_date')
+                                    @if ($sortDirection === 'asc')
+                                        <span>↑</span>
+                                    @else
+                                        <span>↓</span>
                                     @endif
-                                </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('active')">
-                                    Estado
-                                    @if ($sortField === 'active')
-                                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('active')">
+                                Estado
+                                @if ($sortField === 'active')
+                                    @if ($sortDirection === 'asc')
+                                        <span>↑</span>
+                                    @else
+                                        <span>↓</span>
                                     @endif
-                                </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Acciones
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                            @foreach($standards as $standard)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ $standard->part->number }}
+                                @endif
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Acciones
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                        @foreach($standards as $standard)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ $standard->part->number }}
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ Str::limit($standard->part->description, 30) }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900 dark:text-white">
+                                        {{ $standard->workTable?->number ?? 'N/A' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900 dark:text-white">
+                                        {{ $standard->semiAutoWorkTable?->number ?? 'N/A' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900 dark:text-white">
+                                        {{ $standard->machine?->name ?? 'N/A' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900 dark:text-white">
+                                        <div class="flex flex-col space-y-1">
+                                            <span class="text-xs">1: {{ $standard->persons_1 ?? 'N/A' }}</span>
+                                            <span class="text-xs">2: {{ $standard->persons_2 ?? 'N/A' }}</span>
+                                            <span class="text-xs">3: {{ $standard->persons_3 ?? 'N/A' }}</span>
                                         </div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ Str::limit($standard->part->description, 30) }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900 dark:text-white">
-                                            {{ $standard->area?->name ?? 'N/A' }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900 dark:text-white">
-                                            {{ $standard->department?->name ?? 'N/A' }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900 dark:text-white">
-                                            <div class="flex flex-col space-y-1">
-                                                <span class="text-xs">1: {{ $standard->persons_1 ?? 'N/A' }}</span>
-                                                <span class="text-xs">2: {{ $standard->persons_2 ?? 'N/A' }}</span>
-                                                <span class="text-xs">3: {{ $standard->persons_3 ?? 'N/A' }}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900 dark:text-white">
-                                            {{ $standard->effective_date ? $standard->effective_date->format('d/m/Y') : 'N/A' }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900 dark:text-white">
+                                        {{ $standard->effective_date ? $standard->effective_date->format('d/m/Y') : 'N/A' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($standard->active)
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                            Activo
+                                        </span>
+                                    @else
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                            Inactivo
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-3">
+                                        <a href="{{ route('admin.standards.show', $standard) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" wire:navigate>
+                                            Ver
+                                        </a>
                                         @if($standard->active)
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                                Activo
-                                            </span>
+                                            <button wire:click="toggleActive({{ $standard->id }})" class="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300">
+                                                Desactivar
+                                            </button>
                                         @else
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                                                Inactivo
-                                            </span>
+                                            <button wire:click="toggleActive({{ $standard->id }})" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
+                                                Activar
+                                            </button>
                                         @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex space-x-2">
-                                            <a href="{{ route('admin.standards.show', $standard) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" wire:navigate>
-                                                Ver
-                                            </a>
-                                            <button wire:click="toggleActive({{ $standard->id }})" class="text-{{ $standard->active ? 'red' : 'green' }}-600 hover:text-{{ $standard->active ? 'red' : 'green' }}-900 dark:text-{{ $standard->active ? 'red' : 'green' }}-400 dark:hover:text-{{ $standard->active ? 'red' : 'green' }}-300">
-                                                {{ $standard->active ? 'Desactivar' : 'Activar' }}
-                                            </button>
-                                            <a href="{{ route('admin.standards.edit', $standard) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" wire:navigate>
-                                                Editar
-                                            </a>
-                                            <button wire:click="confirmDeletion({{ $standard->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                                Eliminar
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
+                                        <a href="{{ route('admin.standards.edit', $standard) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" wire:navigate>
+                                            Editar
+                                        </a>
+                                        <button wire:click="confirmDeletion({{ $standard->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
 
-                            @if($standards->count() === 0)
-                                <tr>
-                                    <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                                        No se encontraron estándares.
-                                    </td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                </div>
+                        @if($standards->count() === 0)
+                            <tr>
+                                <td colspan="8" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <p class="mt-2">No se encontraron estándares.</p>
+                                </td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
 
-                <div class="mt-4">
-                    {{ $standards->links() }}
-                </div>
+            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                {{ $standards->links() }}
             </div>
         </div>
 

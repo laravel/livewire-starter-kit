@@ -26,8 +26,9 @@ class Standard extends Model
         'active',
         'description',
         'part_id',
-        'area_id',
-        'department_id'
+        'work_table_id',
+        'semi_auto_work_table_id',
+        'machine_id'
     ];
 
     protected $casts = [
@@ -38,8 +39,9 @@ class Standard extends Model
         'active' => 'boolean',
         'description' => 'string',
         'part_id' => 'integer',
-        'area_id' => 'integer',
-        'department_id' => 'integer'
+        'work_table_id' => 'integer',
+        'semi_auto_work_table_id' => 'integer',
+        'machine_id' => 'integer'
     ];
 
     /**
@@ -51,19 +53,27 @@ class Standard extends Model
     }
 
     /**
-     * Get the area that owns the standard.
+     * Get the work table that owns the standard.
      */
-    public function area()
+    public function workTable()
     {
-        return $this->belongsTo(Area::class);
+        return $this->belongsTo(Table::class, 'work_table_id');
     }
 
     /**
-     * Get the department that owns the standard.
+     * Get the semi-automatic work table that owns the standard.
      */
-    public function department()
+    public function semiAutoWorkTable()
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Semi_Automatic::class, 'semi_auto_work_table_id');
+    }
+
+    /**
+     * Get the machine that owns the standard.
+     */
+    public function machine()
+    {
+        return $this->belongsTo(Machine::class);
     }
 
     /**
@@ -98,11 +108,16 @@ class Standard extends Model
                             ->orWhere('item_number', 'like', "%{$search}%")
                             ->orWhere('description', 'like', "%{$search}%");
               })
-              ->orWhereHas('area', function ($areaQuery) use ($search) {
-                  $areaQuery->where('name', 'like', "%{$search}%");
+              ->orWhereHas('workTable', function ($tableQuery) use ($search) {
+                  $tableQuery->where('number', 'like', "%{$search}%");
               })
-              ->orWhereHas('department', function ($departmentQuery) use ($search) {
-                  $departmentQuery->where('name', 'like', "%{$search}%");
+              ->orWhereHas('semiAutoWorkTable', function ($semiAutoQuery) use ($search) {
+                  $semiAutoQuery->where('number', 'like', "%{$search}%");
+              })
+              ->orWhereHas('machine', function ($machineQuery) use ($search) {
+                  $machineQuery->where('name', 'like', "%{$search}%")
+                               ->orWhere('brand', 'like', "%{$search}%")
+                               ->orWhere('model', 'like', "%{$search}%");
               });
         });
     }

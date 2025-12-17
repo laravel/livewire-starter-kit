@@ -45,36 +45,52 @@
                         @enderror
                     </div>
 
-                    <!-- Area and Department -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Work Stations -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label for="area_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Área
+                            <label for="work_table_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Mesa de Trabajo
                             </label>
-                            <select wire:model="area_id" id="area_id"
+                            <select wire:model="work_table_id" id="work_table_id"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                                <option value="">Seleccione un área</option>
-                                @foreach($areas as $area)
-                                    <option value="{{ $area->id }}">{{ $area->name }}</option>
+                                <option value="">Seleccione una mesa</option>
+                                @foreach($workTables as $table)
+                                    <option value="{{ $table->id }}">{{ $table->number }}</option>
                                 @endforeach
                             </select>
-                            @error('area_id')
+                            @error('work_table_id')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="department_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Departamento
+                            <label for="semi_auto_work_table_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Mesa Semi-Automática
                             </label>
-                            <select wire:model="department_id" id="department_id"
+                            <select wire:model="semi_auto_work_table_id" id="semi_auto_work_table_id"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
-                                <option value="">Seleccione un departamento</option>
-                                @foreach($departments as $department)
-                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                <option value="">Seleccione una mesa semi-auto</option>
+                                @foreach($semiAutoWorkTables as $semiAuto)
+                                    <option value="{{ $semiAuto->id }}">{{ $semiAuto->number }}</option>
                                 @endforeach
                             </select>
-                            @error('department_id')
+                            @error('semi_auto_work_table_id')
+                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="machine_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Máquina
+                            </label>
+                            <select wire:model="machine_id" id="machine_id"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                <option value="">Seleccione una máquina</option>
+                                @foreach($machines as $machine)
+                                    <option value="{{ $machine->id }}">{{ $machine->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('machine_id')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>

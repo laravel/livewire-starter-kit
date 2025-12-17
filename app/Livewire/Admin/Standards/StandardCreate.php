@@ -2,17 +2,19 @@
 
 namespace App\Livewire\Admin\Standards;
 
-use App\Models\Area;
-use App\Models\Department;
+use App\Models\Machine;
 use App\Models\Part;
+use App\Models\Semi_Automatic;
 use App\Models\Standard;
+use App\Models\Table;
 use Livewire\Component;
 
 class StandardCreate extends Component
 {
     public ?int $part_id = null;
-    public ?int $area_id = null;
-    public ?int $department_id = null;
+    public ?int $work_table_id = null;
+    public ?int $semi_auto_work_table_id = null;
+    public ?int $machine_id = null;
     public string $persons_1 = '';
     public string $persons_2 = '';
     public string $persons_3 = '';
@@ -29,8 +31,9 @@ class StandardCreate extends Component
     {
         return [
             'part_id' => 'required|exists:parts,id',
-            'area_id' => 'nullable|exists:areas,id',
-            'department_id' => 'nullable|exists:departments,id',
+            'work_table_id' => 'nullable|exists:tables,id',
+            'semi_auto_work_table_id' => 'nullable|exists:semi_automatics,id',
+            'machine_id' => 'nullable|exists:machines,id',
             'persons_1' => 'nullable|integer|min:1',
             'persons_2' => 'nullable|integer|min:1',
             'persons_3' => 'nullable|integer|min:1',
@@ -45,8 +48,9 @@ class StandardCreate extends Component
         return [
             'part_id.required' => 'Debe seleccionar una parte.',
             'part_id.exists' => 'La parte seleccionada no existe.',
-            'area_id.exists' => 'El área seleccionada no existe.',
-            'department_id.exists' => 'El departamento seleccionado no existe.',
+            'work_table_id.exists' => 'La mesa de trabajo seleccionada no existe.',
+            'semi_auto_work_table_id.exists' => 'La mesa semi-automática seleccionada no existe.',
+            'machine_id.exists' => 'La máquina seleccionada no existe.',
             'persons_1.integer' => 'El campo Personas 1 debe ser un número entero.',
             'persons_1.min' => 'El campo Personas 1 debe ser al menos 1.',
             'persons_2.integer' => 'El campo Personas 2 debe ser un número entero.',
@@ -63,8 +67,9 @@ class StandardCreate extends Component
 
         Standard::create([
             'part_id' => $this->part_id,
-            'area_id' => $this->area_id ?: null,
-            'department_id' => $this->department_id ?: null,
+            'work_table_id' => $this->work_table_id ?: null,
+            'semi_auto_work_table_id' => $this->semi_auto_work_table_id ?: null,
+            'machine_id' => $this->machine_id ?: null,
             'persons_1' => $this->persons_1 ?: null,
             'persons_2' => $this->persons_2 ?: null,
             'persons_3' => $this->persons_3 ?: null,
@@ -83,8 +88,9 @@ class StandardCreate extends Component
     {
         return view('livewire.admin.standards.standard-create', [
             'parts' => Part::orderBy('number')->get(),
-            'areas' => Area::orderBy('name')->get(),
-            'departments' => Department::orderBy('name')->get(),
+            'workTables' => Table::active()->orderBy('number')->get(),
+            'semiAutoWorkTables' => Semi_Automatic::active()->orderBy('number')->get(),
+            'machines' => Machine::active()->orderBy('name')->get(),
         ]);
     }
 }

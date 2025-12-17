@@ -69,7 +69,7 @@ class StandardList extends Component
 
     public function render()
     {
-        $query = Standard::with(['part', 'area', 'department'])
+        $query = Standard::with(['part', 'workTable', 'semiAutoWorkTable', 'machine'])
             ->search($this->search);
 
         // Apply status filter

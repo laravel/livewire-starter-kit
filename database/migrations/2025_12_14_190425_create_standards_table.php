@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('part_id')->constrained()->onDelete('cascade');
-            $table->foreignId('work_table_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('semi_auto_work_table_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('machine_id')->nullabkle()->constrained()->onDelete('set null');
+            $table->foreignId('work_table_id')->nullable()->constrained('tables')->onDelete('set null');
+            $table->foreignId('semi_auto_work_table_id')->nullable()->constrained('semi_automatics')->onDelete('set null');
+            $table->foreignId('machine_id')->nullable()->constrained()->onDelete('set null');
 
             $table->integer('persons_1')->nullable();
             $table->integer('persons_2')->nullable();
