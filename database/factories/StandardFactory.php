@@ -26,9 +26,9 @@ class StandardFactory extends Factory
             'effective_date' => $this->faker->dateTimeBetween('-1 year', '+1 month'),
             'active' => $this->faker->boolean(80),
             'description' => $this->faker->optional()->sentence(),
-            'part_id' => Part::inRandomOrder()->first()?->id ?? Part::factory(),
-            'area_id' => Area::inRandomOrder()->first()?->id,
-            'department_id' => Department::inRandomOrder()->first()?->id,
+            'work_table_id' => random_int(1, 10),
+            'semi_auto_work_table_id' => random_int(1, 10),
+            'machine_id' => random_int(1, 10),
         ];
     }
 }
