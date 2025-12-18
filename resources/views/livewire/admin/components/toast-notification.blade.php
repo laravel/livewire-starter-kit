@@ -25,15 +25,17 @@ $hideToast = function () {
 
 <div>
     @script
+    <script>
     document.addEventListener('livewire:initialized', () => {
-        @this.on('toast', (message, type = 'info') => {
-            @this.showToast(message, type);
+        $wire.on('toast', (message, type = 'info') => {
+            $wire.showToast(message, type);
         });
         
-        @this.on('setTimeout', ({handler, timeout}) => {
-            setTimeout(() => @this.$wire[handler](), timeout);
+        $wire.on('setTimeout', ({handler, timeout}) => {
+            setTimeout(() => $wire[handler](), timeout);
         });
     });
+    </script>
     @endscript
 
     <div
