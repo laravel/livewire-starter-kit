@@ -172,6 +172,76 @@
             </div>
         </div>
 
+        <!-- Document Signatures -->
+        @if($workOrder->purchaseOrder->pdf_path)
+        <div class="mt-6 bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Firmas del Documento</h2>
+                    <button wire:click="openSignatureModal"
+                        class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                        Firmar Documento
+                    </button>
+                </div>
+                
+                @if($signatures->count() > 0)
+                    <div class="space-y-4">
+                        @foreach($signatures as $signature)
+                            <div class="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                                <div class="flex-shrink-0">
+                                    <img src="{{ $signature->signature_url }}" alt="Firma de {{ $signature->user->name }}" 
+                                        class="h-20 w-32 object-contain border border-gray-300 dark:border-gray-600 rounded bg-white">
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ $signature->user->name }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $signature->signed_at->format('d/m/Y H:i') }}
+                                    </p>
+                                    @if($signature->ip_address)
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                            IP: {{ $signature->ip_address }}
+                                        </p>
+                                    @endif
+                                    @if($signature->signed_pdf_path)
+                                        <a href="{{ Storage::url($signature->signed_pdf_path) }}" target="_blank"
+                                            class="mt-2 inline-flex items-center text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            Descargar PDF Firmado
+                                        </a>
+                                    @endif
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Firmado
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-8">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            Este documento aún no ha sido firmado
+                        </p>
+                    </div>
+                @endif
+            </div>
+        </div>
+        @endif
+
         <!-- Status Log -->
         <div class="mt-6 bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="p-6">
@@ -228,4 +298,7 @@
             </div>
         </div>
     </div>
+
+    <!-- Signature Modal Component -->
+    <livewire:admin.signature-modal @signature-completed="refreshWorkOrder" />
 </div>

@@ -143,7 +143,7 @@
                     <!-- PDF Upload -->
                     <div>
                         <label for="pdf_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Archivo PDF de la PO
+                            Archivo PDF de la PO <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
                             <input wire:model="pdf_file" id="pdf_file" type="file" accept=".pdf"
