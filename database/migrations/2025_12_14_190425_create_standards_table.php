@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('standards', function (Blueprint $table) {
             $table->id();
-
+/*
             $table->foreignId('part_id')->constrained()->onDelete('cascade');
             $table->foreignId('work_table_id')->nullable()->constrained('tables')->onDelete('set null');
             $table->foreignId('semi_auto_work_table_id')->nullable()->constrained('semi_automatics')->onDelete('set null');
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->text('description')->nullable();
 
             $table->softDeletes();
-            $table->timestamps();
+            
 
             $table->index(['work_table_id', 'active'], 'standards_search_index');
             $table->index(['semi_auto_work_table_id', 'active'], 'standards_semi_auto_active_index');
@@ -35,6 +35,8 @@ return new class extends Migration
             $table->index('active', 'standards_active_index');
             $table->index('machine_id', 'standards_machine_index');
             $table->index('part_id', 'standards_part_index');
+            */
+            $table->timestamps();
         });
     }
 
