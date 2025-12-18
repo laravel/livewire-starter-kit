@@ -50,7 +50,7 @@ class POCreate extends Component
             'quantity' => 'required|integer|min:1',
             'unit_price' => 'required|numeric|min:0',
             'comments' => 'nullable|string',
-            'pdf_file' => 'nullable|file|mimes:pdf|max:10240',
+            'pdf_file' => 'required|file|mimes:pdf|max:10240',
         ];
     }
 
@@ -68,6 +68,7 @@ class POCreate extends Component
             'quantity.min' => 'La cantidad debe ser al menos 1.',
             'unit_price.required' => 'El precio unitario es obligatorio.',
             'unit_price.min' => 'El precio unitario debe ser mayor o igual a 0.',
+            'pdf_file.required' => 'El documento PDF es obligatorio.',
             'pdf_file.mimes' => 'El archivo debe ser un PDF.',
             'pdf_file.max' => 'El archivo no debe superar los 10MB.',
         ];

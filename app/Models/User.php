@@ -70,6 +70,22 @@ class User extends Authenticatable
         return $this->hasMany(Area::class);
     }
 
+    /**
+     * Get the user's saved signature.
+     */
+    public function signature()
+    {
+        return $this->hasOne(UserSignature::class);
+    }
+
+    /**
+     * Check if the user has a saved signature.
+     */
+    public function hasSavedSignature(): bool
+    {
+        return $this->signature()->exists();
+    }
+
 
     /**
      * Iniciales del usuario
