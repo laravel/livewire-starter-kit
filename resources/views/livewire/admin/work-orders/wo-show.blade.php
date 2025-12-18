@@ -58,6 +58,13 @@
                             </dd>
                         </div>
                         
+                        @if($workOrder->purchaseOrder->wo)
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">WO</dt>
+                            <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ $workOrder->purchaseOrder->wo }}</dd>
+                        </div>
+                        @endif
+                        
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Parte</dt>
                             <dd class="mt-1 text-sm text-gray-900 dark:text-white">

@@ -7,7 +7,6 @@ use App\Models\PurchaseOrder;
 use App\Models\User;
 use App\Models\UserSignature;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -138,25 +137,20 @@ class SignatureService
                 
                 // Add signature on last page
                 if ($pageNo === $pageCount) {
-                    // Signature dimensions - larger size
-                    $signatureWidth = 80;  // Increased from 40
-                    $signatureHeight = 40; // Increased from 20
+                    // Add signature image (bottom right corner)
+                    $signatureWidth = 40;
+                    $signatureHeight = 20;
+                    $x = $size['width'] - $signatureWidth - 10;
+                    $y = $size['height'] - $signatureHeight - 10;
                     
-                    // Center horizontally, position in lower third of page
-                    $x = ($size['width'] - $signatureWidth) / 2;
-                    $y = $size['height'] - $signatureHeight - 60; // More space from bottom
-                    
-                    // Add signature image (centered)
                     $pdf->Image($signatureImagePath, $x, $y, $signatureWidth, $signatureHeight, 'PNG');
                     
-                    // Add signature info text below the signature
-                    $pdf->SetFont('Arial', 'B', 10); // Bold and larger font
-                    $pdf->SetXY($x, $y + $signatureHeight + 5);
-                    $pdf->Cell($signatureWidth, 5, 'Firmado por: ' . $user->name, 0, 1, 'C');
-                    
-                    $pdf->SetFont('Arial', '', 9); // Regular font for date
+                    // Add signature info text
+                    $pdf->SetFont('Arial', '', 8);
+                    $pdf->SetXY($x, $y + $signatureHeight + 2);
+                    $pdf->Cell($signatureWidth, 4, 'Firmado por: ' . $user->name, 0, 1, 'C');
                     $pdf->SetX($x);
-                    $pdf->Cell($signatureWidth, 5, now()->format('d/m/Y H:i'), 0, 0, 'C');
+                    $pdf->Cell($signatureWidth, 4, now()->format('d/m/Y H:i'), 0, 0, 'C');
                 }
             }
             

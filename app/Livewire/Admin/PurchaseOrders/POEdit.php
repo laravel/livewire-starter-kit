@@ -15,6 +15,7 @@ class POEdit extends Component
 
     public PurchaseOrder $purchaseOrder;
     public string $po_number = '';
+    public string $wo = '';
     public ?int $part_id = null;
     public string $po_date = '';
     public string $due_date = '';
@@ -39,6 +40,7 @@ class POEdit extends Component
     {
         $this->purchaseOrder = $purchaseOrder;
         $this->po_number = $purchaseOrder->po_number;
+        $this->wo = $purchaseOrder->wo ?? '';
         $this->part_id = $purchaseOrder->part_id;
         $this->po_date = $purchaseOrder->po_date->format('Y-m-d');
         $this->due_date = $purchaseOrder->due_date->format('Y-m-d');
@@ -53,6 +55,7 @@ class POEdit extends Component
     {
         return [
             'po_number' => 'required|string|max:255|unique:purchase_orders,po_number,' . $this->purchaseOrder->id,
+            'wo' => 'nullable|string|max:255',
             'part_id' => 'required|exists:parts,id',
             'po_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:po_date',
@@ -147,6 +150,7 @@ class POEdit extends Component
 
         $this->purchaseOrder->update([
             'po_number' => $this->po_number,
+            'wo' => $this->wo ?: null,
             'part_id' => $this->part_id,
             'po_date' => $this->po_date,
             'due_date' => $this->due_date,
