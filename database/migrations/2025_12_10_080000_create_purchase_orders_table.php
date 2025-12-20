@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('purchase_orders', function (Blueprint $table) {
             $table->id();
             $table->string('po_number')->unique();
+            $table->string('wo')->nullable();
             $table->foreignId('part_id')->constrained()->onDelete('restrict');
             $table->date('po_date');
             $table->date('due_date');

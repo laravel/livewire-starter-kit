@@ -14,6 +14,7 @@ class POCreate extends Component
     use WithFileUploads;
 
     public string $po_number = '';
+    public string $wo = '';
     public ?int $part_id = null;
     public string $po_date = '';
     public string $due_date = '';
@@ -44,6 +45,7 @@ class POCreate extends Component
     {
         return [
             'po_number' => 'required|string|max:255|unique:purchase_orders,po_number',
+            'wo' => 'nullable|string|max:255',
             'part_id' => 'required|exists:parts,id',
             'po_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:po_date',
@@ -135,6 +137,7 @@ class POCreate extends Component
 
         $purchaseOrder = PurchaseOrder::create([
             'po_number' => $this->po_number,
+            'wo' => $this->wo ?: null,
             'part_id' => $this->part_id,
             'po_date' => $this->po_date,
             'due_date' => $this->due_date,

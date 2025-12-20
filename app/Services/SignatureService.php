@@ -142,11 +142,11 @@ class SignatureService
                     $signatureWidth = 80;  // Increased from 40
                     $signatureHeight = 40; // Increased from 20
                     
-                    // Center horizontally, position in lower third of page
+                    // Center both horizontally AND vertically in the page
                     $x = ($size['width'] - $signatureWidth) / 2;
-                    $y = $size['height'] - $signatureHeight - 60; // More space from bottom
+                    $y = ($size['height'] - $signatureHeight - 20) / 2; // Centered vertically (20 for text space)
                     
-                    // Add signature image (centered)
+                    // Add signature image (centered in the middle of the page)
                     $pdf->Image($signatureImagePath, $x, $y, $signatureWidth, $signatureHeight, 'PNG');
                     
                     // Add signature info text below the signature
