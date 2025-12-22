@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(mv:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(php artisan:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

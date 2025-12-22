@@ -29,8 +29,8 @@
 ### Standars
 - **PK**: ID
 - **FK**:part_id
-- **FK**:work_table_id
-- **FK**:semi_auto_work_table_id
+- **FK**:table_id
+- **FK**:semi_automatics_table_id
 - **FK**:machine_id
 - persons_1
 - persons_2
@@ -38,64 +38,12 @@
 - effective_date
 - active
 - Description
-- Index work_table_id
-- Index semi_auto_work_table_id
+- Index table_id
+- Index semi_automatics_table_id
 - Index machine_id
 - Index part_id
 - Index active
 - Index efective_date
-
-## WorkTable
-- **PK**: ID
-- **FK**: standard_id
-- **FK**: production_status_id
-- name
-- brand
-- model
-- s_n
-- asset_number
-- active
-- number_employees
-- description
-- Index statandar_di
-- Index production_status_id
-- Index name
-- Index active
-
-## SemiAutoWorkTable
-- **PK**: ID
-- **FK**: standard_id
-- **FK**: production_status_id
-- name
-- brand
-- model
-- s_n
-- asset_number
-- active
-- number_empleyees
-- description
-- Index statandar_di
-- Index production_status_id
-- Index name
-- Index active
-
-
-## Machine
-- **PK**: ID
-- **FK**: standard_id
-- **FK**: production_status_id
-- name
-- brand
-- model
-- s_n
-- asset_number
-- active
-- number_employees
-- description
-- Index statandar_di
-- Index production_status_id
-- Index name
-- Index active
 
 ### Production_Standards
 - **PK**: ID
@@ -159,8 +107,6 @@
 - doc2
 - doc3
 - Comments
-
-
 
 ## Production_Capacity
 - **PK**: PC_ID
@@ -302,7 +248,7 @@
 - Name
 - Description
 
-## Table_Smi_automatic
+## Table_Semi_automatic
 - **PK**: TSAutomatic_ID
 - Brand
 - Model
@@ -316,6 +262,8 @@
 - mx_pediment
 - Comments
 - **FK**: Area_ID
+- **FK**: standard_id
+- **FK**: production_status_id
 
 ## Machine
 - **PK**: Machine_ID
@@ -330,6 +278,8 @@
 - Active
 - Comments
 - **FK**: Area_ID
+- **FK**: standard_id
+- **FK**: production_status_id
 
 ## Table
 - **PK**: Table_ID
@@ -344,3 +294,5 @@
 - Active
 - Comments
 - **FK**: Area_ID
+- **FK**: standard_id
+- **FK**: production_status_id

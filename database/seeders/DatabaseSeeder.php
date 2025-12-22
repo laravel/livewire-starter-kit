@@ -22,11 +22,12 @@ class DatabaseSeeder extends Seeder
             'password' => 'password',
         ]);
         
-        // Call the seeders
+        // Call the seeders in order
         $this->call([
             PermissionSeeder::class,
             RoleSeeder::class,
             StatusWOSeeder::class,
+            TableSeeder::class,              // Optional: Creates test table data
             WorkOrderTestSeeder::class,
             StandardSeeder::class,
         ]);
