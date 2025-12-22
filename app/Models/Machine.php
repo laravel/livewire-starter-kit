@@ -48,6 +48,14 @@ class Machine extends Model
         return $this->belongsTo(Area::class);
     }
 
+    /**
+     * Obtiene los estándares asociados a esta máquina
+     */
+    public function standards()
+    {
+        return $this->hasMany(Standard::class, 'machine_id');
+    }
+
     // ===============================================
     // ACCESSORS
     // ===============================================

@@ -1,22 +1,3 @@
-<?php
-
-use Livewire\Volt\Component;
-use App\Models\Machine;
-
-new class extends Component {
-    public Machine $machine;
-
-    public function mount(Machine $machine)
-    {
-        $this->machine = $machine->load('area');
-    }
-
-    public function render(): mixed
-    {
-        return view('livewire.machines.machine-show');
-    }
-}; ?>
-
 <div class="py-12">
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <!-- Header -->

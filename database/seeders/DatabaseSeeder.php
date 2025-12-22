@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             StatusWOSeeder::class,
             TableSeeder::class,              // Optional: Creates test table data
+            Semi_AutomaticSeeder::class,     // Creates semi-automatic tables
+            MachineSeeder::class,            // Creates machines
             WorkOrderTestSeeder::class,
             StandardSeeder::class,
         ]);

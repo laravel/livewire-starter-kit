@@ -102,4 +102,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/standards/{standard}', \App\Livewire\Admin\Standards\StandardShow::class)->name('standards.show');
     Route::get('/standards/{standard}/edit', \App\Livewire\Admin\Standards\StandardEdit::class)->name('standards.edit');
 
+    // Gestion de Mesas (Tables)
+    Route::get('/tables', \App\Livewire\Admin\Tables\TableList::class)->name('tables.index');
+    Route::get('/tables/create', \App\Livewire\Admin\Tables\TableCreate::class)->name('tables.create');
+    Route::get('/tables/{table}', \App\Livewire\Admin\Tables\TableShow::class)->name('tables.show');
+    Route::get('/tables/{table}/edit', \App\Livewire\Admin\Tables\TableEdit::class)->name('tables.edit');
+
+    // Gestion de Semi-Automaticos
+    Route::get('/semi-automatics', \App\Livewire\Admin\SemiAutomatics\SemiAutomaticList::class)->name('semi-automatics.index');
+    Route::get('/semi-automatics/create', \App\Livewire\Admin\SemiAutomatics\SemiAutomaticCreate::class)->name('semi-automatics.create');
+    Route::get('/semi-automatics/{semiAutomatic}', \App\Livewire\Admin\SemiAutomatics\SemiAutomaticShow::class)->name('semi-automatics.show');
+    Route::get('/semi-automatics/{semiAutomatic}/edit', \App\Livewire\Admin\SemiAutomatics\SemiAutomaticEdit::class)->name('semi-automatics.edit');
+
+    // Gestion de Maquinas
+    Route::get('/machines', \App\Livewire\Admin\Machines\MachineList::class)->name('machines.index');
+    Route::get('/machines/create', \App\Livewire\Admin\Machines\MachineCreate::class)->name('machines.create');
+    Route::get('/machines/{machine}', \App\Livewire\Admin\Machines\MachineShow::class)->name('machines.show');
+    Route::get('/machines/{machine}/edit', \App\Livewire\Admin\Machines\MachineEdit::class)->name('machines.edit');
+
 });

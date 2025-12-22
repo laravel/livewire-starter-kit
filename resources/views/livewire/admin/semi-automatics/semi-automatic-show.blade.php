@@ -1,22 +1,3 @@
-<?php
-
-use Livewire\Volt\Component;
-use App\Models\Semi_Automatic;
-
-new class extends Component {
-    public Semi_Automatic $semiAutomatic;
-
-    public function mount(Semi_Automatic $semiAutomatic)
-    {
-        $this->semiAutomatic = $semiAutomatic->load('area');
-    }
-
-    public function render(): mixed
-    {
-        return view('livewire.semi-automatics.semi-automatic-show');
-    }
-}; ?>
-
 <div class="py-12">
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <!-- Header -->

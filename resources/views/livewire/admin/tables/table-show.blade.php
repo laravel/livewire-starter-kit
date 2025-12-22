@@ -1,22 +1,3 @@
-<?php
-
-use Livewire\Volt\Component;
-use App\Models\Table;
-
-new class extends Component {
-    public Table $table;
-
-    public function mount(Table $table)
-    {
-        $this->table = $table->load('area');
-    }
-
-    public function render(): mixed
-    {
-        return view('livewire.tables.table-show');
-    }
-}; ?>
-
 <div class="py-12">
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <!-- Header -->
@@ -85,6 +66,15 @@ new class extends Component {
                                 </dd>
                             </div>
 
+                            @if($table->name)
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Nombre</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                                        {{ $table->name }}
+                                    </dd>
+                                </div>
+                            @endif
+
                             <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Área</dt>
                                 <dd class="mt-1 text-sm text-gray-900 dark:text-white">
@@ -93,6 +83,17 @@ new class extends Component {
                                     </span>
                                 </dd>
                             </div>
+
+                            @if($table->productionStatus)
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado de Producción</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                            {{ $table->productionStatus->name }}
+                                        </span>
+                                    </dd>
+                                </div>
+                            @endif
 
                             @if($table->employees)
                                 <div>
@@ -128,6 +129,62 @@ new class extends Component {
                         </div>
                     </div>
                 </div>
+
+                <!-- Equipment Information -->
+                @if($table->brand || $table->model || $table->s_n || $table->asset_number)
+                    <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
+                            Información del Equipo
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            @if($table->brand)
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Marca</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                                        {{ $table->brand }}
+                                    </dd>
+                                </div>
+                            @endif
+
+                            @if($table->model)
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Modelo</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                                        {{ $table->model }}
+                                    </dd>
+                                </div>
+                            @endif
+
+                            @if($table->s_n)
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Número de Serie</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-white font-mono bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded">
+                                        {{ $table->s_n }}
+                                    </dd>
+                                </div>
+                            @endif
+
+                            @if($table->asset_number)
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Número de Activo</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 dark:text-white font-mono bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded">
+                                        {{ $table->asset_number }}
+                                    </dd>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Description -->
+                @if($table->description)
+                    <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Descripción</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $table->description }}</p>
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Comments -->
                 @if($table->comments)

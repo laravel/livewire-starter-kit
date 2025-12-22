@@ -40,6 +40,14 @@ class Semi_Automatic extends Model
         return $this->belongsTo(Area::class);
     }
 
+    /**
+     * Obtiene los estándares asociados a esta mesa semi-automática
+     */
+    public function standards()
+    {
+        return $this->hasMany(Standard::class, 'semi_auto_work_table_id');
+    }
+
     // ===============================================
     // ACCESSORS
     // ===============================================

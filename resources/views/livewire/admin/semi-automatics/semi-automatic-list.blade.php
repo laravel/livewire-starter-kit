@@ -1,84 +1,3 @@
-<?php
-
-use Livewire\Volt\Component;
-use Livewire\WithPagination;
-use App\Models\Semi_Automatic;
-use App\Models\Area;
-
-new class extends Component {
-    use WithPagination;
-
-    public $search = '';
-    public $sortField = 'number';
-    public $sortDirection = 'asc';
-    public $perPage = 10;
-    public $deleteId = null;
-    public $confirmingDeletion = false;
-    public $areaFilter = '';
-    public $statusFilter = '';
-    public $areas = [];
-
-    public function mount()
-    {
-        $this->areas = Area::orderBy('name')->get();
-    }
-
-    public function updatingSearch()
-    {
-        $this->resetPage();
-    }
-
-    public function sortBy($field)
-    {
-        if ($this->sortField === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortDirection = 'asc';
-        }
-        
-        $this->sortField = $field;
-    }
-
-    public function confirmDeletion($id)
-    {
-        $this->deleteId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    public function delete()
-    {
-        $semiAutomatic = Semi_Automatic::findOrFail($this->deleteId);
-        $semiAutomatic->delete();
-        
-        session()->flash('flash.banner', 'Semi-automático eliminado correctamente.');
-        session()->flash('flash.bannerStyle', 'success');
-        
-        $this->confirmingDeletion = false;
-    }
-
-    public function render(): mixed
-    {
-        $semiAutomaticsQuery = Semi_Automatic::with('area')->search($this->search);
-        
-        if (!empty($this->areaFilter)) {
-            $semiAutomaticsQuery->byArea($this->areaFilter);
-        }
-        
-        if ($this->statusFilter === 'active') {
-            $semiAutomaticsQuery->active();
-        } elseif ($this->statusFilter === 'inactive') {
-            $semiAutomaticsQuery->inactive();
-        }
-        
-        $semiAutomatics = $semiAutomaticsQuery->orderBy($this->sortField, $this->sortDirection)
-            ->paginate($this->perPage);
-        
-        return view('livewire.semi-automatics.semi-automatic-list', [
-            'semiAutomatics' => $semiAutomatics,
-        ]);
-    }
-}; ?>
-
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <!-- Header -->
@@ -183,8 +102,8 @@ new class extends Component {
                     </div>
 
                     <div class="sm:w-1/5">
-                        <select 
-                            wire:model.live="areaFilter" 
+                        <select
+                            wire:model.live="filterArea"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         >
                             <option value="">Todas las áreas</option>
@@ -193,27 +112,15 @@ new class extends Component {
                             @endforeach
                         </select>
                     </div>
-                    
+
                     <div class="sm:w-1/5">
-                        <select 
-                            wire:model.live="statusFilter" 
+                        <select
+                            wire:model.live="filterStatus"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         >
                             <option value="">Todos los estados</option>
-                            <option value="active">Activos</option>
-                            <option value="inactive">Inactivos</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <select 
-                            wire:model.live="perPage" 
-                            class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        >
-                            <option value="5">5 por página</option>
-                            <option value="10">10 por página</option>
-                            <option value="25">25 por página</option>
-                            <option value="50">50 por página</option>
+                            <option value="1">Activos</option>
+                            <option value="0">Inactivos</option>
                         </select>
                     </div>
                 </div>
@@ -229,7 +136,7 @@ new class extends Component {
                             <th wire:click="sortBy('number')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
                                 <div class="flex items-center space-x-1">
                                     <span>Número</span>
-                                    @if($sortField === 'number')
+                                    @if($sortBy === 'number')
                                         @if($sortDirection === 'asc')
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
@@ -290,7 +197,7 @@ new class extends Component {
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
                                         </a>
-                                        <button wire:click="confirmDeletion({{ $semiAutomatic->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                        <button wire:click="confirmDelete({{ $semiAutomatic->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                             </svg>
@@ -331,8 +238,8 @@ new class extends Component {
     </div>
     
     <!-- Delete Confirmation Modal -->
-    @if($confirmingDeletion)
-        <div class="fixed inset-0 z-50 overflow-y-auto" x-data="{ show: @entangle('confirmingDeletion') }" x-show="show" x-cloak>
+    @if($showDeleteModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto" x-data="{ show: @entangle('showDeleteModal') }" x-show="show" x-cloak>
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" x-show="show" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
                 
@@ -355,10 +262,10 @@ new class extends Component {
                         </div>
                     </div>
                     <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                        <button wire:click="delete" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        <button wire:click="deleteSemiAutomatic" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
                             Eliminar
                         </button>
-                        <button wire:click="$set('confirmingDeletion', false)" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
+                        <button wire:click="cancelDelete" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
                             Cancelar
                         </button>
                     </div>

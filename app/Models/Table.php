@@ -14,10 +14,18 @@ class Table extends Model
      */
     protected $fillable = [
         'number',
+        'name',
         'employees',
         'active',
         'comments',
         'area_id',
+        'brand',
+        'model',
+        's_n',
+        'asset_number',
+        'description',
+        'production_status_id',
+        'standard_id',
     ];
 
     /**
@@ -26,6 +34,8 @@ class Table extends Model
     protected $casts = [
         'active' => 'boolean',
         'employees' => 'integer',
+        'production_status_id' => 'integer',
+        'standard_id' => 'integer',
     ];
 
     // ===============================================
@@ -38,6 +48,30 @@ class Table extends Model
     public function area()
     {
         return $this->belongsTo(Area::class);
+    }
+
+    /**
+     * Una mesa pertenece a un estado de producción
+     */
+    public function productionStatus()
+    {
+        return $this->belongsTo(ProductionStatus::class);
+    }
+
+    /**
+     * Una mesa pertenece a un standard
+     */
+    public function standard()
+    {
+        return $this->belongsTo(Standard::class);
+    }
+
+    /**
+     * Relación inversa: una mesa tiene muchos standards
+     */
+    public function standards()
+    {
+        return $this->hasMany(Standard::class, 'work_table_id');
     }
 
     // ===============================================

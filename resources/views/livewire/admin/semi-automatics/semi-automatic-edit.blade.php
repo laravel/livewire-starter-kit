@@ -1,64 +1,3 @@
-<?php
-
-use Livewire\Volt\Component;
-use App\Models\Semi_Automatic;
-use App\Models\Area;
-
-new class extends Component {
-    public Semi_Automatic $semiAutomatic;
-    public $number = '';
-    public $employees = '';
-    public $active = true;
-    public $comments = '';
-    public $area_id = '';
-    public $areas = [];
-
-    public function mount(Semi_Automatic $semiAutomatic)
-    {
-        $this->semiAutomatic = $semiAutomatic;
-        $this->number = $semiAutomatic->number;
-        $this->employees = $semiAutomatic->employees;
-        $this->active = $semiAutomatic->active;
-        $this->comments = $semiAutomatic->comments;
-        $this->area_id = $semiAutomatic->area_id;
-        $this->areas = Area::orderBy('name')->get();
-    }
-
-    public function rules()
-    {
-        return [
-            'number' => 'required|string|max:255',
-            'employees' => 'nullable|integer|min:1',
-            'active' => 'boolean',
-            'comments' => 'nullable|string',
-            'area_id' => 'required|exists:areas,id',
-        ];
-    }
-
-    public function save()
-    {
-        $this->validate();
-
-        $this->semiAutomatic->update([
-            'number' => $this->number,
-            'employees' => $this->employees,
-            'active' => $this->active,
-            'comments' => $this->comments,
-            'area_id' => $this->area_id,
-        ]);
-
-        session()->flash('flash.banner', 'Semi-automático actualizado correctamente.');
-        session()->flash('flash.bannerStyle', 'success');
-
-        return redirect()->route('semi-automatics.index');
-    }
-
-    public function render(): mixed
-    {
-        return view('livewire.semi-automatics.semi-automatic-edit');
-    }
-}; ?>
-
 <div class="py-12">
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <!-- Header -->
@@ -80,7 +19,7 @@ new class extends Component {
 
         <!-- Form -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            <form wire:submit="save" class="p-6 space-y-6">
+            <form wire:submit="update" class="p-6 space-y-6">
                 <!-- Basic Information -->
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Información Básica</h3>
