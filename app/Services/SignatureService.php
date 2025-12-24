@@ -7,7 +7,6 @@ use App\Models\PurchaseOrder;
 use App\Models\User;
 use App\Models\UserSignature;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -23,17 +22,17 @@ class SignatureService
     {
         // Remove data URL prefix if present (e.g., "data:image/png;base64,")
         $base64Data = preg_replace('/^data:image\/\w+;base64,/', '', $base64Data);
-        
+
         // Decode base64 to binary
         $imageData = base64_decode($base64Data);
-        
+
         // Generate unique filename
         $filename = 'signature_' . Str::uuid() . '.png';
         $path = 'signatures/' . $filename;
-        
+
         // Store the file
         Storage::disk('public')->put($path, $imageData);
-        
+
         return $path;
     }
 
@@ -48,14 +47,14 @@ class SignatureService
     {
         // Capture and store the signature
         $signaturePath = $this->captureSignature($base64Data);
-        
+
         // Delete old signature if exists
         $oldSignature = $user->signature;
         if ($oldSignature) {
             Storage::disk('public')->delete($oldSignature->signature_path);
             $oldSignature->delete();
         }
-        
+
         // Create new user signature record
         return UserSignature::create([
             'user_id' => $user->id,
@@ -86,7 +85,7 @@ class SignatureService
     {
         // Generate signed PDF
         $signedPdfPath = $this->generateSignedPdf($purchaseOrder, $signaturePath, $user);
-        
+
         return DocumentSignature::create([
             'purchase_order_id' => $purchaseOrder->id,
             'user_id' => $user->id,
@@ -109,62 +108,60 @@ class SignatureService
     {
         $originalPdfPath = Storage::disk('public')->path($purchaseOrder->pdf_path);
         $signatureImagePath = Storage::disk('public')->path($signaturePath);
-        
+
         // Create signed PDF filename
         $signedFilename = 'signed_' . basename($purchaseOrder->pdf_path);
         $signedPdfPath = 'purchase-orders/signed/' . $signedFilename;
         $signedPdfFullPath = Storage::disk('public')->path($signedPdfPath);
-        
+
         // Ensure directory exists
         $directory = dirname($signedPdfFullPath);
         if (!file_exists($directory)) {
             mkdir($directory, 0755, true);
         }
-        
+
         try {
             // Use FPDI to add signature to existing PDF
             $pdf = new \setasign\Fpdi\Fpdi();
-            
+
             // Get page count
             $pageCount = $pdf->setSourceFile($originalPdfPath);
-            
+
             // Copy all pages
             for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
                 $templateId = $pdf->importPage($pageNo);
                 $size = $pdf->getTemplateSize($templateId);
-                
+
                 $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
                 $pdf->useTemplate($templateId);
-                
+
                 // Add signature on last page
                 if ($pageNo === $pageCount) {
                     // Signature dimensions - larger size
                     $signatureWidth = 80;  // Increased from 40
                     $signatureHeight = 40; // Increased from 20
-                    
-                    // Center both horizontally AND vertically in the page
+
+                    // Center horizontally, position in lower third of page
                     $x = ($size['width'] - $signatureWidth) / 2;
-                    $y = ($size['height'] - $signatureHeight - 20) / 2; // Centered vertically (20 for text space)
-                    
-                    // Add signature image (centered in the middle of the page)
+                    $y = $size['height'] - $signatureHeight - 60; // More space from bottom
+
+                    // Add signature image (centered)
                     $pdf->Image($signatureImagePath, $x, $y, $signatureWidth, $signatureHeight, 'PNG');
-                    
-                    // Add signature info text below the signature
-                    $pdf->SetFont('Arial', 'B', 10); // Bold and larger font
-                    $pdf->SetXY($x, $y + $signatureHeight + 5);
-                    $pdf->Cell($signatureWidth, 5, 'Firmado por: ' . $user->name, 0, 1, 'C');
-                    
-                    $pdf->SetFont('Arial', '', 9); // Regular font for date
+
+                    // Add signature info text
+                    $pdf->SetFont('Arial', '', 8);
+                    $pdf->SetXY($x, $y + $signatureHeight + 2);
+                    $pdf->Cell($signatureWidth, 4, 'Firmado por: ' . $user->name, 0, 1, 'C');
                     $pdf->SetX($x);
-                    $pdf->Cell($signatureWidth, 5, now()->format('d/m/Y H:i'), 0, 0, 'C');
+                    $pdf->Cell($signatureWidth, 4, now()->format('d/m/Y H:i'), 0, 0, 'C');
                 }
             }
-            
+
             // Save signed PDF
             $pdf->Output('F', $signedPdfFullPath);
-            
+
             return $signedPdfPath;
-            
+
         } catch (\Exception $e) {
             // If PDF generation fails, just return original path
             \Log::error('Error generating signed PDF: ' . $e->getMessage());

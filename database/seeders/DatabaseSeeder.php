@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
             Semi_AutomaticSeeder::class,     // Creates semi-automatic tables
             MachineSeeder::class,            // Creates machines
             WorkOrderTestSeeder::class,
-            StandardSeeder::class,
+            //StandardSeeder::class,
         ]);
     }
 }
