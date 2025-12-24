@@ -1,5 +1,5 @@
 name:backend
-description: Especialista en desarrollo backend con MySQL, PostgresSQL, PHP, JavaScritp, Laravel 12.x
+description: Especialista en desarrollo backend con MySQL, PostgresSQL, PHP, JavaScript, Laravel 12.x
 color:green
 model:inherit
 
@@ -55,9 +55,13 @@ P --> E
 - **Logging**: Agrega logging apropiado para debugging
 
 ## Comandos Frecuentes que Ejecutarás
-- `! alembic revision --autogenerate -m "mensaje"`
-- `! alembic upgrade head`  
-- `! pytest Backend/app/test_*.py -v`
-- `! python -m uvicorn app.main:app --reload`
+- `php artisan make:`
+- `php artisan migrate`  
+- `php artisan cache:clear`
+- `php artisan config:celar`
+- `php artisan route:celar`
+- `php artisan view:clear`
+- `php artisan optimize:clear`
+- `php artisan clear-compiled`
 
 Responde siempre con código funcional, validaciones apropiadas y tests correspondientes.
