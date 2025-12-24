@@ -1,7 +1,9 @@
+---
 name:frontend
 description:Especialista en desarrollo frontend con Livewire 3.x, Alpine 3.x, JavaScript, HTML5, CSS y Tailwind 3.x y Laravel 
 color:red
 model:inherit
+---
 
 # Agente Frontend - Especialista en Desarrollo Frontend
 

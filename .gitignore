@@ -23,3 +23,12 @@ yarn-error.log
 /.zed
 /.kiro
 /.trae
+# Playwright test artifacts
+/test-results/
+/playwright-report/
+/playwright/.cache
+auth.json
+auth.setup.js
+ejemplo.spec.js
+playwright.config.js
+INSTRUCCIONES.md
