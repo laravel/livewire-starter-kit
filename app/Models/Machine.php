@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Machine extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Campos que se pueden asignar masivamente
@@ -116,5 +116,36 @@ class Machine extends Model
               ->orWhere('model', 'like', "%{$search}%")
               ->orWhere('asset_number', 'like', "%{$search}%");
         });
+    }
+
+    // ===============================================
+    // ESTADISTICAS
+    // ===============================================
+
+    /**
+     * Obtener estadisticas de maquinas
+     */
+    public static function getStats(): array
+    {
+        $total = self::count();
+        $active = self::where('active', true)->count();
+        $inactive = self::where('active', false)->count();
+        $avgSetupTime = round(self::avg('setup_time') ?? 0, 2);
+        $avgMaintenanceTime = round(self::avg('maintenance_time') ?? 0, 2);
+        $byArea = self::select('area_id', \DB::raw('count(*) as total'))
+            ->with('area:id,name')
+            ->groupBy('area_id')
+            ->get()
+            ->pluck('total', 'area.name')
+            ->toArray();
+
+        return [
+            'total' => $total,
+            'active' => $active,
+            'inactive' => $inactive,
+            'avg_setup_time' => $avgSetupTime,
+            'avg_maintenance_time' => $avgMaintenanceTime,
+            'by_area' => $byArea,
+        ];
     }
 }

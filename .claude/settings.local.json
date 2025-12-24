@@ -4,7 +4,16 @@
       "Bash(mv:*)",
       "Bash(rm:*)",
       "Bash(php artisan:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(php -l:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(php:*)",
+      "Bash(grep:*)",
+      "Bash(mysql -u root flexcon_tracker:*)",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_fill_form",
+      "mcp__playwright__browser_click"
     ],
     "deny": [],
     "ask": []

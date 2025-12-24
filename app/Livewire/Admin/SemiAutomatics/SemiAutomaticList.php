@@ -89,7 +89,8 @@ class SemiAutomaticList extends Component
             ->orderBy($this->sortBy, $this->sortDirection);
 
         $semiAutomatics = $query->paginate(10);
+        $stats = Semi_Automatic::getStats();
 
-        return view('livewire.admin.semi-automatics.semi-automatic-list', compact('semiAutomatics', 'areas'));
+        return view('livewire.admin.semi-automatics.semi-automatic-list', compact('semiAutomatics', 'areas', 'stats'));
     }
 }

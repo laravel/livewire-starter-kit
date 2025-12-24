@@ -25,7 +25,7 @@ Eres un arquitecto de software especializado en:
 
 ## Contexto del Proyecto:Flexcon-Tracker
 
-- **Arquitectura**: Celan Architecture con Backend:Laravel 12.x
+- **Arquitectura**: Architecture con Backend:Laravel 12.x
 - **Patron**:
 - **Base de datos**: MySQL o PostgreSQL y ORM de laravel
 - **Frontend**: Livewire 3.x, JavaScript:Apine.js 3.x y CSS:Tailwind 3.x

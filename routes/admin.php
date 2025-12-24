@@ -102,6 +102,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/standards/{standard}', \App\Livewire\Admin\Standards\StandardShow::class)->name('standards.show');
     Route::get('/standards/{standard}/edit', \App\Livewire\Admin\Standards\StandardEdit::class)->name('standards.edit');
 
+    // Gestion de Estados de Produccion
+    Route::get('/production-statuses', \App\Livewire\Admin\ProductionStatuses\ProductionStatusList::class)->name('production-statuses.index');
+    Route::get('/production-statuses/create', \App\Livewire\Admin\ProductionStatuses\ProductionStatusCreate::class)->name('production-statuses.create');
+    Route::get('/production-statuses/{productionStatus}', \App\Livewire\Admin\ProductionStatuses\ProductionStatusShow::class)->name('production-statuses.show');
+    Route::get('/production-statuses/{productionStatus}/edit', \App\Livewire\Admin\ProductionStatuses\ProductionStatusEdit::class)->name('production-statuses.edit');
+
     // Gestion de Mesas (Tables)
     Route::get('/tables', \App\Livewire\Admin\Tables\TableList::class)->name('tables.index');
     Route::get('/tables/create', \App\Livewire\Admin\Tables\TableCreate::class)->name('tables.create');

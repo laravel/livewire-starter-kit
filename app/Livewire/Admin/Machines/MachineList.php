@@ -89,7 +89,8 @@ class MachineList extends Component
             ->orderBy($this->sortBy, $this->sortDirection);
 
         $machines = $query->paginate(10);
+        $stats = Machine::getStats();
 
-        return view('livewire.admin.machines.machine-list', compact('machines', 'areas'));
+        return view('livewire.admin.machines.machine-list', compact('machines', 'areas', 'stats'));
     }
 }

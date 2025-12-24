@@ -89,7 +89,8 @@ class TableList extends Component
             ->orderBy($this->sortBy, $this->sortDirection);
 
         $tables = $query->paginate(10);
+        $stats = Table::getStats();
 
-        return view('livewire.admin.tables.table-list', compact('tables', 'areas'));
+        return view('livewire.admin.tables.table-list', compact('tables', 'areas', 'stats'));
     }
 }

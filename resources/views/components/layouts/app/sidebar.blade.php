@@ -67,6 +67,15 @@
                 <flux:navlist.item icon="map-pin" :href="route('admin.areas.index')"
                     :current="request()->routeIs('admin.areas.*')" wire:navigate>{{ __('Áreas') }}
                 </flux:navlist.item>
+                <flux:navlist.item icon="table-cells" :href="route('admin.tables.index')"
+                    :current="request()->routeIs('admin.tables.*')" wire:navigate>{{ __('Mesas') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="wrench-screwdriver" :href="route('admin.semi-automatics.index')"
+                    :current="request()->routeIs('admin.semi-automatics.*')" wire:navigate>{{ __('Semi-Automáticos') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="cog-6-tooth" :href="route('admin.machines.index')"
+                    :current="request()->routeIs('admin.machines.*')" wire:navigate>{{ __('Máquinas') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="shield-check" :href="route('admin.roles.index')"
                     :current="request()->routeIs('admin.roles.*')" wire:navigate>{{ __('Roles') }}
                 </flux:navlist.item>

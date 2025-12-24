@@ -28,6 +28,16 @@
                     :current="request()->routeIs('admin.shifts.*')" wire:navigate>{{ __('Turnos') }}</flux:navlist.item>
                 <flux:navlist.item icon="pause-circle" :href="route('admin.break-times.index')"
                     :current="request()->routeIs('admin.break-times.*')" wire:navigate>{{ __('Descansos') }}</flux:navlist.item>
+                <flux:navlist.item icon="signal" :href="route('admin.production-statuses.index')"
+                    :current="request()->routeIs('admin.production-statuses.*')" wire:navigate>{{ __('Estados de Producción') }}</flux:navlist.item>
+            </flux:navlist.group>
+            <flux:navlist.group :heading="__('Estaciones de Trabajo')" class="grid">
+                <flux:navlist.item icon="table-cells" :href="route('admin.tables.index')"
+                    :current="request()->routeIs('admin.tables.*')" wire:navigate>{{ __('Mesas') }}</flux:navlist.item>
+                <flux:navlist.item icon="bolt" :href="route('admin.semi-automatics.index')"
+                    :current="request()->routeIs('admin.semi-automatics.*')" wire:navigate>{{ __('Semi-Automáticos') }}</flux:navlist.item>
+                <flux:navlist.item icon="cog-6-tooth" :href="route('admin.machines.index')"
+                    :current="request()->routeIs('admin.machines.*')" wire:navigate>{{ __('Máquinas') }}</flux:navlist.item>
             </flux:navlist.group>
             <flux:navlist.group :heading="__('Administración')" class="grid">
                 <flux:navlist.item icon="rectangle-group" :href="route('admin.departments.index')"
