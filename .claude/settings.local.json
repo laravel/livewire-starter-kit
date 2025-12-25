@@ -1,25 +1,28 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(mv:*)",
-      "Bash(rm:*)",
-      "Bash(php artisan:*)",
-      "Bash(git checkout:*)",
-      "Bash(php -l:*)",
-      "mcp__playwright__browser_navigate",
-      "mcp__playwright__browser_take_screenshot",
-      "Bash(php:*)",
-      "Bash(grep:*)",
-      "Bash(mysql -u root flexcon_tracker:*)",
-      "mcp__playwright__browser_type",
-      "mcp__playwright__browser_fill_form",
-      "mcp__playwright__browser_click",
-      "mcp__playwright__browser_snapshot",
-      "mcp__playwright__browser_wait_for",
-      "Bash(mysql:*)",
-      "mcp__ide__getDiagnostics"
-    ],
-    "deny": [],
-    "ask": []
-  }
+    "permissions": {
+        "allow": [
+            "Bash(mv:*)",
+            "Bash(rm:*)",
+            "Bash(php artisan:*)",
+            "Bash(git checkout:*)",
+            "Bash(php -l:*)",
+            "mcp__playwright__browser_navigate",
+            "mcp__playwright__browser_take_screenshot",
+            "Bash(php:*)",
+            "Bash(grep:*)",
+            "Bash(mysql -u root flexcon_tracker:*)",
+            "mcp__playwright__browser_type",
+            "mcp__playwright__browser_fill_form",
+            "mcp__playwright__browser_click",
+            "mcp__playwright__browser_snapshot",
+            "mcp__playwright__browser_wait_for",
+            "Bash(mysql:*)",
+            "mcp__ide__getDiagnostics",
+            "Bash(ls -la \"C:\\\\xampp\\\\htdocs\\\\flexcon-tracker\\\\Diagramas_flujo\\\\Estructura\\\\specs\" 2>/dev/null || echo \"Directorio no existe\")",
+            "Bash(git add:*)",
+            "Bash(git commit:*)"
+        ],
+        "deny": [],
+        "ask": []
+    }
 }
