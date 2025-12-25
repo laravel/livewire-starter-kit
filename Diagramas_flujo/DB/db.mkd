@@ -116,7 +116,6 @@
 - Hours_Per_Person_2
 - Hours_Per_Person_3
 - **FK**: Shift_ID
-- **FK**: Over_Time_ID
 
 ## Over_Time
 - **PK**: Over_Time_ID
