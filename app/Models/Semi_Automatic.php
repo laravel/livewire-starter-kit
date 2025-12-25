@@ -19,6 +19,7 @@ class Semi_Automatic extends Model
         'active',
         'comments',
         'area_id',
+        'production_status_id',
     ];
 
     /**
@@ -27,6 +28,7 @@ class Semi_Automatic extends Model
     protected $casts = [
         'active' => 'boolean',
         'employees' => 'integer',
+        'production_status_id' => 'integer',
     ];
 
     // ===============================================
@@ -39,6 +41,14 @@ class Semi_Automatic extends Model
     public function area()
     {
         return $this->belongsTo(Area::class);
+    }
+
+    /**
+     * Una mesa semi-automática pertenece a un estado de producción
+     */
+    public function productionStatus()
+    {
+        return $this->belongsTo(ProductionStatus::class);
     }
 
     /**

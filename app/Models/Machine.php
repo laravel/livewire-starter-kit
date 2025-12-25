@@ -24,6 +24,7 @@ class Machine extends Model
         'active',
         'comments',
         'area_id',
+        'production_status_id',
     ];
 
     /**
@@ -34,6 +35,7 @@ class Machine extends Model
         'setup_time' => 'decimal:2',
         'maintenance_time' => 'decimal:2',
         'employees' => 'integer',
+        'production_status_id' => 'integer',
     ];
 
     // ===============================================
@@ -46,6 +48,14 @@ class Machine extends Model
     public function area()
     {
         return $this->belongsTo(Area::class);
+    }
+
+    /**
+     * Una máquina pertenece a un estado de producción
+     */
+    public function productionStatus()
+    {
+        return $this->belongsTo(ProductionStatus::class);
     }
 
     /**

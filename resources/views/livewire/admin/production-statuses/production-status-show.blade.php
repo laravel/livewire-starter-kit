@@ -91,15 +91,20 @@
         <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="p-6">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Uso del Estado</h3>
-                <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <dl class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Mesas con este estado</dt>
                         <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{{ $productionStatus->tables->count() }}</dd>
                     </div>
 
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Producciones con este estado</dt>
-                        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{{ $productionStatus->productions->count() }}</dd>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Semi-automáticos con este estado</dt>
+                        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{{ $productionStatus->semiAutomatics->count() }}</dd>
+                    </div>
+
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Máquinas con este estado</dt>
+                        <dd class="mt-1 text-2xl font-semibold text-gray-900 dark:text-white">{{ $productionStatus->machines->count() }}</dd>
                     </div>
                 </dl>
             </div>

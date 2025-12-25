@@ -37,11 +37,19 @@ class ProductionStatus extends Model
     }
 
     /**
-     * Estado de producción tiene múltiples producciones
+     * Estado de producción tiene múltiples semi-automáticos
      */
-    public function productions()
+    public function semiAutomatics()
     {
-        return $this->hasMany(Production::class);
+        return $this->hasMany(Semi_Automatic::class);
+    }
+
+    /**
+     * Estado de producción tiene múltiples máquinas
+     */
+    public function machines()
+    {
+        return $this->hasMany(Machine::class);
     }
 
     // ===============================================
@@ -74,6 +82,7 @@ class ProductionStatus extends Model
     public function canBeDeleted()
     {
         return $this->tables()->count() === 0
-            && $this->productions()->count() === 0;
+            && $this->semiAutomatics()->count() === 0
+            && $this->machines()->count() === 0;
     }
 }

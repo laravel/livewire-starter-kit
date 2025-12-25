@@ -16,7 +16,8 @@
       "mcp__playwright__browser_click",
       "mcp__playwright__browser_snapshot",
       "mcp__playwright__browser_wait_for",
-      "Bash(mysql:*)"
+      "Bash(mysql:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

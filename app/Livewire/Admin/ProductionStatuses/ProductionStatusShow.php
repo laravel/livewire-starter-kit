@@ -11,7 +11,7 @@ class ProductionStatusShow extends Component
 
     public function mount(ProductionStatus $productionStatus): void
     {
-        $this->productionStatus = $productionStatus->load(['tables', 'productions']);
+        $this->productionStatus = $productionStatus->load(['tables', 'semiAutomatics', 'machines']);
     }
 
     public function render()
