@@ -126,4 +126,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/machines/{machine}', \App\Livewire\Admin\Machines\MachineShow::class)->name('machines.show');
     Route::get('/machines/{machine}/edit', \App\Livewire\Admin\Machines\MachineEdit::class)->name('machines.edit');
 
+    // Gestion de Over Times (Tiempo Extra)
+    Route::get('/over-times', \App\Livewire\Admin\OverTimes\OverTimeList::class)->name('over-times.index');
+    Route::get('/over-times/create', \App\Livewire\Admin\OverTimes\OverTimeCreate::class)->name('over-times.create');
+    Route::get('/over-times/{overTime}', \App\Livewire\Admin\OverTimes\OverTimeShow::class)->name('over-times.show');
+    Route::get('/over-times/{overTime}/edit', \App\Livewire\Admin\OverTimes\OverTimeEdit::class)->name('over-times.edit');
+
 });

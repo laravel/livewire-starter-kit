@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 class Shift extends Model
 {
@@ -44,6 +46,35 @@ class Shift extends Model
     public function BreakTimes(): HasMany
     {
         return $this->hasMany(BreakTime::class);
+    }
+
+    /**
+     * Get all overtime records for this shift
+     */
+    public function overTimes(): HasMany
+    {
+        return $this->hasMany(OverTime::class);
+    }
+
+    /**
+     * Get overtime records for a specific date
+     */
+    public function overTimesForDate(Carbon $date): Collection
+    {
+        return $this->overTimes()
+                    ->where('date', $date->toDateString())
+                    ->get();
+    }
+
+    /**
+     * Calculate total overtime hours for a date range
+     */
+    public function getTotalOvertimeHours(Carbon $startDate, Carbon $endDate): float
+    {
+        return $this->overTimes()
+                    ->whereBetween('date', [$startDate, $endDate])
+                    ->get()
+                    ->sum('total_hours');
     }
 
     /**
@@ -104,7 +135,8 @@ class Shift extends Model
     {
         return $this->Employees()->count() === 0
             && $this->ProuctionSessions()->count() === 0
-            && $this->BreakTimes()->count() === 0;
+            && $this->BreakTimes()->count() === 0
+            && $this->overTimes()->count() === 0;
     }
 
     // Métodos individuales (mantener por compatibilidad)
