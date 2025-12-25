@@ -55,6 +55,9 @@
                 <flux:navlist.item icon="pause-circle" :href="route('admin.break-times.index')"
                     :current="request()->routeIs('admin.break-times.*')" wire:navigate>{{ __('Descansos') }}
                 </flux:navlist.item>
+                <flux:navlist.item icon="signal" :href="route('admin.production-statuses.index')"
+                    :current="request()->routeIs('admin.production-statuses.*')" wire:navigate>{{ __('Estados de Producción') }}
+                </flux:navlist.item>
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Administración')" class="grid">

@@ -13,7 +13,8 @@
       "Bash(mysql -u root flexcon_tracker:*)",
       "mcp__playwright__browser_type",
       "mcp__playwright__browser_fill_form",
-      "mcp__playwright__browser_click"
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_snapshot"
     ],
     "deny": [],
     "ask": []
