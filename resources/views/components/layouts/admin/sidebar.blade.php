@@ -30,6 +30,8 @@
                     :current="request()->routeIs('admin.break-times.*')" wire:navigate>{{ __('Descansos') }}</flux:navlist.item>
                 <flux:navlist.item icon="signal" :href="route('admin.production-statuses.index')"
                     :current="request()->routeIs('admin.production-statuses.*')" wire:navigate>{{ __('Estados de Producción') }}</flux:navlist.item>
+                <flux:navlist.item icon="calculator" :href="route('admin.capacity.calculator')"
+                    :current="request()->routeIs('admin.capacity.*')" wire:navigate>{{ __('Capacidad') }}</flux:navlist.item>
             </flux:navlist.group>
             <flux:navlist.group :heading="__('Estaciones de Trabajo')" class="grid">
                 <flux:navlist.item icon="table-cells" :href="route('admin.tables.index')"
@@ -147,7 +149,7 @@
 
     {{ $slot }}
 
-    @livewire('components.toast-notification')
+    {{-- @livewire('components.toast-notification') --}}
 
     @fluxScripts
 </body>

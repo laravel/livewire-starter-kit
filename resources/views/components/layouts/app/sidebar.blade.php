@@ -31,6 +31,9 @@
                 <flux:navlist.item icon="clipboard-document-list" :href="route('admin.statuses-wo.index')"
                     :current="request()->routeIs('admin.statuses-wo.*')" wire:navigate>{{ __('Estados WO') }}
                 </flux:navlist.item>
+                <flux:navlist.item icon="calculator" :href="route('admin.capacity.calculator')"
+                    :current="request()->routeIs('admin.capacity.*', 'admin.sent-lists.*')" wire:navigate>{{ __('Capacidad') }}
+                </flux:navlist.item>
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Catálogos')" class="grid">
@@ -185,7 +188,7 @@
 
     {{ $slot }}
 
-    @livewire('admin.components.toast-notification')
+    {{-- @livewire('admin.components.toast-notification') --}}
 
     @fluxScripts
 </body>

@@ -132,4 +132,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/over-times/{overTime}', \App\Livewire\Admin\OverTimes\OverTimeShow::class)->name('over-times.show');
     Route::get('/over-times/{overTime}/edit', \App\Livewire\Admin\OverTimes\OverTimeEdit::class)->name('over-times.edit');
 
+    // Production Capacity Calculator
+    Route::get('/capacity-calculator', \App\Livewire\CapacityCalculator::class)->name('capacity.calculator');
+
+    // Sent Lists Management
+    Route::resource('sent-lists', \App\Http\Controllers\SentListController::class)->except(['create', 'store']);
+
 });

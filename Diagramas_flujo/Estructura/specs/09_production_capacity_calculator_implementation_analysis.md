@@ -1,30 +1,33 @@
 # Spec 09: Análisis Técnico de Implementación - Production Capacity Calculator
 
 **Fecha de Creación:** 2025-12-25
+**Fecha de Actualización:** 2025-12-25
 **Autor:** Agent Architect
 **Fase del Proyecto:** FASE 2 - Planificación de Producción
 **Estado:** Análisis Técnico Completo
-**Versión:** 1.0
+**Versión:** 1.5
 **Relacionado con:**
 - Spec 01 - Plan de Implementación Capacidad de Producción
 - Spec 07 - Análisis Técnico Over Time Module
 - Spec 08 - Estrategias de Manejo de Status de Producción
 - db.mkd - Esquema de Base de Datos
+- Capacidad.xlsx - Archivo de referencia actual
 
 ---
 
 ## Tabla de Contenidos
 
 1. [Resumen Ejecutivo](#resumen-ejecutivo)
-2. [Análisis del Diagrama de Flujo](#análisis-del-diagrama-de-flujo)
-3. [GAP Analysis](#gap-analysis)
-4. [Diseño Propuesto](#diseño-propuesto)
-5. [Diagramas de Arquitectura](#diagramas-de-arquitectura)
-6. [Plan de Implementación (7 Días)](#plan-de-implementación-7-días)
-7. [Validación de Propiedades Arquitecturales](#validación-de-propiedades-arquitecturales)
-8. [Consideraciones Técnicas](#consideraciones-técnicas)
-9. [Archivos Afectados](#archivos-afectados)
-10. [Conclusiones](#conclusiones)
+2. [Análisis del Archivo Excel Capacidad.xlsx](#análisis-del-archivo-excel-capacidadxlsx)
+3. [Análisis del Diagrama de Flujo](#análisis-del-diagrama-de-flujo)
+4. [GAP Analysis](#gap-analysis)
+5. [Diseño Propuesto](#diseño-propuesto)
+6. [Diagramas de Arquitectura](#diagramas-de-arquitectura)
+7. [Plan de Implementación (6 Días)](#plan-de-implementación-6-días)
+8. [Validación de Propiedades Arquitecturales](#validación-de-propiedades-arquitecturales)
+9. [Consideraciones Técnicas](#consideraciones-técnicas)
+10. [Archivos Afectados](#archivos-afectados)
+11. [Conclusiones](#conclusiones)
 
 ---
 
@@ -32,12 +35,12 @@
 
 ### Propósito del Módulo
 
-El **Production Capacity Calculator** automatiza el cálculo de capacidad disponible y la asignación de Work Orders (WO) a esa capacidad. Implementa el flujo de pasos 1-11 del diagrama general, permitiendo a los planificadores:
+El **Production Capacity Calculator** automatiza el cálculo de capacidad disponible y la asignación de Work Orders (WO) a esa capacidad. Implementa el flujo de pasos 1-11 del diagrama de capacidad disponible para producción, permitiendo a los planificadores:
 
 - Seleccionar turnos y personas disponibles
 - Calcular horas totales disponibles (turnos + overtime - feriados)
-- Agregar WOs a la lista de producción
-- Validar que exista capacidad disponible
+- Agregar WOs a la lista de producción validando capacidad
+- Validar que exista capacidad disponible en tiempo real
 - Generar la lista preliminar de envío (SentList)
 
 ### Decisión Crítica de Arquitectura
@@ -45,13 +48,185 @@ El **Production Capacity Calculator** automatiza el cálculo de capacidad dispon
 **Relación de Datos:**
 - **Production_Capacity** ← centraliza asignaciones de capacidad
 - **Over_Time** + **Shift** + **Holiday** ← insumos para cálculo
-- **Standard** (con pivot ProductionStandard) ← estándares por WO
+- **Standard** (con pivot ProductionStandard) ← estándares por WO con assembly modes
 - **SentList** ← salida del calculador (WOs confirmados con capacidad)
 
 **Patrón Arquitectural:**
 - Service layer (`CapacityCalculatorService`) desacoplado de UI
-- Livewire component (`CapacityCalculator`) como orquestador de UI
+- Livewire component (`CapacityCalculator`) para orquestación de UI
 - Excepción personalizada (`CapacityExceededException`) para validaciones
+- Flujo centrado en validación de capacidad: Selección → Cálculo → Validación → SentList
+
+### Alcance de Esta Fase
+
+Esta especificación técnica cubre exclusivamente el módulo de cálculo de capacidad de producción. El OUTPUT final es el SentList con los Work Orders que tienen capacidad confirmada. La preparación de materiales y kits es una fase posterior que no está incluida en este análisis.
+
+---
+
+## Análisis del Archivo Excel Capacidad.xlsx
+
+### Ubicación del Archivo
+
+**Ruta:** `C:\xampp\htdocs\flexcon-tracker\Diagramas_flujo\Estructura\docs\ef\Capacidad.xlsx`
+
+Este archivo Excel representa la herramienta actual que utilizan los planificadores de producción para calcular manualmente la capacidad semanal disponible y asignar Work Orders. Es esencialmente el **blueprint funcional** que el sistema debe automatizar.
+
+### Estructura del Archivo
+
+El archivo contiene **múltiples hojas de cálculo** (una por semana de planificación):
+- Hoja 1: "06-05-2025" (semana del 5 de junio 2025)
+- Hoja 2: "05-28-2025" (semana del 28 de mayo 2025)
+- Hoja 3: "05-21-2025" (semana del 21 de mayo 2025)
+- Hoja 4: "05-14-2025" (semana del 14 de mayo 2025)
+
+Cada hoja tiene **210 filas** y **10 columnas (A-J)**, siguiendo la misma estructura.
+
+### Análisis de Estructura por Sección
+
+#### Sección 1: Encabezado y Resumen de Capacidad (Filas 1-6)
+
+```
+Fila 1: "Capacidad de Producción Semanal"
+Fila 2: Headers → Turno | Personal disponible | Horas por turno | Días trabajados | Total horas disponibles | Total horas necesarias
+Fila 4: Turno 1 → 19 personas | 8.5 horas | 5 días | =B4*C4*D4 (cálculo automático)
+Fila 5: Turno 2 → 19 personas | 7.5 horas | 5 días | =B5*C5*D5
+Fila 6: Total → =SUBTOTAL(9,E4:E5) | Diferencia: =F4-E6
+```
+
+**Interpretación técnica:**
+- **Turnos múltiples:** Sistema debe soportar selección de varios turnos simultáneamente
+- **Personal variable:** El número de personas cambia semanalmente (requiere input dinámico)
+- **Cálculo automático:** Total horas = personas × horas_turno × días_trabajados
+- **Balance en tiempo real:** Diferencia = horas_disponibles - horas_necesarias
+
+**Mapeo al sistema propuesto:**
+```php
+// Corresponde a CapacityCalculatorService::calculateTotalAvailableHours()
+$regular_hours = $num_persons * $shift_hours * $available_days;
+$total_hours = $regular_hours + $overtime_hours;
+```
+
+#### Sección 2: Catálogo de Partes y Estándares (Filas 9-210)
+
+```
+Fila 9-10: Headers
+  - No Parte (Columna A)
+  - Estándar de: 1 persona | 2 personas | 3 personas (Columnas B-D)
+  - Cantidad de WO (Columna E)
+  - Horas necesarias por: 1 persona | 2 personas | 3 personas (Columnas F-H)
+
+Fila 11: E-C-249-8 | - | 230 | - | =E11/B11 | =E11/C11 | =E11/D11
+Fila 22: H-BML-324-10 | - | - | 124 | 5500 | =E22/B22 | =E22/C22 | =E22/D22
+Fila 36: H-C-3 | 2500 | 228 | 177 | 50000 | =E36/B36 | =E36/C36 | =E36/D36
+```
+
+**Interpretación técnica:**
+
+1. **Estándares flexibles por modalidad de ensamble:**
+   - **1 persona:** units_per_hour más bajo (ej: 2500 para H-C-3)
+   - **2 personas:** units_per_hour medio (ej: 228 para H-C-3)
+   - **3 personas:** units_per_hour más alto (ej: 177 para H-C-3)
+
+2. **Fórmulas de cálculo de horas:**
+   ```
+   Horas requeridas = Cantidad_WO / Standard_units_per_hour
+   ```
+
+3. **Cantidad de WO variable:**
+   - Algunas partes tienen cantidad asignada (ej: 5500, 8200, 50000)
+   - Otras están vacías (planificador las llena manualmente)
+
+**Hallazgo crítico:** El Excel se enfoca exclusivamente en el cálculo de capacidad disponible. La generación de SentList es el output final de este proceso.
+
+#### Sección 3: Totales y Validación
+
+```
+Fila 6: =F4-E6 → Diferencia (positivo = capacidad sobrante, negativo = sobrecarga)
+```
+
+**Interpretación:**
+- Si Diferencia > 0 → Hay capacidad disponible, se puede generar SentList
+- Si Diferencia < 0 → Capacidad excedida, requiere ajuste (CapacityExceededException)
+
+### Análisis de Datos Reales
+
+#### Ejemplo: Semana 06-05-2025 (Hoja 1)
+
+**Capacidad disponible:**
+- Turno 1: 19 personas × 8.5 horas × 5 días = 807.5 horas
+- Turno 2: 19 personas × 7.5 horas × 5 días = 712.5 horas
+- **Total: 1,520 horas semanales**
+
+**Work Orders asignados (muestra):**
+- H-BML-324-10: 5,500 unidades (Standard: 124 unidades/hora con 3 personas) → 44.35 horas
+- H-BML-B324-10: 8,200 unidades (Standard: 113 unidades/hora con 3 personas) → 72.57 horas
+- H-C-3: 50,000 unidades (Standard: 2500 unidades/hora con 1 persona) → 20 horas
+
+**Total horas necesarias:** Se calcula sumando las fórmulas en F (ej: =F33+F42+G61+...)
+
+### Relación con el Flujo de Producción
+
+#### Lo que el Excel SÍ hace:
+1. Calcula capacidad total disponible (turnos + personas + días)
+2. Asigna Work Orders a esa capacidad
+3. Valida que no se exceda la capacidad
+4. Genera una "lista preliminar de envío" (implícita en las filas con cantidad)
+
+#### Lo que el Excel NO hace (limitaciones naturales):
+1. **No automatiza el cálculo** - requiere entrada manual repetitiva
+2. **No valida en tiempo real** - el planificador debe calcular mentalmente
+3. **No registra histórico** - cada semana es una hoja nueva sin trazabilidad
+4. **No integra con sistema** - datos aislados sin conexión a WOs reales
+
+### Conclusiones del Análisis
+
+#### Hallazgos clave:
+
+1. **El Excel es un calculador de capacidad puro** - Se enfoca exclusivamente en validar si hay horas disponibles
+2. **El SentList es el output final** - Representa la lista de Work Orders que tienen capacidad confirmada
+3. **El sistema debe automatizar y mejorar este flujo** - Validación en tiempo real, histórico, integración
+
+#### Impacto arquitectural:
+
+**NECESIDAD CONFIRMADA:** Crear módulo `CapacityCalculator` para:
+- Automatizar el cálculo de horas disponibles
+- Validar capacidad en tiempo real mientras se agregan WOs
+- Generar SentList automáticamente con trazabilidad
+- Integrar con datos reales del sistema (Shifts, Holidays, OverTime, Standards)
+
+**Flujo implementado:**
+```
+CapacityCalculator (UI + Service)
+  ↓ (seleccionar turnos, personas, fechas)
+  ↓ (agregar WOs validando capacidad)
+  ↓
+SentList (Output: WOs con capacidad confirmada)
+```
+
+### Datos para el Diseño
+
+#### Campos identificados del Excel que deben mapearse al sistema:
+
+| Campo Excel | Tabla Sistema | Campo Sistema | Tipo |
+|-------------|---------------|---------------|------|
+| Turno | shifts | id (FK en sent_lists) | int |
+| Personal disponible | sent_lists | num_persons | int |
+| Horas por turno | shifts | hours | decimal |
+| Días trabajados | sent_lists | start_date, end_date | date |
+| Total horas disponibles | sent_lists | total_available_hours | decimal |
+| No Parte | parts | number | string |
+| Estándar (1/2/3 personas) | production_standards | units_per_hour (pivot) | decimal |
+| Cantidad de WO | work_orders | quantity | int |
+| Horas necesarias | sent_lists | used_hours | decimal |
+| Diferencia | sent_lists | remaining_hours | decimal |
+
+#### Nuevos campos requeridos (NO en Excel):
+
+| Campo Nuevo | Tabla | Propósito |
+|-------------|-------|-----------|
+| assembly_mode | work_orders | 1 persona / 2 personas / 3 personas |
+| sent_list_id | work_orders | FK a sent_lists para trazabilidad |
+| status | sent_lists | pending / confirmed / canceled |
 
 ---
 
@@ -522,7 +697,7 @@ class CapacityCalculator extends Component
 
 ## Diagramas de Arquitectura
 
-### Diagrama 1: Flujo de Datos
+### Diagrama 1: Flujo de Datos del Production Capacity Calculator
 
 ```mermaid
 graph TB
@@ -531,8 +706,7 @@ graph TB
     Models["Models Layer"]
     DB["Database"]
 
-    UI -->|"shift_ids, num_persons,<br/>dates"| Service
-    UI -->|"part_id, quantity"| Service
+    UI -->|"shift_ids, num_persons,<br/>dates, WOs"| Service
     Service -->|"read"| Models
     Models -->|"query"| DB
 
@@ -544,112 +718,182 @@ graph TB
         Standard["Standard"]
         ProdStd["ProductionStandard<br/>Pivot"]
         SentList["SentList"]
+        WorkOrder["WorkOrder"]
     end
 
     Service -->|"create"| SentList
+    Service -->|"create"| WorkOrder
+
     SentList -->|"write"| DB
+    WorkOrder -->|"write"| DB
+
+    style SentList fill:#90EE90
+    style UI fill:#FFD700
 ```
 
-### Diagrama 2: Secuencia del Calculador
+### Diagrama 2: Secuencia del Cálculo de Capacidad
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant Component as Livewire Component
+    participant CapCalc as CapacityCalculator
     participant Service as CapacityCalculatorService
     participant DB as Database
 
-    User->>Component: Select Shifts + Persons
-    Component->>Service: calculateCapacity()
+    %% Paso 1-5: Calcular capacidad disponible
+    User->>CapCalc: Select Shifts + Persons + Dates
+    CapCalc->>Service: calculateCapacity()
     Service->>DB: SELECT Shift, Holiday, OverTime
     DB-->>Service: Data
-    Service->>Component: total_available_hours
+    Service->>CapCalc: total_available_hours
 
-    User->>Component: Add WO (Part, Qty)
-    Component->>Service: calculateRequiredHours()
-    Service->>DB: SELECT Standard via Part
-    DB-->>Service: units_per_hour
-    Service->>Component: required_hours
-    Component->>Component: validateCapacity()
+    %% Paso 6-10: Agregar WOs y validar
+    loop Agregar Work Orders
+        User->>CapCalc: Add WO (Part, Qty, Assembly Mode)
+        CapCalc->>Service: calculateRequiredHours()
+        Service->>DB: SELECT Standard via Part + AssemblyMode
+        DB-->>Service: units_per_hour
+        Service->>CapCalc: required_hours
 
-    User->>Component: Generate SentList
-    Component->>Service: createSentList()
+        alt Hay capacidad disponible
+            CapCalc->>CapCalc: validateCapacity() OK
+            CapCalc->>CapCalc: Add WO to list
+            CapCalc->>CapCalc: Update remaining_hours
+        else Capacidad excedida
+            CapCalc->>User: CapacityExceededException
+        end
+    end
+
+    %% Paso 11: Generar SentList
+    User->>CapCalc: Generate SentList
+    CapCalc->>Service: createSentList()
+
+    Service->>DB: BEGIN TRANSACTION
     Service->>DB: INSERT INTO sent_lists
     Service->>DB: INSERT INTO work_orders
+    Service->>DB: COMMIT
+
     DB-->>Service: SentList ID
-    Service-->>Component: SentList
-    Component-->>User: Redirect to SentList View
+    Service-->>CapCalc: SentList
+    CapCalc-->>User: Success: SentList creado
 ```
 
-### Diagrama 3: Relaciones de Datos
+### Diagrama 3: ERD del Production Capacity Calculator
 
 ```mermaid
 erDiagram
+    PURCHASE_ORDER ||--o{ SENT_LIST : "has many"
+    PURCHASE_ORDER ||--o{ WORK_ORDER : "has many"
+
     SENT_LIST ||--o{ WORK_ORDER : "has many"
-    SENT_LIST ||--o{ SHIFT : "many-to-many"
-    SENT_LIST }o--|| PURCHASE_ORDER : "belongs to"
+    SENT_LIST ||--o{ SHIFT : "many-to-many via sent_list_shift"
+
     WORK_ORDER }o--|| PART : "belongs to"
+
     PART ||--o{ PRODUCTION_STANDARD : "many-to-many"
     PRODUCTION_STANDARD }o--|| STANDARD : "belongs to"
+
     SHIFT ||--o{ BREAK_TIME : "has many"
     SHIFT ||--o{ OVER_TIME : "has many"
+
     HOLIDAY ||--o{ BREAK_TIME : "optional"
+
+    SENT_LIST {
+        int id PK
+        int po_id FK
+        json shift_ids
+        int num_persons
+        date start_date
+        date end_date
+        decimal total_available_hours
+        decimal used_hours
+        decimal remaining_hours
+        enum status "pending, confirmed, canceled"
+        timestamps created_at_updated_at
+    }
+
+    WORK_ORDER {
+        int id PK
+        int sent_list_id FK
+        int part_id FK
+        int po_id FK
+        int quantity
+        enum assembly_mode "1_persona, 2_personas, 3_personas"
+        timestamps created_at_updated_at
+    }
+
+    PRODUCTION_STANDARD {
+        int id PK
+        int part_id FK
+        int standard_id FK
+        decimal units_per_hour
+        text notes
+        timestamps created_at_updated_at
+    }
+
+    SENT_LIST_SHIFT {
+        int id PK
+        int sent_list_id FK
+        int shift_id FK
+        unique sent_list_id_shift_id
+    }
 ```
 
 ---
 
-## Plan de Implementación (7 Días)
+## Plan de Implementación (6 Días)
 
 ### Día 1: Modelos y Migraciones
-- [x] Crear SentList model + migración
-- [x] Crear/ajustar ProductionStandard pivot migración
-- [x] Crear CapacityExceededException
+- [ ] Crear SentList model + migración
+- [ ] Crear/ajustar ProductionStandard pivot migración
+- [ ] Crear sent_list_shift pivot migración
+- [ ] Crear CapacityExceededException
+- [ ] Agregar campo `assembly_mode` a WorkOrder migración
 - **Tiempo:** 2-3 horas
 - **Validación:** `php artisan migrate`, verificar tablas en DB
 
 ### Día 2: Service Layer
-- [x] Implementar CapacityCalculatorService
-- [x] Métodos: calculateTotalAvailableHours, calculateRequiredHours, validateCapacity, createSentList
-- [x] Agregar helpers: getAvailableDays, countWeekends
+- [ ] Implementar CapacityCalculatorService
+- [ ] Métodos: calculateTotalAvailableHours, calculateRequiredHours, validateCapacity, createSentList
+- [ ] Agregar helpers: getAvailableDays, countWeekends
+- [ ] Transacciones DB en createSentList
 - **Tiempo:** 3-4 horas
 - **Validación:** Unit tests para cada método
 
 ### Día 3: Livewire Component
-- [x] Crear CapacityCalculator component
-- [x] Métodos: mount, calculateCapacity, addWorkOrder, generateSentList
-- [x] Inyección de dependencia (Service)
+- [ ] Crear CapacityCalculator component
+- [ ] Métodos: mount, calculateCapacity, addWorkOrder, generateSentList
+- [ ] Inyección de dependencia (Service)
+- [ ] Validación en tiempo real
 - **Tiempo:** 3-4 horas
 - **Validación:** Testeo manual en navegador
 
 ### Día 4: Vistas (Blade)
-- [x] Crear vista `livewire/capacity-calculator.blade.php`
-- [x] Formulario: shifts, personas, fechas
-- [x] Lista dinámmica de WOs
-- [x] Validación de capacidad en tiempo real (Alpine.js)
+- [ ] Crear vista `livewire/capacity-calculator.blade.php`
+- [ ] Formulario: shifts (multi-select), personas, fechas
+- [ ] Lista dinámica de WOs con capacidad restante
+- [ ] Validación de capacidad en tiempo real (Alpine.js)
+- [ ] Mensajes de error para CapacityExceededException
 - **Tiempo:** 3-4 horas
 - **Validación:** Renderizado correcto en navegador
 
-### Día 5: CRUD SentList
-- [x] SentListController: index, show, edit, update, destroy
-- [x] Rutas en web.php
-- [x] Políticas de autorización (SentListPolicy)
-- **Tiempo:** 2-3 horas
+### Día 5: CRUD SentList y Navegación
+- [ ] SentListController: index, show, edit, update, destroy
+- [ ] Rutas en web.php
+- [ ] Políticas de autorización (SentListPolicy)
+- [ ] Actualizar navegación (menu.blade.php)
+- [ ] Vistas index y show de SentList
+- **Tiempo:** 3-4 horas
 - **Validación:** Rutas disponibles (`php artisan route:list`)
 
-### Día 6: Testing
-- [x] CapacityCalculatorServiceTest (unit)
-- [x] CapacityCalculatorComponentTest (feature)
-- [x] Cobertura mínima: 85%
+### Día 6: Testing y Documentación
+- [ ] CapacityCalculatorServiceTest (unit)
+- [ ] CapacityCalculatorComponentTest (feature)
+- [ ] SentListControllerTest (feature)
+- [ ] Cobertura mínima: 85%
+- [ ] Documentación de uso en README
 - **Tiempo:** 4-5 horas
 - **Validación:** `php artisan test` 100% passing
-
-### Día 7: Integración y Documentación
-- [x] Integración con flujo existente
-- [x] Actualizar navegación (menu.blade.php)
-- [x] Documentación API endpoints
-- [x] README de features
-- **Tiempo:** 2-3 horas
-- **Validación:** Flujo end-to-end funcional
 
 ---
 
@@ -779,20 +1023,21 @@ app/
 ├── Tests/Unit/Services/
 │   └── CapacityCalculatorServiceTest.php (NEW)
 └── Tests/Feature/
-    └── CapacityCalculatorComponentTest.php (NEW)
+    ├── CapacityCalculatorComponentTest.php (NEW)
+    └── SentListControllerTest.php (NEW)
 
 resources/views/
 ├── livewire/
 │   └── capacity-calculator.blade.php (NEW)
-├── sent-lists/
-│   ├── index.blade.php (NEW)
-│   ├── show.blade.php (NEW)
-│   └── edit.blade.php (NEW)
+└── sent-lists/
+    ├── index.blade.php (NEW)
+    ├── show.blade.php (NEW)
+    └── edit.blade.php (NEW)
 
 database/migrations/
 ├── xxxx_create_sent_lists_table.php (NEW)
 ├── xxxx_create_sent_list_shift_table.php (NEW)
-└── xxxx_create_production_standards_table.php (MODIFY)
+└── xxxx_update_production_standards_table.php (MODIFY if needed)
 ```
 
 ### Archivos Modificados
@@ -801,18 +1046,18 @@ database/migrations/
 app/Models/
 ├── Part.php (ADD relationships to ProductionStandard)
 ├── Standard.php (ADD relationships to Part)
-├── WorkOrder.php (ADD sent_list_id FK)
+├── WorkOrder.php (ADD sent_list_id FK, assembly_mode field)
 ├── Shift.php (ADD eager loading hints)
 └── PurchaseOrder.php (ADD relationship to SentList)
 
 routes/
-└── web.php (ADD resource route: sent-lists)
+└── web.php (ADD resource routes: sent-lists)
 
 resources/views/
-└── layouts/navigation.blade.php (ADD menu item for Calculator)
+└── layouts/navigation.blade.php (ADD menu item: Production Capacity Calculator)
 
 config/
-└── app.php (REGISTER service in container - optional)
+└── app.php (REGISTER CapacityCalculatorService in container - optional)
 ```
 
 ---
@@ -821,33 +1066,125 @@ config/
 
 ### Impacto Arquitectural
 
-1. **Clean Architecture:** Service desacoplado de Livewire permite reutilización en CLI, API, Jobs
-2. **Escalabilidad:** Estructura de pivot ProductionStandard permite flexibilidad de estándares
-3. **Mantenibilidad:** Exceptions personalizadas y métodos enfocados facilitan debugging
-4. **Performance:** Eager loading + caché previenen N+1 queries
+#### Mejoras Arquitecturales Implementadas:
 
-### Riesgos Identificados
+1. **Clean Architecture:**
+   - Service layer desacoplado de Livewire permite reutilización en CLI, API, Jobs
+   - Separación clara de responsabilidades: UI → Service → Models → DB
+   - Lógica de negocio centralizada en CapacityCalculatorService
 
-| Riesgo | Mitigación | Prioridad |
-|--------|-----------|-----------|
-| Query N+1 en calculateCapacity | Eager loading en queries | ALTA |
-| Concurrencia en createSentList | Transacciones DB | ALTA |
-| Validación incompleta de entrada | Validators + Rules | MEDIA |
-| Rate limiting ausente | Middleware throttle | MEDIA |
+2. **Escalabilidad:**
+   - Estructura de pivot ProductionStandard permite flexibilidad de estándares
+   - Assembly modes configurables (1, 2, 3 personas) por Work Order
+   - JSON en shift_ids permite selección múltiple sin tabla pivot adicional
+
+3. **Mantenibilidad:**
+   - Exceptions personalizadas (CapacityExceededException) facilitan debugging
+   - Métodos pequeños y enfocados (calculateTotalAvailableHours, validateCapacity)
+   - Trazabilidad completa con timestamps en SentList
+
+4. **Performance:**
+   - Eager loading previene N+1 queries
+   - Transacciones DB garantizan integridad de datos
+   - Índices en campos frecuentemente consultados (po_id, status)
+
+5. **Validación en Tiempo Real:**
+   - Capacidad validada antes de agregar cada WO
+   - Usuario ve remaining_hours actualizado dinámicamente
+   - Prevención de sobrecarga de capacidad
+
+### Hallazgos Críticos del Análisis del Excel
+
+| Hallazgo | Impacto | Solución Implementada |
+|----------|---------|----------------------|
+| Cálculo manual de capacidad | Propenso a errores, lento | CapacityCalculatorService automático |
+| Sin validación en tiempo real | Errores descubiertos tarde | Validación al agregar cada WO |
+| Sin histórico de planificación | No hay trazabilidad | SentList con timestamps completos |
+| Datos aislados del sistema | Doble entrada de datos | Integración con WOs, POs, Shifts reales |
+| Sin control de assembly modes | Estándares incorrectos | Assembly mode por WO con validación |
+
+### Flujo Implementado
+
+```
+FASE 1: Configuración de Capacidad (Pasos 1-5)
+  └─→ CapacityCalculator Component
+      └─→ Seleccionar Shifts + Personas + Fechas
+          └─→ CapacityCalculatorService::calculateTotalAvailableHours()
+              └─→ total_available_hours calculado
+
+FASE 2: Asignación de Work Orders (Pasos 6-10)
+  └─→ Usuario agrega WO (Part + Quantity + Assembly Mode)
+      └─→ CapacityCalculatorService::calculateRequiredHours()
+          └─→ CapacityCalculatorService::validateCapacity()
+              └─→ Si OK: agregar WO, actualizar remaining_hours
+              └─→ Si NO: lanzar CapacityExceededException
+
+FASE 3: Generación de SentList (Paso 11)
+  └─→ Usuario confirma lista
+      └─→ CapacityCalculatorService::createSentList()
+          └─→ Transacción DB: SentList + WorkOrders
+              └─→ SentList creado (OUTPUT FINAL)
+```
+
+### Riesgos Identificados y Mitigaciones
+
+| Riesgo | Mitigación | Prioridad | Estado |
+|--------|-----------|-----------|--------|
+| Query N+1 en calculateCapacity | Eager loading en queries | ALTA | Por implementar |
+| Concurrencia en createSentList | Transacciones DB | ALTA | Diseñado |
+| Validación incompleta de entrada | Validators + Rules en Livewire | MEDIA | Pendiente |
+| Rate limiting ausente | Middleware throttle en rutas | MEDIA | Pendiente |
+| Cálculo incorrecto de feriados | Validar lógica en tests unitarios | ALTA | Por implementar |
+| Standards no configurados | Validación antes de calcular horas | ALTA | Por implementar |
 
 ### Próximos Pasos
 
-1. **Fase 3:** Implementar Kit assembly (Preparar Kits → Ensamble)
-2. **Fase 4:** Inspección y Acción Correctiva
-3. **Fase 5:** Empaque, Shipping List, Invoice, Cierre de WO
+#### Inmediato (Días 1-6):
+1. Implementar migraciones de SentList y sent_list_shift
+2. Crear modelo SentList con relaciones
+3. Implementar CapacityCalculatorService completo
+4. Crear componente Livewire CapacityCalculator
+5. Implementar vistas y CRUD de SentList
+6. Testing completo con cobertura 85%+
+
+#### Corto Plazo (2-4 semanas después):
+1. **Optimización:** Agregar caché para Standards frecuentemente usados
+2. **Reportes:** Dashboard de capacidad utilizada vs. disponible
+3. **Notifications:** Alertas cuando SentList es confirmado
+4. **Validaciones adicionales:** Verificar disponibilidad de personal antes de calcular
+
+#### Medio Plazo (1-3 meses):
+1. **Fase 3:** Integración con módulo de Materiales (preparación de kits)
+2. **Fase 4:** Asignación de recursos físicos (mesas, máquinas)
+3. **Fase 5:** Módulo de Inspección y Acción Correctiva
+4. **Reports:** Reportes históricos de capacidad vs. utilización real
 
 ### Métricas de Éxito
 
-- [x] Service con 85%+ cobertura de tests
-- [x] Componente Livewire renderiza sin errores
-- [x] SentList CRUD funcional
-- [x] Flujo end-to-end completo (paso 1-11)
-- [x] Documentación API actualizada
+#### Módulo de Capacidad:
+- [ ] CapacityCalculatorService con 85%+ cobertura de tests
+- [ ] Componente Livewire renderiza sin errores
+- [ ] SentList CRUD funcional
+- [ ] Flujo de cálculo completo (pasos 1-11 del diagrama)
+- [ ] Validación en tiempo real de capacidad excedida
+- [ ] Transacciones DB correctas (sin pérdida de datos)
+
+#### Métricas de Negocio:
+- [ ] Reducción de 90% en tiempo de cálculo de capacidad (30 min → 3 min)
+- [ ] 100% trazabilidad de SentLists generados
+- [ ] Eliminación de errores de cálculo manual
+- [ ] Histórico completo de planificación de capacidad
+
+### Comparativa: Antes vs. Después
+
+| Aspecto | Antes (Excel Manual) | Después (Sistema) | Mejora |
+|---------|---------------------|-------------------|--------|
+| Cálculo de capacidad | Manual, 30 min | Automático, <3 min | 10x más rápido |
+| Validación de capacidad | Manual, propensa a errores | Automática en tiempo real | Eliminación de errores |
+| Trazabilidad | Sin registro | Completa con timestamps | Infinita |
+| Integración con sistema | Cero (datos aislados) | Total (WOs, POs, Shifts reales) | 100% integrado |
+| Histórico | No existe | Completo en DB | Datos para análisis |
+| Assembly modes | No controlados | Configurables por WO | Mayor precisión |
 
 ---
 
@@ -857,5 +1194,13 @@ config/
 - **Spec 07:** Over Time Module Analysis
 - **Spec 08:** Production Status Management with Kits
 - **db.mkd:** Database Schema
+- **Diagrama de Flujo:** 2-diagrama-capacidad-disponible-produccion.mkd (11 pasos)
+- **Capacidad.xlsx:** Archivo Excel de referencia actual
 - **Laravel Docs:** Eloquent ORM, Livewire 3.x
 - **Clean Architecture:** Robert C. Martin
+
+---
+
+**Fin del Documento**
+
+**Próxima Fase:** Módulo de Materiales y Preparación de Kits (Spec 10 - Por definir)

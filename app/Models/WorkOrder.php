@@ -17,6 +17,9 @@ class WorkOrder extends Model
     protected $fillable = [
         'wo_number',
         'purchase_order_id',
+        'sent_list_id',
+        'assembly_mode',
+        'required_hours',
         'status_id',
         'sent_pieces',
         'scheduled_send_date',
@@ -32,6 +35,7 @@ class WorkOrder extends Model
         'actual_send_date' => 'date',
         'opened_date' => 'date',
         'sent_pieces' => 'integer',
+        'required_hours' => 'decimal:2',
     ];
 
     /**
@@ -65,16 +69,11 @@ class WorkOrder extends Model
     }
 
     /**
-     * Get the sent lists for the work order.
-     * Note: SentList model will be created in Phase 2
+     * Get the sent list that owns the work order.
      */
-    public function sentLists(): HasMany
+    public function sentList(): BelongsTo
     {
-        // Return empty relation if SentList model doesn't exist yet
-        if (!class_exists(\App\Models\SentList::class)) {
-            return $this->hasMany(self::class, 'id', 'id')->whereRaw('1 = 0');
-        }
-        return $this->hasMany(\App\Models\SentList::class);
+        return $this->belongsTo(SentList::class, 'sent_list_id');
     }
 
     /**
@@ -196,11 +195,9 @@ class WorkOrder extends Model
             }
         }
 
-        // Check sent lists only if model exists
-        if (class_exists(\App\Models\SentList::class)) {
-            if ($this->sentLists()->count() > 0) {
-                return false;
-            }
+        // Cannot delete if assigned to a confirmed sent list
+        if ($this->sent_list_id && $this->sentList && $this->sentList->isConfirmed()) {
+            return false;
         }
 
         return true;
