@@ -136,6 +136,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/capacity-calculator', \App\Livewire\CapacityCalculator::class)->name('capacity.calculator');
 
     // Sent Lists Management
-    Route::resource('sent-lists', \App\Http\Controllers\SentListController::class)->except(['create', 'store']);
+    Route::get('/sent-lists', [\App\Http\Controllers\SentListController::class, 'index'])->name('sent-lists.index');
+    Route::get('/sent-lists/{sentList}', [\App\Http\Controllers\SentListController::class, 'show'])->name('sent-lists.show');
+    Route::get('/sent-lists/{sentList}/edit', [\App\Http\Controllers\SentListController::class, 'edit'])->name('sent-lists.edit');
+    Route::put('/sent-lists/{sentList}', [\App\Http\Controllers\SentListController::class, 'update'])->name('sent-lists.update');
+    Route::delete('/sent-lists/{sentList}', [\App\Http\Controllers\SentListController::class, 'destroy'])->name('sent-lists.destroy');
+
+    // Gestión de Kits
+    Route::get('/kits', \App\Livewire\Admin\Kits\KitList::class)->name('kits.index');
+    Route::get('/kits/create', \App\Livewire\Admin\Kits\KitCreate::class)->name('kits.create');
+    Route::get('/kits/{kit}', \App\Livewire\Admin\Kits\KitShow::class)->name('kits.show');
+
+    // Gestión de Lotes
+    Route::get('/lots', \App\Livewire\Admin\Lots\LotList::class)->name('lots.index');
+    Route::get('/lots/create', \App\Livewire\Admin\Lots\LotCreate::class)->name('lots.create');
+    Route::get('/lots/{lot}', \App\Livewire\Admin\Lots\LotShow::class)->name('lots.show');
 
 });

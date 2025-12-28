@@ -29,7 +29,7 @@
                     :current="request()->routeIs('admin.work-orders.*')" wire:navigate>{{ __('Work Orders') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="clipboard-document-list" :href="route('admin.statuses-wo.index')"
-                    :current="request()->routeIs('admin.statuses-wo.*')" wire:navigate>{{ __('Estados WO') }}
+                    :current="request()->routeIs('admin.statuses-wo.*')" wire:navigate>{{ __('Estados') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="calculator" :href="route('admin.capacity.calculator')"
                     :current="request()->routeIs('admin.capacity.*', 'admin.sent-lists.*')" wire:navigate>{{ __('Capacidad') }}
@@ -60,6 +60,12 @@
                 </flux:navlist.item>
                 <flux:navlist.item icon="bolt" :href="route('admin.over-times.index')"
                     :current="request()->routeIs('admin.over-times.*')" wire:navigate>{{ __('Tiempo Extra') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="cube" :href="route('admin.kits.index')"
+                    :current="request()->routeIs('admin.kits.*')" wire:navigate>{{ __('Kits') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="queue-list" :href="route('admin.lots.index')"
+                    :current="request()->routeIs('admin.lots.*')" wire:navigate>{{ __('Lotes') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="signal" :href="route('admin.production-statuses.index')"
                     :current="request()->routeIs('admin.production-statuses.*')" wire:navigate>{{ __('Estados de Producción') }}

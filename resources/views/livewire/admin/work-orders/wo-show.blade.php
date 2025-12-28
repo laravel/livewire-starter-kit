@@ -4,9 +4,14 @@
         <div class="mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Work Order: {{ $workOrder->wo_number }}</h1>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Detalle completo de la WO
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ID: {{ $workOrder->wo_number }}</p>
+                    @if($workOrder->purchaseOrder->wo)
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">WO: {{ $workOrder->purchaseOrder->wo }}</h1>
+                    @else
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $workOrder->wo_number }}</h1>
+                    @endif
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        Detalle de la orden de trabajo
                     </p>
                 </div>
                 <div class="mt-4 sm:mt-0 flex space-x-2">
@@ -36,9 +41,16 @@
                     
                     <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Número de WO</dt>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">ID (Interno)</dt>
                             <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ $workOrder->wo_number }}</dd>
                         </div>
+                        
+                        @if($workOrder->purchaseOrder->wo)
+                        <div class="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg -m-1">
+                            <dt class="text-sm font-medium text-indigo-600 dark:text-indigo-400">WO (Cliente)</dt>
+                            <dd class="mt-1 text-xl text-indigo-700 dark:text-indigo-300 font-bold">{{ $workOrder->purchaseOrder->wo }}</dd>
+                        </div>
+                        @endif
                         
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado</dt>
@@ -57,13 +69,6 @@
                                 </a>
                             </dd>
                         </div>
-                        
-                        @if($workOrder->purchaseOrder->wo)
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">WO</dt>
-                            <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ $workOrder->purchaseOrder->wo }}</dd>
-                        </div>
-                        @endif
                         
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Parte</dt>
