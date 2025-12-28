@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,14 +20,15 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@test.com',
             'account' => 'test',
-            'password' => 'password',
+            'password' => Hash::make('password'),
         ]);
-        
+
         // Call the seeders in order
         $this->call([
             PermissionSeeder::class,
             RoleSeeder::class,
             StatusWOSeeder::class,
+            ShiftSeeder::class,              // Creates default shifts for production
             TableSeeder::class,              // Optional: Creates test table data
             Semi_AutomaticSeeder::class,     // Creates semi-automatic tables
             MachineSeeder::class,            // Creates machines

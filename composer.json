@@ -14,6 +14,7 @@
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.2",
         "livewire/volt": "^1.7.0",
+        "phpoffice/phpspreadsheet": "^5.3",
         "setasign/fpdf": "^1.8",
         "setasign/fpdi": "^2.6",
         "spatie/laravel-permission": "^6.20"

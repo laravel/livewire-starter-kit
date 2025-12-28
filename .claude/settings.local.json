@@ -17,7 +17,16 @@
       "mcp__playwright__browser_snapshot",
       "mcp__playwright__browser_wait_for",
       "Bash(mysql:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(ls -la \"C:\\\\xampp\\\\htdocs\\\\flexcon-tracker\\\\Diagramas_flujo\\\\Estructura\\\\specs\" 2>/dev/null || echo \"Directorio no existe\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(python:*)",
+      "Bash(composer require:*)",
+      "Bash(timeout 10 tail:*)",
+      "Bash(cat:*)",
+      "mcp__playwright__browser_press_key",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
