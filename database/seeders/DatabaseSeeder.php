@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             StatusWOSeeder::class,
+            ShiftSeeder::class,              // Creates default shifts for production
             TableSeeder::class,              // Optional: Creates test table data
             Semi_AutomaticSeeder::class,     // Creates semi-automatic tables
             MachineSeeder::class,            // Creates machines
