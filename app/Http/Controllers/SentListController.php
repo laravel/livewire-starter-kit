@@ -37,8 +37,8 @@ class SentListController extends Controller
     {
         // Only pending sent lists can be edited
         if (!$sentList->isPending()) {
-            return redirect()->route('sent-lists.show', $sentList)
-                ->with('error', 'Only pending sent lists can be edited.');
+            return redirect()->route('admin.sent-lists.show', $sentList)
+                ->with('error', 'Solo las listas pendientes pueden ser editadas.');
         }
 
         return view('sent-lists.edit', compact('sentList'));
@@ -51,8 +51,8 @@ class SentListController extends Controller
     {
         // Only pending sent lists can be updated
         if (!$sentList->isPending()) {
-            return redirect()->route('sent-lists.show', $sentList)
-                ->with('error', 'Only pending sent lists can be updated.');
+            return redirect()->route('admin.sent-lists.show', $sentList)
+                ->with('error', 'Solo las listas pendientes pueden ser actualizadas.');
         }
 
         $validated = $request->validate([
@@ -61,8 +61,8 @@ class SentListController extends Controller
 
         $sentList->update($validated);
 
-        return redirect()->route('sent-lists.show', $sentList)
-            ->with('success', 'Sent list updated successfully.');
+        return redirect()->route('admin.sent-lists.show', $sentList)
+            ->with('success', 'Lista de envío actualizada exitosamente.');
     }
 
     /**
@@ -71,13 +71,13 @@ class SentListController extends Controller
     public function destroy(SentList $sentList)
     {
         if (!$sentList->canBeDeleted()) {
-            return redirect()->route('sent-lists.index')
-                ->with('error', 'Cannot delete confirmed sent lists.');
+            return redirect()->route('admin.sent-lists.index')
+                ->with('error', 'No se pueden eliminar listas confirmadas.');
         }
 
         $sentList->delete();
 
-        return redirect()->route('sent-lists.index')
-            ->with('success', 'Sent list deleted successfully.');
+        return redirect()->route('admin.sent-lists.index')
+            ->with('success', 'Lista de envío eliminada exitosamente.');
     }
 }

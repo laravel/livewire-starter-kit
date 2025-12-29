@@ -4,7 +4,7 @@
         <div class="mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Editar Estado de Work Order</h1>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Editar Estado</h1>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         Actualiza la información del estado
                     </p>

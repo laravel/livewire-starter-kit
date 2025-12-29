@@ -202,4 +202,24 @@ class WorkOrder extends Model
 
         return true;
     }
+
+    /**
+     * Update sent_pieces based on completed lots.
+     */
+    public function updateSentPieces(): void
+    {
+        $completedQuantity = $this->lots()
+            ->where('status', Lot::STATUS_COMPLETED)
+            ->sum('quantity');
+        
+        $this->update(['sent_pieces' => $completedQuantity]);
+    }
+
+    /**
+     * Get the kits for the work order.
+     */
+    public function kits(): HasMany
+    {
+        return $this->hasMany(Kit::class);
+    }
 }

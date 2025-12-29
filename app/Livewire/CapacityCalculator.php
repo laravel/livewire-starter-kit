@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Livewire\Attributes\Validate;
 use App\Models\{PurchaseOrder, Shift, Part, SentList, WorkOrder};
 use App\Services\CapacityCalculatorService;
 use App\Exceptions\CapacityExceededException;
@@ -36,6 +35,14 @@ class CapacityCalculator extends Component
     protected CapacityCalculatorService $service;
 
     /**
+     * Boot method to inject service
+     */
+    public function boot(CapacityCalculatorService $service)
+    {
+        $this->service = $service;
+    }
+
+    /**
      * Validation rules
      */
     protected function rules()
@@ -56,9 +63,8 @@ class CapacityCalculator extends Component
     /**
      * Component initialization
      */
-    public function mount(CapacityCalculatorService $service)
+    public function mount()
     {
-        $this->service = $service;
         $this->start_date = now()->format('Y-m-d');
         $this->end_date = now()->addDays(7)->format('Y-m-d');
     }
@@ -193,8 +199,8 @@ class CapacityCalculator extends Component
                 $this->work_orders
             );
 
-            session()->flash('success', 'SentList created successfully!');
-            return redirect()->route('sent-lists.show', $sentList->id);
+            session()->flash('success', 'Lista de envío creada exitosamente!');
+            return redirect()->route('admin.sent-lists.show', $sentList->id);
         } catch (\Exception $e) {
             $this->error_message = 'Error generating SentList: ' . $e->getMessage();
             $this->success_message = '';
@@ -238,6 +244,6 @@ class CapacityCalculator extends Component
                 ->whereNotNull('id')
                 ->orderBy('created_at', 'desc')
                 ->get(),
-        ])->layout('components.layouts.admin');
+        ]);
     }
 }
