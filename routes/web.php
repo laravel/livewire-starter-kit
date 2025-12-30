@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
+use App\Livewire\MenuPage;
+use App\Livewire\MenuItem;
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,3 +32,18 @@ Route::middleware(['auth'])->group(function () {
         )
         ->name('two-factor.show');
 });
+
+Route ::get('/{slug}', MenuPage::class);
+Route::get('/{restaurant:slug}', MenuPage::class)
+    ->name('menu.show');
+
+
+Route::get('/{restaurant}/{item}', \App\Livewire\MenuItem::class)
+    ->name('item.show');
+
+
+
+
+
+
+
