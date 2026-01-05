@@ -70,8 +70,17 @@ class CapacityCalculatorService
 
         $total_minutes = $start->diffInMinutes($end);
 
-        // Subtract break times
-        $break_minutes = $shift->breakTimes()->sum('duration') ?? 0;
+        // Calculate break minutes from start_break_time and end_break_time
+        $break_minutes = 0;
+        foreach ($shift->breakTimes as $breakTime) {
+            $breakStart = Carbon::parse($breakTime->start_break_time);
+            $breakEnd = Carbon::parse($breakTime->end_break_time);
+            if ($breakEnd->lessThan($breakStart)) {
+                $breakEnd->addDay();
+            }
+            $break_minutes += $breakStart->diffInMinutes($breakEnd);
+        }
+        
         $net_minutes = $total_minutes - $break_minutes;
 
         return round($net_minutes / 60, 2);
@@ -105,11 +114,11 @@ class CapacityCalculatorService
             throw new \Exception("No active standard found for part {$part->number}");
         }
 
-        // Get units_per_hour based on assembly mode
-        $units_per_hour = $this->getUnitsPerHourByMode($standard, $assembly_mode);
+        // Use units_per_hour from standard
+        $units_per_hour = $standard->units_per_hour ?? 0;
 
         if ($units_per_hour === 0) {
-            throw new \Exception("Standard for part {$part->number} has units_per_hour = 0 for {$assembly_mode}");
+            throw new \Exception("Standard for part {$part->number} has units_per_hour = 0");
         }
 
         return round($quantity / $units_per_hour, 2);
@@ -117,6 +126,8 @@ class CapacityCalculatorService
 
     /**
      * Get units per hour based on assembly mode.
+     * 
+     * Note: This method is deprecated. Use units_per_hour directly from standard.
      *
      * @param Standard $standard
      * @param string $assembly_mode
@@ -124,12 +135,8 @@ class CapacityCalculatorService
      */
     protected function getUnitsPerHourByMode(Standard $standard, string $assembly_mode): int
     {
-        return match ($assembly_mode) {
-            '1_person' => $standard->persons_1 ?? 0,
-            '2_persons' => $standard->persons_2 ?? 0,
-            '3_persons' => $standard->persons_3 ?? 0,
-            default => $standard->units_per_hour ?? 0,
-        };
+        // Use the main units_per_hour field
+        return $standard->units_per_hour ?? 0;
     }
 
     /**

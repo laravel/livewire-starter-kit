@@ -47,7 +47,9 @@ class WOShow extends Component
 
     public function openSignatureModal(): void
     {
-        $this->dispatch('openSignatureModal', purchaseOrderId: $this->workOrder->purchaseOrder->id);
+        if ($this->workOrder->purchaseOrder) {
+            $this->dispatch('openSignatureModal', purchaseOrderId: $this->workOrder->purchaseOrder->id);
+        }
     }
 
     public function updateStatus(int $statusId, ?string $comments = null): void
@@ -68,9 +70,14 @@ class WOShow extends Component
 
     public function render()
     {
+        $signatures = [];
+        if ($this->workOrder->purchaseOrder) {
+            $signatures = $this->signatureService->getDocumentSignatures($this->workOrder->purchaseOrder);
+        }
+
         return view('livewire.admin.work-orders.wo-show', [
             'statuses' => StatusWO::all(),
-            'signatures' => $this->signatureService->getDocumentSignatures($this->workOrder->purchaseOrder),
+            'signatures' => $signatures,
         ]);
     }
 }

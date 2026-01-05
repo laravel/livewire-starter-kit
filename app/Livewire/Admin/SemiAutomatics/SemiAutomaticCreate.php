@@ -17,7 +17,7 @@ class SemiAutomaticCreate extends Component
     public function rules(): array
     {
         return [
-            'number' => 'required|string|max:255|unique:semi_automatics,number',
+            'number' => 'required|string|max:255|unique:semi__automatics,number',
             'employees' => 'nullable|integer|min:1',
             'active' => 'boolean',
             'comments' => 'nullable|string',
@@ -40,7 +40,7 @@ class SemiAutomaticCreate extends Component
         session()->flash('flash.banner', 'Semi-automático creado correctamente.');
         session()->flash('flash.bannerStyle', 'success');
 
-        return redirect()->route('semi-automatics.index');
+        return redirect()->route('admin.semi-automatics.index');
     }
 
     public function render()

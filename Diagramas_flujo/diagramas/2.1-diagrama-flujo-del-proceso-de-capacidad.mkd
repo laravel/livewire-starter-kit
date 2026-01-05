@@ -1,0 +1,52 @@
+flowchart TD
+
+%% =====================
+%% STEP 1
+%% =====================
+subgraph STEP1["Step 1 – Disponibilidad de horas"]
+    A[Seleccionar turnos]
+    B[Se obtiene el personal disponible]
+    C[Se obtienen las horas por turno]
+    D[Seleccionar rango de fechas\nmáximo de 5 días]
+    E[Se suman las horas totales\nde los turnos]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+end
+
+%% =====================
+%% STEP 2
+%% =====================
+subgraph STEP2["Step 2 – Cálculo de horas necesarias"]
+    F[Se agrega número de parte]
+    G[Se agrega cantidad del WO]
+    H[Horas necesarias =\nEstándar / Cantidad WO *\n# de parte agregado]
+    I[Se suman todas las horas necesarias\niteradas por # de parte]
+    J[Diferencia = Total de horas necesarias\n- Total de horas disponibles]
+    K[Mostrar diferencias\ny si se pasa de horas\nmostrar sugerencia de horas extras]
+
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    J --> K
+end
+
+%% =====================
+%% STEP 3
+%% =====================
+subgraph STEP3["Step 3 – Cierre y salida"]
+    L[No hay más números de parte\nque puedan entrar en la lista\nSchedule para la semana\nde producción]
+    M[Mandar lista de WO's con su\n# de parte al departamento\nde Materiales]
+
+    L --> M
+end
+
+%% =====================
+%% CONEXIONES ENTRE STEPS
+%% =====================
+E --> F
+K --> F
+K --> L

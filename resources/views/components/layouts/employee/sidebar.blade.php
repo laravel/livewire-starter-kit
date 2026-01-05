@@ -17,9 +17,9 @@
             <flux:navlist.group :heading="__('Mi Panel')" class="grid">
                 <flux:navlist.item icon="home" :href="route('employee.dashboard')" :current="request()->routeIs('employee.dashboard')"
                     wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                <flux:navlist.item icon="user" :href="route('employee.profile')" :current="request()->routeIs('employee.profile')"
+                    wire:navigate>{{ __('Mi Perfil') }}</flux:navlist.item>
             </flux:navlist.group>
-
-            {{-- Aquí puedes agregar más opciones para empleados --}}
         </flux:navlist>
 
         <flux:spacer />

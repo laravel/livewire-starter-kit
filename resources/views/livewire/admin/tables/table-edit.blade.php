@@ -238,7 +238,7 @@
                 <!-- Actions -->
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
                     <div class="flex items-center justify-end space-x-4">
-                        <a href="{{ route('tables.index') }}" 
+                        <a href="{{ route('admin.tables.index') }}" 
                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Cancelar
                         </a>

@@ -13,7 +13,7 @@ use Livewire\Volt\Volt;
 |
 */
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     // Dashboard Admin
     Route::view('/', 'admin.dashboard')->name('dashboard');
@@ -132,8 +132,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/over-times/{overTime}', \App\Livewire\Admin\OverTimes\OverTimeShow::class)->name('over-times.show');
     Route::get('/over-times/{overTime}/edit', \App\Livewire\Admin\OverTimes\OverTimeEdit::class)->name('over-times.edit');
 
-    // Production Capacity Calculator
+    // Production Capacity Calculator (Legacy)
     Route::get('/capacity-calculator', \App\Livewire\CapacityCalculator::class)->name('capacity.calculator');
+    
+    // Capacity Wizard (New 3-step wizard)
+    Route::get('/capacity-wizard', \App\Livewire\Admin\CapacityWizard::class)->name('capacity.wizard');
 
     // Sent Lists Management
     Route::get('/sent-lists', [\App\Http\Controllers\SentListController::class, 'index'])->name('sent-lists.index');
@@ -151,5 +154,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lots', \App\Livewire\Admin\Lots\LotList::class)->name('lots.index');
     Route::get('/lots/create', \App\Livewire\Admin\Lots\LotCreate::class)->name('lots.create');
     Route::get('/lots/{lot}', \App\Livewire\Admin\Lots\LotShow::class)->name('lots.show');
+
+    // Gestión de Empleados
+    Route::get('/employees', \App\Livewire\Admin\Employees\EmployeeList::class)->name('employees.index');
+    Route::get('/employees/create', \App\Livewire\Admin\Employees\EmployeeCreate::class)->name('employees.create');
+    Route::get('/employees/{employee}', \App\Livewire\Admin\Employees\EmployeeShow::class)->name('employees.show');
+    Route::get('/employees/{employee}/edit', \App\Livewire\Admin\Employees\EmployeeEdit::class)->name('employees.edit');
 
 });

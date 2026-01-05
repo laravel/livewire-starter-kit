@@ -156,11 +156,13 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900 dark:text-white">
-                                            {{ $wo->purchaseOrder->po_number }}
+                                            {{ $wo->purchaseOrder->po_number ?? '-' }}
                                         </div>
+                                        @if($wo->purchaseOrder && $wo->purchaseOrder->part)
                                         <div class="text-xs text-gray-500 dark:text-gray-400">
                                             {{ $wo->purchaseOrder->part->number }} - {{ Str::limit($wo->purchaseOrder->part->description, 25) }}
                                         </div>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900 dark:text-white">

@@ -11,6 +11,11 @@ class Semi_Automatic extends Model
     use HasFactory, SoftDeletes;
 
     /**
+     * Nombre de la tabla en la base de datos
+     */
+    protected $table = 'semi__automatics';
+
+    /**
      * Campos que se pueden asignar masivamente
      */
     protected $fillable = [
