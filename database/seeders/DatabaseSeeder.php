@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
         ]);
         
         // Assign admin role
-        $adminUser->assignRole('Admin');
+        $adminUser->assignRole('admin');
         
         $this->command->info('Admin user created: test@test.com / password');
     }

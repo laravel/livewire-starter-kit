@@ -15,7 +15,7 @@ class RoleSeeder extends Seeder
     {
         // Create roles
         $roles = [
-            'Admin',
+            'admin',     // Cambiado a minúsculas para consistencia
             'HR',
             'Maintenance',
             'Production',
@@ -30,7 +30,7 @@ class RoleSeeder extends Seeder
             
             // Asignar permisos según el rol
             switch ($roleName) {
-                case 'Admin':
+                case 'admin':
                     // Admin tiene todos los permisos
                     $role->syncPermissions(Permission::all());
                     break;
