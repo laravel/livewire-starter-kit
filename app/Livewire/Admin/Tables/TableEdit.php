@@ -84,7 +84,7 @@ class TableEdit extends Component
         session()->flash('flash.banner', 'Mesa actualizada correctamente.');
         session()->flash('flash.bannerStyle', 'success');
 
-        return redirect()->route('tables.index');
+        return redirect()->route('admin.tables.index');
     }
 
     public function render()

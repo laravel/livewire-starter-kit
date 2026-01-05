@@ -64,6 +64,14 @@ class Area extends Model
         return $this->hasMany(Semi_Automatic::class);
     }
 
+    /**
+     * Un área tiene múltiples empleados (usuarios con rol employee)
+     */
+    public function employees()
+    {
+        return $this->hasMany(User::class)->role('employee');
+    }
+
 
       // ===============================================
     // ACCESSORS
@@ -132,7 +140,8 @@ class Area extends Model
     {
         return $this->machines()->count() === 0
             && $this->tables()->count() === 0
-            && $this->semiAutomatics()->count() === 0;
+            && $this->semiAutomatics()->count() === 0
+            && $this->employees()->count() === 0;
     }
 
     /**

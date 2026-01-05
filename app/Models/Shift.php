@@ -31,17 +31,20 @@ class Shift extends Model
      * Relationships with other models
      */
 
-    //pending
-    /* public function Employees(): HasMany
+    /**
+     * Get all employees (users with employee role) for this shift
+     */
+    public function employees(): HasMany
     {
-        return $this->hasMany(Employee::class);
-    } */
-
-
-    public function ProuctionSessions(): HasMany
-    {
-        return $this->hasMany(ProductionSession::class);
+        return $this->hasMany(User::class);
     }
+
+
+    // TODO: Uncomment when ProductionSession model is created
+    // public function ProuctionSessions(): HasMany
+    // {
+    //     return $this->hasMany(ProductionSession::class);
+    // }
 
     public function BreakTimes(): HasMany
     {
@@ -133,17 +136,18 @@ class Shift extends Model
     // Método unificado para verificar si se puede eliminar
     public function canBeDeleted()
     {
-        return $this->Employees()->count() === 0
-            && $this->ProuctionSessions()->count() === 0
+        return $this->employees()->count() === 0
+            // && $this->ProuctionSessions()->count() === 0  // TODO: Uncomment when ProductionSession model exists
             && $this->BreakTimes()->count() === 0
             && $this->overTimes()->count() === 0;
     }
 
     // Métodos individuales (mantener por compatibilidad)
-    public function canBeDeletedProductionSessions()
-    {
-        return $this->ProuctionSessions()->count() == 0;
-    }
+    // TODO: Uncomment when ProductionSession model is created
+    // public function canBeDeletedProductionSessions()
+    // {
+    //     return $this->ProuctionSessions()->count() == 0;
+    // }
 
     public function canBeDeletedBreakTimes()
     {

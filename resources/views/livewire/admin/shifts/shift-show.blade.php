@@ -345,8 +345,7 @@ new class extends Component {
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody
-                                class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
+                            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                                 @foreach ($shift->BreakTimes as $breakTime)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -355,8 +354,7 @@ new class extends Component {
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div
-                                                class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                                            <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                                                 <svg class="w-4 h-4 mr-2 text-gray-400" fill="none"
                                                     stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -371,9 +369,7 @@ new class extends Component {
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-500 dark:text-gray-400">
                                                 @php
-                                                    $start = \Carbon\Carbon::parse(
-                                                        $breakTime->start_break_time,
-                                                    );
+                                                    $start = \Carbon\Carbon::parse($breakTime->start_break_time);
                                                     $end = \Carbon\Carbon::parse($breakTime->end_break_time);
                                                     $duration = $start->diff($end);
                                                 @endphp

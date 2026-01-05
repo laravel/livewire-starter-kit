@@ -45,6 +45,21 @@
                         @enderror
                     </div>
 
+                    <!-- Units Per Hour -->
+                    <div>
+                        <label for="units_per_hour" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Unidades por Hora <span class="text-red-500">*</span>
+                        </label>
+                        <input wire:model="units_per_hour" id="units_per_hour" type="number" min="1"
+                            placeholder="Ej: 50"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                            required />
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Cantidad de unidades que se producen por hora en esta estación</p>
+                        @error('units_per_hour')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Work Stations -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>

@@ -26,12 +26,12 @@
                     :current="request()->routeIs('admin.purchase-orders.*')" wire:navigate>{{ __('Purchase Orders') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="clipboard-document-check" :href="route('admin.work-orders.index')"
-                    :current="request()->routeIs('admin.work-orders.*')" wire:navigate>{{ __('Work Orders') }}
+                    :current="request()->routeIs('admin.work-orders.*')" wire:navigate>{{ __('Manage PO') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="clipboard-document-list" :href="route('admin.statuses-wo.index')"
                     :current="request()->routeIs('admin.statuses-wo.*')" wire:navigate>{{ __('Estados') }}
                 </flux:navlist.item>
-                <flux:navlist.item icon="calculator" :href="route('admin.capacity.calculator')"
+                <flux:navlist.item icon="calculator" :href="route('admin.capacity.wizard')"
                     :current="request()->routeIs('admin.capacity.*', 'admin.sent-lists.*')" wire:navigate>{{ __('Capacidad') }}
                 </flux:navlist.item>
             </flux:navlist.group>
@@ -75,6 +75,9 @@
             <flux:navlist.group :heading="__('Administración')" class="grid">
                 <flux:navlist.item icon="users" :href="route('admin.users.index')"
                     :current="request()->routeIs('admin.users.*')" wire:navigate>{{ __('Usuarios') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="user-group" :href="route('admin.employees.index')"
+                    :current="request()->routeIs('admin.employees.*')" wire:navigate>{{ __('Empleados') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="rectangle-group" :href="route('admin.departments.index')"
                     :current="request()->routeIs('admin.departments.*')" wire:navigate>{{ __('Departamentos') }}

@@ -53,8 +53,8 @@
                             <option value="">Seleccione un turno</option>
                             @foreach ($shifts as $shift)
                                 <option value="{{ $shift->id }}">
-                                    {{ $shift->name }} ({{ Carbon::parse($shift->start_time)->format('H:i') }}
-                                    - {{ Carbon::parse($shift->end_time)->format('H:i') }})
+                                    {{ $shift->name }} ({{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }}
+                                    - {{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }})
                                 </option>
                             @endforeach
                         </select>

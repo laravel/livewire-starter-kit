@@ -58,7 +58,7 @@ class MachineCreate extends Component
         session()->flash('flash.banner', 'Máquina creada correctamente.');
         session()->flash('flash.bannerStyle', 'success');
 
-        return redirect()->route('machines.index');
+        return redirect()->route('admin.machines.index');
     }
 
     public function render()

@@ -21,7 +21,8 @@ class RoleSeeder extends Seeder
             'Production',
             'Shipping',
             'Warehouse',
-            'Materials'
+            'Materials',
+            'employee',  // Rol para empleados (panel de empleado)
         ];
 
         foreach ($roles as $roleName) {
@@ -61,6 +62,13 @@ class RoleSeeder extends Seeder
                         'view-dashboard',
                         'view-users',
                         'view-reports',
+                    ]);
+                    break;
+                    
+                case 'employee':
+                    // Empleados solo pueden ver su dashboard
+                    $role->syncPermissions([
+                        'view-dashboard',
                     ]);
                     break;
             }

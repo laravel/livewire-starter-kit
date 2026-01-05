@@ -5,7 +5,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ID: {{ $workOrder->wo_number }}</p>
-                    @if($workOrder->purchaseOrder->wo)
+                    @if($workOrder->purchaseOrder?->wo)
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">WO: {{ $workOrder->purchaseOrder->wo }}</h1>
                     @else
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $workOrder->wo_number }}</h1>
@@ -45,7 +45,7 @@
                             <dd class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ $workOrder->wo_number }}</dd>
                         </div>
                         
-                        @if($workOrder->purchaseOrder->wo)
+                        @if($workOrder->purchaseOrder?->wo)
                         <div class="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg -m-1">
                             <dt class="text-sm font-medium text-indigo-600 dark:text-indigo-400">WO (Cliente)</dt>
                             <dd class="mt-1 text-xl text-indigo-700 dark:text-indigo-300 font-bold">{{ $workOrder->purchaseOrder->wo }}</dd>
@@ -61,6 +61,7 @@
                             </dd>
                         </div>
                         
+                        @if($workOrder->purchaseOrder)
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Purchase Order</dt>
                             <dd class="mt-1 text-sm text-gray-900 dark:text-white">
@@ -73,10 +74,18 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Parte</dt>
                             <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                                {{ $workOrder->purchaseOrder->part->number }}
+                                {{ $workOrder->purchaseOrder->part->number ?? 'N/A' }}
+                                @if($workOrder->purchaseOrder->part)
                                 <span class="text-gray-500 dark:text-gray-400">- {{ $workOrder->purchaseOrder->part->description }}</span>
+                                @endif
                             </dd>
                         </div>
+                        @else
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Purchase Order</dt>
+                            <dd class="mt-1 text-sm text-gray-500 dark:text-gray-400">No asociado</dd>
+                        </div>
+                        @endif
                         
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Cantidad Original</dt>
@@ -185,7 +194,7 @@
         </div>
 
         <!-- Document Signatures -->
-        @if($workOrder->purchaseOrder->pdf_path)
+        @if($workOrder->purchaseOrder?->pdf_path)
         <div class="mt-6 bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-4">

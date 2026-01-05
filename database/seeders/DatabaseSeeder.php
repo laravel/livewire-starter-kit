@@ -14,16 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@test.com',
-            'account' => 'test',
-            'password' => Hash::make('password'),
-        ]);
-
-        // Call the seeders in order
+        // Call the seeders in order (roles first!)
         $this->call([
             PermissionSeeder::class,
             RoleSeeder::class,
@@ -35,5 +26,18 @@ class DatabaseSeeder extends Seeder
             WorkOrderTestSeeder::class,
             //StandardSeeder::class,
         ]);
+
+        // Create admin user AFTER roles are created
+        $adminUser = User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'test@test.com',
+            'account' => 'test',
+            'password' => Hash::make('password'),
+        ]);
+        
+        // Assign admin role
+        $adminUser->assignRole('Admin');
+        
+        $this->command->info('Admin user created: test@test.com / password');
     }
 }

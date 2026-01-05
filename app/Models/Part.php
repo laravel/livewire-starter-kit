@@ -35,6 +35,14 @@ class Part extends Model
     }
 
     /**
+     * Get the standards for the part.
+     */
+    public function standards(): HasMany
+    {
+        return $this->hasMany(Standard::class);
+    }
+
+    /**
      * Get the purchase orders for the part.
      */
     public function purchaseOrders(): HasMany
