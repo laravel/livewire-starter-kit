@@ -180,7 +180,7 @@ new class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <h1 class="sr-only">Two-Factor Authentication Settings</h1>
+    <flux:heading class="sr-only">Two-Factor Authentication Settings</flux:heading>
 
     <x-settings.layout
         :heading="__('Two Factor Authentication')"
