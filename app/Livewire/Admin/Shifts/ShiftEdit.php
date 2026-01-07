@@ -29,7 +29,7 @@ class ShiftEdit extends Component
         return [
             'name' => 'required|string|max:255|unique:shifts,name,' . $this->shift->id,
             'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'end_time' => 'required|date_format:H:i',
             'active' => 'boolean',
             'comments' => 'nullable|string',
         ];
@@ -42,7 +42,6 @@ class ShiftEdit extends Component
             'start_time.date_format' => 'El formato de hora debe ser HH:MM.',
             'end_time.required' => 'La hora de fin es requerida.',
             'end_time.date_format' => 'El formato de hora debe ser HH:MM.',
-            'end_time.after' => 'La hora de fin debe ser posterior a la hora de inicio.',
         ];
     }
 
