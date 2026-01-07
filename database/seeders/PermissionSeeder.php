@@ -13,86 +13,166 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         // Permisos para gestión de usuarios
-        $userPermissions = [
+        $permissions = [
+            // Dashboard
+            'view-dashboard',
+            'view-analytics',
+            
+            // Users
             'view-users',
             'create-users',
             'edit-users',
             'delete-users',
-        ];
-
-        // Permisos para gestión de roles
-        $rolePermissions = [
+            
+            // Roles
             'view-roles',
             'create-roles',
             'edit-roles',
             'delete-roles',
-        ];
-
-        // Permisos para gestión de permisos
-        $permissionPermissions = [
+            
+            // Permissions
             'view-permissions',
             'create-permissions',
             'edit-permissions',
             'delete-permissions',
-        ];
-
-        // Permisos para áreas
-        $areaPermissions = [
-            'view-areas',
-            'create-areas',
-            'edit-areas',
-            'delete-areas',
-        ];
-
-        // Permisos para departamentos
-        $departmentPermissions = [
+            
+            // Departments
             'view-departments',
             'create-departments',
             'edit-departments',
             'delete-departments',
-        ];
-
-        // Permisos para reportes
-        $reportPermissions = [
+            
+            // Areas
+            'view-areas',
+            'create-areas',
+            'edit-areas',
+            'delete-areas',
+            
+            // Shifts
+            'view-shifts',
+            'create-shifts',
+            'edit-shifts',
+            'delete-shifts',
+            
+            // Break Times
+            'view-break-times',
+            'create-break-times',
+            'edit-break-times',
+            'delete-break-times',
+            
+            // Holidays
+            'view-holidays',
+            'create-holidays',
+            'edit-holidays',
+            'delete-holidays',
+            
+            // Parts
+            'view-parts',
+            'create-parts',
+            'edit-parts',
+            'delete-parts',
+            
+            // Prices
+            'view-prices',
+            'create-prices',
+            'edit-prices',
+            'delete-prices',
+            
+            // Purchase Orders
+            'view-purchase-orders',
+            'create-purchase-orders',
+            'edit-purchase-orders',
+            'delete-purchase-orders',
+            'approve-purchase-orders',
+            
+            // Work Orders
+            'view-work-orders',
+            'create-work-orders',
+            'edit-work-orders',
+            'delete-work-orders',
+            
+            // Standards
+            'view-standards',
+            'create-standards',
+            'edit-standards',
+            'delete-standards',
+            
+            // Production Statuses
+            'view-production-statuses',
+            'create-production-statuses',
+            'edit-production-statuses',
+            'delete-production-statuses',
+            
+            // Tables (Mesas)
+            'view-tables',
+            'create-tables',
+            'edit-tables',
+            'delete-tables',
+            
+            // Semi-Automatics
+            'view-semi-automatics',
+            'create-semi-automatics',
+            'edit-semi-automatics',
+            'delete-semi-automatics',
+            
+            // Machines
+            'view-machines',
+            'create-machines',
+            'edit-machines',
+            'delete-machines',
+            
+            // Over Times
+            'view-over-times',
+            'create-over-times',
+            'edit-over-times',
+            'delete-over-times',
+            
+            // Capacity Calculator/Wizard
+            'view-capacity',
+            'use-capacity-wizard',
+            
+            // Sent Lists
+            'view-sent-lists',
+            'create-sent-lists',
+            'edit-sent-lists',
+            'delete-sent-lists',
+            
+            // Kits
+            'view-kits',
+            'create-kits',
+            'edit-kits',
+            'delete-kits',
+            
+            // Lots
+            'view-lots',
+            'create-lots',
+            'edit-lots',
+            'delete-lots',
+            
+            // Employees
+            'view-employees',
+            'create-employees',
+            'edit-employees',
+            'delete-employees',
+            
+            // Reports
             'view-reports',
             'create-reports',
-            'edit-reports',
-            'delete-reports',
             'export-reports',
-        ];
-
-        // Permisos para configuración
-        $settingsPermissions = [
+            
+            // Settings
             'view-settings',
             'edit-settings',
         ];
 
-        // Permisos para dashboard
-        $dashboardPermissions = [
-            'view-dashboard',
-            'view-analytics',
-        ];
-
-        // Combinar todos los permisos
-        $allPermissions = array_merge(
-            $userPermissions,
-            $rolePermissions,
-            $permissionPermissions,
-            $areaPermissions,
-            $departmentPermissions,
-            $reportPermissions,
-            $settingsPermissions,
-            $dashboardPermissions
-        );
-
         // Crear permisos
-        foreach ($allPermissions as $permission) {
+        foreach ($permissions as $permission) {
             Permission::firstOrCreate([
                 'name' => $permission,
                 'guard_name' => 'web',
             ]);
         }
 
-        $this->command->info('Permisos creados correctamente.');
+        $this->command->info('Permisos creados correctamente: ' . count($permissions) . ' permisos.');
     }
 }
