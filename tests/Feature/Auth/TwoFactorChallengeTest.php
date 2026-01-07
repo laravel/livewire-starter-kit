@@ -33,7 +33,7 @@ class TwoFactorChallengeTest extends TestCase
             'confirmPassword' => true,
         ]);
 
-        $user = User::factory()->create();
+        $user = User::factory()->withTwoFactor()->create();
 
         $this->post(route('login.store'), [
             'email' => $user->email,
