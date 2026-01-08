@@ -114,7 +114,7 @@ new class extends Component {
                     <div
                         class="grid gap-1 p-4 font-mono text-sm rounded-lg bg-zinc-100 dark:bg-white/5"
                         role="list"
-                        aria-label="Recovery codes"
+                        aria-label="{{ __('Recovery codes') }}"
                     >
                         @foreach($recoveryCodes as $code)
                             <div
