@@ -5,10 +5,12 @@ on:
     branches:
       - develop
       - main
+      - components
   pull_request:
     branches:
       - develop
       - main
+      - components
 
 jobs:
   ci:
