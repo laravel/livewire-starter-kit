@@ -4,10 +4,13 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('settings/password', 'settings.password')->name('user-password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
 

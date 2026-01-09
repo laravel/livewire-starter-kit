@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Actions\Logout;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Component;
 
@@ -12,11 +13,17 @@ new class extends Component {
      */
     public function deleteUser(Logout $logout): void
     {
+        $user = Auth::user();
+        if ($user instanceof MustVerifyEmail && ! $user->hasVerifiedEmail()) {
+            $this->redirect('/email/verify');
+            return;
+        }
+
         $this->validate([
             'password' => ['required', 'string', 'current_password'],
         ]);
 
-        tap(Auth::user(), $logout(...))->delete();
+        tap($user, $logout(...))->delete();
 
         $this->redirect('/', navigate: true);
     }
