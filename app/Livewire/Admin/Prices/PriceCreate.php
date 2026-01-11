@@ -9,11 +9,9 @@ use Livewire\Component;
 class PriceCreate extends Component
 {
     public string $part_id = '';
-    public string $unit_price = '';
-    public string $tier_1_999 = '';
-    public string $tier_1000_10999 = '';
-    public string $tier_11000_99999 = '';
-    public string $tier_100000_plus = '';
+    public string $sample_price = '';
+    public string $workstation_type = 'table';
+    public array $tier_prices = [];
     public string $effective_date = '';
     public bool $active = true;
     public string $comments = '';
@@ -21,25 +19,38 @@ class PriceCreate extends Component
     public function mount(): void
     {
         $this->effective_date = now()->format('Y-m-d');
+        $this->initializeTierPrices();
         
         if (request()->has('part_id')) {
             $this->part_id = request('part_id');
         }
     }
 
+    public function updatedWorkstationType(): void
+    {
+        $this->initializeTierPrices();
+    }
+
+    protected function initializeTierPrices(): void
+    {
+        $config = Price::getTierConfigForType($this->workstation_type);
+        $this->tier_prices = array_fill(0, count($config), '');
+    }
+
     protected function rules(): array
     {
-        return [
+        $rules = [
             'part_id' => 'required|exists:parts,id',
-            'unit_price' => 'required|numeric|min:0',
-            'tier_1_999' => 'nullable|numeric|min:0',
-            'tier_1000_10999' => 'nullable|numeric|min:0',
-            'tier_11000_99999' => 'nullable|numeric|min:0',
-            'tier_100000_plus' => 'nullable|numeric|min:0',
+            'sample_price' => 'required|numeric|min:0',
+            'workstation_type' => 'required|in:table,machine,semi_automatic',
             'effective_date' => 'required|date',
             'active' => 'boolean',
             'comments' => 'nullable|string',
+            'tier_prices' => 'array',
+            'tier_prices.*' => 'nullable|numeric|min:0',
         ];
+
+        return $rules;
     }
 
     protected function messages(): array
@@ -47,9 +58,11 @@ class PriceCreate extends Component
         return [
             'part_id.required' => 'Debe seleccionar una parte.',
             'part_id.exists' => 'La parte seleccionada no es válida.',
-            'unit_price.required' => 'El precio unitario es obligatorio.',
-            'unit_price.numeric' => 'El precio unitario debe ser un número.',
-            'unit_price.min' => 'El precio unitario debe ser mayor o igual a 0.',
+            'sample_price.required' => 'El precio de muestra es obligatorio.',
+            'sample_price.numeric' => 'El precio de muestra debe ser un número.',
+            'sample_price.min' => 'El precio de muestra debe ser mayor o igual a 0.',
+            'workstation_type.required' => 'Debe seleccionar un tipo de estación de trabajo.',
+            'workstation_type.in' => 'El tipo de estación de trabajo no es válido.',
             'effective_date.required' => 'La fecha efectiva es obligatoria.',
             'effective_date.date' => 'La fecha efectiva debe ser una fecha válida.',
         ];
@@ -59,17 +72,17 @@ class PriceCreate extends Component
     {
         $this->validate();
 
-        Price::create([
+        $price = Price::create([
             'part_id' => $this->part_id,
-            'unit_price' => $this->unit_price,
-            'tier_1_999' => $this->tier_1_999 !== '' ? $this->tier_1_999 : null,
-            'tier_1000_10999' => $this->tier_1000_10999 !== '' ? $this->tier_1000_10999 : null,
-            'tier_11000_99999' => $this->tier_11000_99999 !== '' ? $this->tier_11000_99999 : null,
-            'tier_100000_plus' => $this->tier_100000_plus !== '' ? $this->tier_100000_plus : null,
+            'sample_price' => $this->sample_price,
+            'workstation_type' => $this->workstation_type,
             'effective_date' => $this->effective_date,
             'active' => $this->active,
             'comments' => $this->comments,
         ]);
+
+        // Sincronizar los tiers
+        $price->syncTiers($this->tier_prices);
 
         session()->flash('flash.banner', 'Precio creado correctamente.');
         session()->flash('flash.bannerStyle', 'success');
@@ -81,6 +94,8 @@ class PriceCreate extends Component
     {
         return view('livewire.admin.prices.price-create', [
             'parts' => Part::active()->orderBy('number')->get(),
+            'workstationTypes' => Price::WORKSTATION_TYPES,
+            'tierConfig' => Price::getTierConfigForType($this->workstation_type),
         ]);
     }
 }

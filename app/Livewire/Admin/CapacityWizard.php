@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
-use App\Models\{Shift, Part, SentList};
+use App\Models\{Shift, Part, SentList, User};
 use App\Services\CapacityCalculatorService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +15,8 @@ class CapacityWizard extends Component
 
     // Step 1 - Disponibilidad de horas
     public array $selectedShifts = [];
-    public int $numPersons = 1;
+    public int $numPersons = 0;  // Ahora se calcula automáticamente
+    public array $loadedEmployees = [];  // Empleados cargados por turno
     public string $startDate = '';
     public string $endDate = '';
     public float $totalAvailableHours = 0;
@@ -95,8 +96,9 @@ class CapacityWizard extends Component
             return false;
         }
 
-        if ($this->numPersons < 1) {
-            $this->errorMessage = 'El número de personas debe ser al menos 1.';
+        // Permitir continuar con 0 personas (se mostrará advertencia en la vista)
+        if ($this->numPersons < 0) {
+            $this->errorMessage = 'El número de personas no puede ser negativo.';
             return false;
         }
 
@@ -187,9 +189,82 @@ class CapacityWizard extends Component
 
     public function updatedSelectedShifts()
     {
+        // Cargar empleados para los turnos seleccionados
+        $this->loadEmployeesForShifts();
+        
         if (!empty($this->selectedShifts) && $this->currentStep === 1) {
             $this->calculateAvailableHours();
         }
+    }
+
+    // ==========================================
+    // Employee Loading Methods
+    // ==========================================
+
+    /**
+     * Carga los empleados activos asociados a los turnos seleccionados.
+     * Agrupa los empleados por turno para mostrar en la vista.
+     */
+    protected function loadEmployeesForShifts(): void
+    {
+        if (empty($this->selectedShifts)) {
+            $this->loadedEmployees = [];
+            $this->numPersons = 0;
+            return;
+        }
+
+        // Obtener empleados activos con rol 'employee' de los turnos seleccionados
+        $employees = User::active()
+            ->role('employee')
+            ->whereIn('shift_id', $this->selectedShifts)
+            ->with('shift:id,name')
+            ->orderBy('shift_id')
+            ->orderBy('name')
+            ->get();
+
+        // Agrupar por turno
+        $grouped = [];
+        foreach ($employees as $employee) {
+            $shiftId = $employee->shift_id;
+            if (!isset($grouped[$shiftId])) {
+                $grouped[$shiftId] = [
+                    'shift_id' => $shiftId,
+                    'shift_name' => $employee->shift->name ?? 'Sin turno',
+                    'employees' => [],
+                ];
+            }
+            $grouped[$shiftId]['employees'][] = [
+                'id' => $employee->id,
+                'name' => $employee->name,
+                'last_name' => $employee->last_name,
+                'full_name' => $employee->full_name,
+                'employee_number' => $employee->employee_number,
+                'position' => $employee->position,
+            ];
+        }
+
+        $this->loadedEmployees = array_values($grouped);
+        $this->numPersons = $employees->count();
+    }
+
+    /**
+     * Obtiene el total de empleados cargados.
+     */
+    public function getTotalEmployeesProperty(): int
+    {
+        return $this->numPersons;
+    }
+
+    /**
+     * Obtiene el conteo de empleados por turno.
+     */
+    public function getEmployeeCountByShiftProperty(): array
+    {
+        $counts = [];
+        foreach ($this->loadedEmployees as $group) {
+            $counts[$group['shift_id']] = count($group['employees']);
+        }
+        return $counts;
     }
 
     // ==========================================
@@ -251,6 +326,9 @@ class CapacityWizard extends Component
             // Reset form
             $this->currentPartId = null;
             $this->currentQuantity = 0;
+
+            // Dispatch event to clear Tom Select
+            $this->dispatch('partAdded');
 
             $this->errorMessage = '';
             $this->successMessage = "Parte {$part->number} agregada. Horas requeridas: {$requiredHours}";
@@ -326,6 +404,7 @@ class CapacityWizard extends Component
             'currentStep',
             'selectedShifts',
             'numPersons',
+            'loadedEmployees',
             'totalAvailableHours',
             'shiftDetails',
             'workOrderItems',
@@ -339,7 +418,7 @@ class CapacityWizard extends Component
             'successMessage',
         ]);
 
-        $this->numPersons = 1;
+        $this->numPersons = 0;
         $this->startDate = now()->format('Y-m-d');
         $this->endDate = now()->addDays(4)->format('Y-m-d');
     }

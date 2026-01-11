@@ -69,7 +69,7 @@ class PriceList extends Component
 
     public function render()
     {
-        $query = Price::with('part')->search($this->search);
+        $query = Price::with(['part', 'tiers'])->search($this->search);
 
         if ($this->filterActive === 'active') {
             $query->active();
