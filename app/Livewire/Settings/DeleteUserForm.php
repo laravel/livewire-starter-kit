@@ -19,17 +19,11 @@ class DeleteUserForm extends Component
      */
     public function deleteUser(Logout $logout): void
     {
-        $user = Auth::user();
-        if ($user instanceof MustVerifyEmail && ! $user->hasVerifiedEmail()) {
-            $this->redirect('/email/verify');
-            return;
-        }
-
         $this->validate([
             'password' => $this->currentPasswordRules(),
         ]);
 
-        tap($user, $logout(...))->delete();
+        tap(Auth::user(), $logout(...))->delete();
 
         $this->redirect('/', navigate: true);
     }
