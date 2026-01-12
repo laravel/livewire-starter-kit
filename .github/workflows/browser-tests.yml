@@ -6,11 +6,13 @@ on:
       - pest-ci
       - develop
       - main
+      - components
   pull_request:
     branches:
       - pest-ci
       - develop
       - main
+      - components
 
 jobs:
   ci:
