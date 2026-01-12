@@ -36,7 +36,7 @@ jobs:
           npm install
 
       - name: Run Pint
-        run: vendor/bin/pint
+        run: composer lint
 
       # - name: Commit Changes
       #   uses: stefanzweifel/git-auto-commit-action@v5
