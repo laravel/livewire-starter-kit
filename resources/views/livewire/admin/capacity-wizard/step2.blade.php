@@ -10,23 +10,24 @@
             <div class="rounded-lg bg-gray-50 dark:bg-gray-900 p-4">
                 <h3 class="font-medium text-gray-900 dark:text-white mb-4">Agregar Número de Parte</h3>
                 
-                {{-- Part Selection --}}
-                <div class="mb-4">
+                {{-- Part Selection with Tom Select --}}
+                <div class="mb-4" wire:ignore>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Número de Parte
                         <span class="text-xs text-gray-500">({{ $parts->count() }} disponibles)</span>
                     </label>
                     <select 
-                        wire:model="currentPartId"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        id="part-select"
+                        placeholder="Buscar número de parte..."
+                        autocomplete="off"
                     >
                         <option value="">Seleccionar parte...</option>
                         @foreach($parts as $part)
-                            <option value="{{ $part->id }}">{{ $part->number }} - {{ Str::limit($part->description, 30) }}</option>
+                            <option value="{{ $part->id }}">{{ $part->number }} - {{ Str::limit($part->description, 40) }}</option>
                         @endforeach
                     </select>
-                    @error('currentPartId') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
+                @error('currentPartId') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
 
                 {{-- Quantity --}}
                 <div class="mb-4">
@@ -191,3 +192,56 @@
         </button>
     </div>
 </div>
+
+{{-- Tom Select Initialization --}}
+@script
+<script>
+    // Initialize Tom Select when component loads
+    $wire.on('initTomSelect', () => {
+        initPartSelect();
+    });
+
+    // Clear Tom Select when item is added successfully
+    $wire.on('partAdded', () => {
+        const selectEl = document.getElementById('part-select');
+        if (selectEl && selectEl.tomselect) {
+            selectEl.tomselect.clear();
+        }
+    });
+
+    function initPartSelect() {
+        const selectEl = document.getElementById('part-select');
+        if (!selectEl) return;
+        
+        // Destroy existing instance if any
+        if (selectEl.tomselect) {
+            selectEl.tomselect.destroy();
+        }
+
+        new TomSelect('#part-select', {
+            create: false,
+            sortField: { field: 'text', direction: 'asc' },
+            placeholder: 'Buscar número de parte...',
+            allowEmptyOption: true,
+            render: {
+                option: function(data, escape) {
+                    return '<div class="py-2 px-3">' + escape(data.text) + '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div>' + escape(data.text) + '</div>';
+                },
+                no_results: function(data, escape) {
+                    return '<div class="no-results py-2 px-3 text-gray-500">No se encontraron resultados para "' + escape(data.input) + '"</div>';
+                }
+            },
+            onChange: function(value) {
+                // Sync with Livewire using $wire
+                $wire.set('currentPartId', value ? parseInt(value) : null);
+            }
+        });
+    }
+
+    // Initialize on first load
+    setTimeout(() => initPartSelect(), 100);
+</script>
+@endscript

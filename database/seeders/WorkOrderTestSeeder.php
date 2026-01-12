@@ -107,29 +107,80 @@ class WorkOrderTestSeeder extends Seeder
 
     private function createTestPrices(array $parts): void
     {
-        // Precios para cada parte con diferentes tiers
+        // Precios para cada parte con diferentes tipos de estación
         $priceData = [
-            'part1' => ['unit' => 1.5000, 't1' => 1.5000, 't2' => 1.3000, 't3' => 1.1000, 't4' => 0.9000],
-            'part2' => ['unit' => 2.0000, 't1' => 2.0000, 't2' => 1.8000, 't3' => 1.5000, 't4' => 1.2000],
-            'part3' => ['unit' => 0.7500, 't1' => 0.7500, 't2' => 0.6500, 't3' => 0.5500, 't4' => 0.4500],
-            'part4' => ['unit' => 3.2500, 't1' => 3.2500, 't2' => 2.9000, 't3' => 2.5000, 't4' => 2.0000],
-            'part5' => ['unit' => 1.0000, 't1' => 1.0000, 't2' => 0.9000, 't3' => 0.8000, 't4' => 0.7000],
+            // Mesa de Trabajo (4 niveles)
+            'part1' => [
+                'sample' => 1.5000,
+                'type' => 'table',
+                'tiers' => [
+                    ['min' => 1, 'max' => 999, 'price' => 1.5000],
+                    ['min' => 1000, 'max' => 10999, 'price' => 1.3000],
+                    ['min' => 11000, 'max' => 99999, 'price' => 1.1000],
+                    ['min' => 100000, 'max' => null, 'price' => 0.9000],
+                ],
+            ],
+            // Mesa de Trabajo
+            'part2' => [
+                'sample' => 2.0000,
+                'type' => 'table',
+                'tiers' => [
+                    ['min' => 1, 'max' => 999, 'price' => 2.0000],
+                    ['min' => 1000, 'max' => 10999, 'price' => 1.8000],
+                    ['min' => 11000, 'max' => 99999, 'price' => 1.5000],
+                    ['min' => 100000, 'max' => null, 'price' => 1.2000],
+                ],
+            ],
+            // Máquina (3 niveles)
+            'part3' => [
+                'sample' => 0.7500,
+                'type' => 'machine',
+                'tiers' => [
+                    ['min' => 1, 'max' => 9999, 'price' => 0.7500],
+                    ['min' => 10000, 'max' => 49999, 'price' => 0.6500],
+                    ['min' => 50000, 'max' => null, 'price' => 0.5500],
+                ],
+            ],
+            // Máquina
+            'part4' => [
+                'sample' => 3.2500,
+                'type' => 'machine',
+                'tiers' => [
+                    ['min' => 1, 'max' => 9999, 'price' => 3.2500],
+                    ['min' => 10000, 'max' => 49999, 'price' => 2.9000],
+                    ['min' => 50000, 'max' => null, 'price' => 2.5000],
+                ],
+            ],
+            // Semi-Automática (2 niveles)
+            'part5' => [
+                'sample' => 1.0000,
+                'type' => 'semi_automatic',
+                'tiers' => [
+                    ['min' => 2000, 'max' => 10000, 'price' => 1.0000],
+                    ['min' => 11000, 'max' => null, 'price' => 0.8000],
+                ],
+            ],
         ];
 
-        foreach ($priceData as $key => $prices) {
-            Price::firstOrCreate(
+        foreach ($priceData as $key => $data) {
+            $price = Price::firstOrCreate(
                 ['part_id' => $parts[$key]->id, 'active' => true],
                 [
-                    'unit_price' => $prices['unit'],
-                    'tier_1_999' => $prices['t1'],
-                    'tier_1000_10999' => $prices['t2'],
-                    'tier_11000_99999' => $prices['t3'],
-                    'tier_100000_plus' => $prices['t4'],
+                    'sample_price' => $data['sample'],
+                    'workstation_type' => $data['type'],
                     'effective_date' => Carbon::now()->subMonth(),
                     'active' => true,
-                    'comments' => 'Precio de prueba',
+                    'comments' => 'Precio de prueba - ' . ucfirst($data['type']),
                 ]
             );
+
+            // Crear los tiers en la tabla pivote
+            foreach ($data['tiers'] as $tier) {
+                $price->tiers()->firstOrCreate(
+                    ['min_quantity' => $tier['min'], 'max_quantity' => $tier['max']],
+                    ['tier_price' => $tier['price']]
+                );
+            }
         }
     }
 

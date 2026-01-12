@@ -10,41 +10,43 @@ class PriceEdit extends Component
 {
     public Price $price;
     public string $part_id = '';
-    public string $unit_price = '';
-    public string $tier_1_999 = '';
-    public string $tier_1000_10999 = '';
-    public string $tier_11000_99999 = '';
-    public string $tier_100000_plus = '';
+    public string $sample_price = '';
+    public string $workstation_type = 'table';
+    public array $tier_prices = [];
     public string $effective_date = '';
     public bool $active = true;
     public string $comments = '';
 
     public function mount(Price $price): void
     {
-        $this->price = $price;
+        $this->price = $price->load('tiers');
         $this->part_id = (string) $price->part_id;
-        $this->unit_price = (string) $price->unit_price;
-        $this->tier_1_999 = $price->tier_1_999 !== null ? (string) $price->tier_1_999 : '';
-        $this->tier_1000_10999 = $price->tier_1000_10999 !== null ? (string) $price->tier_1000_10999 : '';
-        $this->tier_11000_99999 = $price->tier_11000_99999 !== null ? (string) $price->tier_11000_99999 : '';
-        $this->tier_100000_plus = $price->tier_100000_plus !== null ? (string) $price->tier_100000_plus : '';
+        $this->sample_price = (string) $price->sample_price;
+        $this->workstation_type = $price->workstation_type ?? 'table';
+        $this->tier_prices = $price->tiers_array;
         $this->effective_date = $price->effective_date->format('Y-m-d');
         $this->active = $price->active;
         $this->comments = $price->comments ?? '';
+    }
+
+    public function updatedWorkstationType(): void
+    {
+        // Reinicializar tiers cuando cambia el tipo
+        $config = Price::getTierConfigForType($this->workstation_type);
+        $this->tier_prices = array_fill(0, count($config), '');
     }
 
     protected function rules(): array
     {
         return [
             'part_id' => 'required|exists:parts,id',
-            'unit_price' => 'required|numeric|min:0',
-            'tier_1_999' => 'nullable|numeric|min:0',
-            'tier_1000_10999' => 'nullable|numeric|min:0',
-            'tier_11000_99999' => 'nullable|numeric|min:0',
-            'tier_100000_plus' => 'nullable|numeric|min:0',
+            'sample_price' => 'required|numeric|min:0',
+            'workstation_type' => 'required|in:table,machine,semi_automatic',
             'effective_date' => 'required|date',
             'active' => 'boolean',
             'comments' => 'nullable|string',
+            'tier_prices' => 'array',
+            'tier_prices.*' => 'nullable|numeric|min:0',
         ];
     }
 
@@ -53,9 +55,11 @@ class PriceEdit extends Component
         return [
             'part_id.required' => 'Debe seleccionar una parte.',
             'part_id.exists' => 'La parte seleccionada no es válida.',
-            'unit_price.required' => 'El precio unitario es obligatorio.',
-            'unit_price.numeric' => 'El precio unitario debe ser un número.',
-            'unit_price.min' => 'El precio unitario debe ser mayor o igual a 0.',
+            'sample_price.required' => 'El precio de muestra es obligatorio.',
+            'sample_price.numeric' => 'El precio de muestra debe ser un número.',
+            'sample_price.min' => 'El precio de muestra debe ser mayor o igual a 0.',
+            'workstation_type.required' => 'Debe seleccionar un tipo de estación de trabajo.',
+            'workstation_type.in' => 'El tipo de estación de trabajo no es válido.',
             'effective_date.required' => 'La fecha efectiva es obligatoria.',
             'effective_date.date' => 'La fecha efectiva debe ser una fecha válida.',
         ];
@@ -67,15 +71,15 @@ class PriceEdit extends Component
 
         $this->price->update([
             'part_id' => $this->part_id,
-            'unit_price' => $this->unit_price,
-            'tier_1_999' => $this->tier_1_999 !== '' ? $this->tier_1_999 : null,
-            'tier_1000_10999' => $this->tier_1000_10999 !== '' ? $this->tier_1000_10999 : null,
-            'tier_11000_99999' => $this->tier_11000_99999 !== '' ? $this->tier_11000_99999 : null,
-            'tier_100000_plus' => $this->tier_100000_plus !== '' ? $this->tier_100000_plus : null,
+            'sample_price' => $this->sample_price,
+            'workstation_type' => $this->workstation_type,
             'effective_date' => $this->effective_date,
             'active' => $this->active,
             'comments' => $this->comments,
         ]);
+
+        // Sincronizar los tiers
+        $this->price->syncTiers($this->tier_prices);
 
         session()->flash('flash.banner', 'Precio actualizado correctamente.');
         session()->flash('flash.bannerStyle', 'success');
@@ -87,6 +91,8 @@ class PriceEdit extends Component
     {
         return view('livewire.admin.prices.price-edit', [
             'parts' => Part::active()->orderBy('number')->get(),
+            'workstationTypes' => Price::WORKSTATION_TYPES,
+            'tierConfig' => Price::getTierConfigForType($this->workstation_type),
         ]);
     }
 }

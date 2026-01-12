@@ -1,0 +1,2 @@
+<img src="<?php echo e(asset('flexcon.png')); ?>" alt="FlexCon" <?php echo e($attributes); ?> />
+<?php /**PATH D:\xampp\htdocs\Laravel\Flexcon-tracker\resources\views/components/app-logo-icon.blade.php ENDPATH**/ ?>

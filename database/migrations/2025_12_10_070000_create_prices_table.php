@@ -14,17 +14,33 @@ return new class extends Migration
         Schema::create('prices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('part_id')->constrained()->onDelete('cascade');
-            $table->decimal('unit_price', 10, 4);
-            $table->decimal('tier_1_999', 10, 4)->nullable();
-            $table->decimal('tier_1000_10999', 10, 4)->nullable();
-            $table->decimal('tier_11000_99999', 10, 4)->nullable();
-            $table->decimal('tier_100000_plus', 10, 4)->nullable();
+            
+            // Precio de muestra (antes unit_price)
+            $table->decimal('sample_price', 10, 4);
+            
+            // Tipo de estación de trabajo
+            $table->enum('workstation_type', ['table', 'machine', 'semi_automatic'])->default('table');
+            
             $table->date('effective_date');
             $table->boolean('active')->default(true);
             $table->text('comments')->nullable();
             $table->timestamps();
 
             $table->index(['part_id', 'active', 'effective_date']);
+            $table->index(['workstation_type']);
+        });
+
+        // Tabla pivote para los niveles de precio por volumen
+        Schema::create('price_tiers', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('price_id')->constrained()->onDelete('cascade');
+            $table->unsignedInteger('min_quantity');
+            $table->unsignedInteger('max_quantity')->nullable(); // null = sin límite (ej: 100000+)
+            $table->decimal('tier_price', 10, 4);
+            $table->timestamps();
+
+            $table->index(['price_id', 'min_quantity']);
+            $table->unique(['price_id', 'min_quantity', 'max_quantity'], 'price_tier_unique');
         });
     }
 
@@ -33,6 +49,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('price_tiers');
         Schema::dropIfExists('prices');
     }
 };
