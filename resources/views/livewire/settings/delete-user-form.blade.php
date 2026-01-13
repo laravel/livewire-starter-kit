@@ -1,10 +1,13 @@
 <?php
 
+use App\Concerns\PasswordValidationRules;
 use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Component;
 
 new class extends Component {
+    use PasswordValidationRules;
+
     public string $password = '';
 
     /**
@@ -13,7 +16,7 @@ new class extends Component {
     public function deleteUser(Logout $logout): void
     {
         $this->validate([
-            'password' => ['required', 'string', 'current_password'],
+            'password' => $this->currentPasswordRules(),
         ]);
 
         tap(Auth::user(), $logout(...))->delete();

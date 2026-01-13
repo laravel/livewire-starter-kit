@@ -1,5 +1,6 @@
 <?php
 
+use App\Concerns\ProfileValidationRules;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -7,6 +8,8 @@ use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
 
 new class extends Component {
+    use ProfileValidationRules;
+
     public string $name = '';
     public string $email = '';
 
@@ -26,18 +29,7 @@ new class extends Component {
     {
         $user = Auth::user();
 
-        $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($user->id)
-            ],
-        ]);
+        $validated = $this->validate($this->profileRules($user->id));
 
         $user->fill($validated);
 
