@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Settings;
 
-use Tests\TestCase;
-use Livewire\Livewire;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Livewire\Livewire;
+use Tests\TestCase;
 
 class PasswordUpdateTest extends TestCase
 {
