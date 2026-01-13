@@ -1,4 +1,4 @@
-<x-layouts::auth>
+<x-layouts.auth>
     <div class="flex flex-col gap-6">
         <div
             class="relative w-full h-auto"
@@ -14,7 +14,7 @@
                     this.recovery_code = '';
 
                     $dispatch('clear-2fa-auth-code');
-
+            
                     $nextTick(() => {
                         this.showRecoveryInput
                             ? this.$refs.recovery_code?.focus()
@@ -96,4 +96,4 @@
             </form>
         </div>
     </div>
-</x-layouts::auth>
+</x-layouts.auth>
