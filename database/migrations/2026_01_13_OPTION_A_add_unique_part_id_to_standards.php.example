@@ -1,0 +1,93 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * OPCIÓN A: SOLUCIÓN SIMPLE - UNIQUE constraint en part_id
+ *
+ * Esta migración implementa la solución SIMPLE donde:
+ * - SOLO puede existir UN estándar por parte
+ * - NO permite historial de estándares
+ * - Elimina duplicados antes de agregar constraint
+ *
+ * USAR CUANDO:
+ * - NO necesitas historial de estándares
+ * - NO necesitas auditoría de cambios
+ * - Cuando cambias un estándar → eliminas el anterior
+ * - Caso de uso SIMPLE
+ *
+ * IMPORTANTE:
+ * - Renombra este archivo eliminando ".example" para activarlo
+ * - Revisa la lógica de limpieza de duplicados (línea 45-48)
+ * - Esta migración es IRREVERSIBLE (pierdes historial)
+ */
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        // PASO 1: Limpiar duplicados existentes
+        // ESTRATEGIA: Mantener el más reciente (mayor created_at), eliminar los demás
+
+        $duplicates = DB::table('standards')
+            ->select('part_id', DB::raw('COUNT(*) as count'))
+            ->groupBy('part_id')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('part_id');
+
+        foreach ($duplicates as $partId) {
+            // Obtener el ID del estándar más reciente
+            $keepId = DB::table('standards')
+                ->where('part_id', $partId)
+                ->orderBy('created_at', 'desc')
+                ->value('id');
+
+            // ELIMINAR todos los demás (HARD DELETE, no soft delete)
+            DB::table('standards')
+                ->where('part_id', $partId)
+                ->where('id', '!=', $keepId)
+                ->delete();
+
+            echo "Part ID {$partId}: Kept standard #{$keepId}, deleted others\n";
+        }
+
+        // PASO 2: Agregar UNIQUE constraint
+        Schema::table('standards', function (Blueprint $table) {
+            $table->unique('part_id', 'unique_part_id');
+        });
+
+        // PASO 3: Opcional - Limpiar campos innecesarios si quieres simplificar
+        // Descomenta si quieres remover campos que ya no tienen sentido:
+        /*
+        Schema::table('standards', function (Blueprint $table) {
+            $table->dropColumn('active'); // Ya no necesitas activar/desactivar
+            $table->dropColumn('effective_date'); // Ya no hay versiones
+            $table->dropSoftDeletes(); // Ya no necesitas soft deletes
+        });
+        */
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('standards', function (Blueprint $table) {
+            $table->dropUnique('unique_part_id');
+        });
+
+        // Si eliminaste columnas en up(), agrégalas de nuevo:
+        /*
+        Schema::table('standards', function (Blueprint $table) {
+            $table->boolean('active')->default(true);
+            $table->date('effective_date')->nullable();
+            $table->softDeletes();
+        });
+        */
+    }
+};

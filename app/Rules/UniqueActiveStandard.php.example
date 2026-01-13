@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Rules;
+
+use App\Models\Standard;
+use Illuminate\Contracts\Validation\Rule;
+
+/**
+ * Valida que solo exista UN estándar activo por parte
+ *
+ * Esta rule se usa con OPCIÓN B (solución compleja)
+ *
+ * USO:
+ *
+ * En StandardCreate:
+ * 'active' => ['boolean', new UniqueActiveStandard($this->part_id)]
+ *
+ * En StandardEdit:
+ * 'active' => ['boolean', new UniqueActiveStandard($this->part_id, $this->standard->id)]
+ *
+ * IMPORTANTE:
+ * - Renombra eliminando ".example" y coloca en app/Rules/
+ * - Asegúrate de tener el índice compuesto (migración OPTION_B)
+ */
+class UniqueActiveStandard implements Rule
+{
+    private int $partId;
+    private ?int $exceptId;
+    private ?Standard $conflictingStandard = null;
+
+    /**
+     * @param int $partId ID de la parte a validar
+     * @param int|null $exceptId ID del estándar actual (para update/edit)
+     */
+    public function __construct(int $partId, ?int $exceptId = null)
+    {
+        $this->partId = $partId;
+        $this->exceptId = $exceptId;
+    }
+
+    /**
+     * Determina si la validación pasa
+     *
+     * @param string $attribute
+     * @param mixed $value Valor del campo 'active'
+     * @return bool
+     */
+    public function passes($attribute, $value): bool
+    {
+        // Si active = false, siempre permitir
+        // (Puedes tener infinitos estándares inactivos)
+        if (!$value) {
+            return true;
+        }
+
+        // Buscar si ya existe otro estándar activo para esta parte
+        $query = Standard::where('part_id', $this->partId)
+            ->where('active', true);
+
+        // Si estamos editando, excluir el estándar actual
+        if ($this->exceptId) {
+            $query->where('id', '!=', $this->exceptId);
+        }
+
+        $this->conflictingStandard = $query->first();
+
+        // Si hay conflicto → validación falla
+        return $this->conflictingStandard === null;
+    }
+
+    /**
+     * Mensaje de error personalizado
+     *
+     * @return string
+     */
+    public function message(): string
+    {
+        if ($this->conflictingStandard) {
+            $partNumber = $this->conflictingStandard->part->number ?? "N/A";
+            $standardId = $this->conflictingStandard->id;
+
+            return "Ya existe un estándar activo para la parte {$partNumber} " .
+                   "(Standard #{$standardId}). " .
+                   "Desactiva el estándar anterior antes de activar este.";
+        }
+
+        return 'Ya existe un estándar activo para esta parte. ' .
+               'Desactiva el anterior primero.';
+    }
+}

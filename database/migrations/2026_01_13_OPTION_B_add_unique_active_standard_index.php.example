@@ -1,0 +1,96 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * OPCIÓN B: SOLUCIÓN COMPLEJA - Validación en app + índice compuesto
+ *
+ * Esta migración implementa la solución COMPLEJA donde:
+ * - Una parte puede tener MÚLTIPLES estándares (historial)
+ * - SOLO UNO puede estar activo (active=true) a la vez
+ * - Los inactivos se mantienen como historial
+ * - Usa índice compuesto para performance
+ *
+ * USAR CUANDO:
+ * - Necesitas historial de cambios en estándares
+ * - Necesitas auditoría y trazabilidad
+ * - Quieres reportes históricos
+ * - Planeas usar effective_date para versiones
+ * - Contexto de manufactura con mejora continua
+ *
+ * IMPORTANTE:
+ * - Renombra este archivo eliminando ".example" para activarlo
+ * - Requiere implementar UniqueActiveStandard rule (ver documentación)
+ * - Esta migración PRESERVA el historial
+ */
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        // PASO 1: Limpiar duplicados ACTIVOS existentes
+        // ESTRATEGIA: Mantener el más reciente activo, desactivar los demás
+
+        $duplicates = DB::table('standards')
+            ->select('part_id', DB::raw('COUNT(*) as count'))
+            ->where('active', true)
+            ->groupBy('part_id')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('part_id');
+
+        foreach ($duplicates as $partId) {
+            // Obtener el ID del estándar más reciente
+            $keepId = DB::table('standards')
+                ->where('part_id', $partId)
+                ->where('active', true)
+                ->orderBy('created_at', 'desc')
+                ->value('id');
+
+            // DESACTIVAR todos los demás (SOFT: active=false)
+            $deactivated = DB::table('standards')
+                ->where('part_id', $partId)
+                ->where('active', true)
+                ->where('id', '!=', $keepId)
+                ->update([
+                    'active' => false,
+                    'updated_at' => now()
+                ]);
+
+            echo "Part ID {$partId}: Kept standard #{$keepId} active, deactivated {$deactivated} others\n";
+        }
+
+        // PASO 2: Agregar índice compuesto para mejorar performance
+        // Este índice optimiza queries como: WHERE part_id = X AND active = true
+        Schema::table('standards', function (Blueprint $table) {
+            $table->index(['part_id', 'active'], 'idx_part_active_standard');
+        });
+
+        // PASO 3: Opcional - Agregar índice para effective_date si se usará
+        Schema::table('standards', function (Blueprint $table) {
+            // Si planeas hacer queries por fecha efectiva
+            $table->index(['part_id', 'effective_date'], 'idx_part_effective_date');
+        });
+
+        // NOTA: La validación de unicidad se implementa en:
+        // - app/Rules/UniqueActiveStandard.php
+        // - app/Livewire/Admin/Standards/StandardCreate.php
+        // - app/Livewire/Admin/Standards/StandardEdit.php
+        // Ver documentación para implementación completa
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('standards', function (Blueprint $table) {
+            $table->dropIndex('idx_part_active_standard');
+            $table->dropIndex('idx_part_effective_date');
+        });
+    }
+};
