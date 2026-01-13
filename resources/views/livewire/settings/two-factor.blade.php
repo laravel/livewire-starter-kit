@@ -7,7 +7,7 @@ use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Symfony\Component\HttpFoundation\Response;
 
 new class extends Component {
