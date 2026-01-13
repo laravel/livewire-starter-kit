@@ -11,21 +11,23 @@
                 <h3 class="font-medium text-gray-900 dark:text-white mb-4">Agregar Número de Parte</h3>
                 
                 
-                <div class="mb-4">
+                <div class="mb-4" wire:ignore>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Número de Parte
                         <span class="text-xs text-gray-500">(<?php echo e($parts->count()); ?> disponibles)</span>
                     </label>
                     <select 
-                        wire:model="currentPartId"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        id="part-select"
+                        placeholder="Buscar número de parte..."
+                        autocomplete="off"
                     >
                         <option value="">Seleccionar parte...</option>
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $parts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $part): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($part->id); ?>"><?php echo e($part->number); ?> - <?php echo e(Str::limit($part->description, 30)); ?></option>
+                            <option value="<?php echo e($part->id); ?>"><?php echo e($part->number); ?> - <?php echo e(Str::limit($part->description, 40)); ?></option>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </select>
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['currentPartId'];
+                </div>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['currentPartId'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -33,7 +35,6 @@ $message = $__bag->first($__errorArgs[0]); ?> <span class="text-xs text-red-500"
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                </div>
 
                 
                 <div class="mb-4">
@@ -208,4 +209,64 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
         </button>
     </div>
 </div>
+
+
+    <?php
+        $__scriptKey = '2913236060-0';
+        ob_start();
+    ?>
+<script>
+    // Initialize Tom Select when component loads
+    $wire.on('initTomSelect', () => {
+        initPartSelect();
+    });
+
+    // Clear Tom Select when item is added successfully
+    $wire.on('partAdded', () => {
+        const selectEl = document.getElementById('part-select');
+        if (selectEl && selectEl.tomselect) {
+            selectEl.tomselect.clear();
+        }
+    });
+
+    function initPartSelect() {
+        const selectEl = document.getElementById('part-select');
+        if (!selectEl) return;
+        
+        // Destroy existing instance if any
+        if (selectEl.tomselect) {
+            selectEl.tomselect.destroy();
+        }
+
+        new TomSelect('#part-select', {
+            create: false,
+            sortField: { field: 'text', direction: 'asc' },
+            placeholder: 'Buscar número de parte...',
+            allowEmptyOption: true,
+            render: {
+                option: function(data, escape) {
+                    return '<div class="py-2 px-3">' + escape(data.text) + '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div>' + escape(data.text) + '</div>';
+                },
+                no_results: function(data, escape) {
+                    return '<div class="no-results py-2 px-3 text-gray-500">No se encontraron resultados para "' + escape(data.input) + '"</div>';
+                }
+            },
+            onChange: function(value) {
+                // Sync with Livewire using $wire
+                $wire.set('currentPartId', value ? parseInt(value) : null);
+            }
+        });
+    }
+
+    // Initialize on first load
+    setTimeout(() => initPartSelect(), 100);
+</script>
+    <?php
+        $__output = ob_get_clean();
+
+        \Livewire\store($this)->push('scripts', $__output, $__scriptKey)
+    ?>
 <?php /**PATH C:\xampp\htdocs\flexcon-tracker\resources\views/livewire/admin/capacity-wizard/step2.blade.php ENDPATH**/ ?>

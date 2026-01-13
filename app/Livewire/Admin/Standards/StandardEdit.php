@@ -13,6 +13,7 @@ class StandardEdit extends Component
 {
     public Standard $standard;
     public ?int $part_id = null;
+    public string $units_per_hour = '';
     public ?int $work_table_id = null;
     public ?int $semi_auto_work_table_id = null;
     public ?int $machine_id = null;
@@ -27,6 +28,7 @@ class StandardEdit extends Component
     {
         $this->standard = $standard;
         $this->part_id = $standard->part_id;
+        $this->units_per_hour = $standard->units_per_hour ? (string) $standard->units_per_hour : '';
         $this->work_table_id = $standard->work_table_id;
         $this->semi_auto_work_table_id = $standard->semi_auto_work_table_id;
         $this->machine_id = $standard->machine_id;
@@ -42,6 +44,7 @@ class StandardEdit extends Component
     {
         return [
             'part_id' => 'required|exists:parts,id',
+            'units_per_hour' => 'required|integer|min:1',
             'work_table_id' => 'nullable|exists:tables,id',
             'semi_auto_work_table_id' => 'nullable|exists:semi_automatics,id',
             'machine_id' => 'nullable|exists:machines,id',
@@ -59,6 +62,9 @@ class StandardEdit extends Component
         return [
             'part_id.required' => 'Debe seleccionar una parte.',
             'part_id.exists' => 'La parte seleccionada no existe.',
+            'units_per_hour.required' => 'Las unidades por hora son obligatorias.',
+            'units_per_hour.integer' => 'Las unidades por hora deben ser un número entero.',
+            'units_per_hour.min' => 'Las unidades por hora deben ser al menos 1.',
             'work_table_id.exists' => 'La mesa de trabajo seleccionada no existe.',
             'semi_auto_work_table_id.exists' => 'La mesa semi-automática seleccionada no existe.',
             'machine_id.exists' => 'La máquina seleccionada no existe.',
@@ -78,6 +84,7 @@ class StandardEdit extends Component
 
         $this->standard->update([
             'part_id' => $this->part_id,
+            'units_per_hour' => $this->units_per_hour,
             'work_table_id' => $this->work_table_id ?: null,
             'semi_auto_work_table_id' => $this->semi_auto_work_table_id ?: null,
             'machine_id' => $this->machine_id ?: null,
