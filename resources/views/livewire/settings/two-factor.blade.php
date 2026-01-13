@@ -180,6 +180,8 @@ new class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
+    <flux:heading class="sr-only">{{ __('Two-Factor Authentication Settings') }}</flux:heading>
+
     <x-settings.layout
         :heading="__('Two Factor Authentication')"
         :subheading="__('Manage your two-factor authentication settings')"
@@ -265,18 +267,15 @@ new class extends Component {
 
             @if ($showVerificationStep)
                 <div class="space-y-6">
-                    <div class="flex flex-col items-center space-y-3">
-                        <x-input-otp
-                            :digits="6"
+                    <div class="flex flex-col items-center space-y-3 justify-center">
+                        <flux:otp
                             name="code"
                             wire:model="code"
-                            autocomplete="one-time-code"
+                            length="6"
+                            label="OTP Code"
+                            label:sr-only
+                            class="mx-auto"
                         />
-                        @error('code')
-                            <flux:text color="red">
-                                {{ $message }}
-                            </flux:text>
-                        @enderror
                     </div>
 
                     <div class="flex items-center space-x-3">
@@ -310,8 +309,11 @@ new class extends Component {
                                 <flux:icon.loading/>
                             </div>
                         @else
-                            <div class="flex items-center justify-center h-full p-4">
-                                <div class="bg-white p-3 rounded">
+                            <div x-data class="flex items-center justify-center h-full p-4">
+                                <div
+                                    class="bg-white p-3 rounded"
+                                    :style="($flux.appearance === 'dark' || ($flux.appearance === 'system' && $flux.dark)) ? 'filter: invert(1) brightness(1.5)' : ''"
+                                >
                                     {!! $qrCodeSvg !!}
                                 </div>
                             </div>
