@@ -195,4 +195,146 @@ class Shift extends Model
         ];
     } */
 
+    /**
+     * Hours Calculation Accessors
+     * These accessors calculate shift hours, break times, and net working hours
+     */
+
+    /**
+     * Calcula las horas totales del turno en minutos.
+     * Maneja turnos nocturnos que cruzan la medianoche.
+     *
+     * @return int Total de minutos del turno
+     */
+    public function getTotalMinutesAttribute(): int
+    {
+        $start = Carbon::parse($this->start_time);
+        $end = Carbon::parse($this->end_time);
+
+        // Si end_time es menor que start_time, el turno cruza la medianoche
+        if ($end->lt($start)) {
+            // Agregar un dia al end_time para calculo correcto
+            $end->addDay();
+        }
+
+        return $start->diffInMinutes($end);
+    }
+
+    /**
+     * Retorna las horas totales como numero decimal.
+     *
+     * @return float Horas totales (ej: 8.0, 7.5)
+     */
+    public function getTotalHoursAttribute(): float
+    {
+        return round($this->total_minutes / 60, 2);
+    }
+
+    /**
+     * Calcula el total de minutos de descanso (solo breaks activos).
+     *
+     * @return int Total de minutos de descanso
+     */
+    public function getTotalBreakMinutesAttribute(): int
+    {
+        return $this->BreakTimes()
+            ->where('active', true)
+            ->get()
+            ->sum(function ($break) {
+                $start = Carbon::parse($break->start_break_time);
+                $end = Carbon::parse($break->end_break_time);
+                return $start->diffInMinutes($end);
+            });
+    }
+
+    /**
+     * Retorna el total de horas de descanso como decimal.
+     *
+     * @return float Horas de descanso (ej: 0.5)
+     */
+    public function getTotalBreakHoursAttribute(): float
+    {
+        return round($this->total_break_minutes / 60, 2);
+    }
+
+    /**
+     * Calcula las horas laborables netas en minutos.
+     *
+     * @return int Minutos netos laborables
+     */
+    public function getNetWorkingMinutesAttribute(): int
+    {
+        return max(0, $this->total_minutes - $this->total_break_minutes);
+    }
+
+    /**
+     * Retorna las horas laborables netas como decimal.
+     *
+     * @return float Horas netas (ej: 7.5)
+     */
+    public function getNetWorkingHoursAttribute(): float
+    {
+        return round($this->net_working_minutes / 60, 2);
+    }
+
+    /**
+     * Formatea las horas totales del turno.
+     * Formato: "Xh" o "Xh Ym"
+     *
+     * @return string Horas formateadas
+     */
+    public function getFormattedTotalHoursAttribute(): string
+    {
+        return $this->formatMinutesToHoursString($this->total_minutes);
+    }
+
+    /**
+     * Formatea el total de horas de descanso.
+     * Formato: "Xh Ym" o "Xm"
+     *
+     * @return string Tiempo de descanso formateado
+     */
+    public function getFormattedBreakTimeAttribute(): string
+    {
+        $minutes = $this->total_break_minutes;
+
+        if ($minutes === 0) {
+            return 'Sin descansos';
+        }
+
+        return $this->formatMinutesToHoursString($minutes);
+    }
+
+    /**
+     * Formatea las horas laborables netas.
+     * Formato: "Xh Ym"
+     *
+     * @return string Horas netas formateadas
+     */
+    public function getFormattedNetWorkingHoursAttribute(): string
+    {
+        return $this->formatMinutesToHoursString($this->net_working_minutes);
+    }
+
+    /**
+     * Convierte minutos a string formateado "Xh Ym".
+     *
+     * @param int $minutes Total de minutos
+     * @return string Formato "Xh Ym", "Xh", o "Ym"
+     */
+    protected function formatMinutesToHoursString(int $minutes): string
+    {
+        $hours = intdiv($minutes, 60);
+        $mins = $minutes % 60;
+
+        if ($hours === 0) {
+            return "{$mins}m";
+        }
+
+        if ($mins === 0) {
+            return "{$hours}h";
+        }
+
+        return "{$hours}h {$mins}m";
+    }
 }

@@ -175,8 +175,15 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                                            {{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }} -
-                                            {{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }}
+                                            <div class="flex items-center">
+                                                <span>
+                                                    {{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }} -
+                                                    {{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }}
+                                                </span>
+                                                <span class="ml-2 px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">
+                                                    {{ $shift->formatted_total_hours }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">

@@ -201,6 +201,94 @@ new class extends Component {
             </div>
         </div>
 
+        <!-- Informacion de Horas del Turno -->
+        <div class="mt-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Informacion de Horas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Horas Totales del Turno -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-blue-500">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Horas Totales
+                            </dt>
+                            <dd class="mt-1 text-3xl font-semibold text-blue-600 dark:text-blue-400">
+                                {{ $shift->formatted_total_hours }}
+                            </dd>
+                            <dd class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                {{ \Carbon\Carbon::parse($shift->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($shift->end_time)->format('H:i') }}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Tiempo de Descansos -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-orange-500">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Tiempo de Descansos
+                            </dt>
+                            <dd class="mt-1 text-3xl font-semibold text-orange-600 dark:text-orange-400">
+                                {{ $shift->formatted_break_time }}
+                            </dd>
+                            <dd class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                {{ $shift->BreakTimes->where('active', true)->count() }} descanso(s) activo(s)
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Horas Netas Laborables -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border-l-4 border-green-500">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Horas Laborables Netas
+                            </dt>
+                            <dd class="mt-1 text-3xl font-semibold text-green-600 dark:text-green-400">
+                                {{ $shift->formatted_net_working_hours }}
+                            </dd>
+                            <dd class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                Tiempo efectivo de trabajo
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detalle del Calculo -->
+            <div class="mt-4 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Detalle del Calculo</h4>
+                <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <p>
+                        <span class="font-medium">Turno completo:</span>
+                        {{ $shift->formatted_total_hours }}
+                        ({{ $shift->total_minutes }} minutos)
+                    </p>
+                    <p>
+                        <span class="font-medium">(-) Descansos:</span>
+                        {{ $shift->formatted_break_time }}
+                        ({{ $shift->total_break_minutes }} minutos)
+                    </p>
+                    <p class="pt-1 border-t border-gray-200 dark:border-gray-700">
+                        <span class="font-medium">(=) Tiempo neto:</span>
+                        {{ $shift->formatted_net_working_hours }}
+                        ({{ $shift->net_working_minutes }} minutos)
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <!-- Estadisticas de Empleados -->
         <div class="mt-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Estadisticas de Empleados</h3>
@@ -591,12 +679,7 @@ new class extends Component {
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                @php
-                                                    $start = \Carbon\Carbon::parse($breakTime->start_break_time);
-                                                    $end = \Carbon\Carbon::parse($breakTime->end_break_time);
-                                                    $duration = $start->diff($end);
-                                                @endphp
-                                                {{ $duration->h > 0 ? $duration->h . 'h ' : '' }}{{ $duration->i }}min
+                                                {{ $breakTime->formatted_duration }}
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">

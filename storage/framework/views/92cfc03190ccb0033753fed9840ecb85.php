@@ -1,0 +1,1 @@
+<?php /**PATH C:\xampp\htdocs\flexcon-tracker\resources\views\capacity\calculator.blade.php ENDPATH**/ ?>

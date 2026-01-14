@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -89,4 +90,43 @@ class BreakTime extends Model
         return true;
     }
 
+    /**
+     * Duration Calculation Accessors
+     */
+
+    /**
+     * Calcula la duracion del descanso en minutos.
+     *
+     * @return int Duracion en minutos
+     */
+    public function getDurationMinutesAttribute(): int
+    {
+        $start = Carbon::parse($this->start_break_time);
+        $end = Carbon::parse($this->end_break_time);
+
+        return $start->diffInMinutes($end);
+    }
+
+    /**
+     * Formatea la duracion del descanso.
+     * Formato: "Xh Ym" o "Xm"
+     *
+     * @return string Duracion formateada
+     */
+    public function getFormattedDurationAttribute(): string
+    {
+        $minutes = $this->duration_minutes;
+        $hours = intdiv($minutes, 60);
+        $mins = $minutes % 60;
+
+        if ($hours === 0) {
+            return "{$mins}m";
+        }
+
+        if ($mins === 0) {
+            return "{$hours}h";
+        }
+
+        return "{$hours}h {$mins}m";
+    }
 }
