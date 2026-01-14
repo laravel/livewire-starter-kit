@@ -56,4 +56,4 @@
             </div>
         @endif
     </div>
-</x-layouts.auth>
+</x-layouts::auth>

@@ -64,4 +64,4 @@
             <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
         </div>
     </div>
-</x-layouts.auth>
+</x-layouts::auth>
