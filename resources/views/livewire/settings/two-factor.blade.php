@@ -18,7 +18,7 @@
                         {{ __('With two-factor authentication enabled, you will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
                     </flux:text>
 
-                    <livewire::settings.two-factor.recovery-codes :$requiresConfirmation/>
+                    <livewire:settings.two-factor.recovery-codes :$requiresConfirmation/>
 
                     <div class="flex justify-start">
                         <flux:button
