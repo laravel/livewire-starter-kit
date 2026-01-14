@@ -3,9 +3,10 @@
 namespace App\Livewire\Settings;
 
 use App\Concerns\ProfileValidationRules;
-use App\Models\User;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class Profile extends Component
@@ -61,5 +62,18 @@ class Profile extends Component
         $user->sendEmailVerificationNotification();
 
         Session::flash('status', 'verification-link-sent');
+    }
+
+    #[Computed]
+    public function hasUnverifiedEmail(): bool
+    {
+        return Auth::user() instanceof MustVerifyEmail && ! Auth::user()->hasVerifiedEmail();
+    }
+
+    #[Computed]
+    public function showDeleteUser(): bool
+    {
+        return ! Auth::user() instanceof MustVerifyEmail
+            || (Auth::user() instanceof MustVerifyEmail && Auth::user()->hasVerifiedEmail());
     }
 }
