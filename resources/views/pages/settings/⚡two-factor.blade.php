@@ -7,7 +7,7 @@ use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Symfony\Component\HttpFoundation\Response;
 
 new class extends Component {
@@ -182,7 +182,7 @@ new class extends Component {
 
     <flux:heading class="sr-only">{{ __('Two-Factor Authentication Settings') }}</flux:heading>
 
-    <x-settings.layout
+    <x-pages::settings.layout
         :heading="__('Two Factor Authentication')"
         :subheading="__('Manage your two-factor authentication settings')"
     >
@@ -197,7 +197,7 @@ new class extends Component {
                         {{ __('With two-factor authentication enabled, you will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
                     </flux:text>
 
-                    <livewire:settings.two-factor.recovery-codes :$requiresConfirmation/>
+                    <livewire:pages::settings.two-factor.recovery-codes :$requiresConfirmation />
 
                     <div class="flex justify-start">
                         <flux:button
@@ -231,7 +231,7 @@ new class extends Component {
                 </div>
             @endif
         </div>
-    </x-settings.layout>
+    </x-pages::settings.layout>
 
     <flux:modal
         name="two-factor-setup-modal"

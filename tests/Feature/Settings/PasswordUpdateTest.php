@@ -5,7 +5,7 @@ namespace Tests\Feature\Settings;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Volt\Volt;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class PasswordUpdateTest extends TestCase
@@ -20,7 +20,7 @@ class PasswordUpdateTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = Volt::test('settings.password')
+        $response = Livewire::test('pages::settings.password')
             ->set('current_password', 'password')
             ->set('password', 'new-password')
             ->set('password_confirmation', 'new-password')
@@ -39,7 +39,7 @@ class PasswordUpdateTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = Volt::test('settings.password')
+        $response = Livewire::test('pages::settings.password')
             ->set('current_password', 'wrong-password')
             ->set('password', 'new-password')
             ->set('password_confirmation', 'new-password')
