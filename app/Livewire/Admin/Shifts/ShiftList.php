@@ -66,11 +66,7 @@ class ShiftList extends Component
 
     public function render()
     {
-        $shifts = Shift::with([
-                        'employees' => function ($query) {
-                            $query->select('id', 'name', 'last_name', 'shift_id', 'active');
-                        }
-                    ])
+        $shifts = Shift::withCount('employees')
                     ->search($this->search)
                     ->orderBy($this->sortField, $this->sortDirection)
                     ->paginate($this->perPage);

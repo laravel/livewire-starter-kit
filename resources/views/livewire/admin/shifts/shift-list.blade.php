@@ -192,30 +192,16 @@
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4">
-                                        @if($shift->employees->count() > 0)
-                                            <div class="text-sm text-gray-900 dark:text-white">
-                                                @php
-                                                    $limit = 3;
-                                                    $employees = $shift->employees;
-                                                    $total = $employees->count();
-                                                    $displayed = $employees->take($limit);
-                                                    $remaining = $total - $limit;
-                                                @endphp
-
-                                                <span title="{{ $employees->pluck('full_name')->join(', ') }}">
-                                                    {{ $displayed->pluck('full_name')->join(', ') }}
-
-                                                    @if($remaining > 0)
-                                                        <span class="ml-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
-                                                            (+{{ $remaining }} más)
-                                                        </span>
-                                                    @endif
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            @if($shift->employees_count > 0)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                    {{ $shift->employees_count }} empleado{{ $shift->employees_count > 1 ? 's' : '' }}
                                                 </span>
-                                            </div>
-                                        @else
-                                            <span class="text-sm text-gray-400 dark:text-gray-500 italic">N/A</span>
-                                        @endif
+                                            @else
+                                                <span class="text-sm text-gray-400 dark:text-gray-500 italic">0 empleados</span>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
