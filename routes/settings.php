@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Laravel\WorkOS\Http\Middleware\ValidateSessionWithWorkOS;
-use Livewire\Volt\Volt;
 
 Route::middleware([
     'auth',
@@ -10,6 +9,6 @@ Route::middleware([
 ])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
-    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
-    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+    Route::livewire('settings/profile', 'pages::settings.profile')->name('settings.profile');
+    Route::livewire('settings/appearance', 'pages::settings.appearance')->name('settings.appearance');
 });

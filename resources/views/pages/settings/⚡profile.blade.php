@@ -4,7 +4,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
-use Livewire\Volt\Component;
+use Livewire\Component;
 
 new class extends Component {
     public string $name = '';
@@ -43,7 +43,7 @@ new class extends Component {
 
     <flux:heading class="sr-only">{{ __('Profile Settings') }}</flux:heading>
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
@@ -62,6 +62,6 @@ new class extends Component {
             </div>
         </form>
 
-        <livewire:settings.delete-user-form />
-    </x-settings.layout>
+        <livewire:pages::settings.delete-user-form />
+    </x-pages::settings.layout>
 </section>
