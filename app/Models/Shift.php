@@ -33,10 +33,32 @@ class Shift extends Model
 
     /**
      * Get all employees (users with employee role) for this shift
+     * Only returns active users with 'employee' role
      */
     public function employees(): HasMany
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'shift_id')
+                    ->role('employee')
+                    ->active()
+                    ->orderBy('name');
+    }
+
+    /**
+     * Get all employees including inactive ones
+     */
+    public function allEmployees(): HasMany
+    {
+        return $this->hasMany(User::class, 'shift_id')
+                    ->role('employee')
+                    ->orderBy('name');
+    }
+
+    /**
+     * Get employee count for this shift
+     */
+    public function getEmployeeCountAttribute(): int
+    {
+        return $this->employees()->count();
     }
 
 
@@ -134,9 +156,9 @@ class Shift extends Model
      */
 
     // Método unificado para verificar si se puede eliminar
-    public function canBeDeleted()
+    public function canBeDeleted(): bool
     {
-        return $this->employees()->count() === 0
+        return $this->allEmployees()->count() === 0
             // && $this->ProuctionSessions()->count() === 0  // TODO: Uncomment when ProductionSession model exists
             && $this->BreakTimes()->count() === 0
             && $this->overTimes()->count() === 0;

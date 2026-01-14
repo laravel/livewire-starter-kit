@@ -79,7 +79,9 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Empleados Asignados</p>
-                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">0{{-- {{ App\Models\Employee::whereNotNull('shift_id')->count() //need create model and migration }} --}}</p>
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                            {{ \App\Models\User::role('employee')->whereNotNull('shift_id')->active()->count() }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -190,10 +192,30 @@
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                                            0{{-- {{ $shift->Employees()->count() }} //need create model and migration --}}
-                                        </div>
+                                    <td class="px-6 py-4">
+                                        @if($shift->employees->count() > 0)
+                                            <div class="text-sm text-gray-900 dark:text-white">
+                                                @php
+                                                    $limit = 3;
+                                                    $employees = $shift->employees;
+                                                    $total = $employees->count();
+                                                    $displayed = $employees->take($limit);
+                                                    $remaining = $total - $limit;
+                                                @endphp
+
+                                                <span title="{{ $employees->pluck('full_name')->join(', ') }}">
+                                                    {{ $displayed->pluck('full_name')->join(', ') }}
+
+                                                    @if($remaining > 0)
+                                                        <span class="ml-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                                            (+{{ $remaining }} más)
+                                                        </span>
+                                                    @endif
+                                                </span>
+                                            </div>
+                                        @else
+                                            <span class="text-sm text-gray-400 dark:text-gray-500 italic">N/A</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
