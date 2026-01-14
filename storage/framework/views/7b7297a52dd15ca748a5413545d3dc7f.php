@@ -80,7 +80,10 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Empleados Asignados</p>
-                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">0</p>
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                            <?php echo e(\App\Models\User::role('employee')->whereNotNull('shift_id')->active()->count()); ?>
+
+                        </p>
                     </div>
                 </div>
             </div>
@@ -194,8 +197,15 @@
                                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                                            0
+                                        <div class="flex items-center">
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($shift->employees_count > 0): ?>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                    <?php echo e($shift->employees_count); ?> empleado<?php echo e($shift->employees_count > 1 ? 's' : ''); ?>
+
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="text-sm text-gray-400 dark:text-gray-500 italic">0 empleados</span>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
