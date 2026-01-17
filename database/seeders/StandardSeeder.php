@@ -48,10 +48,12 @@ class StandardSeeder extends Seeder
                 'work_table_id' => $tableId,
                 'machine_id' => $machineId,
                 'semi_auto_work_table_id' => $semiAutoId,
-                'persons_1' => rand(800, 1500),
-                'persons_2' => rand(1200, 2000),
-                'persons_3' => rand(1800, 2800),
-                'units_per_hour' => rand(100, 350), // Crítico para cálculo de capacidad
+                // NOTA: persons_X representa la cantidad de personas para cada configuración
+                // Los valores correctos son 1, 2 y 3 (máximo 3 personas por configuración)
+                'persons_1' => 1,
+                'persons_2' => 2,
+                'persons_3' => 3,
+                'units_per_hour' => rand(100, 350), // Productividad base (será migrado a configuraciones)
                 'effective_date' => now()->subDays(rand(1, 30)),
                 'active' => true,
                 'description' => "Estándar de producción para {$part->number}",

@@ -3,16 +3,24 @@
 namespace App\Livewire\Admin\Standards;
 
 use App\Models\Standard;
+use App\Models\StandardConfiguration;
 use Livewire\Component;
 
 class StandardShow extends Component
 {
     public Standard $standard;
     public bool $is_current = false;
+    public array $configurationStats = [];
 
     public function mount(Standard $standard): void
     {
-        $this->standard = $standard->load(['part', 'workTable', 'semiAutoWorkTable', 'machine']);
+        $this->standard = $standard->load([
+            'part',
+            'workTable',
+            'semiAutoWorkTable',
+            'machine',
+            'configurations'
+        ]);
         $this->calculateInfo();
     }
 
@@ -22,6 +30,9 @@ class StandardShow extends Component
         $this->is_current = $this->standard->active &&
                            $this->standard->effective_date &&
                            $this->standard->effective_date->lte(now());
+
+        // Calculate configuration stats
+        $this->configurationStats = $this->standard->getConfigurationsStats();
     }
 
     public function toggleActive(): void
@@ -30,10 +41,16 @@ class StandardShow extends Component
         $this->standard->save();
 
         $status = $this->standard->active ? 'activado' : 'desactivado';
-        session()->flash('flash.banner', "Estándar {$status} correctamente.");
+        session()->flash('flash.banner', "Estandar {$status} correctamente.");
         session()->flash('flash.bannerStyle', 'success');
 
-        $this->standard = $this->standard->fresh(['part', 'workTable', 'semiAutoWorkTable', 'machine']);
+        $this->standard = $this->standard->fresh([
+            'part',
+            'workTable',
+            'semiAutoWorkTable',
+            'machine',
+            'configurations'
+        ]);
         $this->calculateInfo();
     }
 
@@ -41,14 +58,41 @@ class StandardShow extends Component
     {
         $this->standard->delete();
 
-        session()->flash('flash.banner', 'Estándar eliminado correctamente.');
+        session()->flash('flash.banner', 'Estandar eliminado correctamente.');
         session()->flash('flash.bannerStyle', 'success');
 
         $this->redirect(route('admin.standards.index'), navigate: true);
     }
 
+    /**
+     * Obtiene la etiqueta del tipo de estacion
+     */
+    public function getWorkstationTypeLabel(string $type): string
+    {
+        return match($type) {
+            StandardConfiguration::TYPE_MANUAL => 'Mesa Manual',
+            StandardConfiguration::TYPE_SEMI_AUTOMATIC => 'Mesa Semi-Automatica',
+            StandardConfiguration::TYPE_MACHINE => 'Maquina',
+            default => 'Desconocido',
+        };
+    }
+
+    /**
+     * Obtiene las configuraciones agrupadas por tipo
+     */
+    public function getGroupedConfigurations(): array
+    {
+        return $this->standard->configurations
+            ->sortBy(['workstation_type', 'persons_required'])
+            ->groupBy('workstation_type')
+            ->toArray();
+    }
+
     public function render()
     {
-        return view('livewire.admin.standards.standard-show');
+        return view('livewire.admin.standards.standard-show', [
+            'workstationTypes' => StandardConfiguration::getWorkstationTypes(),
+            'groupedConfigurations' => $this->getGroupedConfigurations(),
+        ]);
     }
 }

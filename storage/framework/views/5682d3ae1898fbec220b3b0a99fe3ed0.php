@@ -10,7 +10,7 @@
                     </p>
                 </div>
                 <div class="mt-4 sm:mt-0">
-                    <a href="{{ route('admin.standards.create') }}"
+                    <a href="<?php echo e(route('admin.standards.create')); ?>"
                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200"
                        wire:navigate>
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Estandares</p>
-                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $stats['total'] }}</p>
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white"><?php echo e($stats['total']); ?></p>
                     </div>
                 </div>
             </div>
@@ -51,7 +51,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Activos</p>
-                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $stats['active'] }}</p>
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white"><?php echo e($stats['active']); ?></p>
                     </div>
                 </div>
             </div>
@@ -67,7 +67,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Inactivos</p>
-                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $stats['inactive'] }}</p>
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white"><?php echo e($stats['inactive']); ?></p>
                     </div>
                 </div>
             </div>
@@ -83,7 +83,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Vigentes</p>
-                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $stats['current'] }}</p>
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white"><?php echo e($stats['current']); ?></p>
                     </div>
                 </div>
             </div>
@@ -119,9 +119,9 @@
                             class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                             <option value="all">Todos los tipos</option>
-                            @foreach($workstationTypes as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $workstationTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $value => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($value); ?>"><?php echo e($label); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
 
@@ -140,12 +140,12 @@
 
             </div>
 
-            @if (session('error'))
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                     <strong class="font-bold">Error!</strong>
-                    <span class="block sm:inline">{{ session('error') }}</span>
+                    <span class="block sm:inline"><?php echo e(session('error')); ?></span>
                 </div>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
 
         <!-- Table -->
@@ -165,23 +165,23 @@
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('effective_date')">
                                 Fecha Efectiva
-                                @if ($sortField === 'effective_date')
-                                    @if ($sortDirection === 'asc')
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sortField === 'effective_date'): ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sortDirection === 'asc'): ?>
                                         <span>&#8593;</span>
-                                    @else
+                                    <?php else: ?>
                                         <span>&#8595;</span>
-                                    @endif
-                                @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('active')">
                                 Estado
-                                @if ($sortField === 'active')
-                                    @if ($sortDirection === 'asc')
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sortField === 'active'): ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sortDirection === 'asc'): ?>
                                         <span>&#8593;</span>
-                                    @else
+                                    <?php else: ?>
                                         <span>&#8595;</span>
-                                    @endif
-                                @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Acciones
@@ -189,28 +189,30 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                        @foreach($standards as $standard)
-                            @php
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $standards; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $standard): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $configSummary = $this->getConfigurationSummary($standard);
-                            @endphp
+                            ?>
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ $standard->part->number }}
+                                        <?php echo e($standard->part->number); ?>
+
                                     </div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                                        {{ Str::limit($standard->part->description, 30) }}
+                                        <?php echo e(Str::limit($standard->part->description, 30)); ?>
+
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @if($configSummary['count'] > 0)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($configSummary['count'] > 0): ?>
                                         <div class="flex flex-col space-y-1">
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                {{ $configSummary['count'] }} configuracion(es)
+                                                <?php echo e($configSummary['count']); ?> configuracion(es)
                                             </span>
                                             <div class="flex flex-wrap gap-1">
-                                                @foreach($configSummary['types'] as $type => $count)
-                                                    @php
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $configSummary['types']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type => $count): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <?php
                                                         $typeLabel = match($type) {
                                                             'manual' => 'Manual',
                                                             'semi_automatic' => 'Semi-Auto',
@@ -223,80 +225,82 @@
                                                             'machine' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
                                                             default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                                                         };
-                                                    @endphp
-                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs {{ $typeColor }}">
-                                                        {{ $typeLabel }}: {{ $count }}
+                                                    ?>
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs <?php echo e($typeColor); ?>">
+                                                        <?php echo e($typeLabel); ?>: <?php echo e($count); ?>
+
                                                     </span>
-                                                @endforeach
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </div>
                                         </div>
-                                    @else
+                                    <?php else: ?>
                                         <div class="flex flex-col space-y-1">
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                                                 Sin configuraciones
                                             </span>
-                                            @if(!$configSummary['is_migrated'])
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$configSummary['is_migrated']): ?>
                                                 <span class="text-xs text-gray-500 dark:text-gray-400">
                                                     (Sistema Legacy)
                                                 </span>
-                                            @endif
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </div>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-semibold text-gray-900 dark:text-white">
-                                        {{ $configSummary['default_uph'] ?? 'N/A' }} uph
+                                        <?php echo e($configSummary['default_uph'] ?? 'N/A'); ?> uph
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900 dark:text-white">
-                                        {{ $standard->effective_date ? $standard->effective_date->format('d/m/Y') : 'N/A' }}
+                                        <?php echo e($standard->effective_date ? $standard->effective_date->format('d/m/Y') : 'N/A'); ?>
+
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex flex-col space-y-1">
-                                        @if($standard->active)
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($standard->active): ?>
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                                 Activo
                                             </span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                                                 Inactivo
                                             </span>
-                                        @endif
-                                        @if($standard->is_migrated)
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($standard->is_migrated): ?>
                                             <span class="px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                                 Migrado
                                             </span>
-                                        @endif
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-3">
-                                        <a href="{{ route('admin.standards.show', $standard) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" wire:navigate>
+                                        <a href="<?php echo e(route('admin.standards.show', $standard)); ?>" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" wire:navigate>
                                             Ver
                                         </a>
-                                        @if($standard->active)
-                                            <button wire:click="toggleActive({{ $standard->id }})" class="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300">
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($standard->active): ?>
+                                            <button wire:click="toggleActive(<?php echo e($standard->id); ?>)" class="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300">
                                                 Desactivar
                                             </button>
-                                        @else
-                                            <button wire:click="toggleActive({{ $standard->id }})" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
+                                        <?php else: ?>
+                                            <button wire:click="toggleActive(<?php echo e($standard->id); ?>)" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
                                                 Activar
                                             </button>
-                                        @endif
-                                        <a href="{{ route('admin.standards.edit', $standard) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" wire:navigate>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        <a href="<?php echo e(route('admin.standards.edit', $standard)); ?>" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" wire:navigate>
                                             Editar
                                         </a>
-                                        <button wire:click="confirmDeletion({{ $standard->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                        <button wire:click="confirmDeletion(<?php echo e($standard->id); ?>)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                                             Eliminar
                                         </button>
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-                        @if($standards->count() === 0)
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($standards->count() === 0): ?>
                             <tr>
                                 <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -305,18 +309,19 @@
                                     <p class="mt-2">No se encontraron estandares.</p>
                                 </td>
                             </tr>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
                 </table>
             </div>
 
             <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                {{ $standards->links() }}
+                <?php echo e($standards->links()); ?>
+
             </div>
         </div>
 
         <!-- Modal de confirmacion para eliminar -->
-        @if($confirmingDeletion)
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($confirmingDeletion): ?>
             <div class="fixed z-10 inset-0 overflow-y-auto">
                 <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                     <div class="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -355,6 +360,7 @@
                     </div>
                 </div>
             </div>
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 </div>
+<?php /**PATH C:\xampp\htdocs\flexcon-tracker\resources\views/livewire/admin/standards/standard-list.blade.php ENDPATH**/ ?>
