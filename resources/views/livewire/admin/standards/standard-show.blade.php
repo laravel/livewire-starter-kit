@@ -73,15 +73,6 @@
                                             Inactivo
                                         </span>
                                     @endif
-                                    @if($standard->is_migrated)
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                            Sistema Nuevo
-                                        </span>
-                                    @else
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                            Sistema Legacy
-                                        </span>
-                                    @endif
                                 </dd>
                             </div>
 
