@@ -20,11 +20,13 @@ foreach ($files as $file) {
     $currentPath = $basePath.'/'.$file;
     $directory = dirname($currentPath);
     $filename = basename($file);
-    $newPath = $directory.'/⚡'.$filename;
+    $newFilename = '⚡'.$filename;
+    $newPath = $directory.'/'.$newFilename;
 
     if (file_exists($currentPath) && ! file_exists($newPath)) {
         rename($currentPath, $newPath);
-        echo "Renamed: {$file} -> ⚡{$filename}\n";
+        $dirRelative = ltrim(str_replace(__DIR__.'/', '', $directory), '/');
+        echo "Renamed: {$dirRelative}/{{$filename} => {$newFilename}}\n";
     }
 }
 
