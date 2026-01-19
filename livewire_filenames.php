@@ -27,3 +27,5 @@ foreach ($files as $file) {
         echo "Renamed: {$file} -> ⚡{$filename}\n";
     }
 }
+
+unlink(__FILE__);
