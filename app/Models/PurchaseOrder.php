@@ -59,6 +59,16 @@ class PurchaseOrder extends Model
     }
 
     /**
+     * Get the sent lists that include this purchase order (many-to-many).
+     */
+    public function sentLists(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(SentList::class, 'sent_list_purchase_orders')
+            ->withPivot(['quantity', 'required_hours', 'lot_number'])
+            ->withTimestamps();
+    }
+
+    /**
      * Get the signatures for this purchase order.
      */
     public function signatures(): HasMany

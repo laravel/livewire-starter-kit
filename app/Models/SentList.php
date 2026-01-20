@@ -25,6 +25,17 @@ class SentList extends Model
         'used_hours',
         'remaining_hours',
         'status',
+        'current_department',
+        'department_history',
+        'materials_approved_at',
+        'materials_approved_by',
+        'production_approved_at',
+        'production_approved_by',
+        'quality_approved_at',
+        'quality_approved_by',
+        'shipping_approved_at',
+        'shipping_approved_by',
+        'notes',
     ];
 
     protected $casts = [
@@ -34,6 +45,11 @@ class SentList extends Model
         'total_available_hours' => 'decimal:2',
         'used_hours' => 'decimal:2',
         'remaining_hours' => 'decimal:2',
+        'department_history' => 'array',
+        'materials_approved_at' => 'datetime',
+        'production_approved_at' => 'datetime',
+        'quality_approved_at' => 'datetime',
+        'shipping_approved_at' => 'datetime',
     ];
 
     /**
@@ -42,6 +58,14 @@ class SentList extends Model
     public const STATUS_PENDING = 'pending';
     public const STATUS_CONFIRMED = 'confirmed';
     public const STATUS_CANCELED = 'canceled';
+
+    /**
+     * Department constants
+     */
+    public const DEPT_MATERIALS = 'materiales';
+    public const DEPT_PRODUCTION = 'produccion';
+    public const DEPT_QUALITY = 'calidad';
+    public const DEPT_SHIPPING = 'envios';
 
     /**
      * Get the purchase order that owns the sent list.
@@ -68,6 +92,39 @@ class SentList extends Model
     }
 
     /**
+     * Get the purchase orders for this sent list (many-to-many).
+     */
+    public function purchaseOrders(): BelongsToMany
+    {
+        return $this->belongsToMany(PurchaseOrder::class, 'sent_list_purchase_orders')
+            ->withPivot(['quantity', 'required_hours', 'lot_number'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the users who approved at each department.
+     */
+    public function materialsApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'materials_approved_by');
+    }
+
+    public function productionApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'production_approved_by');
+    }
+
+    public function qualityApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'quality_approved_by');
+    }
+
+    public function shippingApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'shipping_approved_by');
+    }
+
+    /**
      * Get all available statuses.
      */
     public static function getStatuses(): array
@@ -77,6 +134,93 @@ class SentList extends Model
             self::STATUS_CONFIRMED => 'Confirmed',
             self::STATUS_CANCELED => 'Canceled',
         ];
+    }
+
+    /**
+     * Get all available departments.
+     */
+    public static function getDepartments(): array
+    {
+        return [
+            self::DEPT_MATERIALS => 'Materiales',
+            self::DEPT_PRODUCTION => 'Producción',
+            self::DEPT_QUALITY => 'Calidad',
+            self::DEPT_SHIPPING => 'Envíos',
+        ];
+    }
+
+    /**
+     * Get the department label.
+     */
+    public function getDepartmentLabelAttribute(): string
+    {
+        return self::getDepartments()[$this->current_department] ?? $this->current_department;
+    }
+
+    /**
+     * Check if the list is confirmed.
+     */
+    public function isConfirmed(): bool
+    {
+        return $this->status === self::STATUS_CONFIRMED;
+    }
+
+    /**
+     * Move to next department in workflow.
+     */
+    public function moveToNextDepartment(?int $userId = null): bool
+    {
+        $departments = [
+            self::DEPT_MATERIALS => self::DEPT_PRODUCTION,
+            self::DEPT_PRODUCTION => self::DEPT_QUALITY,
+            self::DEPT_QUALITY => self::DEPT_SHIPPING,
+        ];
+
+        $currentDept = $this->current_department;
+        
+        if (!isset($departments[$currentDept])) {
+            return false; // Already at last department
+        }
+
+        // Update approval for current department
+        $approvalField = match($currentDept) {
+            self::DEPT_MATERIALS => 'materials_approved',
+            self::DEPT_PRODUCTION => 'production_approved',
+            self::DEPT_QUALITY => 'quality_approved',
+            self::DEPT_SHIPPING => 'shipping_approved',
+            default => null,
+        };
+
+        $updates = [
+            'current_department' => $departments[$currentDept],
+        ];
+
+        if ($approvalField && $userId) {
+            $updates["{$approvalField}_at"] = now();
+            $updates["{$approvalField}_by"] = $userId;
+        }
+
+        // Add to history
+        $history = $this->department_history ?? [];
+        $history[] = [
+            'from' => $currentDept,
+            'to' => $departments[$currentDept],
+            'user_id' => $userId,
+            'timestamp' => now()->toISOString(),
+        ];
+        $updates['department_history'] = $history;
+
+        return $this->update($updates);
+    }
+
+    /**
+     * Check if department can edit this list.
+     */
+    public function canDepartmentEdit(string $department): bool
+    {
+        return $this->current_department === $department && 
+               $this->status !== self::STATUS_CONFIRMED &&
+               $this->status !== self::STATUS_CANCELED;
     }
 
     /**
@@ -125,14 +269,6 @@ class SentList extends Model
     }
 
     /**
-     * Check if the sent list is confirmed.
-     */
-    public function isConfirmed(): bool
-    {
-        return $this->status === self::STATUS_CONFIRMED;
-    }
-
-    /**
      * Check if the sent list is pending.
      */
     public function isPending(): bool
@@ -141,19 +277,20 @@ class SentList extends Model
     }
 
     /**
-     * Check if the sent list is canceled.
+     * Check if the sent list can be deleted.
      */
-    public function isCanceled(): bool
+    public function canBeDeleted(): bool
     {
-        return $this->status === self::STATUS_CANCELED;
+        // Can only delete pending lists
+        return $this->isPending() && $this->workOrders()->count() === 0;
     }
 
     /**
-     * Calculate capacity utilization percentage.
+     * Get capacity utilization percentage.
      */
     public function getCapacityUtilizationAttribute(): float
     {
-        if ($this->total_available_hours == 0) {
+        if ($this->total_available_hours <= 0) {
             return 0;
         }
 
@@ -161,11 +298,10 @@ class SentList extends Model
     }
 
     /**
-     * Check if this sent list can be deleted.
+     * Check if the sent list is canceled.
      */
-    public function canBeDeleted(): bool
+    public function isCanceled(): bool
     {
-        // Cannot delete confirmed sent lists
-        return !$this->isConfirmed();
+        return $this->status === self::STATUS_CANCELED;
     }
 }

@@ -13,7 +13,7 @@ class SentListController extends Controller
      */
     public function index()
     {
-        $sentLists = SentList::with(['purchaseOrder.part', 'workOrders', 'shifts'])
+        $sentLists = SentList::with(['purchaseOrder.part', 'purchaseOrders.part', 'workOrders', 'shifts'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -25,7 +25,16 @@ class SentListController extends Controller
      */
     public function show(SentList $sentList)
     {
-        $sentList->load(['purchaseOrder.part', 'workOrders.purchaseOrder.part', 'shifts']);
+        $sentList->load([
+            'purchaseOrder.part', 
+            'purchaseOrders.part', // Nueva relación many-to-many
+            'workOrders.purchaseOrder.part', 
+            'shifts',
+            'materialsApprover',
+            'productionApprover',
+            'qualityApprover',
+            'shippingApprover',
+        ]);
 
         return view('sent-lists.show', compact('sentList'));
     }

@@ -22,14 +22,26 @@ Precio para Maquina
 
 Opcion 3
 Precio para mesa semi automatic
-Campos semi-automatic
+- Campos semi-automatic
 - 2,000 to 10,000
  Nivel 11,000+ unidades
 
 Estos precios tambien se va a tener que modificar el purcharse order para que mantenga la logica que tiene pero haga el calculo a partir de estos nuevos campios
 
 
-Cambio en capacidad
+
 Wizard de Capacidad
-Que cuando se seleccione un turno, jale en automatico los empleados asociados al turno en cuestion... y haga el calculo de acuerdo al area.. verificar que empleados este bien relacionado con turno etc y los calculos se realicen..
+
+Que cuando se seleccione un turno, jale en automatico los empleados asociados al turno en cuestion... y haga el calculo de acuerdo al area.. verificar que empleados este bien relacionado con turno etc y los calculos se realicen de acuerdo al standar la configuracion que se haya establecido, revisar la nueva forma de estandar..
+
+
+
+- Area de wizard en el step 2... Agregar un modal para que abra y traiga los PO con los status "abiertos" y que ademas dependiendo la configuración que tiene en los estandares haga el calculo de acuerdo la configuración, pero se pueda elegir en que se va a correr de acuerdo la configuracion que se tengan... y haga los calculos correctos. Y permita poner mas de un purcharse order
+
+En el step 3,
+- Cambiar nombre de "cierre" a "Lista Preeliminar"
+- En la lista preeliminar, se hace una lista que va a pasar por todos los departamentos, ya que se le agregue el numero de parte
+- Aqui en el mismo numero de PO, puede agregar los lotes o los viajeros que se llama y se convierte en una lista de envio antes de enviar...
+
+al enviarse se va a materiales. La cuales materiales, produccion, calidad, envios, van a poder consultar, editar y cambiar el status.
 

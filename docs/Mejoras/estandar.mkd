@@ -1,0 +1,1336 @@
+Spec 06: Analisis Arquitectonico - Multiple Standards por Numero de Parte
+Fecha de Creacion:
+Fecha de Creacion: 2026-01-15 Autor:
+Autor: Agent Architect Fase del Proyecto:
+Fase del Proyecto: FASE 2 - Evolucion de Standards Estado:
+Estado: Analisis Tecnico Completo Version:
+Version: 1.0 Relacionado con:
+Spec 02 - Refactorizacion Standards-Workstation
+Spec 03 - Guia Rapida de Implementacion
+Spec 04 - Validacion de Personas y Estaciones
+Spec 05 - Estructura del Modulo Standards
+Relacionado con:
+Tabla de Contenidos
+Tabla de Contenidos
+1. Resumen Ejecutivo
+2. Nuevo Requerimiento del Cliente
+3. Analisis del Sistema Actual
+4. Impacto Arquitectural
+5. Propuesta de Nueva Estructura de Datos
+6. Plan de Migracion de Datos
+7. Plan de Implementacion
+8. Riesgos y Mitigaciones
+9. Consideraciones de Extensibilidad
+10. Conclusiones y Recomendaciones
+Resumen Ejecutivo
+Resumen Ejecutivo
+Contexto del Cambio
+Contexto del Cambio
+El cliente ha identificado un nuevo requerimiento CRITICO
+campos 
+persons_1 , 
+persons_2 , 
+CRITICO que cambia fundamentalmente como funcionan los standards en el sistema. Actualmente, un numero de parte tiene UN standard con
+persons_3 y UN solo 
+units_per_hour .
+El nuevo requerimiento establece que:
+El nuevo requerimiento establece que:
+Un numero de parte puede tener MULTIPLES standards
+MULTIPLES standards con productividades diferentes
+La productividad varia segun cantidad de personas
+cantidad de personas (1, 2 o 3 max)
+La productividad varia segun tipo de estacion
+tipo de estacion (Mesa manual, Maquina, Mesa semi-automatica)
+Cada combinacion unica de 
+Part + Tipo Estacion + Cantidad Personas tiene su propio 
+Impacto Estimado
+Impacto Estimado
+Categoria
+Categoria
+Nivel de
+Nivel de
+Impacto
+Impacto
+units_per_hour
+Descripcion
+Descripcion
+Modelo de Datos
+Modelo de Datos
+CRITICO
+Requiere nueva tabla y reestructuracion
+Base de Datos
+Base de Datos
+ALTO
+Migraciones complejas + migracion de
+datos
+Logica de
+Logica de
+Negocio
+Negocio
+ALTO
+Cambios en calculos de capacidad
+Interfaces
+Interfaces
+MEDIO
+Nuevos formularios y vistas
+Tests
+Tests
+MEDIO
+Nuevos tests unitarios y de integracion
+Tiempo Estimado Total
+Tiempo Estimado Total
+Fase
+Fase
+Tiempo
+Tiempo
+Descripcion
+Descripcion
+Fase 1: Base de
+Datos
+2-3 dias
+Migraciones y modelo StandardConfiguration
+Fase 2: Backend
+3-4 dias
+Servicios, validaciones, logica de negocio
+Fase 3: Frontend
+3-4 dias
+Componentes Livewire y vistas Blade
+Fase 4: Migracion
+1-2 dias
+Migracion de datos existentes
+Fase 5: Testing
+2-3 dias
+Tests unitarios, integracion y UAT
+11-16
+TOTAL
+TOTAL
+11-16
+dias
+dias
+Implementacion completa
+Nuevo Requerimiento del Cliente
+Nuevo Requerimiento del Cliente
+1. Requerimiento por Cantidad de Personas
+1. Requerimiento por Cantidad de Personas
+Un numero de parte puede tener diferentes standards segun cuantas personas trabajan:
+Part: ABC-123 (Conector Electrico)
+Configuracion 1 persona:- Tipo: Mesa Manual- Personas: 1- units_per_hour: 80
+Configuracion 2 personas:- Tipo: Mesa Manual- Personas: 2- units_per_hour: 150 (no es lineal, hay eficiencia)
+Configuracion 3 personas (MAXIMO):- Tipo: Mesa Manual- Personas: 3- units_per_hour: 200
+NOTA CRITICA:
+NOTA CRITICA: El maximo de personas por configuracion es 3.
+2. Requerimiento por Tipo de Estacion
+2. Requerimiento por Tipo de Estacion
+El mismo numero de parte puede ensamblarse en diferentes tipos de estaciones:
+Part: ABC-123 (Conector Electrico)
+En Mesa Manual:- 1 persona: 80 uph- 2 personas: 150 uph- 3 personas: 200 uph
+En Maquina:- Standard unico: 500 uph (operador supervisa)
+En Mesa Semi-Automatica (FUTURO):- Aun no definido pero debe contemplarse
+3. Combinaciones Posibles
+3. Combinaciones Posibles
+Para el Part ABC-123, las combinaciones validas serian:
+ID
+ID
+1
+2
+3
+4
+5
+Part
+Part
+Tipo Estacion
+Tipo Estacion
+ABC-123 Mesa Manual
+ABC-123 Mesa Manual
+ABC-123 Mesa Manual
+ABC-123 Maquina
+ABC-123 Semi-Auto
+(futuro)
+4. Reglas de Negocio Identificadas
+4. Reglas de Negocio Identificadas
+1. Maximo 3 personas
+Personas
+Personas units_per_hour
+units_per_hour
+1
+2
+3
+1
+?
+Maximo 3 personas por configuracion de standard
+2. Una combinacion unica
+Una combinacion unica por 
+80
+150
+200
+500
+?
+Part + Tipo Estacion + Cantidad Personas
+3. Maquinas
+Maquinas generalmente tienen 1 configuracion (operador supervisa)
+4. Mesas manuales
+Mesas manuales pueden tener 1, 2 o 3 configuraciones diferentes
+5. Semi-automaticas
+Semi-automaticas son para futuro pero la arquitectura debe soportarlas
+Analisis del Sistema Actual
+Analisis del Sistema Actual
+Estructura Actual de la Tabla 
+Estructura Actual de la Tabla 
+standards
+standards
+CREATE TABLE standards (
+id BIGINT PRIMARY KEY,
+part_id BIGINT NOT NULL,              
+work_table_id BIGINT NULL,            -- FK a parts-- FK a tables (mesa manual)
+semi_auto_work_table_id BIGINT NULL,  -- FK a semi__automatics
+machine_id BIGINT NULL,               -- FK a machines
+units_per_hour INT NOT NULL DEFAULT 1,-- Productividad UNICA
+persons_1 INT NULL,                   -- Config personas 1
+persons_2 INT NULL,                   -- Config personas 2
+persons_3 INT NULL,                   -- Config personas 3
+effective_date DATE NULL,
+active BOOLEAN DEFAULT TRUE,
+description TEXT NULL,
+deleted_at TIMESTAMP NULL,
+created_at TIMESTAMP,
+updated_at TIMESTAMP
+);
+Limitaciones Criticas del Diseno Actual
+Limitaciones Criticas del Diseno Actual
+Limitacion 1: UN SOLO 
+Limitacion 1: UN SOLO 
+units_per_hour
+units_per_hour por Standard
+por Standard
+// PROBLEMA: No se puede almacenar productividad diferente para cada configuracion de personas
+Standard {
+part_id: 1,
+work_table_id: 5,
+units_per_hour: 100,  // Solo UN valor
+persons_1: 1,         
+// Deberia tener su propio units_per_hour
+persons_2: 2,         
+// Deberia tener su propio units_per_hour
+persons_3: 3          
+// Deberia tener su propio units_per_hour
+}
+Limitacion 2: Relacion 1:1 entre Part y Tipo de Estacion
+Limitacion 2: Relacion 1:1 entre Part y Tipo de Estacion
+// PROBLEMA ACTUAL: Un standard solo puede tener UNA estacion
+// (work_table_id XOR semi_auto_work_table_id XOR machine_id)
+// El cliente necesita que el MISMO Part tenga standards para:
+// - Mesa Manual CON 1 persona
+// - Mesa Manual CON 2 personas
+// - Mesa Manual CON 3 personas
+// - Maquina CON operador
+// SOLUCION: Se necesitan MULTIPLES registros de standard para el mismo Part
+Limitacion 3: Semantica Ambigua de 
+Limitacion 3: Semantica Ambigua de 
+persons_1, persons_2, persons_3
+persons_1, persons_2, persons_3
+Los campos actuales 
+persons_1 , 
+persons_2 , 
+persons_3 fueron disenados sin una semantica clara:
+No se sabe si representan "cantidad de personas" o "configuracion 1, 2, 3"
+No tienen su propia productividad asociada
+No hay validacion de coherencia con capacidad de estacion
+Modelo Actual vs Modelo Requerido
+Modelo Actual vs Modelo Requerido
+MODELO ACTUAL:
+==============
+Part ABC-123 --> Standard --> units_per_hour: 100--> persons_1: 1--> persons_2: 2--> persons_3: 3--> work_table_id: 5
+PROBLEMA: No sabemos si 100 uph es para 1, 2 o 3 personas
+MODELO REQUERIDO:
+=================
+Part ABC-123 --> StandardConfiguration #1 --> persons: 1--> units_per_hour: 80--> workstation_type: 'manual'--> StandardConfiguration #2 --> persons: 2--> units_per_hour: 150--> workstation_type: 'manual'--> StandardConfiguration #3 --> persons: 3--> units_per_hour: 200--> workstation_type: 'manual'--> StandardConfiguration #4 --> persons: 1--> units_per_hour: 500--> workstation_type: 'machine'
+Impacto Arquitectural
+Impacto Arquitectural
+Backend: Modelos Afectados
+Backend: Modelos Afectados
+1. Modelo 
+1. Modelo 
+Standard
+Standard (Modificacion CRITICA)
+(Modificacion CRITICA)
+Cambios requeridos:
+Cambios requeridos:
+Eliminar campos 
+persons_1 , 
+persons_2 , 
+persons_3 (mover a nueva tabla)
+Eliminar campo 
+units_per_hour (mover a nueva tabla)
+Agregar relacion 
+hasMany a 
+StandardConfiguration
+Actualizar metodos de calculo
+Codigo actual a deprecar:
+Codigo actual a deprecar:
+// DEPRECAR estos campos
+protected $fillable = [
+'persons_1',      
+// ELIMINAR
+'persons_2',      
+// ELIMINAR
+'persons_3',      
+// ELIMINAR
+'units_per_hour', // ELIMINAR
+// ... resto permanece
+];
+2. Nuevo Modelo 
+2. Nuevo Modelo 
+Proposito:
+StandardConfiguration
+StandardConfiguration (NUEVO)
+(NUEVO)
+Proposito: Almacenar configuraciones individuales de produccion.
+class StandardConfiguration extends Model
+{
+protected $fillable = [
+'standard_id',
+'workstation_type',    
+'persons_required',    
+// 'manual', 'semi_automatic', 'machine'
+// 1, 2 o 3
+'units_per_hour',
+'is_default',
+'notes',
+];
+}
+3. Modelos de Estaciones (Modificacion Menor)
+3. Modelos de Estaciones (Modificacion Menor)
+Los modelos 
+Table , 
+Semi_Automatic , 
+Machine no requieren cambios estructurales, pero necesitan:
+Agregar relacion inversa 
+hasMany a 
+StandardConfiguration
+Metodos helper para validar capacidad vs personas requeridas
+Frontend: Componentes Livewire Afectados
+Frontend: Componentes Livewire Afectados
+1. 
+1. 
+StandardCreate
+StandardCreate (Modificacion CRITICA)
+(Modificacion CRITICA)
+Cambios:
+Cambios:
+2. 
+Nuevo formulario multi-seccion para configuraciones
+Selector dinamico de tipo de estacion
+Selector de cantidad de personas (1-3)
+Campo 
+units_per_hour por cada configuracion
+Validacion de combinaciones unicas
+2. 
+StandardEdit
+StandardEdit (Modificacion CRITICA)
+(Modificacion CRITICA)
+Cambios similares a StandardCreate:
+Cambios similares a StandardCreate:
+3. 
+Cargar configuraciones existentes
+Permitir agregar/eliminar configuraciones
+Validar cambios
+3. 
+StandardList
+StandardList (Modificacion MEDIA)
+(Modificacion MEDIA)
+Cambios:
+Cambios:
+4. 
+Mostrar resumen de configuraciones por standard
+Expandir/colapsar para ver detalles
+Filtrar por tipo de estacion
+4. 
+StandardShow
+StandardShow (Modificacion MEDIA)
+Cambios:
+Cambios:
+(Modificacion MEDIA)
+Mostrar todas las configuraciones del standard
+Tabla comparativa de productividades
+Indicar configuracion por defecto
+Base de Datos: Cambios Requeridos
+Base de Datos: Cambios Requeridos
+Cambio Critico: Nueva Tabla 
+Cambio Critico: Nueva Tabla 
+standard_configurations
+standard_configurations
+CREATE TABLE standard_configurations (
+id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+standard_id BIGINT UNSIGNED NOT NULL,
+workstation_type ENUM('manual', 'semi_automatic', 'machine') NOT NULL,
+workstation_id BIGINT UNSIGNED NULL,  -- FK a tabla especifica
+persons_required TINYINT UNSIGNED NOT NULL DEFAULT 1,
+units_per_hour INT UNSIGNED NOT NULL,
+is_default BOOLEAN DEFAULT FALSE,
+notes TEXT NULL,
+created_at TIMESTAMP NULL,
+updated_at TIMESTAMP NULL,
+FOREIGN KEY (standard_id) REFERENCES standards(id) ON DELETE CASCADE,-- Constraint de unicidad: no puede haber dos configs iguales
+UNIQUE KEY unique_config (standard_id, workstation_type, persons_required),-- Indices para performance
+INDEX idx_standard_id (standard_id),
+INDEX idx_workstation_type (workstation_type),
+INDEX idx_persons (persons_required),
+INDEX idx_default (standard_id, is_default)
+);
+Cambio Menor: Modificar Tabla 
+Cambio Menor: Modificar Tabla 
+standards
+standards-- Opcion A: Eliminar campos obsoletos (RECOMENDADO a largo plazo)
+ALTER TABLE standards
+DROP COLUMN persons_1,
+DROP COLUMN persons_2,
+DROP COLUMN persons_3,
+DROP COLUMN units_per_hour;-- Opcion B: Mantener campos como deprecated (RECOMENDADO para migracion gradual)
+ALTER TABLE standards
+ADD COLUMN is_migrated BOOLEAN DEFAULT FALSE AFTER active;
+Clasificacion de Cambios
+Clasificacion de Cambios
+Cambios CRITICOS (Deben hacerse primero)
+Cambios CRITICOS (Deben hacerse primero)
+1. Crear tabla 
+standard_configurations
+2. Crear modelo 
+StandardConfiguration
+3. Actualizar modelo 
+Standard con nuevas relaciones
+4. Migrar datos existentes a nueva estructura
+Cambios ALTOS (Segunda prioridad)
+Cambios ALTOS (Segunda prioridad)
+5. Actualizar 
+StandardCreate component
+6. Actualizar 
+StandardEdit component
+7. Actualizar validaciones y reglas de negocio
+8. Actualizar 
+CapacityCalculatorService
+Cambios MENORES (Tercera prioridad)
+Cambios MENORES (Tercera prioridad)
+9. Actualizar 
+StandardList component
+10. Actualizar 
+StandardShow component
+11. Actualizar vistas Blade
+12. Actualizar tests
+Propuesta de Nueva Estructura de Datos
+Propuesta de Nueva Estructura de Datos
+Diagrama Entidad-Relacion Propuesto
+Diagrama Entidad-Relacion Propuesto
+┌──────────────────────────────────────────────────────────────────┐
+│                            PARTS                                  │
+│──────────────────────────────────────────────────────────────────│
+│ id (PK)                                                          │
+│ number (unique)                                                  │
+│ item_number                                                      │
+│ description                                                      │
+│ active                                                           │
+└────────────────────────────────┬─────────────────────────────────┘
+                                 │
+                                 │ 1:N
+                                 │
+┌────────────────────────────────▼─────────────────────────────────┐
+│                          STANDARDS                                │
+│──────────────────────────────────────────────────────────────────│
+│ id (PK)                                                          │
+│ part_id (FK) ──────────────────────────────────────┐             │
+│ effective_date                                     │             │
+│ active                                             │             │
+│ description                                        │             │
+│ is_migrated (nuevo - para control de migracion)   │             │
+│                                                    │             │
+│ -- CAMPOS DEPRECATED (mantener para migracion) -- │             │
+│ work_table_id (nullable, deprecated)              │             │
+│ semi_auto_work_table_id (nullable, deprecated)    │             │
+│ machine_id (nullable, deprecated)                 │             │
+│ persons_1 (nullable, deprecated)                  │             │
+│ persons_2 (nullable, deprecated)                  │             │
+│ persons_3 (nullable, deprecated)                  │             │
+│ units_per_hour (deprecated)                       │             │
+└────────────────────────────────┬─────────────────────────────────┘
+                                 │
+                                 │ 1:N
+                                 │
+┌────────────────────────────────▼─────────────────────────────────┐
+│                   STANDARD_CONFIGURATIONS (NUEVA)                 │
+│──────────────────────────────────────────────────────────────────│
+│ id (PK)                                                          │
+│ standard_id (FK) ────────────────────────────────┐               │
+│ workstation_type ENUM('manual','semi_automatic','machine')       │
+│ workstation_id (FK, nullable) ───────────────────┼───────┐       │
+│ persons_required (1, 2 o 3)                      │       │       │
+│ units_per_hour                                   │       │       │
+│ is_default                                       │       │       │
+│ notes                                            │       │       │
+│                                                  │       │       │
+│ UNIQUE(standard_id, workstation_type, persons_required)  │       │
+└──────────────────────────────────────────────────────────┼───────┘
+                                                           │
+                    ┌──────────────────────────────────────┘
+                    │
+        ┌───────────┴───────────┬───────────────────────┐
+        │                       │                       │
+        ▼                       ▼                       ▼
+┌───────────────┐      ┌───────────────┐      ┌───────────────┐
+│    TABLES     │      │SEMI_AUTOMATICS│      │   MACHINES    │
+│ (Mesa Manual) │      │(Mesa Semi-Aut)│      │  (Maquinas)   │
+│───────────────│      │───────────────│      │───────────────│
+│ id            │      │ id            │      │ id            │
+│ number        │      │ number        │      │ name          │
+│ employees     │      │ employees     │      │ employees     │
+│ active        │      │ active        │      │ active        │
+│ area_id       │      │ area_id       │      │ area_id       │
+└───────────────┘      └───────────────┘      └───────────────┘
+Modelo Modelo StandardConfiguration StandardConfiguration Detallado Detallado
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+class StandardConfiguration extends Model
+{
+    /**
+    /**
+     * Tipos de estacion de trabajo soportados
+     */
+    public const TYPE_MANUAL = 'manual';
+    public const TYPE_SEMI_AUTOMATIC = 'semi_automatic';
+    public const TYPE_MACHINE = 'machine';
+    /**
+     * Maximo de personas permitido
+     */
+    public const MAX_PERSONS = 3;
+    protected $fillable = [
+        'standard_id',
+        'workstation_type',
+        'workstation_id',
+        'persons_required',
+        'units_per_hour',
+        'is_default',
+        'notes',
+    ];
+    protected $casts = [
+        'standard_id' => 'integer',
+        'workstation_id' => 'integer',
+        'persons_required' => 'integer',
+        'units_per_hour' => 'integer',
+        'is_default' => 'boolean',
+    ];
+    // ==========================================
+    // RELACIONES
+    // ==========================================
+    /**
+     * Relacion con Standard padre
+     */
+    public function standard()
+    {
+        return $this->belongsTo(Standard::class);
+    }
+    /**
+     * Relacion polimorfica con estacion de trabajo
+     */
+    public function workstation()
+    {
+        return match($this->workstation_type) {
+            self::TYPE_MANUAL => $this->belongsTo(Table::class, 'workstation_id'),
+            self::TYPE_SEMI_AUTOMATIC => $this->belongsTo(Semi_Automatic::class, 'workstation_id'),
+            self::TYPE_MACHINE => $this->belongsTo(Machine::class, 'workstation_id'),
+            default => null,
+        };
+    }
+    // ==========================================
+    // SCOPES
+    // ==========================================
+    /**
+     * Filtrar por tipo de estacion
+     */
+    public function scopeByWorkstationType(Builder $query, string $type): Builder
+    {
+        return $query->where('workstation_type', $type);
+    }
+    /**
+     * Filtrar por cantidad de personas
+     */
+    public function scopeByPersons(Builder $query, int $persons): Builder
+    {
+        return $query->where('persons_required', $persons);
+    }
+    /**
+     * Obtener configuracion por defecto
+     */
+    public function scopeDefault(Builder $query): Builder
+    public function scopeDefault(Builder $query): Builder
+    {
+        return $query->where('is_default', true);
+    }
+    /**
+     * Ordenar por productividad descendente
+     */
+    public function scopeOrderByProductivity(Builder $query, string $direction = 'desc'): Builder
+    {
+        return $query->orderBy('units_per_hour', $direction);
+    }
+    // ==========================================
+    // METODOS DE NEGOCIO
+    // ==========================================
+    /**
+     * Validar que personas requeridas no excede capacidad de estacion
+     */
+    public function validateCapacity(): array
+    {
+        $workstation = $this->workstation;
+        if (!$workstation) {
+            return [
+                'is_valid' => true,
+                'message' => 'Sin estacion asignada',
+            ];
+        }
+        $capacity = $workstation->employees ?? 0;
+        $isValid = $this->persons_required <= $capacity;
+        return [
+            'is_valid' => $isValid,
+            'message' => $isValid
+                ? 'OK'
+                : "Personas requeridas ({$this->persons_required}) excede capacidad ({$capacity})",
+            'capacity' => $capacity,
+        ];
+    }
+    /**
+     * Calcular horas requeridas para una cantidad
+     */
+    public function calculateRequiredHours(int $quantity): float
+    {
+        if ($this->units_per_hour === 0) {
+            throw new \DivisionByZeroError(
+                "La configuracion tiene units_per_hour = 0"
+            );
+        }
+        return round($quantity / $this->units_per_hour, 2);
+    }
+    /**
+     * Obtener etiqueta descriptiva de la configuracion
+     */
+    public function getLabelAttribute(): string
+    {
+        $type = match($this->workstation_type) {
+            self::TYPE_MANUAL => 'Mesa Manual',
+            self::TYPE_SEMI_AUTOMATIC => 'Semi-Automatica',
+            self::TYPE_MACHINE => 'Maquina',
+            default => 'Desconocido',
+        };
+        return "{$type} - {$this->persons_required} persona(s) - {$this->units_per_hour} uph";
+    }
+    // ==========================================
+    // METODOS ESTATICOS
+    // ==========================================
+    /**
+     * Obtener tipos de estacion disponibles
+     */
+*/
+public static function getWorkstationTypes(): array
+{
+return [
+self::TYPE_MANUAL => 'Mesa de Trabajo Manual',
+self::TYPE_SEMI_AUTOMATIC => 'Mesa Semi-Automatica',
+self::TYPE_MACHINE => 'Maquina',
+];
+}
+/**
+* Obtener opciones de personas
+*/
+public static function getPersonsOptions(): array
+{
+return [
+1 => '1 Persona',
+2 => '2 Personas',
+3 => '3 Personas',
+];
+}
+}
+Modelo 
+Modelo 
+<?php
+Standard
+Standard Actualizado
+Actualizado
+namespace App\Models;
+class Standard extends Model
+{
+// ... codigo existente ...
+// ==========================================
+// NUEVAS RELACIONES
+// ==========================================
+/**
+* Obtener todas las configuraciones del standard
+*/
+public function configurations()
+{
+return $this->hasMany(StandardConfiguration::class);
+}
+/**
+* Obtener configuracion por defecto
+*/
+public function defaultConfiguration()
+{
+return $this->hasOne(StandardConfiguration::class)->where('is_default', true);
+}
+/**
+* Obtener configuraciones por tipo de estacion
+*/
+public function configurationsByType(string $type)
+{
+return $this->configurations()->where('workstation_type', $type)->orderBy('persons_required');
+}
+// ==========================================
+// NUEVOS METODOS DE NEGOCIO
+// ==========================================
+/**
+* Obtener configuracion optima para empleados disponibles
+*
+* @param int $availableEmployees Empleados disponibles
+* @param string|null $preferredType Tipo de estacion preferido
+* @return StandardConfiguration|null
+*/
+public function getOptimalConfiguration(
+int $availableEmployees,
+?string $preferredType = null
+?string $preferredType = null
+): ?StandardConfiguration
+{
+$query = $this->configurations()->where('persons_required', '<=', $availableEmployees);
+if ($preferredType) {
+$query->where('workstation_type', $preferredType);
+}
+// Buscar la configuracion con mayor productividad
+return $query->orderBy('units_per_hour', 'desc')->first();
+}
+/**
+* Calcular horas requeridas con configuracion optima
+*/
+public function calculateRequiredHoursOptimal(
+int $quantity,
+int $availableEmployees,
+?string $preferredType = null
+): array
+{
+$config = $this->getOptimalConfiguration($availableEmployees, $preferredType);
+if (!$config) {
+throw new \RuntimeException(
+"No hay configuracion disponible para {$availableEmployees} empleados"
+);
+}
+return [
+'hours' => $config->calculateRequiredHours($quantity),
+'configuration' => $config,
+'persons_used' => $config->persons_required,
+'productivity' => $config->units_per_hour,
+'workstation_type' => $config->workstation_type,
+];
+}
+/**
+* Verificar si el standard tiene configuraciones migradas
+*/
+public function hasMigratedConfigurations(): bool
+{
+return $this->configurations()->exists();
+}
+/**
+* Obtener resumen de configuraciones para display
+*/
+public function getConfigurationsSummaryAttribute(): array
+{
+return $this->configurations()->select('workstation_type', 'persons_required', 'units_per_hour', 'is_default')->orderBy('workstation_type')->orderBy('persons_required')->get()->groupBy('workstation_type')->toArray();
+}
+}
+Plan de Migracion de Datos
+Plan de Migracion de Datos
+Estrategia de Migracion
+Estrategia de Migracion
+Enfoque:
+Enfoque: Migracion gradual con retrocompatibilidad.
+1. Fase 1:
+Fase 1: Crear nueva estructura (tabla 
+standard_configurations )
+2. Fase 2:
+Fase 2: Migrar datos existentes a nueva estructura
+3. Fase 3:
+Fase 3: Actualizar codigo para usar nueva estructura
+4. Fase 4:
+Fase 4: Marcar campos antiguos como deprecated
+5. Fase 5 (futuro):
+Fase 5 (futuro): Eliminar campos deprecated
+Script de Migracion de Datos
+Script de Migracion de Datos
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use App\Models\Standard;
+use App\Models\StandardConfiguration;
+return new class extends Migration
+{
+public function up(): void
+{
+// Crear tabla standard_configurations
+Schema::create('standard_configurations', function (Blueprint $table) {
+$table->id();
+$table->foreignId('standard_id')->constrained()->onDelete('cascade');
+$table->enum('workstation_type', ['manual', 'semi_automatic', 'machine']);
+$table->unsignedBigInteger('workstation_id')->nullable();
+$table->unsignedTinyInteger('persons_required')->default(1);
+$table->unsignedInteger('units_per_hour');
+$table->boolean('is_default')->default(false);
+$table->text('notes')->nullable();
+$table->timestamps();
+// Constraint de unicidad
+$table->unique(
+['standard_id', 'workstation_type', 'persons_required'],
+'unique_standard_config'
+);
+// Indices
+$table->index('standard_id');
+$table->index('workstation_type');
+$table->index(['standard_id', 'is_default']);
+});
+// Agregar campo de control de migracion a standards
+Schema::table('standards', function (Blueprint $table) {
+$table->boolean('is_migrated')->default(false)->after('active');
+});
+}
+public function down(): void
+{
+Schema::table('standards', function (Blueprint $table) {
+$table->dropColumn('is_migrated');
+});
+Schema::dropIfExists('standard_configurations');
+}
+};
+Seeder de Migracion de Datos Existentes
+Seeder de Migracion de Datos Existentes
+<?php
+namespace Database\Seeders;
+use Illuminate\Database\Seeder;
+use App\Models\Standard;
+use App\Models\StandardConfiguration;
+use Illuminate\Support\Facades\DB;
+class MigrateStandardsToConfigurationsSeeder extends Seeder
+{
+public function run(): void
+{
+$this->command->info('Iniciando migracion de standards a configurations...');
+$standards = Standard::whereNull('deleted_at')->where('is_migrated', false)->get();
+$this->command->info("Standards a migrar: {$standards->count()}");
+        $this->command->info("Standards a migrar: {$standards->count()}");
+        $migrated = 0;
+        $errors = [];
+        DB::transaction(function () use ($standards, &$migrated, &$errors) {
+            foreach ($standards as $standard) {
+                try {
+                    $this->migrateStandard($standard);
+                    $migrated++;
+                } catch (\Exception $e) {
+                    $errors[] = [
+                        'standard_id' => $standard->id,
+                        'error' => $e->getMessage(),
+                    ];
+                }
+            }
+        });
+        $this->command->info("Migracion completada: {$migrated} standards migrados");
+        if (!empty($errors)) {
+            $this->command->warn("Errores encontrados: " . count($errors));
+            foreach ($errors as $error) {
+                $this->command->error("Standard #{$error['standard_id']}: {$error['error']}");
+            }
+        }
+    }
+    protected function migrateStandard(Standard $standard): void
+    {
+        // Determinar tipo de estacion
+        $workstationType = $this->determineWorkstationType($standard);
+        $workstationId = $this->getWorkstationId($standard);
+        // Crear configuraciones basadas en persons_1, persons_2, persons_3
+        $configurations = [];
+        // Configuracion para persons_1 (si existe)
+        if ($standard->persons_1) {
+            $configurations[] = [
+                'standard_id' => $standard->id,
+                'workstation_type' => $workstationType,
+                'workstation_id' => $workstationId,
+                'persons_required' => $standard->persons_1,
+                'units_per_hour' => $standard->units_per_hour ?? 1,
+                'is_default' => true,
+                'notes' => 'Migrado automaticamente desde persons_1',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+        // Configuracion para persons_2 (si existe y es diferente)
+        if ($standard->persons_2 && $standard->persons_2 != $standard->persons_1) {
+            $configurations[] = [
+                'standard_id' => $standard->id,
+                'workstation_type' => $workstationType,
+                'workstation_id' => $workstationId,
+                'persons_required' => $standard->persons_2,
+                // NOTA: Usamos mismo units_per_hour porque no tenemos valor diferenciado
+                'units_per_hour' => $standard->units_per_hour ?? 1,
+                'is_default' => false,
+                'notes' => 'Migrado automaticamente desde persons_2 - REQUIERE REVISION de units_per_hour',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+        // Configuracion para persons_3 (si existe y es diferente)
+        if ($standard->persons_3 &&
+            $standard->persons_3 != $standard->persons_1 &&
+            $standard->persons_3 != $standard->persons_2) {
+            $configurations[] = [
+                'standard_id' => $standard->id,
+                'workstation_type' => $workstationType,
+                'workstation_id' => $workstationId,
+                'persons_required' => $standard->persons_3,
+                'units_per_hour' => $standard->units_per_hour ?? 1,
+                'units_per_hour' => $standard->units_per_hour ?? 1,
+                'is_default' => false,
+                'notes' => 'Migrado automaticamente desde persons_3 - REQUIERE REVISION de units_per_hour',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+        // Si no hay configuraciones de personas, crear una por defecto
+        if (empty($configurations)) {
+            $configurations[] = [
+                'standard_id' => $standard->id,
+                'workstation_type' => $workstationType,
+                'workstation_id' => $workstationId,
+                'persons_required' => 1,
+                'units_per_hour' => $standard->units_per_hour ?? 1,
+                'is_default' => true,
+                'notes' => 'Configuracion por defecto creada durante migracion',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+        // Insertar configuraciones
+        StandardConfiguration::insert($configurations);
+        // Marcar standard como migrado
+        $standard->update(['is_migrated' => true]);
+    }
+    protected function determineWorkstationType(Standard $standard): string
+    {
+        if ($standard->work_table_id) {
+            return StandardConfiguration::TYPE_MANUAL;
+        }
+        if ($standard->semi_auto_work_table_id) {
+            return StandardConfiguration::TYPE_SEMI_AUTOMATIC;
+        }
+        if ($standard->machine_id) {
+            return StandardConfiguration::TYPE_MACHINE;
+        }
+        // Default a manual si no hay estacion asignada
+        return StandardConfiguration::TYPE_MANUAL;
+    }
+    protected function getWorkstationId(Standard $standard): ?int
+    {
+        return $standard->work_table_id
+            ?? $standard->semi_auto_work_table_id
+            ?? $standard->machine_id;
+    }
+}
+Consideraciones de Migracion Consideraciones de Migracion
+Datos que Requieren Revision Manual Datos que Requieren Revision Manual
+1. Standards con persons_2 y persons_3: Standards con persons_2 y persons_3:
+El sistema actual tiene UN solo units_per_hour
+Al migrar, todas las configuraciones tendran el mismo valor
+Se agregan notas para revision manual
+2. Standards sin estacion asignada: Standards sin estacion asignada:
+Se asignan como tipo 'manual' por defecto
+Requieren revision manual post-migracion
+3. Standards con datos inconsistentes: Standards con datos inconsistentes:
+Se registran errores para revision
+No se migran automaticamente
+Query de Verificacion Post-Migracion Query de Verificacion Post-Migracion
+-- Verificar standards migrados correctamente
+SELECT
+s.id as standard_id,
+s.part_id,
+p.number as part_number,
+s.is_migrated,
+COUNT(sc.id) as config_count,
+GROUP_CONCAT(
+CONCAT(sc.workstation_type, '-', sc.persons_required, 'p-', sc.units_per_hour, 'uph')
+SEPARATOR ', '
+) as configurations
+FROM standards s
+LEFT JOIN parts p ON s.part_id = p.id
+LEFT JOIN standard_configurations sc ON s.id = sc.standard_id
+WHERE s.deleted_at IS NULL
+GROUP BY s.id, s.part_id, p.number, s.is_migrated
+ORDER BY s.id;-- Verificar configuraciones que requieren revision
+SELECT
+sc.*,
+s.part_id,
+p.number as part_number
+FROM standard_configurations sc
+JOIN standards s ON sc.standard_id = s.id
+JOIN parts p ON s.part_id = p.id
+WHERE sc.notes LIKE '%REQUIERE REVISION%'
+ORDER BY sc.standard_id;
+Plan de Implementacion
+Plan de Implementacion
+FASE 1: Base de Datos (2-3 dias)
+FASE 1: Base de Datos (2-3 dias)
+Tarea
+Tarea
+1.1
+1.2
+Tiempo
+Tiempo Descripcion
+Descripcion
+2 horas Crear migracion para tabla 
+1 hora
+standard_configurations
+is_migrated en
+Crear migracion para campo 
+standards
+1.3
+1.4
+3 horas Crear modelo 
+StandardConfiguration con relaciones
+2 horas Actualizar modelo 
+Standard con nuevas relaciones
+1.5
+1.6
+2 horas Crear seeder de migracion de datos
+2 horas Tests unitarios de modelos
+FASE 2: Backend (3-4 dias)
+FASE 2: Backend (3-4 dias)
+Tarea
+Tarea
+2.1
+2.2
+Tiempo
+Tiempo Descripcion
+Descripcion
+4 horas Crear 
+StandardConfigurationService
+UniqueConfiguration ,
+3 horas Crear validaciones custom (
+etc)
+2.3
+2.4
+4 horas Actualizar 
+CapacityCalculatorService
+3 horas Crear API endpoints (si aplica)
+2.5
+2 horas Tests de integracion
+FASE 3: Frontend (3-4 dias)
+FASE 3: Frontend (3-4 dias)
+Tarea
+Tarea
+3.1
+3.2
+Tiempo
+Tiempo Descripcion
+Descripcion
+6 horas Actualizar 
+StandardCreate component
+6 horas Actualizar 
+StandardEdit component
+3.3
+3 horas Actualizar 
+StandardList component
+3 horas Actualizar 
+3.4
+StandardShow component
+Tarea
+Tarea
+3.5
+Tiempo
+Tiempo Descripcion
+Descripcion
+4 horas Crear/actualizar vistas Blade
+FASE 4: Migracion de Datos (1-2 dias)
+FASE 4: Migracion de Datos (1-2 dias)
+Tarea
+Tarea
+Tiempo
+Tiempo Descripcion
+Descripcion
+4.1
+2 horas Backup de base de datos
+4.2
+2 horas Ejecutar migracion en staging
+4.3
+4 horas Verificar datos migrados
+4.4
+4 horas Corregir datos inconsistentes
+4.5
+2 horas Ejecutar migracion en
+produccion
+FASE 5: Testing y QA (2-3 dias)
+FASE 5: Testing y QA (2-3 dias)
+Tarea
+Tarea
+Tiempo
+Tiempo Descripcion
+Descripcion
+5.1
+4 horas Tests unitarios completos
+5.2
+4 horas Tests de integracion
+5.3
+4 horas Tests end-to-end (Livewire)
+5.4
+4 horas UAT con usuarios
+5.5
+4 horas Documentacion
+Riesgos y Mitigaciones
+Riesgos y Mitigaciones
+Riesgo 1: Perdida de Datos Durante Migracion
+Riesgo 1: Perdida de Datos Durante Migracion
+Aspecto
+Aspecto
+Detalle
+Detalle
+Probabilidad
+Probabilidad
+MEDIA
+Impacto
+Impacto
+CRITICO
+Mitigacion
+Mitigacion- Backup completo antes de migracion- Migracion en ambiente de staging primero- Script de rollback preparado- Mantener campos antiguos como
+deprecated
+Riesgo 2: Inconsistencia de Productividades Migradas
+Riesgo 2: Inconsistencia de Productividades Migradas
+Aspecto
+Aspecto
+Detalle
+Detalle
+Probabilidad
+Probabilidad
+ALTA
+Impacto
+Impacto
+MEDIO
+Mitigacion
+Mitigacion- Marcar configuraciones que requieren
+revision- Notificar usuarios para revision manual- Reportes de configuraciones pendientes
+Riesgo 3: Breaking Changes en API/UI
+Riesgo 3: Breaking Changes en API/UI
+Aspecto
+Aspecto
+Detalle
+Detalle
+Probabilidad
+Probabilidad
+ALTA
+Impacto
+Impacto
+ALTO
+Mitigacion
+Mitigacion
+Aspecto
+Aspecto
+Detalle
+Detalle- Mantener retrocompatibilidad- Versionado de API (si aplica)- Feature flags para rollout
+gradual
+Riesgo 4: Performance con Multiples Configuraciones
+Riesgo 4: Performance con Multiples Configuraciones
+Aspecto
+Aspecto
+Detalle
+Detalle
+Probabilidad
+Probabilidad
+BAJA
+Impacto
+Impacto
+MEDIO
+Mitigacion
+Mitigacion- Indices optimizados- Eager loading en queries- Cache de configuraciones
+frecuentes
+Riesgo 5: Complejidad de UI Incrementada
+Riesgo 5: Complejidad de UI Incrementada
+Aspecto
+Aspecto
+Detalle
+Detalle
+Probabilidad
+Probabilidad
+MEDIA
+Impacto
+Impacto
+MEDIO
+Mitigacion
+Mitigacion- Diseno de UX intuitivo- Tooltips y ayuda
+contextual- Validaciones en tiempo
+real- Capacitacion a usuarios
+Consideraciones de Extensibilidad
+Consideraciones de Extensibilidad
+1. Soporte para Mesas Semi-Automaticas (FUTURO)
+1. Soporte para Mesas Semi-Automaticas (FUTURO)
+El nuevo diseno ya soporta mesas semi-automaticas:
+// La enum workstation_type ya incluye 'semi_automatic'
+StandardConfiguration::create([
+'standard_id' => 1,
+'workstation_type' => 'semi_automatic',
+'workstation_id' => 5, // ID de semi__automatics
+'persons_required' => 2,
+'units_per_hour' => 300,
+]);
+Cuando se implemente:
+Cuando se implemente:
+1. Agregar validaciones especificas para semi-automaticas
+2. Actualizar UI para mostrar esta opcion
+3. No requiere cambios en estructura de datos
+2. Soporte para Mas de 3 Personas (Si se requiere)
+2. Soporte para Mas de 3 Personas (Si se requiere)
+El diseno actual permite expansion facil:
+// Actualmente limitado a 3 en validacion
+public const MAX_PERSONS = 3;
+// Para expandir, solo cambiar constante y validacion
+public const MAX_PERSONS = 5;
+3. Configuraciones Adicionales por Estacion
+3. Configuraciones Adicionales por Estacion
+La tabla 
+standard_configurations puede extenderse:
+-- Futuras columnas posibles
+ALTER TABLE standard_configurations
+ADD COLUMN setup_time_minutes INT NULL,
+ADD COLUMN efficiency_factor DECIMAL(3,2) NULL,
+ADD COLUMN skill_level_required ENUM('basic', 'intermediate', 'advanced') NULL;
+4. Versionado de Standards
+4. Versionado de Standards
+Para historial de cambios:-- Futura tabla de versiones
+CREATE TABLE standard_configuration_versions (
+id BIGINT PRIMARY KEY,
+configuration_id BIGINT,
+version_number INT,
+units_per_hour INT,
+changed_by BIGINT,
+changed_at TIMESTAMP,
+reason TEXT
+);
+Conclusiones y Recomendaciones
+Conclusiones y Recomendaciones
+Resumen de Cambios Criticos
+Resumen de Cambios Criticos
+1. Nueva tabla 
+Nueva tabla 
+2. Modelo 
+standard_configurations
+standard_configurations : Almacena configuraciones individuales con productividad diferenciada.
+Modelo 
+StandardConfiguration
+StandardConfiguration: Encapsula logica de configuraciones con validaciones y metodos de negocio.
+3. Actualizacion de 
+Actualizacion de 
+Standard
+Standard : Nuevas relaciones 
+4. Migracion de datos:
+hasMany a configuraciones, metodos de seleccion optima.
+Migracion de datos: Script que convierte estructura actual a nueva con notas de revision.
+5. UI actualizada:
+UI actualizada: Formularios multi-seccion para gestionar configuraciones por standard.
+Recomendaciones de Implementacion
+Recomendaciones de Implementacion
+1. Implementar en sprints:
+Implementar en sprints:
+Sprint 1: Base de datos y modelos (Fase 1)
+Sprint 2: Backend y servicios (Fase 2)
+Sprint 3: Frontend y migracion (Fases 3-4)
+Sprint 4: Testing y despliegue (Fase 5)
+2. Priorizar retrocompatibilidad:
+Priorizar retrocompatibilidad:
+Mantener campos antiguos como deprecated
+No eliminar hasta verificar que todo funciona
+3. Involucrar usuarios temprano:
+Involucrar usuarios temprano:
+Revisar diseno de UI antes de implementar
+Capacitar sobre nueva estructura
+4. Documentar exhaustivamente:
+Documentar exhaustivamente:
+Guia de migracion para administradores
+Manual de usuario actualizado
+Documentacion tecnica de API
+Proximos Pasos Inmediatos
+Proximos Pasos Inmediatos
+1.  Aprobar este documento de analisis
+2.  Crear branch de feature: 
+feature/multiple-standards-per-part
+3.  Implementar Fase 1 (Base de datos)
+4.  Revisar con equipo antes de continuar
+5.  Continuar con Fases 2-5
+Historial de Cambios
+Historial de Cambios
+Version
+Version
+Fecha
+Fecha
+Autor
+Autor
+Cambios
+Cambios
+1.0
+2026-01-15
+Agent
+Architect
+Creacion inicial - Analisis arquitectonico
+completo
+Fin del Spec 06 - Analisis Arquitectonico Multiple Standards por Part
+Fin del Spec 06 - Analisis Arquitectonico Multiple Standards por Part---  
+Resumen del Análisis Arquitectónico
+Problema Identificado en el Sistema Actual
+El sistema actual tiene una limitación crítica: UN solo units_per_hour por Standard, pero tu cliente necesita: ┌─────────┬────────────────────┬──────────┬────────────────┐ │ Part │
+Tipo Estación │ Personas │ units_per_hour │ ├─────────┼────────────────────┼──────────┼────────────────┤ │ ABC-123 │ Mesa Manual │ 1 │ 80 │
+├─────────┼────────────────────┼──────────┼────────────────┤ │ ABC-123 │ Mesa Manual │ 2 │ 150 │
+├─────────┼────────────────────┼──────────┼────────────────┤ │ ABC-123 │ Mesa Manual │ 3 │ 200 │
+├─────────┼────────────────────┼──────────┼────────────────┤ │ ABC-123 │ Máquina │ 1 │ 500 │ ├─────────┼────────────────────┼──────────┼────────────────┤
+│ ABC-123 │ Semi-Auto (futuro) │ ? │ ? │ └─────────┴────────────────────┴──────────┴────────────────┘ Solución Propuesta: Nueva Tabla standard_configurations
+PARTS (existente) │ │ 1:N ▼ STANDARDS (modificado) │ │ 1:N (NUEVO) ▼ STANDARD_CONFIGURATIONS (NUEVA) - workstation_type ('manual', 'semi_automatic', 'machine') - persons_required (1, 2
+o 3) - units_per_hour (valor único por configuración) - is_default
+Impacto por Área ┌─────────────────────┬─────────┬─────────────────────────────────────────┐ │ Área │ Impacto │ Cambios Principales │
+├─────────────────────┼─────────┼─────────────────────────────────────────┤ │ Modelo de Datos │ CRÍTICO │ Nueva tabla standard_configurations │
+├─────────────────────┼─────────┼─────────────────────────────────────────┤ │ Modelo Standard │ ALTO │ Nueva relación hasMany a configurations │
+├─────────────────────┼─────────┼─────────────────────────────────────────┤ │ StandardCreate/Edit │ CRÍTICO │ Formulario multi-configuración │
+├─────────────────────┼─────────┼─────────────────────────────────────────┤ │ CapacityCalculator │ ALTO │ Lógica de selección óptima │
+├─────────────────────┼─────────┼─────────────────────────────────────────┤ │ Migracion Datos │ ALTO │ Script automático + revisión manual │
+└─────────────────────┴─────────┴─────────────────────────────────────────┘ Estrategia de Migración
+1. Crear nueva estructura sin eliminar campos antiguos
+2. Migrar datos con script automatizado
+3. Marcar configuraciones que requieren revisión (porque persons_2 y persons_3 tendrán el mismo units_per_hour)
+4. Mantener retrocompatibilidad hasta verificar funcionamiento
+Riesgos Principales
+Riesgos Principales
+Riesgo │ Probabilidad 
+Probabilidad │ Mitigación 
+┌─────────────────────────────┬──────────────┬─────────────────────────────────────┐
+│ Riesgo 
+Pérdida de datos │ MEDIA 
+Mitigación │
+├─────────────────────────────┼──────────────┼─────────────────────────────────────┤
+│ Pérdida de datos 
+MEDIA │ Backup + mantener campos deprecated 
+Backup + mantener campos deprecated │
+├─────────────────────────────┼──────────────┼─────────────────────────────────────┤
+│ Productividades incorrectas 
+Productividades incorrectas │ ALTA 
+ALTA │ Marcar para revisión manual 
+Breaking changes UI │ ALTA 
+Marcar para revisión manual │
+├─────────────────────────────┼──────────────┼─────────────────────────────────────┤
+│ Breaking changes UI 
+ALTA │ Feature flags + rollout gradual 
+Feature flags + rollout gradual │
+└─────────────────────────────┴──────────────┴─────────────────────────────────────┘
+El documento completo está en: Diagramas_flujo/Estructura/specs/06_multiple_standards_per_part_architecture.md
+Incluye:
+Código de ejemplo para migraciones
+Modelo StandardConfiguration completo
+Seeder de migración de datos
+Queries de verificación
+Plan de implementación por fases
+Consideraciones para extensibilidad futura (mesas semi-automáticas

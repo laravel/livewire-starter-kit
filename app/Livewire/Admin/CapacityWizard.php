@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
-use App\Models\{Shift, Part, SentList, User};
+use App\Models\{Shift, Part, SentList, User, Lot};
 use App\Services\CapacityCalculatorService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -23,19 +23,49 @@ class CapacityWizard extends Component
     public array $shiftDetails = [];
 
     // Step 2 - Cálculo de horas necesarias (por número de parte)
-    public array $workOrderItems = []; // Items agregados [{part_id, part_number, quantity, required_hours, work_order_id}]
+    /**
+     * Work order items with configuration details
+     * 
+     * Structure: [
+     *   'part_id' => int,
+     *   'part_number' => string,
+     *   'part_description' => string,
+     *   'quantity' => int,
+     *   'required_hours' => float,
+     *   'configuration' => [
+     *     'workstation_type' => string,
+     *     'workstation_type_label' => string,
+     *     'persons_required' => int,
+     *     'units_per_hour' => int
+     *   ]
+     * ]
+     */
+    public array $workOrderItems = [];
     public ?int $currentPartId = null;
     public int $currentQuantity = 0;
     public float $totalRequiredHours = 0;
     public float $remainingHours = 0;
     public float $suggestedOvertime = 0;
 
-    // Step 3 - Cierre
+    // Modal PO state
+    public bool $showPOModal = false;
+    public array $selectedPOs = [];
+    public array $poConfigurations = []; // Store selected configuration for each PO
+    public string $poSearchTerm = '';
+
+    // Step 3 - Lista Preliminar
     public ?int $generatedSentListId = null;
+    public array $lotNumbers = []; // Números de lote para cada PO (múltiples por índice)
+    
+    // Modal de Lotes
+    public bool $showLotModal = false;
+    public ?int $currentLotIndex = null; // Índice del item actual para agregar lotes
+    public array $tempLots = []; // Lotes temporales para el modal
 
     // UI state
     public string $errorMessage = '';
     public string $successMessage = '';
+    public array $warnings = [];
 
     protected CapacityCalculatorService $service;
 
@@ -280,6 +310,159 @@ class CapacityWizard extends Component
         return true;
     }
 
+    // ==========================================
+    // PO Modal Methods
+    // ==========================================
+
+    public function openPOModal()
+    {
+        $this->showPOModal = true;
+        $this->selectedPOs = [];
+        $this->poConfigurations = [];
+        $this->poSearchTerm = '';
+    }
+
+    public function closePOModal()
+    {
+        $this->showPOModal = false;
+        $this->selectedPOs = [];
+        $this->poConfigurations = [];
+    }
+
+    public function togglePOSelection(int $poId)
+    {
+        if (in_array($poId, $this->selectedPOs)) {
+            // Remove from selection
+            $this->selectedPOs = array_values(array_diff($this->selectedPOs, [$poId]));
+            unset($this->poConfigurations[$poId]);
+        } else {
+            // Add to selection
+            $this->selectedPOs[] = $poId;
+        }
+    }
+
+    public function setConfigurationForPO(int $poId, int $configId)
+    {
+        $this->poConfigurations[$poId] = $configId;
+    }
+
+    public function addSelectedPOs()
+    {
+        if (empty($this->selectedPOs)) {
+            $this->errorMessage = 'Debe seleccionar al menos un PO.';
+            return;
+        }
+
+        try {
+            $pos = \App\Models\PurchaseOrder::with(['part.standards.configurations'])
+                ->whereIn('id', $this->selectedPOs)
+                ->get();
+
+            foreach ($pos as $po) {
+                // Check if already added
+                $existingIndex = array_search($po->part_id, array_column($this->workOrderItems, 'part_id'));
+                if ($existingIndex !== false) {
+                    continue; // Skip if already added
+                }
+
+                $standard = $po->part->standards()->where('active', true)->first();
+                
+                if (!$standard || !$standard->hasMigratedConfigurations()) {
+                    $this->warnings[] = "PO {$po->po_number}: Part {$po->part->number} has no configurations.";
+                    continue;
+                }
+
+                // Get selected configuration or use optimal
+                $configId = $this->poConfigurations[$po->id] ?? null;
+                
+                if ($configId) {
+                    $config = $standard->configurations()->find($configId);
+                    if (!$config) {
+                        $this->warnings[] = "PO {$po->po_number}: Selected configuration not found.";
+                        continue;
+                    }
+                    
+                    // Validate persons required
+                    if ($config->persons_required > $this->numPersons) {
+                        $this->warnings[] = "PO {$po->po_number}: Configuration requires {$config->persons_required} persons but only {$this->numPersons} available.";
+                        continue;
+                    }
+                    
+                    $requiredHours = $config->calculateRequiredHours($po->quantity);
+                } else {
+                    // Use optimal configuration
+                    $result = $this->service->calculateRequiredHours(
+                        $po->part_id,
+                        $po->quantity,
+                        $this->numPersons
+                    );
+                    
+                    $requiredHours = $result['required_hours'];
+                    $config = $standard->configurations()->find($result['configuration']['id']);
+                }
+
+                // Validate capacity
+                if ($config) {
+                    $validation = $config->validateCapacity();
+                    if (!$validation['is_valid']) {
+                        $this->warnings[] = "PO {$po->po_number}: {$validation['message']}";
+                    }
+                }
+
+                $this->workOrderItems[] = [
+                    'part_id' => $po->part_id,
+                    'part_number' => $po->part->number,
+                    'part_description' => $po->part->description,
+                    'quantity' => $po->quantity,
+                    'required_hours' => $requiredHours,
+                    'po_id' => $po->id,
+                    'po_number' => $po->po_number,
+                    'configuration' => [
+                        'id' => $config->id,
+                        'workstation_type' => $config->workstation_type,
+                        'workstation_type_label' => $config->workstation_type_label,
+                        'persons_required' => $config->persons_required,
+                        'units_per_hour' => $config->units_per_hour,
+                    ],
+                ];
+            }
+
+            $this->calculateDifference();
+            $this->closePOModal();
+            
+            $count = count($this->selectedPOs);
+            $this->successMessage = "{$count} PO(s) agregado(s) exitosamente.";
+        } catch (\Exception $e) {
+            $this->errorMessage = 'Error al agregar POs: ' . $e->getMessage();
+        }
+    }
+
+    public function getAvailablePOsProperty()
+    {
+        $query = \App\Models\PurchaseOrder::with(['part.standards.configurations', 'workOrder'])
+            ->where('status', \App\Models\PurchaseOrder::STATUS_APPROVED)
+            ->whereHas('part.standards', function($q) {
+                $q->where('active', true)
+                  ->has('configurations');
+            })
+            // Solo POs que tienen Work Order con status "Open"
+            ->whereHas('workOrder.status', function($q) {
+                $q->where('name', 'Open');
+            });
+
+        if (!empty($this->poSearchTerm)) {
+            $query->where(function($q) {
+                $q->where('po_number', 'like', "%{$this->poSearchTerm}%")
+                  ->orWhereHas('part', function($partQuery) {
+                      $partQuery->where('number', 'like', "%{$this->poSearchTerm}%")
+                                ->orWhere('description', 'like', "%{$this->poSearchTerm}%");
+                  });
+            });
+        }
+
+        return $query->orderBy('po_number')->get();
+    }
+
     public function addWorkOrderItem()
     {
         $this->validate([
@@ -298,8 +481,14 @@ class CapacityWizard extends Component
             // Obtener el estándar para calcular horas
             $standard = $part->standards()->where('active', true)->first();
             
-            if (!$standard || !$standard->units_per_hour || $standard->units_per_hour == 0) {
-                $this->errorMessage = "No hay estándar activo con unidades por hora para la parte {$part->number}.";
+            if (!$standard) {
+                $this->errorMessage = "No hay estándar activo para la parte {$part->number}.";
+                return;
+            }
+
+            // Check if standard has configurations
+            if (!$standard->hasMigratedConfigurations()) {
+                $this->errorMessage = "Part {$part->number} has no configurations. Please add configurations for this standard in the Standards management section.";
                 return;
             }
 
@@ -310,15 +499,31 @@ class CapacityWizard extends Component
                 return;
             }
 
-            $requiredHours = round($this->currentQuantity / $standard->units_per_hour, 2);
+            // Calculate using service with available employees
+            $result = $this->service->calculateRequiredHours(
+                $this->currentPartId,
+                $this->currentQuantity,
+                $this->numPersons  // Available employees from loaded shifts
+            );
+
+            // Validate capacity for the selected configuration
+            $configuration = \App\Models\StandardConfiguration::find($result['configuration']['id']);
+            if ($configuration) {
+                $validation = $configuration->validateCapacity();
+                if (!$validation['is_valid']) {
+                    $this->warnings[] = "Part {$part->number}: {$validation['message']}";
+                }
+            }
 
             $this->workOrderItems[] = [
                 'part_id' => $this->currentPartId,
                 'part_number' => $part->number,
                 'part_description' => $part->description,
                 'quantity' => $this->currentQuantity,
-                'required_hours' => $requiredHours,
-                'units_per_hour' => $standard->units_per_hour,
+                'required_hours' => $result['required_hours'],
+                'po_id' => null, // Agregado manualmente, no desde PO
+                'po_number' => null,
+                'configuration' => $result['configuration'],
             ];
 
             $this->calculateDifference();
@@ -331,9 +536,11 @@ class CapacityWizard extends Component
             $this->dispatch('partAdded');
 
             $this->errorMessage = '';
-            $this->successMessage = "Parte {$part->number} agregada. Horas requeridas: {$requiredHours}";
-        } catch (\Exception $e) {
+            $this->successMessage = "Parte {$part->number} agregada. Horas requeridas: {$result['required_hours']}";
+        } catch (\RuntimeException $e) {
             $this->errorMessage = $e->getMessage();
+        } catch (\Exception $e) {
+            $this->errorMessage = 'Error al agregar parte: ' . $e->getMessage();
         }
     }
 
@@ -360,8 +567,66 @@ class CapacityWizard extends Component
     }
 
     // ==========================================
-    // Step 3 Methods - Cierre y salida
+    // Step 3 Methods - Lista Preliminar
     // ==========================================
+
+    public function openLotModal(int $index)
+    {
+        $this->currentLotIndex = $index;
+        // Cargar lotes existentes o inicializar con uno vacío
+        $this->tempLots = $this->lotNumbers[$index] ?? [''];
+        if (empty($this->tempLots)) {
+            $this->tempLots = [''];
+        }
+        $this->showLotModal = true;
+    }
+
+    public function closeLotModal()
+    {
+        $this->showLotModal = false;
+        $this->currentLotIndex = null;
+        $this->tempLots = [];
+    }
+
+    public function addLotInput()
+    {
+        $this->tempLots[] = '';
+    }
+
+    public function removeLotInput(int $lotIndex)
+    {
+        if (count($this->tempLots) > 1) {
+            unset($this->tempLots[$lotIndex]);
+            $this->tempLots = array_values($this->tempLots);
+        }
+    }
+
+    public function saveLots()
+    {
+        if ($this->currentLotIndex === null) {
+            return;
+        }
+
+        // Filtrar lotes vacíos y guardar
+        $filteredLots = array_values(array_filter($this->tempLots, fn($lot) => !empty(trim($lot))));
+        
+        if (!empty($filteredLots)) {
+            $this->lotNumbers[$this->currentLotIndex] = $filteredLots;
+        } else {
+            unset($this->lotNumbers[$this->currentLotIndex]);
+        }
+
+        $this->closeLotModal();
+    }
+
+    public function setLotNumber(int $index, string $lotNumber)
+    {
+        if (!empty(trim($lotNumber))) {
+            $this->lotNumbers[$index] = [$lotNumber];
+        } else {
+            unset($this->lotNumbers[$index]);
+        }
+    }
 
     public function generateSentList()
     {
@@ -372,9 +637,9 @@ class CapacityWizard extends Component
 
         try {
             DB::transaction(function () {
-                // Crear SentList (sin po_id ya que es una lista de planificación)
+                // Crear SentList como Lista Preliminar
                 $sentList = SentList::create([
-                    'po_id' => null, // Se asignará cuando se creen los WOs
+                    'po_id' => null, // Ya no se usa, ahora es relación many-to-many
                     'shift_ids' => $this->selectedShifts,
                     'num_persons' => $this->numPersons,
                     'start_date' => $this->startDate,
@@ -383,15 +648,73 @@ class CapacityWizard extends Component
                     'used_hours' => $this->totalRequiredHours,
                     'remaining_hours' => max(0, $this->remainingHours),
                     'status' => SentList::STATUS_PENDING,
+                    'current_department' => SentList::DEPT_MATERIALS,
+                    'notes' => 'Lista preliminar generada desde Capacity Wizard',
                 ]);
 
                 // Sync shifts
                 $sentList->shifts()->sync($this->selectedShifts);
 
+                // Attach purchase orders with their details and create Lot records
+                foreach ($this->workOrderItems as $index => $item) {
+                    if (isset($item['po_id'])) {
+                        // Obtener el PO para acceder al work_order_id
+                        $purchaseOrder = \App\Models\PurchaseOrder::with('workOrder')->find($item['po_id']);
+                        
+                        // Convertir array de lotes a string separado por comas para la tabla pivot
+                        $lotNumbersString = null;
+                        $lotNumbersArray = [];
+                        
+                        if (isset($this->lotNumbers[$index])) {
+                            if (is_array($this->lotNumbers[$index])) {
+                                $lotNumbersArray = $this->lotNumbers[$index];
+                                $lotNumbersString = implode(', ', $this->lotNumbers[$index]);
+                            } else {
+                                $lotNumbersArray = [$this->lotNumbers[$index]];
+                                $lotNumbersString = $this->lotNumbers[$index];
+                            }
+                        }
+                        
+                        $sentList->purchaseOrders()->attach($item['po_id'], [
+                            'quantity' => $item['quantity'],
+                            'required_hours' => $item['required_hours'],
+                            'lot_number' => $lotNumbersString,
+                        ]);
+                        
+                        // Crear registros Lot reales para que aparezcan en /admin/lots
+                        if ($purchaseOrder && $purchaseOrder->workOrder && !empty($lotNumbersArray)) {
+                            $workOrder = $purchaseOrder->workOrder;
+                            $quantityPerLot = count($lotNumbersArray) > 0 
+                                ? intval($item['quantity'] / count($lotNumbersArray)) 
+                                : $item['quantity'];
+                            
+                            foreach ($lotNumbersArray as $lotNumber) {
+                                if (!empty(trim($lotNumber))) {
+                                    // Verificar si ya existe un lote con ese número para esta WO
+                                    $existingLot = Lot::where('work_order_id', $workOrder->id)
+                                        ->where('lot_number', trim($lotNumber))
+                                        ->first();
+                                    
+                                    if (!$existingLot) {
+                                        Lot::create([
+                                            'work_order_id' => $workOrder->id,
+                                            'lot_number' => trim($lotNumber),
+                                            'description' => "Lote creado desde Lista Preliminar #{$sentList->id}",
+                                            'quantity' => $quantityPerLot,
+                                            'status' => Lot::STATUS_PENDING,
+                                            'comments' => "Generado automáticamente desde Capacity Wizard",
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 $this->generatedSentListId = $sentList->id;
             });
 
-            $this->successMessage = '¡Lista de planificación generada exitosamente!';
+            $this->successMessage = '¡Lista preliminar generada exitosamente!';
             $this->errorMessage = '';
         } catch (\Exception $e) {
             $this->errorMessage = 'Error al generar la lista: ' . $e->getMessage();
@@ -416,6 +739,10 @@ class CapacityWizard extends Component
             'generatedSentListId',
             'errorMessage',
             'successMessage',
+            'lotNumbers',
+            'showLotModal',
+            'currentLotIndex',
+            'tempLots',
         ]);
 
         $this->numPersons = 0;
@@ -434,13 +761,17 @@ class CapacityWizard extends Component
     {
         $this->errorMessage = '';
         $this->successMessage = '';
+        $this->warnings = [];
     }
 
     public function render()
     {
-        // Obtener todas las partes activas que tienen estándar activo con units_per_hour
+        // Obtener todas las partes activas que tienen estándar activo con configuraciones
         $partsWithStandard = Part::active()
-            ->whereHas('standards', fn($q) => $q->where('active', true)->where('units_per_hour', '>', 0))
+            ->whereHas('standards', function($q) {
+                $q->where('active', true)
+                  ->has('configurations');
+            })
             ->orderBy('number')
             ->get();
 

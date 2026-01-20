@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Listas de Envío') }}
+                {{ __('Listas Preliminares') }}
             </h2>
             <a href="{{ route('admin.capacity.calculator') }}"
                 class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
@@ -63,6 +63,7 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Período</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Personas</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Capacidad</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Departamento</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
                                     </tr>
@@ -74,10 +75,27 @@
                                                 #{{ $sentList->id }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                {{ $sentList->purchaseOrder->po_number ?? 'N/A' }}
+                                                @if($sentList->purchaseOrders->count() > 0)
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        {{ $sentList->purchaseOrders->count() }} PO(s)
+                                                    </span>
+                                                @else
+                                                    {{ $sentList->purchaseOrder->po_number ?? 'N/A' }}
+                                                @endif
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                {{ $sentList->purchaseOrder->part->number ?? 'N/A' }}
+                                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                                @if($sentList->purchaseOrders->count() > 0)
+                                                    <div class="flex flex-col space-y-1">
+                                                        @foreach($sentList->purchaseOrders->take(2) as $po)
+                                                            <span class="text-xs">{{ $po->part->number }}</span>
+                                                        @endforeach
+                                                        @if($sentList->purchaseOrders->count() > 2)
+                                                            <span class="text-xs text-gray-500">+{{ $sentList->purchaseOrders->count() - 2 }} más</span>
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    {{ $sentList->purchaseOrder->part->number ?? 'N/A' }}
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                                 {{ $sentList->start_date->format('d/m/Y') }} - {{ $sentList->end_date->format('d/m/Y') }}
@@ -93,6 +111,11 @@
                                                         Restante: {{ number_format($sentList->remaining_hours, 2) }}h
                                                     </span>
                                                 </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                    {{ $sentList->department_label }}
+                                                </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 

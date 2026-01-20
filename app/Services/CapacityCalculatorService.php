@@ -87,22 +87,26 @@ class CapacityCalculatorService
     }
 
     /**
-     * Calculate required hours for a work order.
-     *
-     * Formula: quantity / units_per_hour (from standard)
+     * Calculate required hours for a work order using standard configurations.
      *
      * @param int $part_id Part ID
      * @param int $quantity Quantity to produce
-     * @param string $assembly_mode Assembly mode (1_person, 2_persons, 3_persons)
-     * @return float Required hours
-     * @throws \Exception if no standard found
+     * @param int $available_employees Number of available employees
+     * @param string|null $preferred_workstation_type Optional preferred workstation type
+     * @return array{required_hours: float, configuration: array, part_number: string}
+     * @throws \RuntimeException if no standard or configuration found
      */
-    public function calculateRequiredHours(int $part_id, int $quantity, string $assembly_mode = '1_person'): float
+    public function calculateRequiredHours(
+        int $part_id, 
+        int $quantity, 
+        int $available_employees,
+        ?string $preferred_workstation_type = null
+    ): array
     {
         $part = Part::find($part_id);
 
         if (!$part) {
-            throw new \Exception("Part with ID {$part_id} not found");
+            throw new \RuntimeException("Part with ID {$part_id} not found");
         }
 
         // Get the active standard for this part
@@ -111,32 +115,48 @@ class CapacityCalculatorService
             ->first();
 
         if (!$standard) {
-            throw new \Exception("No active standard found for part {$part->number}");
+            throw new \RuntimeException("No active standard found for part {$part->number}");
         }
 
-        // Use units_per_hour from standard
-        $units_per_hour = $standard->units_per_hour ?? 0;
-
-        if ($units_per_hour === 0) {
-            throw new \Exception("Standard for part {$part->number} has units_per_hour = 0");
+        // Check if standard has configurations
+        if (!$standard->hasMigratedConfigurations()) {
+            throw new \RuntimeException(
+                "Part {$part->number} has no configurations. Please add configurations for this standard in the Standards management section."
+            );
         }
 
-        return round($quantity / $units_per_hour, 2);
-    }
+        // Calculate using optimal configuration
+        try {
+            $result = $standard->calculateRequiredHoursOptimal(
+                $quantity,
+                $available_employees,
+                $preferred_workstation_type
+            );
 
-    /**
-     * Get units per hour based on assembly mode.
-     * 
-     * Note: This method is deprecated. Use units_per_hour directly from standard.
-     *
-     * @param Standard $standard
-     * @param string $assembly_mode
-     * @return int Units per hour
-     */
-    protected function getUnitsPerHourByMode(Standard $standard, string $assembly_mode): int
-    {
-        // Use the main units_per_hour field
-        return $standard->units_per_hour ?? 0;
+            $config = $result['configuration'];
+
+            return [
+                'required_hours' => $result['hours'],
+                'configuration' => [
+                    'id' => $config->id,
+                    'workstation_type' => $config->workstation_type,
+                    'workstation_type_label' => $config->workstation_type_label,
+                    'persons_required' => $config->persons_required,
+                    'units_per_hour' => $config->units_per_hour,
+                    'label' => $config->label,
+                ],
+                'part_number' => $part->number,
+            ];
+        } catch (\RuntimeException $e) {
+            // Get minimum persons required from all configurations
+            $minPersons = $standard->configurations()->min('persons_required') ?? 0;
+            
+            throw new \RuntimeException(
+                "Part {$part->number} requires at least {$minPersons} employee(s). " .
+                "Currently {$available_employees} employee(s) are available. " .
+                "Please increase available employees or select different shifts."
+            );
+        }
     }
 
     /**

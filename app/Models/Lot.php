@@ -87,11 +87,12 @@ class Lot extends Model
 
     /**
      * Get the inspections for this lot.
+     * NOTE: Inspection model not implemented yet
      */
-    public function inspections(): HasMany
-    {
-        return $this->hasMany(Inspection::class);
-    }
+    // public function inspections(): HasMany
+    // {
+    //     return $this->hasMany(Inspection::class);
+    // }
 
     /**
      * Scope a query to only include lots with a specific status.
@@ -219,6 +220,7 @@ class Lot extends Model
      */
     public function canBeDeleted(): bool
     {
-        return $this->status === self::STATUS_PENDING && !$this->inspections()->exists();
+        // NOTE: Inspection model not implemented yet
+        return $this->status === self::STATUS_PENDING;
     }
 }
