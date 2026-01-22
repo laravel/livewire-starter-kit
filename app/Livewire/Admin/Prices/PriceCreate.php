@@ -16,6 +16,10 @@ class PriceCreate extends Component
     public bool $active = true;
     public string $comments = '';
     
+    // Validación en tiempo real
+    public string $validation_message = '';
+    public bool $has_conflict = false;
+    
     // Almacenamiento temporal de valores por tipo de estación
     protected array $savedTierValues = [
         'table' => [],
@@ -34,7 +38,20 @@ class PriceCreate extends Component
         
         if (request()->has('part_id')) {
             $this->part_id = request('part_id');
+            $this->checkForConflicts();
         }
+        
+        if (request()->has('workstation_type')) {
+            $this->workstation_type = request('workstation_type');
+            $this->previousWorkstationType = $this->workstation_type;
+            $this->initializeTierPrices();
+            $this->checkForConflicts();
+        }
+    }
+
+    public function updatedPartId(): void
+    {
+        $this->checkForConflicts();
     }
 
     public function updatedWorkstationType($value): void
@@ -52,6 +69,36 @@ class PriceCreate extends Component
             $this->tier_prices = $this->savedTierValues[$value];
         } else {
             $this->initializeTierPrices();
+        }
+        
+        // Verificar conflictos con el nuevo tipo
+        $this->checkForConflicts();
+    }
+    
+    public function updatedActive(): void
+    {
+        $this->checkForConflicts();
+    }
+    
+    protected function checkForConflicts(): void
+    {
+        $this->validation_message = '';
+        $this->has_conflict = false;
+        
+        if (empty($this->part_id) || !$this->active) {
+            return;
+        }
+        
+        // Buscar precios activos existentes para esta parte y tipo de estación
+        $existingPrice = Price::where('part_id', $this->part_id)
+            ->where('workstation_type', $this->workstation_type)
+            ->where('active', true)
+            ->first();
+        
+        if ($existingPrice) {
+            $this->has_conflict = true;
+            $typeLabel = Price::WORKSTATION_TYPES[$this->workstation_type] ?? $this->workstation_type;
+            $this->validation_message = "Ya existe un precio activo para esta parte con tipo de estación {$typeLabel}. Debes desactivar el precio existente primero o crear este precio como inactivo.";
         }
     }
     
@@ -100,24 +147,34 @@ class PriceCreate extends Component
 
     public function savePrice(): void
     {
+        // Validar primero si hay conflictos
+        if ($this->has_conflict && $this->active) {
+            $this->addError('part_id', $this->validation_message);
+            return;
+        }
+        
         $this->validate();
 
-        $price = Price::create([
-            'part_id' => $this->part_id,
-            'sample_price' => $this->sample_price,
-            'workstation_type' => $this->workstation_type,
-            'effective_date' => $this->effective_date,
-            'active' => $this->active,
-            'comments' => $this->comments,
-        ]);
+        try {
+            $price = Price::create([
+                'part_id' => $this->part_id,
+                'sample_price' => $this->sample_price,
+                'workstation_type' => $this->workstation_type,
+                'effective_date' => $this->effective_date,
+                'active' => $this->active,
+                'comments' => $this->comments,
+            ]);
 
-        // Sincronizar los tiers
-        $price->syncTiers($this->tier_prices);
+            // Sincronizar los tiers
+            $price->syncTiers($this->tier_prices);
 
-        session()->flash('flash.banner', 'Precio creado correctamente.');
-        session()->flash('flash.bannerStyle', 'success');
+            session()->flash('flash.banner', 'Precio creado correctamente.');
+            session()->flash('flash.bannerStyle', 'success');
 
-        $this->redirect(route('admin.prices.index'), navigate: true);
+            $this->redirect(route('admin.prices.index'), navigate: true);
+        } catch (\Exception $e) {
+            $this->addError('general', 'Error al crear el precio: ' . $e->getMessage());
+        }
     }
 
     public function render()

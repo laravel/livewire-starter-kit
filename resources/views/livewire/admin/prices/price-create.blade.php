@@ -29,7 +29,7 @@
                         <label for="part_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Parte <span class="text-red-500">*</span>
                         </label>
-                        <select wire:model="part_id" id="part_id"
+                        <select wire:model.live="part_id" id="part_id"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" required>
                             <option value="">Seleccione una parte</option>
                             @foreach ($parts as $part)
@@ -37,6 +37,17 @@
                             @endforeach
                         </select>
                         @error('part_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        
+                        @if($has_conflict)
+                            <div class="mt-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <span class="text-sm text-red-700 dark:text-red-300">{{ $validation_message }}</span>
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Precio de Muestra y Fecha -->

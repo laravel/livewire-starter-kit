@@ -1,0 +1,2 @@
+http://flexcon-tracker.test:8088/admin/prices/create
+Cuando se seleccione un numero de parte ya traiga un error de que ya tiene un numero de parte y veo que al crear no lanza ningun error de validación.. Arreglalo por favor
