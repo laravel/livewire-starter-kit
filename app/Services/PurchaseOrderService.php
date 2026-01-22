@@ -21,19 +21,20 @@ class PurchaseOrderService
      */
     public function validatePrice(PurchaseOrder $purchaseOrder): array
     {
-        // Get the active price for the part
-        $activePrice = Price::getActivePriceForPart($purchaseOrder->part_id);
+        // Use POPriceDetectionService to get the correct price based on workstation type
+        $priceDetectionService = app(POPriceDetectionService::class);
+        $detection = $priceDetectionService->detectPrice($purchaseOrder);
 
-        if (!$activePrice) {
+        if (!$detection->found) {
             return [
                 'valid' => false,
                 'expected_price' => null,
-                'message' => 'No hay precio registrado para esta parte.',
+                'message' => $detection->error ?? 'No se pudo detectar el precio correcto.',
             ];
         }
 
         // Get the expected price based on quantity tier
-        $expectedPrice = $activePrice->getPriceForQuantity($purchaseOrder->quantity);
+        $expectedPrice = $detection->price->getPriceForQuantity($purchaseOrder->quantity);
 
         if ($expectedPrice === null) {
             return [
@@ -43,7 +44,7 @@ class PurchaseOrderService
             ];
         }
 
-        // Compare prices (using bccomp for decimal precision)
+        // Compare prices (using tolerance for decimal precision)
         $poPrice = (float) $purchaseOrder->unit_price;
         $tolerance = 0.0001; // Allow small floating point differences
 
@@ -55,13 +56,15 @@ class PurchaseOrderService
             ];
         }
 
+        $typeLabel = Price::WORKSTATION_TYPES[$detection->workstationType] ?? $detection->workstationType;
         return [
             'valid' => false,
             'expected_price' => $expectedPrice,
             'message' => sprintf(
-                'El precio no coincide. Precio en PO: $%.4f, Precio esperado: $%.4f',
+                'El precio no coincide. Precio en PO: $%.4f, Precio esperado: $%.4f (Tipo de estación: %s)',
                 $poPrice,
-                $expectedPrice
+                $expectedPrice,
+                $typeLabel
             ),
         ];
     }
@@ -143,13 +146,20 @@ class PurchaseOrderService
      */
     public function getExpectedPrice(int $partId, int $quantity): ?float
     {
-        $activePrice = Price::getActivePriceForPart($partId);
+        // Create a temporary PO to use POPriceDetectionService
+        $tempPO = new PurchaseOrder([
+            'part_id' => $partId,
+            'quantity' => $quantity,
+        ]);
 
-        if (!$activePrice) {
+        $priceDetectionService = app(POPriceDetectionService::class);
+        $detection = $priceDetectionService->detectPrice($tempPO);
+
+        if (!$detection->found) {
             return null;
         }
 
-        return $activePrice->getPriceForQuantity($quantity);
+        return $detection->price->getPriceForQuantity($quantity);
     }
 
     /**
