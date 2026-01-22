@@ -10,7 +10,6 @@ This Livewire starter kit utilizes Livewire 4, TypeScript, Tailwind, and the [Fl
 
 If you are looking for the alternate configurations of this starter kit, they can be found in the following branches:
 
-- [components](https://github.com/laravel/livewire-starter-kit/tree/components) - if Volt is not selected
 - [workos](https://github.com/laravel/livewire-starter-kit/tree/workos) - if WorkOS is selected for authentication
 
 ## Official Documentation
