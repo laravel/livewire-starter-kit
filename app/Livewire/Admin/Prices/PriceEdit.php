@@ -20,6 +20,8 @@ class PriceEdit extends Component
     // Validación en tiempo real
     public string $validation_message = '';
     public bool $has_conflict = false;
+    public string $info_message = '';
+    public bool $has_existing_prices = false;
     
     // Almacenamiento temporal de valores por tipo de estación
     protected array $savedTierValues = [
@@ -93,23 +95,54 @@ class PriceEdit extends Component
     {
         $this->validation_message = '';
         $this->has_conflict = false;
+        $this->info_message = '';
+        $this->has_existing_prices = false;
         
-        if (empty($this->part_id) || !$this->active) {
+        if (empty($this->part_id)) {
             return;
         }
         
-        // Buscar precios activos existentes para esta parte y tipo de estación
+        // Verificar si la parte tiene algún precio activo (de cualquier tipo)
         // Excluir el precio actual que se está editando
-        $existingPrice = Price::where('part_id', $this->part_id)
-            ->where('workstation_type', $this->workstation_type)
-            ->where('active', true)
-            ->where('id', '!=', $this->price->id)
-            ->first();
+        if ($this->active) {
+            $existingActivePrice = Price::where('part_id', $this->part_id)
+                ->where('active', true)
+                ->where('id', '!=', $this->price->id)
+                ->first();
+            
+            if ($existingActivePrice) {
+                $this->has_conflict = true;
+                $typeLabel = Price::WORKSTATION_TYPES[$existingActivePrice->workstation_type] ?? $existingActivePrice->workstation_type;
+                $this->validation_message = "Esta parte ya tiene otro precio activo (Tipo: {$typeLabel}). Solo puede haber un precio activo por parte. Debes desactivar el precio existente primero o guardar este precio como inactivo.";
+                return;
+            }
+        }
         
-        if ($existingPrice) {
-            $this->has_conflict = true;
-            $typeLabel = Price::WORKSTATION_TYPES[$this->workstation_type] ?? $this->workstation_type;
-            $this->validation_message = "Ya existe otro precio activo para esta parte con tipo de estación {$typeLabel}. Debes desactivar el precio existente primero o guardar este precio como inactivo.";
+        // Mostrar información de otros precios existentes
+        $allPrices = Price::where('part_id', $this->part_id)
+            ->where('id', '!=', $this->price->id)
+            ->get();
+        
+        if ($allPrices->isNotEmpty()) {
+            $this->has_existing_prices = true;
+            $activePrices = $allPrices->where('active', true);
+            $inactivePrices = $allPrices->where('active', false);
+            
+            $info = [];
+            if ($activePrices->isNotEmpty()) {
+                $types = $activePrices->pluck('workstation_type')->map(function($type) {
+                    return Price::WORKSTATION_TYPES[$type] ?? $type;
+                })->join(', ');
+                $info[] = "Activos: {$types}";
+            }
+            if ($inactivePrices->isNotEmpty()) {
+                $types = $inactivePrices->pluck('workstation_type')->map(function($type) {
+                    return Price::WORKSTATION_TYPES[$type] ?? $type;
+                })->join(', ');
+                $info[] = "Inactivos: {$types}";
+            }
+            
+            $this->info_message = "Esta parte tiene otros precios registrados - " . implode(' | ', $info);
         }
     }
 
