@@ -127,6 +127,14 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'prices' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/prices.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

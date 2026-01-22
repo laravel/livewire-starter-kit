@@ -63,6 +63,43 @@ class Part extends Model
     }
 
     /**
+     * Get the active price for a specific workstation type.
+     * 
+     * @param string $workstationType One of: 'table', 'machine', 'semi_automatic'
+     * @return Price|null
+     */
+    public function activePriceForWorkstationType(string $workstationType): ?Price
+    {
+        return $this->prices()
+            ->activeForWorkstationType($workstationType)
+            ->first();
+    }
+
+    /**
+     * Get all prices grouped by workstation type.
+     * 
+     * @return \Illuminate\Support\Collection<string, \Illuminate\Support\Collection<Price>>
+     */
+    public function pricesByWorkstationType(): \Illuminate\Support\Collection
+    {
+        return $this->prices()
+            ->with('tiers')
+            ->get()
+            ->groupBy('workstation_type');
+    }
+
+    /**
+     * Check if this part has an active price for a specific workstation type.
+     * 
+     * @param string $workstationType One of: 'table', 'machine', 'semi_automatic'
+     * @return bool
+     */
+    public function hasPriceForWorkstationType(string $workstationType): bool
+    {
+        return $this->activePriceForWorkstationType($workstationType) !== null;
+    }
+
+    /**
      * Scope a query to only include active parts.
      */
     public function scopeActive(Builder $query): Builder
