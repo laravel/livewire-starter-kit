@@ -53,6 +53,7 @@ class AuthenticationTest extends TestCase
         if (! Features::canManageTwoFactorAuthentication()) {
             $this->markTestSkipped('Two-factor authentication is not enabled.');
         }
+
         Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => true,
@@ -76,6 +77,7 @@ class AuthenticationTest extends TestCase
         $response = $this->actingAs($user)->post(route('logout'));
 
         $response->assertRedirect(route('home'));
+
         $this->assertGuest();
     }
 }
