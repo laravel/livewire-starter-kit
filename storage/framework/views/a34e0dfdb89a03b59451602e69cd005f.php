@@ -54,6 +54,15 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                                     <span class="text-sm text-red-700 dark:text-red-300"><?php echo e($validation_message); ?></span>
                                 </div>
                             </div>
+                        <?php elseif($has_existing_prices && $info_message): ?>
+                            <div class="mt-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-sm text-blue-700 dark:text-blue-300"><?php echo e($info_message); ?></span>
+                                </div>
+                            </div>
                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
 
@@ -141,7 +150,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
                     <!-- Activo y Comentarios -->
                     <div class="flex items-center">
-                        <input wire:model="active" id="active" type="checkbox" class="w-4 h-4 text-blue-600 rounded" />
+                        <input wire:model.live="active" id="active" type="checkbox" class="w-4 h-4 text-blue-600 rounded" />
                         <label for="active" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Precio activo</label>
                     </div>
 
