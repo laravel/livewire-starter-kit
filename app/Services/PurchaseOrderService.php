@@ -146,14 +146,8 @@ class PurchaseOrderService
      */
     public function getExpectedPrice(int $partId, int $quantity): ?float
     {
-        // Create a temporary PO to use POPriceDetectionService
-        $tempPO = new PurchaseOrder([
-            'part_id' => $partId,
-            'quantity' => $quantity,
-        ]);
-
         $priceDetectionService = app(POPriceDetectionService::class);
-        $detection = $priceDetectionService->detectPrice($tempPO);
+        $detection = $priceDetectionService->detectPriceForPart($partId, $quantity);
 
         if (!$detection->found) {
             return null;

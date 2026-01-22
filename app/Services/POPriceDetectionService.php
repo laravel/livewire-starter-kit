@@ -35,6 +35,11 @@ class POPriceDetectionService
             );
         }
 
+        // Cargar la relación part si no está cargada
+        if (!$po->relationLoaded('part')) {
+            $po->load('part');
+        }
+
         // Obtener el Standard activo para la parte
         $standard = $po->part->standards()->active()->first();
 
@@ -61,6 +66,72 @@ class POPriceDetectionService
 
         // Buscar el precio activo para el workstation_type
         $price = $po->part->activePriceForWorkstationType($workstationType);
+
+        if (!$price) {
+            $typeLabel = Price::WORKSTATION_TYPES[$workstationType] ?? $workstationType;
+            return new PriceDetectionResult(
+                price: null,
+                workstationType: $workstationType,
+                found: false,
+                error: "No se encontró un precio activo para el tipo de estación {$typeLabel}"
+            );
+        }
+
+        return new PriceDetectionResult(
+            price: $price,
+            workstationType: $workstationType,
+            found: true,
+            error: null
+        );
+    }
+
+    /**
+     * Detecta el precio correcto basado en part_id y quantity
+     * Útil para formularios donde aún no existe el PO
+     * 
+     * @param int $partId
+     * @param int $quantity
+     * @return PriceDetectionResult
+     */
+    public function detectPriceForPart(int $partId, int $quantity): PriceDetectionResult
+    {
+        $part = \App\Models\Part::find($partId);
+
+        if (!$part) {
+            return new PriceDetectionResult(
+                price: null,
+                workstationType: '',
+                found: false,
+                error: 'La parte no existe'
+            );
+        }
+
+        // Obtener el Standard activo para la parte
+        $standard = $part->standards()->active()->first();
+
+        if (!$standard) {
+            return new PriceDetectionResult(
+                price: null,
+                workstationType: '',
+                found: false,
+                error: 'No hay Standard activo para esta parte'
+            );
+        }
+
+        // Obtener el workstation_type del Standard
+        $workstationType = $this->getWorkstationTypeFromStandard($standard);
+
+        if (!$workstationType) {
+            return new PriceDetectionResult(
+                price: null,
+                workstationType: '',
+                found: false,
+                error: 'El Standard no tiene un tipo de estación de trabajo definido'
+            );
+        }
+
+        // Buscar el precio activo para el workstation_type
+        $price = $part->activePriceForWorkstationType($workstationType);
 
         if (!$price) {
             $typeLabel = Price::WORKSTATION_TYPES[$workstationType] ?? $workstationType;
