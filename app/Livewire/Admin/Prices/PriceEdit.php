@@ -16,6 +16,16 @@ class PriceEdit extends Component
     public string $effective_date = '';
     public bool $active = true;
     public string $comments = '';
+    
+    // Almacenamiento temporal de valores por tipo de estación
+    protected array $savedTierValues = [
+        'table' => [],
+        'machine' => [],
+        'semi_automatic' => [],
+    ];
+    
+    // Guardar el tipo anterior para detectar cambios
+    protected string $previousWorkstationType = '';
 
     public function mount(Price $price): void
     {
@@ -23,17 +33,40 @@ class PriceEdit extends Component
         $this->part_id = (string) $price->part_id;
         $this->sample_price = (string) $price->sample_price;
         $this->workstation_type = $price->workstation_type ?? 'table';
+        $this->previousWorkstationType = $this->workstation_type;
         $this->tier_prices = $price->tiers_array;
         $this->effective_date = $price->effective_date->format('Y-m-d');
         $this->active = $price->active;
         $this->comments = $price->comments ?? '';
+        
+        // Guardar los valores iniciales en el almacenamiento temporal
+        $this->savedTierValues[$this->workstation_type] = $this->tier_prices;
     }
 
-    public function updatedWorkstationType(): void
+    public function updatedWorkstationType($value): void
     {
-        // Reinicializar tiers cuando cambia el tipo
-        $config = Price::getTierConfigForType($this->workstation_type);
-        $this->tier_prices = array_fill(0, count($config), '');
+        // Guardar los valores del tipo anterior
+        if (!empty($this->tier_prices) && $this->previousWorkstationType) {
+            $this->savedTierValues[$this->previousWorkstationType] = $this->tier_prices;
+        }
+        
+        // Actualizar el tipo anterior
+        $this->previousWorkstationType = $value;
+        
+        // Cargar los valores guardados del nuevo tipo, o inicializar vacío
+        if (!empty($this->savedTierValues[$value])) {
+            $this->tier_prices = $this->savedTierValues[$value];
+        } else {
+            // Inicializar con valores vacíos según la configuración del nuevo tipo
+            $config = Price::getTierConfigForType($value);
+            $this->tier_prices = array_fill(0, count($config), '');
+        }
+    }
+    
+    public function updatedTierPrices(): void
+    {
+        // Guardar automáticamente cuando se actualiza un tier
+        $this->savedTierValues[$this->workstation_type] = $this->tier_prices;
     }
 
     protected function rules(): array

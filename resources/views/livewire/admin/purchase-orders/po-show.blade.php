@@ -96,12 +96,12 @@
                         
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de PO</dt>
-                            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $purchaseOrder->po_date->format('d/m/Y') }}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $purchaseOrder->po_date->format('n/j/Y') }}</dd>
                         </div>
                         
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Entrega</dt>
-                            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $purchaseOrder->due_date->format('d/m/Y') }}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $purchaseOrder->due_date->format('n/j/Y') }}</dd>
                         </div>
                     </dl>
 
