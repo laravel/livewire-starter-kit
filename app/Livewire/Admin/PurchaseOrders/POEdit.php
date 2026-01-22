@@ -19,7 +19,7 @@ class POEdit extends Component
     public ?int $part_id = null;
     public string $po_date = '';
     public string $due_date = '';
-    public int $quantity = 0;
+    public $quantity = 0;  // Changed from int to mixed to avoid type issues
     public string $unit_price = '';
     public string $comments = '';
     public $pdf_file = null;
@@ -109,14 +109,25 @@ class POEdit extends Component
             return;
         }
 
-        $this->expected_price = $this->purchaseOrderService->getExpectedPrice(
+        // Get detailed detection result
+        $priceDetectionService = app(\App\Services\POPriceDetectionService::class);
+        $detection = $priceDetectionService->detectPriceForPart(
             $this->part_id,
-            $this->quantity
+            (int) $this->quantity
         );
+
+        if (!$detection->found) {
+            $this->expected_price = null;
+            $this->price_valid = false;
+            $this->price_message = $detection->error ?? 'No se pudo detectar el precio.';
+            return;
+        }
+
+        $this->expected_price = $detection->price->getPriceForQuantity((int) $this->quantity);
 
         if ($this->expected_price === null) {
             $this->price_valid = false;
-            $this->price_message = 'No hay precio registrado para esta parte.';
+            $this->price_message = 'No se pudo calcular el precio para la cantidad especificada.';
             return;
         }
 
@@ -125,12 +136,15 @@ class POEdit extends Component
 
         if (abs($poPrice - $this->expected_price) <= $tolerance) {
             $this->price_valid = true;
-            $this->price_message = 'El precio es válido.';
+            $typeLabel = \App\Models\Price::WORKSTATION_TYPES[$detection->workstationType] ?? $detection->workstationType;
+            $this->price_message = "El precio es válido para tipo de estación: {$typeLabel}";
         } else {
             $this->price_valid = false;
+            $typeLabel = \App\Models\Price::WORKSTATION_TYPES[$detection->workstationType] ?? $detection->workstationType;
             $this->price_message = sprintf(
-                'El precio no coincide. Precio esperado: $%.4f',
-                $this->expected_price
+                'El precio no coincide. Precio esperado: $%.4f (Tipo: %s)',
+                $this->expected_price,
+                $typeLabel
             );
         }
     }

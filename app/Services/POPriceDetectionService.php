@@ -220,28 +220,3 @@ class POPriceDetectionService
         return self::ASSEMBLY_MODE_MAP[$assemblyMode] ?? null;
     }
 }
-
-/**
- * Resultado de la detección de precio
- */
-class PriceDetectionResult
-{
-    public function __construct(
-        public ?Price $price,
-        public string $workstationType,
-        public bool $found,
-        public ?string $error
-    ) {}
-}
-
-/**
- * Resultado de validación
- */
-class ValidationResult
-{
-    public function __construct(
-        public bool $isValid,
-        public array $errors,
-        public ?Price $conflictingPrice
-    ) {}
-}
