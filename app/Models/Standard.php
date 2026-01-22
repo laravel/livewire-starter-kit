@@ -286,9 +286,23 @@ class Standard extends Model
      */
     public function getAssemblyMode(): ?string
     {
+        // Primero intentar con los campos legacy
         if ($this->work_table_id) return 'manual';
         if ($this->semi_auto_work_table_id) return 'semi_automatic';
         if ($this->machine_id) return 'machine';
+        
+        // Si no hay campos legacy, buscar en las configuraciones
+        $defaultConfig = $this->configurations()->where('is_default', true)->first();
+        if ($defaultConfig) {
+            return $defaultConfig->workstation_type;
+        }
+        
+        // Si no hay configuración default, usar la primera configuración
+        $firstConfig = $this->configurations()->first();
+        if ($firstConfig) {
+            return $firstConfig->workstation_type;
+        }
+        
         return null;
     }
 
