@@ -17,6 +17,10 @@ class PriceEdit extends Component
     public bool $active = true;
     public string $comments = '';
     
+    // Validación en tiempo real
+    public string $validation_message = '';
+    public bool $has_conflict = false;
+    
     // Almacenamiento temporal de valores por tipo de estación
     protected array $savedTierValues = [
         'table' => [],
@@ -41,6 +45,14 @@ class PriceEdit extends Component
         
         // Guardar los valores iniciales en el almacenamiento temporal
         $this->savedTierValues[$this->workstation_type] = $this->tier_prices;
+        
+        // Verificar conflictos iniciales
+        $this->checkForConflicts();
+    }
+
+    public function updatedPartId(): void
+    {
+        $this->checkForConflicts();
     }
 
     public function updatedWorkstationType($value): void
@@ -61,12 +73,44 @@ class PriceEdit extends Component
             $config = Price::getTierConfigForType($value);
             $this->tier_prices = array_fill(0, count($config), '');
         }
+        
+        // Verificar conflictos con el nuevo tipo
+        $this->checkForConflicts();
+    }
+    
+    public function updatedActive(): void
+    {
+        $this->checkForConflicts();
     }
     
     public function updatedTierPrices(): void
     {
         // Guardar automáticamente cuando se actualiza un tier
         $this->savedTierValues[$this->workstation_type] = $this->tier_prices;
+    }
+    
+    protected function checkForConflicts(): void
+    {
+        $this->validation_message = '';
+        $this->has_conflict = false;
+        
+        if (empty($this->part_id) || !$this->active) {
+            return;
+        }
+        
+        // Buscar precios activos existentes para esta parte y tipo de estación
+        // Excluir el precio actual que se está editando
+        $existingPrice = Price::where('part_id', $this->part_id)
+            ->where('workstation_type', $this->workstation_type)
+            ->where('active', true)
+            ->where('id', '!=', $this->price->id)
+            ->first();
+        
+        if ($existingPrice) {
+            $this->has_conflict = true;
+            $typeLabel = Price::WORKSTATION_TYPES[$this->workstation_type] ?? $this->workstation_type;
+            $this->validation_message = "Ya existe otro precio activo para esta parte con tipo de estación {$typeLabel}. Debes desactivar el precio existente primero o guardar este precio como inactivo.";
+        }
     }
 
     protected function rules(): array
@@ -100,24 +144,34 @@ class PriceEdit extends Component
 
     public function updatePrice(): void
     {
+        // Validar primero si hay conflictos
+        if ($this->has_conflict && $this->active) {
+            $this->addError('part_id', $this->validation_message);
+            return;
+        }
+        
         $this->validate();
 
-        $this->price->update([
-            'part_id' => $this->part_id,
-            'sample_price' => $this->sample_price,
-            'workstation_type' => $this->workstation_type,
-            'effective_date' => $this->effective_date,
-            'active' => $this->active,
-            'comments' => $this->comments,
-        ]);
+        try {
+            $this->price->update([
+                'part_id' => $this->part_id,
+                'sample_price' => $this->sample_price,
+                'workstation_type' => $this->workstation_type,
+                'effective_date' => $this->effective_date,
+                'active' => $this->active,
+                'comments' => $this->comments,
+            ]);
 
-        // Sincronizar los tiers
-        $this->price->syncTiers($this->tier_prices);
+            // Sincronizar los tiers
+            $this->price->syncTiers($this->tier_prices);
 
-        session()->flash('flash.banner', 'Precio actualizado correctamente.');
-        session()->flash('flash.bannerStyle', 'success');
+            session()->flash('flash.banner', 'Precio actualizado correctamente.');
+            session()->flash('flash.bannerStyle', 'success');
 
-        $this->redirect(route('admin.prices.index'), navigate: true);
+            $this->redirect(route('admin.prices.index'), navigate: true);
+        } catch (\Exception $e) {
+            $this->addError('general', 'Error al actualizar el precio: ' . $e->getMessage());
+        }
     }
 
     public function render()
