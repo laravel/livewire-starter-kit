@@ -11,7 +11,7 @@ class PartShow extends Component
 
     public function mount(Part $part): void
     {
-        $this->part = $part->load('prices');
+        $this->part = $part->load(['prices.tiers']);
     }
 
     public function render()

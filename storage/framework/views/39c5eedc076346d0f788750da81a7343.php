@@ -4,14 +4,14 @@
         <div class="mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $part->number }}</h1>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white"><?php echo e($part->number); ?></h1>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         Detalle de la parte
                     </p>
                 </div>
                 <div class="mt-4 sm:mt-0 flex space-x-2">
-                    @if (Route::has('admin.parts.edit'))
-                        <a href="{{ route('admin.parts.edit', $part) }}"
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Route::has('admin.parts.edit')): ?>
+                        <a href="<?php echo e(route('admin.parts.edit', $part)); ?>"
                             class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -19,9 +19,9 @@
                             </svg>
                             Editar
                         </a>
-                    @endif
-                    @if (Route::has('admin.parts.index'))
-                        <a href="{{ route('admin.parts.index') }}"
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Route::has('admin.parts.index')): ?>
+                        <a href="<?php echo e(route('admin.parts.index')); ?>"
                             class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -29,7 +29,7 @@
                             </svg>
                             Volver a la lista
                         </a>
-                    @endif
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
         </div>
@@ -42,40 +42,40 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Número de Parte</p>
-                        <p class="text-lg text-gray-900 dark:text-white">{{ $part->number }}</p>
+                        <p class="text-lg text-gray-900 dark:text-white"><?php echo e($part->number); ?></p>
                     </div>
                     
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Número de Ítem</p>
-                        <p class="text-lg text-gray-900 dark:text-white">{{ $part->item_number }}</p>
+                        <p class="text-lg text-gray-900 dark:text-white"><?php echo e($part->item_number); ?></p>
                     </div>
                     
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Unidad de Medida</p>
-                        <p class="text-lg text-gray-900 dark:text-white">{{ $part->unit_of_measure ?? '-' }}</p>
+                        <p class="text-lg text-gray-900 dark:text-white"><?php echo e($part->unit_of_measure ?? '-'); ?></p>
                     </div>
                     
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado</p>
-                        @if ($part->active)
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($part->active): ?>
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                 Activa
                             </span>
-                        @else
+                        <?php else: ?>
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                                 Inactiva
                             </span>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                     
                     <div class="md:col-span-2">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Descripción</p>
-                        <p class="text-gray-900 dark:text-white">{{ $part->description ?? '-' }}</p>
+                        <p class="text-gray-900 dark:text-white"><?php echo e($part->description ?? '-'); ?></p>
                     </div>
                     
                     <div class="md:col-span-2">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Notas</p>
-                        <p class="text-gray-900 dark:text-white">{{ $part->notes ?? '-' }}</p>
+                        <p class="text-gray-900 dark:text-white"><?php echo e($part->notes ?? '-'); ?></p>
                     </div>
                 </div>
             </div>
@@ -86,18 +86,18 @@
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Precios Asociados</h2>
-                    @if (Route::has('admin.prices.create'))
-                        <a href="{{ route('admin.prices.create', ['part_id' => $part->id]) }}"
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Route::has('admin.prices.create')): ?>
+                        <a href="<?php echo e(route('admin.prices.create', ['part_id' => $part->id])); ?>"
                             class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
                             Agregar Precio
                         </a>
-                    @endif
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
 
-                @if($part->prices->count() > 0)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($part->prices->count() > 0): ?>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-800">
@@ -113,45 +113,49 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                                @foreach($part->prices as $price)
-                                    @php
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $part->prices; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $price): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $tiersArray = $price->tiers_array;
-                                    @endphp
+                                    ?>
                                     <tr>
-                                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">${{ number_format($price->sample_price, 4) }}</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">$<?php echo e(number_format($price->sample_price, 4)); ?></td>
                                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                            {{ isset($tiersArray[0]) && $tiersArray[0] !== '' ? '$' . number_format($tiersArray[0], 4) : '-' }}
+                                            <?php echo e(isset($tiersArray[0]) && $tiersArray[0] !== '' ? '$' . number_format($tiersArray[0], 4) : '-'); ?>
+
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                            {{ isset($tiersArray[1]) && $tiersArray[1] !== '' ? '$' . number_format($tiersArray[1], 4) : '-' }}
+                                            <?php echo e(isset($tiersArray[1]) && $tiersArray[1] !== '' ? '$' . number_format($tiersArray[1], 4) : '-'); ?>
+
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                            {{ isset($tiersArray[2]) && $tiersArray[2] !== '' ? '$' . number_format($tiersArray[2], 4) : '-' }}
+                                            <?php echo e(isset($tiersArray[2]) && $tiersArray[2] !== '' ? '$' . number_format($tiersArray[2], 4) : '-'); ?>
+
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                            {{ isset($tiersArray[3]) && $tiersArray[3] !== '' ? '$' . number_format($tiersArray[3], 4) : '-' }}
+                                            <?php echo e(isset($tiersArray[3]) && $tiersArray[3] !== '' ? '$' . number_format($tiersArray[3], 4) : '-'); ?>
+
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $price->effective_date->format('n/j/Y') }}</td>
+                                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"><?php echo e($price->effective_date->format('n/j/Y')); ?></td>
                                         <td class="px-4 py-3">
-                                            @if ($price->active)
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($price->active): ?>
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Activo</span>
-                                            @else
+                                            <?php else: ?>
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Inactivo</span>
-                                            @endif
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
                                         <td class="px-4 py-3 text-sm">
-                                            @if (Route::has('admin.prices.edit'))
-                                                <a href="{{ route('admin.prices.edit', $price) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400">Editar</a>
-                                            @endif
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Route::has('admin.prices.edit')): ?>
+                                                <a href="<?php echo e(route('admin.prices.edit', $price)); ?>" class="text-blue-600 hover:text-blue-900 dark:text-blue-400">Editar</a>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
                         </table>
                     </div>
-                @else
+                <?php else: ?>
                     <p class="text-gray-500 dark:text-gray-400 text-center py-4">No hay precios asociados a esta parte.</p>
-                @endif
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
         </div>
 
@@ -166,7 +170,8 @@
                     <div>
                         <p class="text-xs text-gray-500 dark:text-gray-400">Creado</p>
                         <p class="text-sm font-medium text-gray-900 dark:text-white">
-                            {{ $part->created_at->format('d/m/Y H:i') }}
+                            <?php echo e($part->created_at->format('d/m/Y H:i')); ?>
+
                         </p>
                     </div>
                 </div>
@@ -181,7 +186,8 @@
                     <div>
                         <p class="text-xs text-gray-500 dark:text-gray-400">Última actualización</p>
                         <p class="text-sm font-medium text-gray-900 dark:text-white">
-                            {{ $part->updated_at->format('d/m/Y H:i') }}
+                            <?php echo e($part->updated_at->format('d/m/Y H:i')); ?>
+
                         </p>
                     </div>
                 </div>
@@ -189,3 +195,4 @@
         </div>
     </div>
 </div>
+<?php /**PATH D:\xampp\htdocs\Laravel\Flexcon-tracker\resources\views/livewire/admin/parts/part-show.blade.php ENDPATH**/ ?>

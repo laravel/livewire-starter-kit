@@ -15,10 +15,21 @@ class PriceCreate extends Component
     public string $effective_date = '';
     public bool $active = true;
     public string $comments = '';
+    
+    // Almacenamiento temporal de valores por tipo de estación
+    protected array $savedTierValues = [
+        'table' => [],
+        'machine' => [],
+        'semi_automatic' => [],
+    ];
+    
+    // Guardar el tipo anterior para detectar cambios
+    protected string $previousWorkstationType = 'table';
 
     public function mount(): void
     {
         $this->effective_date = now()->format('Y-m-d');
+        $this->previousWorkstationType = $this->workstation_type;
         $this->initializeTierPrices();
         
         if (request()->has('part_id')) {
@@ -26,9 +37,28 @@ class PriceCreate extends Component
         }
     }
 
-    public function updatedWorkstationType(): void
+    public function updatedWorkstationType($value): void
     {
-        $this->initializeTierPrices();
+        // Guardar los valores del tipo anterior
+        if (!empty($this->tier_prices) && $this->previousWorkstationType) {
+            $this->savedTierValues[$this->previousWorkstationType] = $this->tier_prices;
+        }
+        
+        // Actualizar el tipo anterior
+        $this->previousWorkstationType = $value;
+        
+        // Cargar los valores guardados del nuevo tipo, o inicializar vacío
+        if (!empty($this->savedTierValues[$value])) {
+            $this->tier_prices = $this->savedTierValues[$value];
+        } else {
+            $this->initializeTierPrices();
+        }
+    }
+    
+    public function updatedTierPrices(): void
+    {
+        // Guardar automáticamente cuando se actualiza un tier
+        $this->savedTierValues[$this->workstation_type] = $this->tier_prices;
     }
 
     protected function initializeTierPrices(): void

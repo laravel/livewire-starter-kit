@@ -155,7 +155,7 @@ class Price extends Model
      */
     public static function getActivePriceForPart(int $partId): ?self
     {
-        return static::forPart($partId)->first();
+        return static::forPart($partId)->with('tiers')->first();
     }
 
     /**
