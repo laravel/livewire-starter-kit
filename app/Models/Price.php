@@ -91,12 +91,14 @@ class Price extends Model
 
     /**
      * Scope a query to get the active price for a specific part.
+     * 
+     * NOTA: La fecha efectiva (effective_date) es solo informativa.
+     * El campo 'active' es el que controla si un precio se detecta o no.
      */
     public function scopeForPart(Builder $query, int $partId): Builder
     {
         return $query->where('part_id', $partId)
             ->where('active', true)
-            ->where('effective_date', '<=', now())
             ->orderBy('effective_date', 'desc');
     }
 
@@ -110,12 +112,14 @@ class Price extends Model
 
     /**
      * Scope a query to get active prices for a specific workstation type.
+     * 
+     * NOTA: La fecha efectiva (effective_date) es solo informativa.
+     * El campo 'active' es el que controla si un precio se detecta o no.
      */
     public function scopeActiveForWorkstationType(Builder $query, string $type): Builder
     {
         return $query->where('active', true)
                      ->where('workstation_type', $type)
-                     ->where('effective_date', '<=', now())
                      ->orderBy('effective_date', 'desc');
     }
 
