@@ -229,17 +229,19 @@ class CapacityWizardTestSeeder extends Seeder
                 continue;
             }
 
-            // Crear nuevo estándar
+            // Crear nuevo estándar SIN campos legacy
             $standard = Standard::create([
                 'part_id' => $part->id,
-                'work_table_id' => $tables['table1']->id ?? null,
+                'work_table_id' => null,  // NO usar campos legacy
+                'machine_id' => null,
+                'semi_auto_work_table_id' => null,
                 'persons_1' => 1,
                 'persons_2' => 2,
                 'persons_3' => 3,
                 'units_per_hour' => $partData['configs'][0]['uph'],
                 'effective_date' => now()->subDays(30),
                 'active' => true,
-                'is_migrated' => true,
+                'is_migrated' => true,  // Marcar como migrado
                 'description' => "Estándar para {$partData['number']}",
             ]);
 
@@ -266,27 +268,68 @@ class CapacityWizardTestSeeder extends Seeder
     {
         $basePrice = 0.50;
 
+        // Mapeo de StandardConfiguration workstation_type a Price workstation_type
+        $typeMap = [
+            'manual' => 'table',
+            'machine' => 'machine',
+            'semi_automatic' => 'semi_automatic',
+        ];
+
         foreach ($parts as $key => $part) {
             // Verificar si ya tiene precio activo
             if (Price::where('part_id', $part->id)->where('active', true)->exists()) {
                 continue;
             }
 
+            // Obtener el Standard activo para usar el mismo workstation_type
+            $standard = $part->standards()->where('active', true)->first();
+            $workstationType = 'table'; // default
+            
+            if ($standard) {
+                $defaultConfig = $standard->configurations()->where('is_default', true)->first();
+                if ($defaultConfig) {
+                    // Mapear de StandardConfiguration type a Price type
+                    $workstationType = $typeMap[$defaultConfig->workstation_type] ?? 'table';
+                }
+            }
+
             $price = Price::create([
                 'part_id' => $part->id,
                 'sample_price' => $basePrice,
-                'workstation_type' => 'table',
+                'workstation_type' => $workstationType,  // Usar el tipo mapeado
                 'effective_date' => Carbon::now()->subMonth(),
                 'active' => true,
-                'comments' => 'Precio de prueba para Capacity Wizard',
+                'comments' => 'Precio de prueba para Capacity Wizard - Consistente con Standard',
             ]);
 
-            // Crear tiers
-            $price->tiers()->createMany([
-                ['min_quantity' => 1, 'max_quantity' => 999, 'tier_price' => $basePrice],
-                ['min_quantity' => 1000, 'max_quantity' => 9999, 'tier_price' => $basePrice * 0.9],
-                ['min_quantity' => 10000, 'max_quantity' => null, 'tier_price' => $basePrice * 0.8],
-            ]);
+            // Crear tiers según el tipo de workstation
+            $tierConfigs = [
+                'table' => [
+                    ['min' => 1, 'max' => 999, 'discount' => 0],
+                    ['min' => 1000, 'max' => 9999, 'discount' => 0.10],
+                    ['min' => 10000, 'max' => null, 'discount' => 0.20],
+                ],
+                'machine' => [
+                    ['min' => 1, 'max' => 9999, 'discount' => 0],
+                    ['min' => 10000, 'max' => 49999, 'discount' => 0.15],
+                    ['min' => 50000, 'max' => null, 'discount' => 0.25],
+                ],
+                'semi_automatic' => [
+                    ['min' => 2000, 'max' => 10000, 'discount' => 0],
+                    ['min' => 11000, 'max' => null, 'discount' => 0.15],
+                ],
+            ];
+
+            $configs = $tierConfigs[$workstationType] ?? $tierConfigs['table'];
+            
+            foreach ($configs as $tier) {
+                $tierPrice = round($basePrice * (1 - $tier['discount']), 4);
+                $price->tiers()->create([
+                    'min_quantity' => $tier['min'],
+                    'max_quantity' => $tier['max'],
+                    'tier_price' => $tierPrice,
+                ]);
+            }
 
             $basePrice += 0.25;
         }

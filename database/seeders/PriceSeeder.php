@@ -64,9 +64,28 @@ class PriceSeeder extends Seeder
 
     private function createPriceForPart(Part $part, int $index): void
     {
-        // Alternar entre tipos de estación
-        $types = ['table', 'machine', 'semi_automatic'];
-        $type = $types[$index % 3];
+        // Obtener el Standard activo de la parte para usar el mismo workstation_type
+        $standard = $part->standards()->where('active', true)->first();
+        
+        // Mapeo de StandardConfiguration workstation_type a Price workstation_type
+        // StandardConfiguration: 'manual', 'machine', 'semi_automatic'
+        // Price: 'table', 'machine', 'semi_automatic'
+        $typeMap = [
+            'manual' => 'table',
+            'machine' => 'machine',
+            'semi_automatic' => 'semi_automatic',
+        ];
+        
+        // Si tiene Standard con configuración, usar ese tipo
+        if ($standard) {
+            $defaultConfig = $standard->configurations()->where('is_default', true)->first();
+            $configType = $defaultConfig ? $defaultConfig->workstation_type : 'manual';
+            $type = $typeMap[$configType] ?? 'table';
+        } else {
+            // Si no tiene Standard, alternar entre tipos
+            $types = ['table', 'machine', 'semi_automatic'];
+            $type = $types[$index % 3];
+        }
 
         // Precio base aleatorio
         $basePrice = round(rand(50, 500) / 100, 4);
@@ -78,7 +97,7 @@ class PriceSeeder extends Seeder
                 'workstation_type' => $type,
                 'effective_date' => Carbon::now()->subDays(rand(1, 60)),
                 'active' => true,
-                'comments' => 'Precio generado por seeder',
+                'comments' => 'Precio generado por seeder - Consistente con Standard',
             ]
         );
 

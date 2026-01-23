@@ -104,7 +104,59 @@ if ($this->active) {
 
 ---
 
-### 4. ✅ Documentation Created/Updated
+### 4. ✅ Fix Price Detection Mismatch (Standard vs Price)
+
+**Problema**: El sistema no encontraba precios correctamente porque había inconsistencia entre `Standard.assembly_mode` y `Price.workstation_type`
+
+**Causa Raíz**: Standards con campos legacy (`work_table_id`, etc.) siempre devuelven el assembly_mode basado en esos campos, aunque tengan un Price con un `workstation_type` diferente.
+
+**Ejemplo del Error**:
+```
+Part: PART-002
+Standard: work_table_id=2 → assembly_mode='manual' → expected_type='table'
+Price: workstation_type='machine'
+RESULTADO: NO COINCIDE → Error al buscar precio
+```
+
+**Solución Implementada**:
+
+#### Comando de Diagnóstico y Corrección
+
+Creado `php artisan prices:diagnose-mismatch` que:
+
+1. **Diagnostica** todas las inconsistencias entre Standards y Prices
+2. **Identifica** partes con:
+   - ✅ Coincidencias (Standard y Price consistentes)
+   - ❌ Inconsistencias (Standard y Price NO coinciden)
+   - ⚠️ Partes con Price pero sin Standard activo
+   - ⚠️ Partes con Standard pero sin Price activo
+
+3. **Corrige automáticamente** (con opción `--fix`):
+   - Limpia campos legacy del Standard
+   - Crea/actualiza configuraciones para que coincidan con el Price
+   - Marca el Standard como migrado
+
+**Uso**:
+```bash
+# Solo diagnóstico
+php artisan prices:diagnose-mismatch
+
+# Ver todas las partes (incluyendo coincidencias)
+php artisan prices:diagnose-mismatch --show-all
+
+# Corregir automáticamente
+php artisan prices:diagnose-mismatch --fix
+```
+
+**Estrategia**: Price es la fuente de verdad. Los Standards se actualizan para coincidir con los Prices.
+
+**Archivos**:
+- ✅ `app/Console/Commands/DiagnosePriceStandardMismatch.php` (creado)
+- ✅ `docs/fixes/SOLUCION_PRICE_STANDARD_MISMATCH.md` (creado)
+
+---
+
+### 5. ✅ Documentation Created/Updated
 
 **Archivos de documentación**:
 - ✅ `docs/BUGFIX_VALIDATION_RESULT_CLASS.md`
@@ -112,7 +164,8 @@ if ($this->active) {
 - ✅ `docs/PRICE_DETECTION_DIAGNOSIS.md`
 - ✅ `docs/PRICE_DETECTION_IMPLEMENTATION_SUMMARY.md`
 - ✅ `docs/QUICK_FIX_GUIDE.md`
-- ✅ `docs/RESUMEN_SESION_VALIDACION_PRECIOS.md` (este archivo)
+- ✅ `docs/RESUMEN_SESION_VALIDACION_PRECIOS.md` (actualizado)
+- ✅ `docs/fixes/SOLUCION_PRICE_STANDARD_MISMATCH.md` (creado)
 
 ---
 
@@ -218,3 +271,45 @@ Esta parte tiene precios registrados - Activos: Mesa de Trabajo | Inactivos: Má
 ✅ **TODAS LAS TAREAS COMPLETADAS**
 
 La validación en tiempo real está funcionando correctamente con la regla de negocio de un precio activo por parte. El sistema ahora proporciona feedback inmediato y claro al usuario, previniendo errores antes de intentar guardar.
+
+
+---
+
+## Próximos Pasos Recomendados
+
+### Inmediato (Hacer AHORA)
+
+1. **Ejecutar diagnóstico de inconsistencias**:
+   ```bash
+   php artisan prices:diagnose-mismatch
+   ```
+   Esto mostrará cuántas partes tienen inconsistencias entre Standard y Price.
+
+2. **Corregir inconsistencias**:
+   ```bash
+   php artisan prices:diagnose-mismatch --fix
+   ```
+   Esto corregirá automáticamente todas las inconsistencias.
+
+3. **Verificar corrección**:
+   ```bash
+   php artisan prices:diagnose-mismatch
+   ```
+   Debe mostrar 0 inconsistencias después de la corrección.
+
+4. **Probar detección de precio en PO**:
+   - Ir a `/admin/purchase-orders/create`
+   - Seleccionar una parte que antes fallaba (ej: PART-002)
+   - Verificar que ahora trae el precio correctamente
+
+### Corto Plazo
+
+1. Crear comando `standards:migrate-to-configurations` para migrar todos los Standards legacy
+2. Agregar validación cruzada en CRUD de Standards
+3. Documentar el proceso de migración completo
+
+### Largo Plazo
+
+1. Deprecar campos legacy en tabla `standards`
+2. Crear migración para eliminar campos legacy
+3. Actualizar toda la documentación
