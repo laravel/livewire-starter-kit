@@ -27,7 +27,7 @@
                         <label for="part_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Parte <span class="text-red-500">*</span>
                         </label>
-                        <select wire:model="part_id" id="part_id"
+                        <select wire:model.live="part_id" id="part_id"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" required>
                             <option value="">Seleccione una parte</option>
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $parts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $part): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -42,6 +42,26 @@ $message = $__bag->first($__errorArgs[0]); ?><p class="mt-1 text-sm text-red-600
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($has_conflict): ?>
+                            <div class="mt-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <span class="text-sm text-red-700 dark:text-red-300"><?php echo e($validation_message); ?></span>
+                                </div>
+                            </div>
+                        <?php elseif($has_existing_prices && $info_message): ?>
+                            <div class="mt-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-sm text-blue-700 dark:text-blue-300"><?php echo e($info_message); ?></span>
+                                </div>
+                            </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
 
                     <!-- Precio de Muestra y Fecha -->
@@ -128,7 +148,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
                     <!-- Activo y Comentarios -->
                     <div class="flex items-center">
-                        <input wire:model="active" id="active" type="checkbox" class="w-4 h-4 text-blue-600 rounded" />
+                        <input wire:model.live="active" id="active" type="checkbox" class="w-4 h-4 text-blue-600 rounded" />
                         <label for="active" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Precio activo</label>
                     </div>
 
