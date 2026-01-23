@@ -281,6 +281,11 @@ class Standard extends Model
 
     /**
      * Obtiene el tipo de ensamble (assembly mode)
+     * 
+     * IMPORTANTE: Devuelve valores que coinciden con Price::WORKSTATION_TYPES
+     * - 'manual' (de StandardConfiguration) → se mantiene como 'manual' 
+     * - 'semi_automatic' → se mantiene
+     * - 'machine' → se mantiene
      *
      * @return string|null 'manual', 'semi_automatic', 'machine'
      */
