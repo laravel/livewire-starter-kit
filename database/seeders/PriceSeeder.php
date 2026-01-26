@@ -35,25 +35,25 @@ class PriceSeeder extends Seeder
     private function createSampleParts(): \Illuminate\Database\Eloquent\Collection
     {
         $partsData = [
-            ['number' => 'PART-001', 'description' => 'Componente electrónico A'],
-            ['number' => 'PART-002', 'description' => 'Conector tipo B'],
-            ['number' => 'PART-003', 'description' => 'Cable de alimentación'],
-            ['number' => 'PART-004', 'description' => 'Resistencia 10K'],
-            ['number' => 'PART-005', 'description' => 'Capacitor 100uF'],
-            ['number' => 'PART-006', 'description' => 'LED indicador rojo'],
-            ['number' => 'PART-007', 'description' => 'Transistor NPN'],
-            ['number' => 'PART-008', 'description' => 'Fusible 5A'],
-            ['number' => 'PART-009', 'description' => 'Relay 12V'],
-            ['number' => 'PART-010', 'description' => 'Transformador 110V'],
+            ['number' => 'H-BML-B524-10', 'description' => '189-10631'],
+            ['number' => 'H-BML-424-10', 'description' => '189-10632'],
+            ['number' => 'H-ML-7-97-01', 'description' => '189-10633'],
+            ['number' => 'H-ML-8-93-01', 'description' => '189-10634'],
+            ['number' => 'H-HC-2-0-H', 'description' => '189-10635'],
+            ['number' => 'H-CB-612N', 'description' => '189-10636'],
+            ['number' => 'H-HC-001', 'description' => '189-10637'],
+            ['number' => 'H-HC-3-96', 'description' => '189-10638'],
+            ['number' => 'H-BML-B324-10-A', 'description' => '189-10639'],
+            ['number' => 'H-HMB-3', 'description' => '189-10642'],
         ];
 
         foreach ($partsData as $data) {
             Part::firstOrCreate(
                 ['number' => $data['number']],
                 [
-                    'item_number' => 'ITEM-' . substr($data['number'], -3),
+                    'item_number' => '189-' . substr($data['number'], -3),
                     'description' => $data['description'],
-                    'unit_of_measure' => 'PCS',
+                    'unit_of_measure' => 'PC',
                     'active' => true,
                 ]
             );
@@ -66,7 +66,7 @@ class PriceSeeder extends Seeder
     {
         // Obtener el Standard activo de la parte para usar el mismo workstation_type
         $standard = $part->standards()->where('active', true)->first();
-        
+
         // Mapeo de StandardConfiguration workstation_type a Price workstation_type
         // StandardConfiguration: 'manual', 'machine', 'semi_automatic'
         // Price: 'table', 'machine', 'semi_automatic'
@@ -75,7 +75,7 @@ class PriceSeeder extends Seeder
             'machine' => 'machine',
             'semi_automatic' => 'semi_automatic',
         ];
-        
+
         // Si tiene Standard con configuración, usar ese tipo
         if ($standard) {
             $defaultConfig = $standard->configurations()->where('is_default', true)->first();
@@ -127,7 +127,7 @@ class PriceSeeder extends Seeder
 
         foreach ($tierConfigs[$type] as $tier) {
             $tierPrice = round($basePrice * (1 - $tier['discount']), 4);
-            
+
             $price->tiers()->firstOrCreate(
                 ['min_quantity' => $tier['min'], 'max_quantity' => $tier['max']],
                 ['tier_price' => $tierPrice]
