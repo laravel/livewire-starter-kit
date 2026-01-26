@@ -67,6 +67,9 @@
                 <flux:navlist.item icon="queue-list" :href="route('admin.lots.index')"
                     :current="request()->routeIs('admin.lots.*')" wire:navigate>{{ __('Lotes') }}
                 </flux:navlist.item>
+                <flux:navlist.item icon="truck" :href="route('admin.sent-lists.display')"
+                    :current="request()->routeIs('admin.sent-lists.display')" wire:navigate>{{ __('Lista de Envío') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="signal" :href="route('admin.production-statuses.index')"
                     :current="request()->routeIs('admin.production-statuses.*')" wire:navigate>{{ __('Estados de Producción') }}
                 </flux:navlist.item>
