@@ -68,7 +68,7 @@
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">DOC</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">WO #</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Item #</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300"># de Parte</th>
+                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300"># Parte</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Descripción</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Cantidad WO</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Piezas Enviadas</th>
