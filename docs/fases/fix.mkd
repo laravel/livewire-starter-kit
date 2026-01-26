@@ -1,0 +1,11 @@
+Preguntas:
+Pregunar al cliente si desea que los areas como son producción, calidad etc. Cuales funcione podran tener dentro del sistema. 
+Ejemplo: Caldidad, podra ver sus metricas, podra actualizar sus datos.
+
+
+
+Primero pasar por materiales - Su funcion, despues que revisa la capacidad, surte el kit y calidad revisa ese kit
+El segundo departamento es calidad, ya que liberaron este kit de materiales, entra al sistema y revisa que los numeros de partes esten correctos y los materiales y si hago le falta, se lo regresan a materiales indicando lo que esta mal. 
+Si esta todo bien, en la caja le pone etiqueta verde de ok y avisan a control de materiales que si paso ese kit. Despues que pasa a un pre-produccion donde se veran las ordenes de trabajo que se van a integrar a producción
+Regresa a materiales y materiales lo manda a un rack de producción
+Producción, ya que reviso que calidad lo aprobo, ya que esta bien, lo coloca en una cola de producción. Producción tiene un anaquel donde ponen sus ordenes listas para meter ensamble, tienen un anaquel con lista de cola. Ya que una vez que termina entonces entra producirse
