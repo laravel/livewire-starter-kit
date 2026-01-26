@@ -68,6 +68,7 @@
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">DOC</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">WO #</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Item #</th>
+                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Número de Parte</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Descripción</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Cantidad WO</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Piezas Enviadas</th>
@@ -96,6 +97,7 @@
                                     <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">WO</td>
                                     <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400"><?php echo e($wo->wo_number); ?></td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300"><?php echo e($part->item_number); ?></td>
+                                    <td class="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100"><?php echo e($part->number); ?></td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300 max-w-xs truncate" title="<?php echo e($part->description); ?>"><?php echo e($part->description); ?></td>
                                     <td class="px-4 py-3 text-right font-medium text-gray-900 dark:text-gray-100"><?php echo e(number_format($wo->quantity)); ?></td>
                                     <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($wo->sent_pieces)); ?></td>
@@ -114,6 +116,7 @@
                                         <td class="px-4 py-2 pl-8 text-xs">Lote</td>
                                         <td class="px-4 py-2 text-xs"><?php echo e($wo->wo_number); ?>.<?php echo e($lot->lot_number); ?></td>
                                         <td class="px-4 py-2 text-xs"><?php echo e($part->item_number); ?></td>
+                                        <td class="px-4 py-2 text-xs font-medium"><?php echo e($part->number); ?></td>
                                         <td class="px-4 py-2 text-xs max-w-xs truncate" title="<?php echo e($lot->description ?? $part->description); ?>"><?php echo e($lot->description ?? $part->description); ?></td>
                                         <td class="px-4 py-2 text-right text-xs"></td>
                                         <td class="px-4 py-2 text-right text-xs"></td>
@@ -134,7 +137,7 @@
                                 
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($completedLots->count() > 1): ?>
                                     <tr class="bg-blue-50 dark:bg-blue-900/30 font-semibold">
-                                        <td colspan="7" class="px-4 py-2 text-right text-gray-900 dark:text-gray-100">Total:</td>
+                                        <td colspan="8" class="px-4 py-2 text-right text-gray-900 dark:text-gray-100">Total:</td>
                                         <td class="px-4 py-2 text-right text-gray-900 dark:text-gray-100"><?php echo e(number_format($totalSent)); ?></td>
                                         <td colspan="5"></td>
                                     </tr>

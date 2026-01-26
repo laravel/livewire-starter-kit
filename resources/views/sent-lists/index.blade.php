@@ -75,30 +75,53 @@
                                                 #{{ $sentList->id }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                @if($sentList->purchaseOrders->count() > 0)
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                        {{ $sentList->purchaseOrders->count() }} PO(s)
-                                                    </span>
+                                                @if($sentList->purchaseOrders && $sentList->purchaseOrders->count() > 0)
+                                                    @if($sentList->purchaseOrders->count() == 1)
+                                                        {{ $sentList->purchaseOrders->first()->po_number }}
+                                                    @else
+                                                        <div class="flex flex-col space-y-1">
+                                                            @foreach($sentList->purchaseOrders->take(2) as $po)
+                                                                <span class="text-xs">{{ $po->po_number }}</span>
+                                                            @endforeach
+                                                            @if($sentList->purchaseOrders->count() > 2)
+                                                                <span class="text-xs text-gray-500">+{{ $sentList->purchaseOrders->count() - 2 }} más</span>
+                                                            @endif
+                                                        </div>
+                                                    @endif
                                                 @else
-                                                    {{ $sentList->purchaseOrder->po_number ?? 'N/A' }}
+                                                    <span class="text-gray-500">Sin PO</span>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                                @if($sentList->purchaseOrders->count() > 0)
-                                                    <div class="flex flex-col space-y-1">
-                                                        @foreach($sentList->purchaseOrders->take(2) as $po)
-                                                            <span class="text-xs">{{ $po->part->number }}</span>
-                                                        @endforeach
-                                                        @if($sentList->purchaseOrders->count() > 2)
-                                                            <span class="text-xs text-gray-500">+{{ $sentList->purchaseOrders->count() - 2 }} más</span>
-                                                        @endif
-                                                    </div>
+                                                @if($sentList->purchaseOrders && $sentList->purchaseOrders->count() > 0)
+                                                    @php
+                                                        $uniqueParts = $sentList->purchaseOrders->pluck('part.number')->unique()->filter();
+                                                    @endphp
+                                                    @if($uniqueParts->count() == 1)
+                                                        <span class="font-medium">{{ $uniqueParts->first() }}</span>
+                                                    @else
+                                                        <div class="flex flex-col space-y-1">
+                                                            @foreach($uniqueParts->take(2) as $partNumber)
+                                                                <span class="text-xs font-medium">{{ $partNumber }}</span>
+                                                            @endforeach
+                                                            @if($uniqueParts->count() > 2)
+                                                                <span class="text-xs text-gray-500">+{{ $uniqueParts->count() - 2 }} más</span>
+                                                            @endif
+                                                        </div>
+                                                    @endif
                                                 @else
-                                                    {{ $sentList->purchaseOrder->part->number ?? 'N/A' }}
+                                                    <span class="text-gray-500">Sin parte</span>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                {{ $sentList->start_date->format('d/m/Y') }} - {{ $sentList->end_date->format('d/m/Y') }}
+                                                @if($sentList->start_date && $sentList->end_date)
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs">{{ $sentList->start_date->format('d/m/Y') }}</span>
+                                                        <span class="text-xs text-gray-500">{{ $sentList->end_date->format('d/m/Y') }}</span>
+                                                    </div>
+                                                @else
+                                                    <span class="text-gray-500">N/A</span>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                                 {{ $sentList->num_persons }}
