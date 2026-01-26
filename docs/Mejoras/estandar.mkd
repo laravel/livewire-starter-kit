@@ -1,4 +1,4 @@
-Spec 06: Analisis Arquitectonico - Multiple Standards por Numero de Parte
+npmSpec 06: Analisis Arquitectonico - Multiple Standards por Numero de Parte
 Fecha de Creacion:
 Fecha de Creacion: 2026-01-15 Autor:
 Autor: Agent Architect Fase del Proyecto:
