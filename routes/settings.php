@@ -9,6 +9,6 @@ Route::middleware([
 ])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
-    Route::livewire('settings/profile', 'pages::settings.profile')->name('settings.profile');
-    Route::livewire('settings/appearance', 'pages::settings.appearance')->name('settings.appearance');
+    Route::livewire('settings/profile', 'pages::settings.profile')->name('profile.edit');
+    Route::livewire('settings/appearance', 'pages::settings.appearance')->name('appearance.edit');
 });
