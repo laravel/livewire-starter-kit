@@ -68,7 +68,7 @@
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">DOC</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">WO #</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Item #</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Número de Parte</th>
+                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300"># Parte</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Descripción</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Cantidad WO</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Piezas Enviadas</th>
@@ -93,9 +93,9 @@
                                 @endphp
 
                                 {{-- Fila Principal de WO --}}
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                     <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">WO</td>
-                                    <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">{{ $wo->wo_number }}</td>
+                                    <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">{{ $po->po_number }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ $part->item_number }}</td>
                                     <td class="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">{{ $part->number }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300 max-w-xs truncate" title="{{ $part->description }}">{{ $part->description }}</td>
@@ -114,7 +114,7 @@
                                 @foreach($completedLots as $lot)
                                     <tr class="bg-gray-50 dark:bg-gray-700/30 text-gray-600 dark:text-gray-400">
                                         <td class="px-4 py-2 pl-8 text-xs">Lote</td>
-                                        <td class="px-4 py-2 text-xs">{{ $wo->wo_number }}.{{ $lot->lot_number }}</td>
+                                        <td class="px-4 py-2 text-xs">{{ $po->po_number }}.{{ $lot->lot_number }}</td>
                                         <td class="px-4 py-2 text-xs">{{ $part->item_number }}</td>
                                         <td class="px-4 py-2 text-xs font-medium">{{ $part->number }}</td>
                                         <td class="px-4 py-2 text-xs max-w-xs truncate" title="{{ $lot->description ?? $part->description }}">{{ $lot->description ?? $part->description }}</td>
@@ -165,7 +165,7 @@
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-2">
                                         <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">WO</span>
-                                        <span class="text-base font-bold text-blue-600 dark:text-blue-400">{{ $wo->wo_number }}</span>
+                                        <span class="text-base font-bold text-blue-600 dark:text-blue-400">{{ $po->po_number }}</span>
                                     </div>
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{{ $part->item_number }}</div>
                                     <div class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{{ $part->description }}</div>
@@ -227,7 +227,7 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Lote</span>
-                                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $wo->wo_number }}.{{ $lot->lot_number }}</span>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $po->po_number }}.{{ $lot->lot_number }}</span>
                                     </div>
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200">
                                         Completado
