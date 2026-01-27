@@ -710,21 +710,21 @@ class CapacityWizard extends Component
                             'lot_number' => $lotNumbersString,
                         ]);
                         
+                        // Actualizar fecha programada de envío del Work Order (UNA para toda la lista)
+                        if ($purchaseOrder && $purchaseOrder->workOrder && !empty($this->scheduledShipDate)) {
+                            $purchaseOrder->workOrder->update([
+                                'scheduled_send_date' => $this->scheduledShipDate,
+                            ]);
+                        }
+                        
                         // Crear registros Lot reales para que aparezcan en /admin/lots
                         if ($purchaseOrder && $purchaseOrder->workOrder && !empty($lotNumbersArray)) {
                             $workOrder = $purchaseOrder->workOrder;
                             $partDescription = $purchaseOrder->part->description ?? 'Sin descripción';
                             
-                            // Actualizar fecha programada de envío (UNA para toda la lista)
-                            if (!empty($this->scheduledShipDate)) {
-                                $workOrder->update([
-                                    'ship_date' => $this->scheduledShipDate,
-                                ]);
-                            }
-                            
                             foreach ($lotNumbersArray as $lot) {
-                                $lotNumber = trim($lot['number']);
-                                $lotQuantity = !empty($lot['quantity']) ? intval($lot['quantity']) : 0;
+                                $lotNumber = trim($lot['number'] ?? '');
+                                $lotQuantity = isset($lot['quantity']) && $lot['quantity'] !== '' ? intval($lot['quantity']) : 0;
                                 
                                 if (!empty($lotNumber)) {
                                     // Verificar si ya existe un lote con ese número para esta WO

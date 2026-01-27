@@ -104,8 +104,8 @@
                                     <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($wo->sent_pieces)); ?></td>
                                     <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($pending)); ?></td>
                                     <td class="px-4 py-3 text-right font-bold bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200"><?php echo e(number_format($toSend)); ?></td>
-                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->scheduled_date?->format('m/d/Y') ?? '-'); ?></td>
-                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->ship_date?->format('m/d/Y') ?? '-'); ?></td>
+                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->scheduled_send_date?->format('m/d/Y') ?? '-'); ?></td>
+                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->actual_send_date?->format('m/d/Y') ?? '-'); ?></td>
                                     <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->created_at->format('m/d/Y')); ?></td>
                                     <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->sentList?->id ?? '-'); ?></td>
                                     <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->priority ?? '-'); ?></td>
@@ -123,8 +123,8 @@
                                         <td class="px-4 py-2 text-right text-xs"></td>
                                         <td class="px-4 py-2 text-right text-xs"></td>
                                         <td class="px-4 py-2 text-right text-xs font-medium"><?php echo e(number_format($lot->quantity)); ?></td>
-                                        <td class="px-4 py-2 text-center text-xs"><?php echo e($wo->scheduled_date?->format('m/d/Y') ?? '-'); ?></td>
-                                        <td class="px-4 py-2 text-center text-xs"><?php echo e($wo->ship_date?->format('m/d/Y') ?? '-'); ?></td>
+                                        <td class="px-4 py-2 text-center text-xs"><?php echo e($wo->scheduled_send_date?->format('m/d/Y') ?? '-'); ?></td>
+                                        <td class="px-4 py-2 text-center text-xs"><?php echo e($wo->actual_send_date?->format('m/d/Y') ?? '-'); ?></td>
                                         <td class="px-4 py-2 text-center text-xs"><?php echo e($wo->created_at->format('m/d/Y')); ?></td>
                                         <td class="px-4 py-2 text-center text-xs"><?php echo e($wo->sentList?->id ?? '-'); ?></td>
                                         <td class="px-4 py-2 text-center text-xs">
@@ -139,7 +139,6 @@
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <?php echo e($statusInfo['bg']); ?> <?php echo e($statusInfo['text']); ?>">
                                                 <?php echo e($statusInfo['label']); ?>
 
-                                                Completado
                                             </span>
                                         </td>
                                     </tr>
@@ -207,11 +206,11 @@
                             <div class="grid grid-cols-3 gap-2 text-xs pt-2 border-t border-gray-200 dark:border-gray-700">
                                 <div>
                                     <div class="text-gray-500 dark:text-gray-400 mb-1">Fecha Prog. A</div>
-                                    <div class="text-gray-900 dark:text-gray-100"><?php echo e($wo->scheduled_date?->format('m/d/Y') ?? '-'); ?></div>
+                                    <div class="text-gray-900 dark:text-gray-100"><?php echo e($wo->scheduled_send_date?->format('m/d/Y') ?? '-'); ?></div>
                                 </div>
                                 <div>
                                     <div class="text-gray-500 dark:text-gray-400 mb-1">Fecha Envío</div>
-                                    <div class="text-gray-900 dark:text-gray-100"><?php echo e($wo->ship_date?->format('m/d/Y') ?? '-'); ?></div>
+                                    <div class="text-gray-900 dark:text-gray-100"><?php echo e($wo->actual_send_date?->format('m/d/Y') ?? '-'); ?></div>
                                 </div>
                                 <div>
                                     <div class="text-gray-500 dark:text-gray-400 mb-1">Fecha Apertura</div>
