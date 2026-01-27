@@ -185,22 +185,29 @@ class WorkOrder extends Model
 
     /**
      * Check if this work order can be deleted.
+     * Now allows deletion always (will cascade delete).
      */
     public function canBeDeleted(): bool
     {
-        // Check lots only if model exists
-        if (class_exists(\App\Models\Lot::class)) {
-            if ($this->lots()->count() > 0) {
-                return false;
-            }
-        }
-
-        // Cannot delete if assigned to a confirmed sent list
-        if ($this->sent_list_id && $this->sentList && $this->sentList->isConfirmed()) {
-            return false;
-        }
-
+        // Allow deletion always, will cascade to related records
         return true;
+    }
+
+    /**
+     * Force delete this work order and all related records.
+     */
+    public function forceDeleteWithRelations(): bool
+    {
+        // Delete related lots
+        if (class_exists(\App\Models\Lot::class)) {
+            $this->lots()->delete();
+        }
+
+        // Delete status logs
+        $this->statusLogs()->delete();
+
+        // Finally delete the work order
+        return $this->delete();
     }
 
     /**

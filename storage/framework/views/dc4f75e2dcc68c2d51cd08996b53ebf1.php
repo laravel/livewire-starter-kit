@@ -6,8 +6,7 @@
     ?>
     
     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Paso 3 de 3 - Lista Preliminar - Período Semana <?php echo e($weekNumber); ?>-<?php echo e($year); ?>
-
+        Paso 3 de 4 - Gestión de Lotes/Viajeros
     </h2>
 
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($generatedSentListId): ?>
@@ -214,16 +213,19 @@
                                         <div class="flex items-center gap-2">
                                             <?php
                                                 $lots = $lotNumbers[$index] ?? [];
-                                                $lotCount = is_array($lots) ? count($lots) : (!empty($lots) ? 1 : 0);
+                                                $lotCount = is_array($lots) ? count($lots) : 0;
                                             ?>
                                             
                                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lotCount > 0): ?>
                                                 <div class="flex flex-wrap gap-1 flex-1">
-                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = (is_array($lots) ? $lots : [$lots]); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lot): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($lot)): ?>
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $lots; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lot): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(is_array($lot) && !empty($lot['number'])): ?>
                                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                                <?php echo e($lot); ?>
+                                                                <?php echo e($lot['number']); ?>
 
+                                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($lot['quantity'])): ?>
+                                                                    <span class="ml-1 text-blue-600 dark:text-blue-300">(<?php echo e(number_format($lot['quantity'])); ?>)</span>
+                                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                             </span>
                                                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -336,39 +338,38 @@
 <?php $component = $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
 <?php unset($__componentOriginalc04b147acd0e65cc1a77f86fb0e81580); ?>
 <?php endif; ?>
-            <div class="flex gap-3">
-                <?php if (isset($component)) { $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580 = $component; } ?>
+            <?php if (isset($component)) { $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::button.index','data' => ['wire:click' => 'resetWizard','variant' => 'ghost']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::button.index','data' => ['wire:click' => 'nextStep','variant' => 'primary']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('flux::button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'resetWizard','variant' => 'ghost']); ?>
-                    <?php if (isset($component)) { $__componentOriginal18ce857dfc449fdd246010f7208cb6d5 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal18ce857dfc449fdd246010f7208cb6d5 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::icon.arrow-path','data' => ['class' => 'w-4 h-4 mr-2']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('flux::icon.arrow-path'); ?>
+<?php $component->withAttributes(['wire:click' => 'nextStep','variant' => 'primary']); ?>
+                Siguiente - Fechas de Envío
+                <?php if (isset($component)) { $__componentOriginal5c84e1af936cb00c34687173a7f14ca8 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5c84e1af936cb00c34687173a7f14ca8 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::icon.arrow-right','data' => ['class' => 'w-4 h-4 ml-2']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('flux::icon.arrow-right'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-4 h-4 mr-2']); ?>
+<?php $component->withAttributes(['class' => 'w-4 h-4 ml-2']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginal18ce857dfc449fdd246010f7208cb6d5)): ?>
-<?php $attributes = $__attributesOriginal18ce857dfc449fdd246010f7208cb6d5; ?>
-<?php unset($__attributesOriginal18ce857dfc449fdd246010f7208cb6d5); ?>
+<?php if (isset($__attributesOriginal5c84e1af936cb00c34687173a7f14ca8)): ?>
+<?php $attributes = $__attributesOriginal5c84e1af936cb00c34687173a7f14ca8; ?>
+<?php unset($__attributesOriginal5c84e1af936cb00c34687173a7f14ca8); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal18ce857dfc449fdd246010f7208cb6d5)): ?>
-<?php $component = $__componentOriginal18ce857dfc449fdd246010f7208cb6d5; ?>
-<?php unset($__componentOriginal18ce857dfc449fdd246010f7208cb6d5); ?>
+<?php if (isset($__componentOriginal5c84e1af936cb00c34687173a7f14ca8)): ?>
+<?php $component = $__componentOriginal5c84e1af936cb00c34687173a7f14ca8; ?>
+<?php unset($__componentOriginal5c84e1af936cb00c34687173a7f14ca8); ?>
 <?php endif; ?>
-                    Nueva Calculación
-                 <?php echo $__env->renderComponent(); ?>
+             <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
 <?php $attributes = $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
@@ -378,48 +379,6 @@
 <?php $component = $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
 <?php unset($__componentOriginalc04b147acd0e65cc1a77f86fb0e81580); ?>
 <?php endif; ?>
-                <?php if (isset($component)) { $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::button.index','data' => ['wire:click' => 'generateSentList','variant' => 'primary']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('flux::button'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['wire:click' => 'generateSentList','variant' => 'primary']); ?>
-                    <?php if (isset($component)) { $__componentOriginal42dcb69862a510f1b92ffbdd4006e172 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal42dcb69862a510f1b92ffbdd4006e172 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'e60dd9d2c3a62d619c9acb38f20d5aa5::icon.paper-airplane','data' => ['class' => 'w-4 h-4 mr-2']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('flux::icon.paper-airplane'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['class' => 'w-4 h-4 mr-2']); ?>
-<?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal42dcb69862a510f1b92ffbdd4006e172)): ?>
-<?php $attributes = $__attributesOriginal42dcb69862a510f1b92ffbdd4006e172; ?>
-<?php unset($__attributesOriginal42dcb69862a510f1b92ffbdd4006e172); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal42dcb69862a510f1b92ffbdd4006e172)): ?>
-<?php $component = $__componentOriginal42dcb69862a510f1b92ffbdd4006e172; ?>
-<?php unset($__componentOriginal42dcb69862a510f1b92ffbdd4006e172); ?>
-<?php endif; ?>
-                    Generar Lista Preliminar y Enviar a Materiales
-                 <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
-<?php $attributes = $__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
-<?php unset($__attributesOriginalc04b147acd0e65cc1a77f86fb0e81580); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginalc04b147acd0e65cc1a77f86fb0e81580)): ?>
-<?php $component = $__componentOriginalc04b147acd0e65cc1a77f86fb0e81580; ?>
-<?php unset($__componentOriginalc04b147acd0e65cc1a77f86fb0e81580); ?>
-<?php endif; ?>
-            </div>
         </div>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
@@ -456,21 +415,40 @@
                         
                         <div class="space-y-3 max-h-80 overflow-y-auto">
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $tempLots; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lotIndex => $lot): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400 w-8">
+                                <div class="flex items-start gap-2">
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400 w-8 pt-2">
                                         <?php echo e($lotIndex + 1); ?>.
                                     </span>
-                                    <input 
-                                        type="text" 
-                                        wire:model="tempLots.<?php echo e($lotIndex); ?>"
-                                        placeholder="Número de lote/viajero"
-                                        class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
-                                    />
+                                    <div class="flex-1 space-y-2">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                No. Lote/Viajero
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                wire:model="tempLots.<?php echo e($lotIndex); ?>.number"
+                                                placeholder="Ej: 30"
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Cantidad
+                                            </label>
+                                            <input 
+                                                type="number" 
+                                                wire:model="tempLots.<?php echo e($lotIndex); ?>.quantity"
+                                                placeholder="Ej: 400"
+                                                min="1"
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                    </div>
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(count($tempLots) > 1): ?>
                                         <button 
                                             wire:click="removeLotInput(<?php echo e($lotIndex); ?>)"
                                             type="button"
-                                            class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
+                                            class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition mt-6"
                                             title="Eliminar lote"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -62,6 +62,9 @@ class CapacityWizard extends Component
     public ?int $currentLotIndex = null; // Índice del item actual para agregar lotes
     public array $tempLots = []; // Lotes temporales para el modal
 
+    // Step 4 - Fechas programadas de envío
+    public ?string $scheduledShipDate = null; // UNA fecha para toda la lista
+
     // UI state
     public string $errorMessage = '';
     public string $successMessage = '';
@@ -91,9 +94,11 @@ class CapacityWizard extends Component
             $this->calculateAvailableHours();
         } elseif ($this->currentStep === 2) {
             if (!$this->validateStep2()) return;
+        } elseif ($this->currentStep === 3) {
+            // No validation needed for step 3, just move to step 4
         }
 
-        if ($this->currentStep < 3) {
+        if ($this->currentStep < 4) {
             $this->currentStep++;
             $this->clearMessages();
         }
@@ -109,7 +114,7 @@ class CapacityWizard extends Component
 
     public function goToStep(int $step)
     {
-        if ($step >= 1 && $step <= 3 && $step <= $this->currentStep) {
+        if ($step >= 1 && $step <= 4 && $step <= $this->currentStep) {
             $this->currentStep = $step;
             $this->clearMessages();
         }
@@ -574,10 +579,21 @@ class CapacityWizard extends Component
     {
         $this->currentLotIndex = $index;
         // Cargar lotes existentes o inicializar con uno vacío
-        $this->tempLots = $this->lotNumbers[$index] ?? [''];
-        if (empty($this->tempLots)) {
-            $this->tempLots = [''];
+        $existingLots = $this->lotNumbers[$index] ?? [];
+        
+        if (empty($existingLots)) {
+            $this->tempLots = [['number' => '', 'quantity' => '']];
+        } else {
+            // Ensure existing lots have the new structure
+            $this->tempLots = array_map(function($lot) {
+                if (is_array($lot) && isset($lot['number'])) {
+                    return $lot;
+                }
+                // Convert old format (string) to new format
+                return ['number' => $lot, 'quantity' => ''];
+            }, $existingLots);
         }
+        
         $this->showLotModal = true;
     }
 
@@ -590,7 +606,7 @@ class CapacityWizard extends Component
 
     public function addLotInput()
     {
-        $this->tempLots[] = '';
+        $this->tempLots[] = ['number' => '', 'quantity' => ''];
     }
 
     public function removeLotInput(int $lotIndex)
@@ -608,7 +624,9 @@ class CapacityWizard extends Component
         }
 
         // Filtrar lotes vacíos y guardar
-        $filteredLots = array_values(array_filter($this->tempLots, fn($lot) => !empty(trim($lot))));
+        $filteredLots = array_values(array_filter($this->tempLots, function($lot) {
+            return !empty(trim($lot['number'] ?? ''));
+        }));
         
         if (!empty($filteredLots)) {
             $this->lotNumbers[$this->currentLotIndex] = $filteredLots;
@@ -622,7 +640,7 @@ class CapacityWizard extends Component
     public function setLotNumber(int $index, string $lotNumber)
     {
         if (!empty(trim($lotNumber))) {
-            $this->lotNumbers[$index] = [$lotNumber];
+            $this->lotNumbers[$index] = [['number' => $lotNumber, 'quantity' => '']];
         } else {
             unset($this->lotNumbers[$index]);
         }
@@ -661,18 +679,21 @@ class CapacityWizard extends Component
                         // Obtener el PO para acceder al work_order_id
                         $purchaseOrder = \App\Models\PurchaseOrder::with('workOrder')->find($item['po_id']);
                         
-                        // Convertir array de lotes a string separado por comas para la tabla pivot
+                        // Procesar lotes con nueva estructura (number + quantity)
                         $lotNumbersString = null;
                         $lotNumbersArray = [];
                         
-                        if (isset($this->lotNumbers[$index])) {
-                            if (is_array($this->lotNumbers[$index])) {
-                                $lotNumbersArray = $this->lotNumbers[$index];
-                                $lotNumbersString = implode(', ', $this->lotNumbers[$index]);
-                            } else {
-                                $lotNumbersArray = [$this->lotNumbers[$index]];
-                                $lotNumbersString = $this->lotNumbers[$index];
+                        if (isset($this->lotNumbers[$index]) && is_array($this->lotNumbers[$index])) {
+                            foreach ($this->lotNumbers[$index] as $lot) {
+                                if (is_array($lot) && !empty($lot['number'])) {
+                                    $lotNumbersArray[] = $lot;
+                                }
                             }
+                            
+                            // Crear string para pivot table (solo números de lote)
+                            $lotNumbersString = implode(', ', array_map(function($lot) {
+                                return $lot['number'];
+                            }, $lotNumbersArray));
                         }
                         
                         $sentList->purchaseOrders()->attach($item['po_id'], [
@@ -684,23 +705,31 @@ class CapacityWizard extends Component
                         // Crear registros Lot reales para que aparezcan en /admin/lots
                         if ($purchaseOrder && $purchaseOrder->workOrder && !empty($lotNumbersArray)) {
                             $workOrder = $purchaseOrder->workOrder;
-                            $quantityPerLot = count($lotNumbersArray) > 0 
-                                ? intval($item['quantity'] / count($lotNumbersArray)) 
-                                : $item['quantity'];
+                            $partDescription = $purchaseOrder->part->description ?? 'Sin descripción';
                             
-                            foreach ($lotNumbersArray as $lotNumber) {
-                                if (!empty(trim($lotNumber))) {
+                            // Actualizar fecha programada de envío (UNA para toda la lista)
+                            if (!empty($this->scheduledShipDate)) {
+                                $workOrder->update([
+                                    'ship_date' => $this->scheduledShipDate,
+                                ]);
+                            }
+                            
+                            foreach ($lotNumbersArray as $lot) {
+                                $lotNumber = trim($lot['number']);
+                                $lotQuantity = !empty($lot['quantity']) ? intval($lot['quantity']) : 0;
+                                
+                                if (!empty($lotNumber)) {
                                     // Verificar si ya existe un lote con ese número para esta WO
                                     $existingLot = Lot::where('work_order_id', $workOrder->id)
-                                        ->where('lot_number', trim($lotNumber))
+                                        ->where('lot_number', $lotNumber)
                                         ->first();
                                     
                                     if (!$existingLot) {
                                         Lot::create([
                                             'work_order_id' => $workOrder->id,
-                                            'lot_number' => trim($lotNumber),
-                                            'description' => "Lote creado desde Lista Preliminar #{$sentList->id}",
-                                            'quantity' => $quantityPerLot,
+                                            'lot_number' => $lotNumber,
+                                            'description' => $partDescription,
+                                            'quantity' => $lotQuantity > 0 ? $lotQuantity : intval($item['quantity']),
                                             'status' => Lot::STATUS_PENDING,
                                             'comments' => "Generado automáticamente desde Capacity Wizard",
                                         ]);

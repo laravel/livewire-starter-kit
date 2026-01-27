@@ -7,8 +7,8 @@
             <?php
                 $departments = [
                     \App\Models\SentList::DEPT_MATERIALS => ['label' => 'Materiales', 'icon' => 'cube'],
-                    \App\Models\SentList::DEPT_PRODUCTION => ['label' => 'Producción', 'icon' => 'cog'],
                     \App\Models\SentList::DEPT_QUALITY => ['label' => 'Calidad', 'icon' => 'check-circle'],
+                    \App\Models\SentList::DEPT_PRODUCTION => ['label' => 'Producción', 'icon' => 'cog'],
                     \App\Models\SentList::DEPT_SHIPPING => ['label' => 'Envíos', 'icon' => 'truck'],
                 ];
             ?>
@@ -131,7 +131,22 @@
 
                             </td>
                             <td class="px-4 py-3">
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
+                                <?php
+                                    // Get lots from work order
+                                    $workOrder = $po->workOrder;
+                                    $lots = $workOrder ? $workOrder->lots : collect();
+                                ?>
+                                
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lots->isNotEmpty()): ?>
+                                    <div class="space-y-1">
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $lots; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lot): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <div class="flex items-center justify-between text-xs bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
+                                                <span class="font-medium text-blue-800 dark:text-blue-200"><?php echo e($lot->lot_number); ?></span>
+                                                <span class="text-blue-600 dark:text-blue-300">(<?php echo e(number_format($lot->quantity)); ?>)</span>
+                                            </div>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </div>
+                                <?php elseif($canEdit): ?>
                                     <input 
                                         type="text" 
                                         wire:model.blur="lotNumbers.<?php echo e($po->id); ?>"
@@ -139,8 +154,7 @@
                                         class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                     />
                                 <?php else: ?>
-                                    <?php echo e($po->pivot->lot_number ?? '-'); ?>
-
+                                    <span class="text-gray-400"><?php echo e($po->pivot->lot_number ?? '-'); ?></span>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                         </tr>

@@ -2,13 +2,13 @@
     {{-- Header --}}
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Wizard de Capacidad</h1>
-        <p class="text-gray-600 dark:text-gray-400">Calcula la capacidad de producción en 3 pasos</p>
+        <p class="text-gray-600 dark:text-gray-400">Calcula la capacidad de producción en 4 pasos</p>
     </div>
 
     {{-- Step Indicator --}}
     <div class="mb-8">
         <div class="flex items-center justify-center">
-            @foreach([1 => 'Disponibilidad', 2 => 'Cálculo', 3 => 'Cierre'] as $step => $label)
+            @foreach([1 => 'Disponibilidad', 2 => 'Cálculo', 3 => 'Lotes', 4 => 'Fechas'] as $step => $label)
                 <div class="flex items-center">
                     <button 
                         wire:click="goToStep({{ $step }})"
@@ -29,7 +29,7 @@
                         'text-gray-400' => $currentStep < $step,
                     ])>{{ $label }}</span>
                 </div>
-                @if($step < 3)
+                @if($step < 4)
                     <div @class([
                         'w-16 h-1 mx-4 rounded',
                         'bg-blue-600' => $currentStep > $step,
@@ -79,6 +79,8 @@
             @include('livewire.admin.capacity-wizard.step2')
         @elseif($currentStep === 3)
             @include('livewire.admin.capacity-wizard.step3')
+        @elseif($currentStep === 4)
+            @include('livewire.admin.capacity-wizard.step4')
         @endif
     </div>
 </div>

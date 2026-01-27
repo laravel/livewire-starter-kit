@@ -7,8 +7,8 @@
             @php
                 $departments = [
                     \App\Models\SentList::DEPT_MATERIALS => ['label' => 'Materiales', 'icon' => 'cube'],
-                    \App\Models\SentList::DEPT_PRODUCTION => ['label' => 'Producción', 'icon' => 'cog'],
                     \App\Models\SentList::DEPT_QUALITY => ['label' => 'Calidad', 'icon' => 'check-circle'],
+                    \App\Models\SentList::DEPT_PRODUCTION => ['label' => 'Producción', 'icon' => 'cog'],
                     \App\Models\SentList::DEPT_SHIPPING => ['label' => 'Envíos', 'icon' => 'truck'],
                 ];
             @endphp
@@ -124,7 +124,22 @@
                                 {{ number_format($po->pivot->required_hours, 2) }}
                             </td>
                             <td class="px-4 py-3">
-                                @if($canEdit)
+                                @php
+                                    // Get lots from work order
+                                    $workOrder = $po->workOrder;
+                                    $lots = $workOrder ? $workOrder->lots : collect();
+                                @endphp
+                                
+                                @if($lots->isNotEmpty())
+                                    <div class="space-y-1">
+                                        @foreach($lots as $lot)
+                                            <div class="flex items-center justify-between text-xs bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
+                                                <span class="font-medium text-blue-800 dark:text-blue-200">{{ $lot->lot_number }}</span>
+                                                <span class="text-blue-600 dark:text-blue-300">({{ number_format($lot->quantity) }})</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @elseif($canEdit)
                                     <input 
                                         type="text" 
                                         wire:model.blur="lotNumbers.{{ $po->id }}"
@@ -132,7 +147,7 @@
                                         class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                     />
                                 @else
-                                    {{ $po->pivot->lot_number ?? '-' }}
+                                    <span class="text-gray-400">{{ $po->pivot->lot_number ?? '-' }}</span>
                                 @endif
                             </td>
                         </tr>

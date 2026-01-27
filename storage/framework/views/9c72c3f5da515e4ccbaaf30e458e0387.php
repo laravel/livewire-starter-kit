@@ -147,7 +147,7 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                            <?php echo e($wo->wo_number); ?>
+                                            <?php echo e(str_pad(substr($wo->wo_number, strrpos($wo->wo_number, '-') + 1), 4, '0', STR_PAD_LEFT)); ?>
 
                                         </div>
                                     </td>
@@ -255,7 +255,9 @@
                                     </h3>
                                     <div class="mt-2">
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                                            ¿Está seguro de que desea eliminar esta orden? Esta acción no se puede deshacer.
+                                            ¿Está seguro de que desea eliminar esta orden? 
+                                            <strong class="text-red-600 dark:text-red-400">Esto también eliminará todos los Lotes y registros relacionados.</strong>
+                                            Esta acción no se puede deshacer.
                                         </p>
                                     </div>
                                 </div>

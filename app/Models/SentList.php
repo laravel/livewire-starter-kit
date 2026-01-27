@@ -167,13 +167,14 @@ class SentList extends Model
 
     /**
      * Move to next department in workflow.
+     * Flow: Materiales → Calidad → Producción → Envíos
      */
     public function moveToNextDepartment(?int $userId = null): bool
     {
         $departments = [
-            self::DEPT_MATERIALS => self::DEPT_PRODUCTION,
-            self::DEPT_PRODUCTION => self::DEPT_QUALITY,
-            self::DEPT_QUALITY => self::DEPT_SHIPPING,
+            self::DEPT_MATERIALS => self::DEPT_QUALITY,
+            self::DEPT_QUALITY => self::DEPT_PRODUCTION,
+            self::DEPT_PRODUCTION => self::DEPT_SHIPPING,
         ];
 
         $currentDept = $this->current_department;
@@ -185,8 +186,8 @@ class SentList extends Model
         // Update approval for current department
         $approvalField = match($currentDept) {
             self::DEPT_MATERIALS => 'materials_approved',
-            self::DEPT_PRODUCTION => 'production_approved',
             self::DEPT_QUALITY => 'quality_approved',
+            self::DEPT_PRODUCTION => 'production_approved',
             self::DEPT_SHIPPING => 'shipping_approved',
             default => null,
         };

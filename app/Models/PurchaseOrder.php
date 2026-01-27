@@ -164,10 +164,32 @@ class PurchaseOrder extends Model
 
     /**
      * Check if this purchase order can be deleted.
+     * Now allows deletion even with work orders (will cascade delete).
      */
     public function canBeDeleted(): bool
     {
-        return !$this->hasWorkOrder();
+        // Allow deletion always, but will cascade to work orders
+        return true;
+    }
+
+    /**
+     * Force delete this purchase order and all related records.
+     */
+    public function forceDeleteWithRelations(): bool
+    {
+        // Delete related work orders first
+        if ($this->hasWorkOrder()) {
+            $this->workOrder->delete();
+        }
+
+        // Delete signatures
+        $this->signatures()->delete();
+
+        // Detach from sent lists
+        $this->sentLists()->detach();
+
+        // Finally delete the purchase order
+        return $this->delete();
     }
 
     /**
