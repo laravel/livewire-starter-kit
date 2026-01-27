@@ -422,6 +422,7 @@ class CapacityWizard extends Component
                     'required_hours' => $requiredHours,
                     'po_id' => $po->id,
                     'po_number' => $po->po_number,
+                    'wo' => $po->wo,
                     'configuration' => [
                         'id' => $config->id,
                         'workstation_type' => $config->workstation_type,
@@ -528,6 +529,7 @@ class CapacityWizard extends Component
                 'required_hours' => $result['required_hours'],
                 'po_id' => null, // Agregado manualmente, no desde PO
                 'po_number' => null,
+                'wo' => null,
                 'configuration' => $result['configuration'],
             ];
 
@@ -650,6 +652,12 @@ class CapacityWizard extends Component
     {
         if (empty($this->workOrderItems)) {
             $this->errorMessage = 'No hay items para generar la lista.';
+            return;
+        }
+
+        // Validar que se haya ingresado la fecha programada de envío
+        if (empty($this->scheduledShipDate)) {
+            $this->errorMessage = 'Debe ingresar la fecha programada de envío.';
             return;
         }
 

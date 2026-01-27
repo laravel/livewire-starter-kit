@@ -81,6 +81,7 @@
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">#</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">PO Number</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">WO</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Número de Parte</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cantidad</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Horas Req.</th>
@@ -93,6 +94,9 @@
                                     <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
                                     <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">
                                         {{ $item['po_number'] ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 font-medium text-indigo-600 dark:text-indigo-400">
+                                        {{ $item['wo'] ?? '-' }}
                                     </td>
                                     <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
                                         {{ $item['part_number'] }}
@@ -129,7 +133,7 @@
                         </tbody>
                         <tfoot class="bg-gray-50 dark:bg-gray-900">
                             <tr>
-                                <td colspan="4" class="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">Total:</td>
+                                <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">Total:</td>
                                 <td class="px-4 py-3 text-right font-bold text-gray-900 dark:text-white">{{ number_format($totalRequiredHours, 2) }} hrs</td>
                                 <td></td>
                             </tr>

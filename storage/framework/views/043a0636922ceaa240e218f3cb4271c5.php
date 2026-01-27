@@ -433,7 +433,9 @@
                                     </h3>
                                     <div class="mt-2">
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                                            ¿Está seguro de que desea eliminar esta orden de compra? Esta acción no se puede deshacer.
+                                            ¿Está seguro de que desea eliminar esta orden de compra? 
+                                            <strong class="text-red-600 dark:text-red-400">Esto también eliminará todas las Work Orders, Lotes y registros relacionados.</strong>
+                                            Esta acción no se puede deshacer.
                                         </p>
                                     </div>
                                 </div>
