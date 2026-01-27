@@ -52,13 +52,6 @@ class WOList extends Component
 
     public function confirmDeletion(int $id): void
     {
-        $wo = WorkOrder::findOrFail($id);
-
-        if (!$wo->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar esta Work Order porque tiene lotes o envíos asociados.');
-            return;
-        }
-
         $this->deleteId = $id;
         $this->confirmingDeletion = true;
     }
@@ -68,16 +61,15 @@ class WOList extends Component
     {
         $wo = WorkOrder::findOrFail($this->deleteId);
 
-        if (!$wo->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar esta Work Order porque tiene lotes o envíos asociados.');
-            $this->confirmingDeletion = false;
-            return;
+        try {
+            // Use force delete with relations to cascade delete
+            $wo->forceDeleteWithRelations();
+
+            session()->flash('flash.banner', 'Work Order y registros relacionados eliminados correctamente.');
+            session()->flash('flash.bannerStyle', 'success');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al eliminar la Work Order: ' . $e->getMessage());
         }
-
-        $wo->delete();
-
-        session()->flash('flash.banner', 'Work Order eliminada correctamente.');
-        session()->flash('flash.bannerStyle', 'success');
 
         $this->confirmingDeletion = false;
     }

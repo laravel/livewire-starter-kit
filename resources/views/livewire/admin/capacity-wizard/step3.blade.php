@@ -6,7 +6,7 @@
     @endphp
     
     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Paso 3 de 3 - Lista Preliminar - Período Semana {{ $weekNumber }}-{{ $year }}
+        Paso 3 de 4 - Gestión de Lotes/Viajeros
     </h2>
 
     @if($generatedSentListId)
@@ -98,6 +98,7 @@
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">#</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">PO Number</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">WO</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Número de Parte</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Descripción</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cantidad</th>
@@ -110,6 +111,7 @@
                                 <tr>
                                     <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
                                     <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">{{ $item['po_number'] ?? '-' }}</td>
+                                    <td class="px-4 py-3 font-medium text-indigo-600 dark:text-indigo-400">{{ $item['wo'] ?? '-' }}</td>
                                     <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ $item['part_number'] }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ Str::limit($item['part_description'] ?? '', 30) }}</td>
                                     <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300">{{ number_format($item['quantity']) }}</td>
@@ -118,15 +120,18 @@
                                         <div class="flex items-center gap-2">
                                             @php
                                                 $lots = $lotNumbers[$index] ?? [];
-                                                $lotCount = is_array($lots) ? count($lots) : (!empty($lots) ? 1 : 0);
+                                                $lotCount = is_array($lots) ? count($lots) : 0;
                                             @endphp
                                             
                                             @if($lotCount > 0)
                                                 <div class="flex flex-wrap gap-1 flex-1">
-                                                    @foreach((is_array($lots) ? $lots : [$lots]) as $lot)
-                                                        @if(!empty($lot))
+                                                    @foreach($lots as $lot)
+                                                        @if(is_array($lot) && !empty($lot['number']))
                                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                                {{ $lot }}
+                                                                {{ $lot['number'] }}
+                                                                @if(!empty($lot['quantity']))
+                                                                    <span class="ml-1 text-blue-600 dark:text-blue-300">({{ number_format($lot['quantity']) }})</span>
+                                                                @endif
                                                             </span>
                                                         @endif
                                                     @endforeach
@@ -183,16 +188,10 @@
                 <flux:icon.arrow-left class="w-4 h-4 mr-2" />
                 Anterior
             </flux:button>
-            <div class="flex gap-3">
-                <flux:button wire:click="resetWizard" variant="ghost">
-                    <flux:icon.arrow-path class="w-4 h-4 mr-2" />
-                    Nueva Calculación
-                </flux:button>
-                <flux:button wire:click="generateSentList" variant="primary">
-                    <flux:icon.paper-airplane class="w-4 h-4 mr-2" />
-                    Generar Lista Preliminar y Enviar a Materiales
-                </flux:button>
-            </div>
+            <flux:button wire:click="nextStep" variant="primary">
+                Siguiente - Fechas de Envío
+                <flux:icon.arrow-right class="w-4 h-4 ml-2" />
+            </flux:button>
         </div>
     @endif
 
@@ -229,21 +228,40 @@
                         {{-- Lots List --}}
                         <div class="space-y-3 max-h-80 overflow-y-auto">
                             @foreach($tempLots as $lotIndex => $lot)
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400 w-8">
+                                <div class="flex items-start gap-2">
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400 w-8 pt-2">
                                         {{ $lotIndex + 1 }}.
                                     </span>
-                                    <input 
-                                        type="text" 
-                                        wire:model="tempLots.{{ $lotIndex }}"
-                                        placeholder="Número de lote/viajero"
-                                        class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
-                                    />
+                                    <div class="flex-1 space-y-2">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                No. Lote/Viajero
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                wire:model="tempLots.{{ $lotIndex }}.number"
+                                                placeholder="Ej: 30"
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Cantidad
+                                            </label>
+                                            <input 
+                                                type="number" 
+                                                wire:model="tempLots.{{ $lotIndex }}.quantity"
+                                                placeholder="Ej: 400"
+                                                min="1"
+                                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                    </div>
                                     @if(count($tempLots) > 1)
                                         <button 
                                             wire:click="removeLotInput({{ $lotIndex }})"
                                             type="button"
-                                            class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
+                                            class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition mt-6"
                                             title="Eliminar lote"
                                         >
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

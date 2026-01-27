@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200" wire:poll.{{ $refreshInterval }}s>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200" wire:poll.30s>
     {{-- Header --}}
     <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20 shadow-md">
         <div class="px-4 py-4">
@@ -86,6 +86,7 @@
                                 @php
                                     $po = $wo->purchaseOrder;
                                     $part = $po->part;
+                                    $allLots = $wo->lots; // Todos los lotes
                                     $completedLots = $wo->lots->where('status', \App\Models\Lot::STATUS_COMPLETED);
                                     $totalSent = $completedLots->sum('quantity');
                                     $pending = $wo->quantity - $wo->sent_pieces;
@@ -93,7 +94,7 @@
                                 @endphp
 
                                 {{-- Fila Principal de WO --}}
-<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                     <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">WO</td>
                                     <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">{{ $po->po_number }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ $part->item_number }}</td>
@@ -103,15 +104,15 @@
                                     <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300">{{ number_format($wo->sent_pieces) }}</td>
                                     <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300">{{ number_format($pending) }}</td>
                                     <td class="px-4 py-3 text-right font-bold bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200">{{ number_format($toSend) }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300">{{ $wo->scheduled_date?->format('m/d/Y') ?? '-' }}</td>
-                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300">{{ $wo->ship_date?->format('m/d/Y') ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300">{{ $wo->scheduled_send_date?->format('m/d/Y') ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300">{{ $wo->actual_send_date?->format('m/d/Y') ?? '-' }}</td>
                                     <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300">{{ $wo->created_at->format('m/d/Y') }}</td>
                                     <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300">{{ $wo->sentList?->id ?? '-' }}</td>
                                     <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300">{{ $wo->priority ?? '-' }}</td>
                                 </tr>
 
-                                {{-- Filas de Lots Completados --}}
-                                @foreach($completedLots as $lot)
+                                {{-- Filas de TODOS los Lotes (con estado) --}}
+                                @foreach($allLots as $lot)
                                     <tr class="bg-gray-50 dark:bg-gray-700/30 text-gray-600 dark:text-gray-400">
                                         <td class="px-4 py-2 pl-8 text-xs">Lote</td>
                                         <td class="px-4 py-2 text-xs">{{ $po->po_number }}.{{ $lot->lot_number }}</td>
@@ -122,23 +123,31 @@
                                         <td class="px-4 py-2 text-right text-xs"></td>
                                         <td class="px-4 py-2 text-right text-xs"></td>
                                         <td class="px-4 py-2 text-right text-xs font-medium">{{ number_format($lot->quantity) }}</td>
-                                        <td class="px-4 py-2 text-center text-xs">{{ $wo->scheduled_date?->format('m/d/Y') ?? '-' }}</td>
-                                        <td class="px-4 py-2 text-center text-xs">{{ $wo->ship_date?->format('m/d/Y') ?? '-' }}</td>
+                                        <td class="px-4 py-2 text-center text-xs">{{ $wo->scheduled_send_date?->format('m/d/Y') ?? '-' }}</td>
+                                        <td class="px-4 py-2 text-center text-xs">{{ $wo->actual_send_date?->format('m/d/Y') ?? '-' }}</td>
                                         <td class="px-4 py-2 text-center text-xs">{{ $wo->created_at->format('m/d/Y') }}</td>
                                         <td class="px-4 py-2 text-center text-xs">{{ $wo->sentList?->id ?? '-' }}</td>
                                         <td class="px-4 py-2 text-center text-xs">
-                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200">
-                                                Completado
+                                            @php
+                                                $statusColors = [
+                                                    \App\Models\Lot::STATUS_PENDING => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-800 dark:text-gray-200', 'label' => 'Pendiente'],
+                                                    \App\Models\Lot::STATUS_IN_PROGRESS => ['bg' => 'bg-blue-100 dark:bg-blue-900/50', 'text' => 'text-blue-800 dark:text-blue-200', 'label' => 'En Proceso'],
+                                                    \App\Models\Lot::STATUS_COMPLETED => ['bg' => 'bg-green-100 dark:bg-green-900/50', 'text' => 'text-green-800 dark:text-green-200', 'label' => 'Completado'],
+                                                ];
+                                                $statusInfo = $statusColors[$lot->status] ?? ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'label' => $lot->status];
+                                            @endphp
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
+                                                {{ $statusInfo['label'] }}
                                             </span>
                                         </td>
                                     </tr>
                                 @endforeach
 
                                 {{-- Fila de Total si hay múltiples lots --}}
-                                @if($completedLots->count() > 1)
+                                @if($allLots->count() > 1)
                                     <tr class="bg-blue-50 dark:bg-blue-900/30 font-semibold">
                                         <td colspan="8" class="px-4 py-2 text-right text-gray-900 dark:text-gray-100">Total:</td>
-                                        <td class="px-4 py-2 text-right text-gray-900 dark:text-gray-100">{{ number_format($totalSent) }}</td>
+                                        <td class="px-4 py-2 text-right text-gray-900 dark:text-gray-100">{{ number_format($allLots->sum('quantity')) }}</td>
                                         <td colspan="5"></td>
                                     </tr>
                                 @endif
@@ -196,11 +205,11 @@
                             <div class="grid grid-cols-3 gap-2 text-xs pt-2 border-t border-gray-200 dark:border-gray-700">
                                 <div>
                                     <div class="text-gray-500 dark:text-gray-400 mb-1">Fecha Prog. A</div>
-                                    <div class="text-gray-900 dark:text-gray-100">{{ $wo->scheduled_date?->format('m/d/Y') ?? '-' }}</div>
+                                    <div class="text-gray-900 dark:text-gray-100">{{ $wo->scheduled_send_date?->format('m/d/Y') ?? '-' }}</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-500 dark:text-gray-400 mb-1">Fecha Envío</div>
-                                    <div class="text-gray-900 dark:text-gray-100">{{ $wo->ship_date?->format('m/d/Y') ?? '-' }}</div>
+                                    <div class="text-gray-900 dark:text-gray-100">{{ $wo->actual_send_date?->format('m/d/Y') ?? '-' }}</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-500 dark:text-gray-400 mb-1">Fecha Apertura</div>
@@ -221,16 +230,24 @@
                             </div>
                         </div>
 
-                        {{-- Cards de Lots Completados --}}
-                        @foreach($completedLots as $lot)
-                            <div class="p-4 pl-8 bg-gray-50 dark:bg-gray-700/30 space-y-2 border-l-4 border-green-500 dark:border-green-400">
+                        {{-- Cards de TODOS los Lotes (con estado) --}}
+                        @foreach($allLots as $lot)
+                            @php
+                                $statusColors = [
+                                    \App\Models\Lot::STATUS_PENDING => ['border' => 'border-gray-400', 'bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-800 dark:text-gray-200', 'label' => 'Pendiente'],
+                                    \App\Models\Lot::STATUS_IN_PROGRESS => ['border' => 'border-blue-500 dark:border-blue-400', 'bg' => 'bg-blue-100 dark:bg-blue-900/50', 'text' => 'text-blue-800 dark:text-blue-200', 'label' => 'En Proceso'],
+                                    \App\Models\Lot::STATUS_COMPLETED => ['border' => 'border-green-500 dark:border-green-400', 'bg' => 'bg-green-100 dark:bg-green-900/50', 'text' => 'text-green-800 dark:text-green-200', 'label' => 'Completado'],
+                                ];
+                                $statusInfo = $statusColors[$lot->status] ?? ['border' => 'border-gray-400', 'bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'label' => $lot->status];
+                            @endphp
+                            <div class="p-4 pl-8 bg-gray-50 dark:bg-gray-700/30 space-y-2 border-l-4 {{ $statusInfo['border'] }}">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Lote</span>
                                         <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $po->po_number }}.{{ $lot->lot_number }}</span>
                                     </div>
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200">
-                                        Completado
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
+                                        {{ $statusInfo['label'] }}
                                     </span>
                                 </div>
                                 <div class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{{ $lot->description ?? $part->description }}</div>
@@ -242,11 +259,11 @@
                         @endforeach
 
                         {{-- Total si hay múltiples lots --}}
-                        @if($completedLots->count() > 1)
+                        @if($allLots->count() > 1)
                             <div class="p-4 bg-blue-50 dark:bg-blue-900/30">
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">Total:</span>
-                                    <span class="text-base font-bold text-blue-900 dark:text-blue-100">{{ number_format($totalSent) }}</span>
+                                    <span class="text-base font-bold text-blue-900 dark:text-blue-100">{{ number_format($allLots->sum('quantity')) }}</span>
                                 </div>
                             </div>
                         @endif

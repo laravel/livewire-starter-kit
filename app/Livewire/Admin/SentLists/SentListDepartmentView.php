@@ -159,8 +159,8 @@ class SentListDepartmentView extends Component
     {
         $order = [
             SentList::DEPT_MATERIALS => 1,
-            SentList::DEPT_PRODUCTION => 2,
-            SentList::DEPT_QUALITY => 3,
+            SentList::DEPT_QUALITY => 2,
+            SentList::DEPT_PRODUCTION => 3,
             SentList::DEPT_SHIPPING => 4,
         ];
 
@@ -174,8 +174,8 @@ class SentListDepartmentView extends Component
     {
         $order = [
             SentList::DEPT_MATERIALS => 1,
-            SentList::DEPT_PRODUCTION => 2,
-            SentList::DEPT_QUALITY => 3,
+            SentList::DEPT_QUALITY => 2,
+            SentList::DEPT_PRODUCTION => 3,
             SentList::DEPT_SHIPPING => 4,
         ];
 

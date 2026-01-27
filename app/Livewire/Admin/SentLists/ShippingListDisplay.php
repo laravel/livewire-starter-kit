@@ -53,19 +53,15 @@ class ShippingListDisplay extends Component
 
     public function render()
     {
-        // Obtener Work Orders con lots completados
+        // Obtener Work Orders con lots (todos los estados)
         $query = WorkOrder::with([
             'purchaseOrder.part.standards' => function ($query) {
                 $query->active();
             },
-            'lots' => function ($query) {
-                $query->where('status', Lot::STATUS_COMPLETED);
-            },
+            'lots', // Cargar todos los lotes sin filtrar por estado
             'sentList'
         ])
-        ->whereHas('lots', function ($query) {
-            $query->where('status', Lot::STATUS_COMPLETED);
-        });
+        ->whereHas('lots'); // Solo WOs que tengan al menos un lote
 
         // Aplicar filtros de SentList si existen
         if ($this->filterDepartment) {

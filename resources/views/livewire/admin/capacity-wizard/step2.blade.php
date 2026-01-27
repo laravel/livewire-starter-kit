@@ -14,66 +14,12 @@
                 <button 
                     wire:click="openPOModal" 
                     type="button"
-                    class="w-full mb-4 inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
+                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
                 >
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                     Cargar desde POs
-                </button>
-
-                <div class="relative mb-4">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
-                    </div>
-                    <div class="relative flex justify-center text-xs">
-                        <span class="px-2 bg-gray-50 dark:bg-gray-900 text-gray-500">o agregar manualmente</span>
-                    </div>
-                </div>
-                
-                {{-- Part Selection with Tom Select --}}
-                <div class="mb-4" wire:ignore>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Número de Parte
-                        <span class="text-xs text-gray-500">({{ $parts->count() }} disponibles)</span>
-                    </label>
-                    <select 
-                        id="part-select"
-                        placeholder="Buscar número de parte..."
-                        autocomplete="off"
-                    >
-                        <option value="">Seleccionar parte...</option>
-                        @foreach($parts as $part)
-                            <option value="{{ $part->id }}">{{ $part->number }} - {{ Str::limit($part->description, 40) }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                @error('currentPartId') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-
-                {{-- Quantity --}}
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Cantidad del WO
-                    </label>
-                    <input 
-                        wire:model="currentQuantity" 
-                        type="number" 
-                        min="1"
-                        placeholder="0"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    @error('currentQuantity') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-                </div>
-
-                <button 
-                    wire:click="addWorkOrderItem" 
-                    type="button"
-                    class="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
-                >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Agregar
                 </button>
 
                 @if($parts->isEmpty())
@@ -225,59 +171,6 @@
         </button>
     </div>
 </div>
-
-{{-- Tom Select Initialization --}}
-@script
-<script>
-    // Initialize Tom Select when component loads
-    $wire.on('initTomSelect', () => {
-        initPartSelect();
-    });
-
-    // Clear Tom Select when item is added successfully
-    $wire.on('partAdded', () => {
-        const selectEl = document.getElementById('part-select');
-        if (selectEl && selectEl.tomselect) {
-            selectEl.tomselect.clear();
-        }
-    });
-
-    function initPartSelect() {
-        const selectEl = document.getElementById('part-select');
-        if (!selectEl) return;
-        
-        // Destroy existing instance if any
-        if (selectEl.tomselect) {
-            selectEl.tomselect.destroy();
-        }
-
-        new TomSelect('#part-select', {
-            create: false,
-            sortField: { field: 'text', direction: 'asc' },
-            placeholder: 'Buscar número de parte...',
-            allowEmptyOption: true,
-            render: {
-                option: function(data, escape) {
-                    return '<div class="py-2 px-3">' + escape(data.text) + '</div>';
-                },
-                item: function(data, escape) {
-                    return '<div>' + escape(data.text) + '</div>';
-                },
-                no_results: function(data, escape) {
-                    return '<div class="no-results py-2 px-3 text-gray-500">No se encontraron resultados para "' + escape(data.input) + '"</div>';
-                }
-            },
-            onChange: function(value) {
-                // Sync with Livewire using $wire
-                $wire.set('currentPartId', value ? parseInt(value) : null);
-            }
-        });
-    }
-
-    // Initialize on first load
-    setTimeout(() => initPartSelect(), 100);
-</script>
-@endscript
 
 
 {{-- PO Selection Modal --}}

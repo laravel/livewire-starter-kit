@@ -49,13 +49,6 @@ class POList extends Component
 
     public function confirmDeletion(int $id): void
     {
-        $po = PurchaseOrder::findOrFail($id);
-
-        if (!$po->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar esta orden de compra porque tiene una orden de trabajo asociada.');
-            return;
-        }
-
         $this->deleteId = $id;
         $this->confirmingDeletion = true;
     }
@@ -64,16 +57,15 @@ class POList extends Component
     {
         $po = PurchaseOrder::findOrFail($this->deleteId);
 
-        if (!$po->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar esta orden de compra porque tiene una orden de trabajo asociada.');
-            $this->confirmingDeletion = false;
-            return;
+        try {
+            // Use force delete with relations to cascade delete
+            $po->forceDeleteWithRelations();
+
+            session()->flash('flash.banner', 'Orden de compra y registros relacionados eliminados correctamente.');
+            session()->flash('flash.bannerStyle', 'success');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Error al eliminar la orden de compra: ' . $e->getMessage());
         }
-
-        $po->delete();
-
-        session()->flash('flash.banner', 'Orden de compra eliminada correctamente.');
-        session()->flash('flash.bannerStyle', 'success');
 
         $this->confirmingDeletion = false;
     }

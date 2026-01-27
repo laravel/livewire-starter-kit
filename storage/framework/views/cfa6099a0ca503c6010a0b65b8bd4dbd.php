@@ -1,88 +1,90 @@
 <div>
-    {{-- Department Workflow Progress --}}
+    
     <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Flujo de Departamentos</h3>
         
         <div class="flex items-center justify-between">
-            @php
+            <?php
                 $departments = [
                     \App\Models\SentList::DEPT_MATERIALS => ['label' => 'Materiales', 'icon' => 'cube'],
                     \App\Models\SentList::DEPT_QUALITY => ['label' => 'Calidad', 'icon' => 'check-circle'],
                     \App\Models\SentList::DEPT_PRODUCTION => ['label' => 'Producción', 'icon' => 'cog'],
                     \App\Models\SentList::DEPT_SHIPPING => ['label' => 'Envíos', 'icon' => 'truck'],
                 ];
-            @endphp
+            ?>
 
-            @foreach($departments as $deptKey => $dept)
-                <div class="flex items-center {{ !$loop->last ? 'flex-1' : '' }}">
-                    <div @class([
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $departments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $deptKey => $dept): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <div class="flex items-center <?php echo e(!$loop->last ? 'flex-1' : ''); ?>">
+                    <div class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                         'flex flex-col items-center',
                         'w-32'
-                    ])>
-                        <div @class([
+                    ]); ?>">
+                        <div class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                             'w-16 h-16 rounded-full flex items-center justify-center mb-2 border-2',
                             'bg-blue-500 border-blue-500 text-white' => $sentList->current_department === $deptKey,
                             'bg-green-500 border-green-500 text-white' => $this->isPastDepartment($deptKey),
                             'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500' => $this->isFutureDepartment($deptKey),
-                        ])>
-                            @if($this->isPastDepartment($deptKey))
+                        ]); ?>">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($this->isPastDepartment($deptKey)): ?>
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                            @else
+                            <?php else: ?>
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                                 </svg>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
-                        <span @class([
+                        <span class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                             'text-sm font-medium text-center',
                             'text-blue-600 dark:text-blue-400' => $sentList->current_department === $deptKey,
                             'text-green-600 dark:text-green-400' => $this->isPastDepartment($deptKey),
                             'text-gray-500 dark:text-gray-400' => $this->isFutureDepartment($deptKey),
-                        ])>
-                            {{ $dept['label'] }}
+                        ]); ?>">
+                            <?php echo e($dept['label']); ?>
+
                         </span>
-                        @if($this->isPastDepartment($deptKey))
-                            @php
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($this->isPastDepartment($deptKey)): ?>
+                            <?php
                                 $approvedAt = match($deptKey) {
                                     \App\Models\SentList::DEPT_MATERIALS => $sentList->materials_approved_at,
                                     \App\Models\SentList::DEPT_PRODUCTION => $sentList->production_approved_at,
                                     \App\Models\SentList::DEPT_QUALITY => $sentList->quality_approved_at,
                                     default => null,
                                 };
-                            @endphp
-                            @if($approvedAt)
+                            ?>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($approvedAt): ?>
                                 <span class="text-xs text-gray-500 mt-1">
-                                    {{ $approvedAt->format('d/m H:i') }}
+                                    <?php echo e($approvedAt->format('d/m H:i')); ?>
+
                                 </span>
-                            @endif
-                        @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                     
-                    @if(!$loop->last)
-                        <div @class([
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$loop->last): ?>
+                        <div class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                             'flex-1 h-1 mx-2',
                             'bg-green-500' => $this->isPastDepartment($deptKey),
                             'bg-gray-300 dark:bg-gray-600' => !$this->isPastDepartment($deptKey),
-                        ])></div>
-                    @endif
+                        ]); ?>"></div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
     </div>
 
-    {{-- Purchase Orders Table --}}
+    
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Purchase Orders en la Lista ({{ $sentList->purchaseOrders->count() }})
+                Purchase Orders en la Lista (<?php echo e($sentList->purchaseOrders->count()); ?>)
             </h3>
-            @if($canEdit)
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
                 <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
                     Puede editar
                 </span>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
 
         <div class="overflow-x-auto">
@@ -98,91 +100,97 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    @forelse($sentList->purchaseOrders as $po)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $sentList->purchaseOrders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $po): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">
-                                {{ $po->po_number }}
+                                <?php echo e($po->po_number); ?>
+
                             </td>
                             <td class="px-4 py-3 text-gray-900 dark:text-white">
-                                {{ $po->part->number }}
+                                <?php echo e($po->part->number); ?>
+
                             </td>
                             <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
-                                {{ Str::limit($po->part->description, 40) }}
+                                <?php echo e(Str::limit($po->part->description, 40)); ?>
+
                             </td>
                             <td class="px-4 py-3 text-right text-gray-900 dark:text-white">
-                                @if($canEdit)
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
                                     <input 
                                         type="number" 
-                                        wire:model.blur="quantities.{{ $po->id }}"
+                                        wire:model.blur="quantities.<?php echo e($po->id); ?>"
                                         class="w-24 text-right rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                     />
-                                @else
-                                    {{ number_format($po->pivot->quantity) }}
-                                @endif
+                                <?php else: ?>
+                                    <?php echo e(number_format($po->pivot->quantity)); ?>
+
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <td class="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">
-                                {{ number_format($po->pivot->required_hours, 2) }}
+                                <?php echo e(number_format($po->pivot->required_hours, 2)); ?>
+
                             </td>
                             <td class="px-4 py-3">
-                                @php
+                                <?php
                                     // Get lots from work order
                                     $workOrder = $po->workOrder;
                                     $lots = $workOrder ? $workOrder->lots : collect();
-                                @endphp
+                                ?>
                                 
-                                @if($lots->isNotEmpty())
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lots->isNotEmpty()): ?>
                                     <div class="space-y-1">
-                                        @foreach($lots as $lot)
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $lots; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lot): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <div class="flex items-center justify-between text-xs bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
-                                                <span class="font-medium text-blue-800 dark:text-blue-200">{{ $lot->lot_number }}</span>
-                                                <span class="text-blue-600 dark:text-blue-300">({{ number_format($lot->quantity) }})</span>
+                                                <span class="font-medium text-blue-800 dark:text-blue-200"><?php echo e($lot->lot_number); ?></span>
+                                                <span class="text-blue-600 dark:text-blue-300">(<?php echo e(number_format($lot->quantity)); ?>)</span>
                                             </div>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </div>
-                                @elseif($canEdit)
+                                <?php elseif($canEdit): ?>
                                     <input 
                                         type="text" 
-                                        wire:model.blur="lotNumbers.{{ $po->id }}"
+                                        wire:model.blur="lotNumbers.<?php echo e($po->id); ?>"
                                         placeholder="Opcional"
                                         class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                     />
-                                @else
-                                    <span class="text-gray-400">{{ $po->pivot->lot_number ?? '-' }}</span>
-                                @endif
+                                <?php else: ?>
+                                    <span class="text-gray-400"><?php echo e($po->pivot->lot_number ?? '-'); ?></span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                                 No hay Purchase Orders en esta lista
                             </td>
                         </tr>
-                    @endforelse
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 
-    {{-- Notes Section --}}
+    
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notas</h3>
         
-        @if($canEdit)
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
             <textarea 
                 wire:model="generalNotes"
                 rows="4"
                 class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                 placeholder="Agregar notas generales..."
             ></textarea>
-        @else
+        <?php else: ?>
             <div class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                {{ $sentList->notes ?? 'Sin notas' }}
+                <?php echo e($sentList->notes ?? 'Sin notas'); ?>
+
             </div>
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
-    {{-- Actions --}}
-    @if($canEdit)
+    
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canEdit): ?>
         <div class="flex justify-end gap-3">
             <button 
                 wire:click="saveChanges"
@@ -197,10 +205,10 @@
                 Aprobar y Enviar al Siguiente Departamento
             </button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    {{-- Approval Modal --}}
-    @if($showApprovalModal)
+    
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showApprovalModal): ?>
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeApprovalModal"></div>
@@ -237,9 +245,12 @@
                 </div>
             </div>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    @script
+        <?php
+        $__scriptKey = '1584843068-0';
+        ob_start();
+    ?>
     <script>
         $wire.on('success', (message) => {
             alert(message);
@@ -249,5 +260,10 @@
             alert(message);
         });
     </script>
-    @endscript
+        <?php
+        $__output = ob_get_clean();
+
+        \Livewire\store($this)->push('scripts', $__output, $__scriptKey)
+    ?>
 </div>
+<?php /**PATH D:\xampp\htdocs\Laravel\Flexcon-tracker\resources\views/livewire/admin/sent-lists/sent-list-department-view.blade.php ENDPATH**/ ?>

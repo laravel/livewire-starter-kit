@@ -154,9 +154,9 @@
                                     </td>
                                     @if(!$workOrder)
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <a href="{{ route('admin.work-orders.show', $lot->workOrder) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400">
-                                            {{ $lot->workOrder->wo_number }}
-                                        </a>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                            {{ $lot->workOrder->purchaseOrder->wo ?? '-' }}
+                                        </div>
                                         <div class="text-xs text-gray-500 dark:text-gray-400">
                                             {{ $lot->workOrder->purchaseOrder->part->number }}
                                         </div>

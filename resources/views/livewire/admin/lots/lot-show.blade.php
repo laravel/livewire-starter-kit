@@ -65,9 +65,7 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Work Order</dt>
                             <dd class="mt-1 text-sm">
-                                <a href="{{ route('admin.work-orders.show', $lot->workOrder) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400">
-                                    {{ $lot->workOrder->wo_number }}
-                                </a>
+                                {{ $lot->workOrder->purchaseOrder->wo ?? '-' }}
                             </dd>
                         </div>
                         

@@ -2,13 +2,13 @@
     
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Wizard de Capacidad</h1>
-        <p class="text-gray-600 dark:text-gray-400">Calcula la capacidad de producción en 3 pasos</p>
+        <p class="text-gray-600 dark:text-gray-400">Calcula la capacidad de producción en 4 pasos</p>
     </div>
 
     
     <div class="mb-8">
         <div class="flex items-center justify-center">
-            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = [1 => 'Disponibilidad', 2 => 'Cálculo', 3 => 'Cierre']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $step => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = [1 => 'Disponibilidad', 2 => 'Cálculo', 3 => 'Lotes', 4 => 'Fechas']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $step => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="flex items-center">
                     <button 
                         wire:click="goToStep(<?php echo e($step); ?>)"
@@ -30,7 +30,7 @@
                         'text-gray-400' => $currentStep < $step,
                     ]); ?>"><?php echo e($label); ?></span>
                 </div>
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($step < 3): ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($step < 4): ?>
                     <div class="<?php echo \Illuminate\Support\Arr::toCssClasses([
                         'w-16 h-1 mx-4 rounded',
                         'bg-blue-600' => $currentStep > $step,
@@ -80,6 +80,8 @@
             <?php echo $__env->make('livewire.admin.capacity-wizard.step2', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         <?php elseif($currentStep === 3): ?>
             <?php echo $__env->make('livewire.admin.capacity-wizard.step3', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php elseif($currentStep === 4): ?>
+            <?php echo $__env->make('livewire.admin.capacity-wizard.step4', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 </div>
