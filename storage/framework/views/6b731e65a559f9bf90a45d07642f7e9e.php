@@ -179,69 +179,6 @@
 </div>
 
 
-<<<<<<< HEAD:storage/framework/views/6b731e65a559f9bf90a45d07642f7e9e.php
-    <?php
-        $__scriptKey = '2913236060-0';
-        ob_start();
-    ?>
-<script>
-    // Initialize Tom Select when component loads
-    $wire.on('initTomSelect', () => {
-        initPartSelect();
-    });
-
-    // Clear Tom Select when item is added successfully
-    $wire.on('partAdded', () => {
-        const selectEl = document.getElementById('part-select');
-        if (selectEl && selectEl.tomselect) {
-            selectEl.tomselect.clear();
-        }
-    });
-
-    function initPartSelect() {
-        const selectEl = document.getElementById('part-select');
-        if (!selectEl) return;
-        
-        // Destroy existing instance if any
-        if (selectEl.tomselect) {
-            selectEl.tomselect.destroy();
-        }
-
-        new TomSelect('#part-select', {
-            create: false,
-            sortField: { field: 'text', direction: 'asc' },
-            placeholder: 'Buscar número de parte...',
-            allowEmptyOption: true,
-            render: {
-                option: function(data, escape) {
-                    return '<div class="py-2 px-3">' + escape(data.text) + '</div>';
-                },
-                item: function(data, escape) {
-                    return '<div>' + escape(data.text) + '</div>';
-                },
-                no_results: function(data, escape) {
-                    return '<div class="no-results py-2 px-3 text-gray-500">No se encontraron resultados para "' + escape(data.input) + '"</div>';
-                }
-            },
-            onChange: function(value) {
-                // Sync with Livewire using $wire
-                $wire.set('currentPartId', value ? parseInt(value) : null);
-            }
-        });
-    }
-
-    // Initialize on first load
-    setTimeout(() => initPartSelect(), 100);
-</script>
-    <?php
-        $__output = ob_get_clean();
-
-        \Livewire\store($this)->push('scripts', $__output, $__scriptKey)
-    ?>
-
-
-=======
->>>>>>> 32ef772555d894e797f7fa86f579adbe80fcf5aa:storage/framework/views/f7214327277319c9a9f0e96f086528f7.php
 
 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showPOModal): ?>
 <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
