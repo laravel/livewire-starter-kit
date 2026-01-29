@@ -195,7 +195,7 @@
                                                     Completar
                                                 </button>
                                             @endif
-                                            @if($lot->canBeDeleted())
+                                            @if($lot->canBeDeleted() || $lot->status === \App\Models\Lot::STATUS_COMPLETED)
                                                 <button wire:click="confirmDeletion({{ $lot->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400">
                                                     Eliminar
                                                 </button>

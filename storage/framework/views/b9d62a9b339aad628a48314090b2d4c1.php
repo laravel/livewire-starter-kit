@@ -205,7 +205,7 @@
                                                     Completar
                                                 </button>
                                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lot->canBeDeleted()): ?>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lot->canBeDeleted() || $lot->status === \App\Models\Lot::STATUS_COMPLETED): ?>
                                                 <button wire:click="confirmDeletion(<?php echo e($lot->id); ?>)" class="text-red-600 hover:text-red-900 dark:text-red-400">
                                                     Eliminar
                                                 </button>

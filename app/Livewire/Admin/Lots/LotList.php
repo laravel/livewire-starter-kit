@@ -59,7 +59,7 @@ class LotList extends Component
     {
         if ($this->lotToDelete) {
             $lot = Lot::find($this->lotToDelete);
-            if ($lot && $lot->canBeDeleted()) {
+            if ($lot && ($lot->canBeDeleted() || $lot->status === Lot::STATUS_COMPLETED)) {
                 $lot->delete();
                 session()->flash('message', 'Lote eliminado correctamente.');
             } else {
