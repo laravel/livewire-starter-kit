@@ -106,8 +106,10 @@
                                     $allLots = $wo->lots;
                                     $completedLots = $wo->lots->where('status', \App\Models\Lot::STATUS_COMPLETED);
                                     $totalSent = $completedLots->sum('quantity');
-                                    $pending = $wo->quantity - $wo->sent_pieces;
-                                    $toSend = $completedLots->sum('quantity');
+                                    $cantWO = $wo->original_quantity; // Cantidad total del WO
+                                    $pzEnviadas = $wo->sent_pieces; // Piezas enviadas
+                                    $cantAEnviar = $cantWO - $pzEnviadas; // Cant. a Enviar = Cant. WO - Pz Enviadas
+                                    $toSend = $cantAEnviar;
                                     
                                     // Obtener estados de departamentos (simulado por ahora)
                                     $departmentStatuses = [
@@ -124,9 +126,9 @@
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300"><?php echo e($part->item_number); ?></td>
                                     <td class="px-4 py-3 text-gray-900 dark:text-white font-semibold"><?php echo e($part->number); ?></td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300 max-w-xs truncate" title="<?php echo e($part->description); ?>"><?php echo e($part->description); ?></td>
-                                    <td class="px-4 py-3 text-right text-gray-900 dark:text-white font-medium"><?php echo e(number_format($wo->quantity)); ?></td>
-                                    <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($wo->sent_pieces)); ?></td>
-                                    <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($pending)); ?></td>
+                                    <td class="px-4 py-3 text-right text-gray-900 dark:text-white font-medium"><?php echo e(number_format($cantWO)); ?></td>
+                                    <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($pzEnviadas)); ?></td>
+                                    <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($cantAEnviar)); ?></td>
                                     <td class="px-4 py-3 text-right font-semibold bg-yellow-50 dark:bg-yellow-900/20 text-yellow-900 dark:text-yellow-200"><?php echo e(number_format($toSend)); ?></td>
                                     <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->scheduled_send_date?->format('m/d/Y') ?? '-'); ?></td>
                                     <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->actual_send_date?->format('m/d/Y') ?? '-'); ?></td>
@@ -233,8 +235,10 @@
                             $part = $po->part;
                             $allLots = $wo->lots;
                             $completedLots = $wo->lots->where('status', \App\Models\Lot::STATUS_COMPLETED);
-                            $pending = $wo->quantity - $wo->sent_pieces;
-                            $toSend = $completedLots->sum('quantity');
+                            $cantWO = $wo->original_quantity; // Cantidad total del WO
+                            $pzEnviadas = $wo->sent_pieces; // Piezas enviadas
+                            $cantAEnviar = $cantWO - $pzEnviadas; // Cant. a Enviar = Cant. WO - Pz Enviadas
+                            $toSend = $cantAEnviar;
                             
                             $departmentStatuses = [
                                 'materials' => 'pending',
@@ -258,15 +262,15 @@
                             <div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200 dark:border-gray-700">
                                 <div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Cant. WO</div>
-                                    <div class="text-sm font-semibold text-gray-900 dark:text-white"><?php echo e(number_format($wo->quantity)); ?></div>
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-white"><?php echo e(number_format($cantWO)); ?></div>
                                 </div>
                                 <div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Pz Enviadas</div>
-                                    <div class="text-sm font-semibold text-gray-900 dark:text-white"><?php echo e(number_format($wo->sent_pieces)); ?></div>
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-white"><?php echo e(number_format($pzEnviadas)); ?></div>
                                 </div>
                                 <div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Cant. Pendiente</div>
-                                    <div class="text-sm font-semibold text-gray-900 dark:text-white"><?php echo e(number_format($pending)); ?></div>
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-white"><?php echo e(number_format($cantAEnviar)); ?></div>
                                 </div>
                                 <div class="bg-yellow-50 dark:bg-yellow-900/20 p-2">
                                     <div class="text-xs text-yellow-700 dark:text-yellow-300 mb-1 font-medium">Cant. a Enviar</div>
