@@ -176,7 +176,7 @@
 
     {{-- Navigation --}}
     <div class="flex justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <flux:button wire:click="nextStep" variant="primary">
+        <flux:button wire:click="nextStep" variant="primary" class="flex items-center gap-3">
             Siguiente
             <flux:icon.arrow-right class="w-4 h-4 ml-2" />
         </flux:button>

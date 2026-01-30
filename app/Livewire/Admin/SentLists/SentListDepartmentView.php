@@ -3,7 +3,10 @@
 namespace App\Livewire\Admin\SentLists;
 
 use App\Models\SentList;
+use App\Models\WorkOrder;
+use App\Models\Lot;
 use Livewire\Component;
+use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
 
 class SentListDepartmentView extends Component
@@ -18,6 +21,12 @@ class SentListDepartmentView extends Component
     public array $lotNumbers = [];
     public array $quantities = [];
     public string $generalNotes = '';
+
+    // Modal de lotes
+    public $showLotModal = false;
+    public $selectedWorkOrderId = null;
+    public $selectedWorkOrder = null;
+    public $lots = [];
 
     public function mount(SentList $sentList)
     {
@@ -183,6 +192,111 @@ class SentListDepartmentView extends Component
         $checkOrder = $order[$department] ?? 0;
 
         return $checkOrder > $currentOrder;
+    }
+
+    public function openLotModal($workOrderId)
+    {
+        $this->selectedWorkOrderId = $workOrderId;
+        $this->selectedWorkOrder = WorkOrder::with(['purchaseOrder.part', 'lots'])->find($workOrderId);
+        
+        if (!$this->selectedWorkOrder) {
+            session()->flash('error', 'Work Order no encontrada.');
+            return;
+        }
+
+        // Cargar lotes existentes
+        $this->lots = $this->selectedWorkOrder->lots->map(function ($lot) {
+            return [
+                'id' => $lot->id,
+                'number' => $lot->lot_number,
+                'quantity' => $lot->quantity,
+            ];
+        })->toArray();
+
+        $this->showLotModal = true;
+    }
+
+    public function closeLotModal()
+    {
+        $this->showLotModal = false;
+        $this->selectedWorkOrderId = null;
+        $this->selectedWorkOrder = null;
+        $this->lots = [];
+    }
+
+    public function addLot()
+    {
+        $this->lots[] = [
+            'id' => null,
+            'number' => '',
+            'quantity' => '',
+        ];
+    }
+
+    public function removeLot($index)
+    {
+        // Si el lote tiene ID, significa que existe en la BD y debe eliminarse
+        if (isset($this->lots[$index]['id']) && $this->lots[$index]['id']) {
+            $lot = Lot::find($this->lots[$index]['id']);
+            if ($lot) {
+                $lot->delete();
+                session()->flash('message', 'Lote eliminado correctamente.');
+            }
+        }
+        
+        // Remover del array
+        unset($this->lots[$index]);
+        $this->lots = array_values($this->lots);
+    }
+
+    public function saveLots()
+    {
+        // Validar
+        $this->validate([
+            'lots.*.number' => 'required|string|max:255',
+            'lots.*.quantity' => 'required|integer|min:1',
+        ], [
+            'lots.*.number.required' => 'El número de lote es requerido.',
+            'lots.*.quantity.required' => 'La cantidad es requerida.',
+            'lots.*.quantity.integer' => 'La cantidad debe ser un número.',
+            'lots.*.quantity.min' => 'La cantidad debe ser mayor a 0.',
+        ]);
+
+        if (!$this->selectedWorkOrder) {
+            session()->flash('error', 'Work Order no encontrada.');
+            return;
+        }
+
+        $po = $this->selectedWorkOrder->purchaseOrder;
+        $part = $po->part;
+
+        foreach ($this->lots as $lotData) {
+            if ($lotData['id']) {
+                // Actualizar lote existente
+                $lot = Lot::find($lotData['id']);
+                if ($lot) {
+                    $lot->update([
+                        'lot_number' => $lotData['number'],
+                        'quantity' => $lotData['quantity'],
+                    ]);
+                }
+            } else {
+                // Crear nuevo lote
+                Lot::create([
+                    'work_order_id' => $this->selectedWorkOrder->id,
+                    'lot_number' => $lotData['number'],
+                    'quantity' => $lotData['quantity'],
+                    'description' => $part->description,
+                    'status' => Lot::STATUS_PENDING,
+                ]);
+            }
+        }
+
+        session()->flash('message', 'Lotes actualizados correctamente.');
+        $this->closeLotModal();
+        
+        // Recargar la sent list
+        $this->sentList = $this->sentList->fresh();
     }
 
     public function render()

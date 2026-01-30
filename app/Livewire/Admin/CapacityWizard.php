@@ -459,6 +459,7 @@ class CapacityWizard extends Component
         if (!empty($this->poSearchTerm)) {
             $query->where(function($q) {
                 $q->where('po_number', 'like', "%{$this->poSearchTerm}%")
+                  ->orWhere('wo', 'like', "%{$this->poSearchTerm}%")
                   ->orWhereHas('part', function($partQuery) {
                       $partQuery->where('number', 'like', "%{$this->poSearchTerm}%")
                                 ->orWhere('description', 'like', "%{$this->poSearchTerm}%");

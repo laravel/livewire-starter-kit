@@ -68,6 +68,19 @@
                 </div>
                 @endif
 
+                <!-- Lot Number -->
+                <div>
+                    <label for="lot_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Número de Lote/Viajero <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" wire:model="lot_number" id="lot_number"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="Ej: 001, LOT-2024-001">
+                    @error('lot_number')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Quantity -->
                 <div>
                     <label for="quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -85,48 +98,6 @@
                             Máximo disponible: {{ number_format($selectedWorkOrder->pending_quantity) }} piezas
                         </p>
                     @endif
-                </div>
-
-                <!-- Description -->
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Descripción
-                    </label>
-                    <textarea wire:model="description" id="description" rows="2"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                        placeholder="Descripción del lote (opcional)"></textarea>
-                    @error('description')
-                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Comments -->
-                <div>
-                    <label for="comments" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Comentarios
-                    </label>
-                    <textarea wire:model="comments" id="comments" rows="3"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                        placeholder="Comentarios adicionales (opcional)"></textarea>
-                    @error('comments')
-                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Info Box -->
-                <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-blue-700 dark:text-blue-300">
-                                El número de lote se generará automáticamente de forma secuencial (001, 002, 003...) basado en la Work Order seleccionada.
-                            </p>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Submit Button -->

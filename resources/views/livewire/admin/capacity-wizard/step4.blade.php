@@ -60,7 +60,7 @@
                 <input 
                     type="date" 
                     wire:model="scheduledShipDate"
-                    class="w-full max-w-md rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    class="w-full max-w-md rounded-md p-3 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
                     min="{{ now()->format('Y-m-d') }}"
                 />
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -80,8 +80,8 @@
                         <thead class="bg-gray-50 dark:bg-gray-900">
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">#</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">PO Number</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">WO</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">PO Number</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Número de Parte</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cantidad</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Horas Req.</th>
@@ -92,11 +92,11 @@
                             @foreach($workOrderItems as $index => $item)
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">
-                                        {{ $item['po_number'] ?? '-' }}
-                                    </td>
                                     <td class="px-4 py-3 font-medium text-indigo-600 dark:text-indigo-400">
                                         {{ $item['wo'] ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">
+                                        {{ $item['po_number'] ?? '-' }}
                                     </td>
                                     <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
                                         {{ $item['part_number'] }}
@@ -182,7 +182,7 @@
                     <flux:icon.arrow-path class="w-4 h-4 mr-2" />
                     Nueva Calculación
                 </flux:button>
-                <flux:button wire:click="generateSentList" variant="primary">
+                <flux:button wire:click="generateSentList" variant="primary" class="flex items-center gap-3">
                     <flux:icon.paper-airplane class="w-4 h-4 mr-2" />
                     Generar Lista Preliminar y Enviar a Materiales
                 </flux:button>
