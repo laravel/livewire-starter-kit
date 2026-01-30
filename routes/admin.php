@@ -155,6 +155,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/lots', \App\Livewire\Admin\Lots\LotList::class)->name('lots.index');
     Route::get('/lots/create', \App\Livewire\Admin\Lots\LotCreate::class)->name('lots.create');
     Route::get('/lots/{lot}', \App\Livewire\Admin\Lots\LotShow::class)->name('lots.show');
+    Route::get('/lots/{lot}/edit', \App\Livewire\Admin\Lots\LotEdit::class)->name('lots.edit');
 
     // Gestión de Empleados
     Route::get('/employees', \App\Livewire\Admin\Employees\EmployeeList::class)->name('employees.index');

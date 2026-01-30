@@ -185,8 +185,11 @@
                                             <a href="{{ route('admin.lots.show', $lot) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400">
                                                 Ver
                                             </a>
+                                            <a href="{{ route('admin.lots.edit', $lot) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400">
+                                                Editar
+                                            </a>
                                             @if($lot->canBeStarted())
-                                                <button wire:click="startLot({{ $lot->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400">
+                                                <button wire:click="startLot({{ $lot->id }})" class="text-green-600 hover:text-green-900 dark:text-green-400">
                                                     Iniciar
                                                 </button>
                                             @endif

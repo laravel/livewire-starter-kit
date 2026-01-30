@@ -1,7 +1,7 @@
-<?php if (isset($component)) { $__componentOriginald275691d15a0a68ca98ac956f9920812 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginald275691d15a0a68ca98ac956f9920812 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layouts.app.sidebar','data' => ['title' => $title ?? null]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('layouts.app.sidebar'); ?>
+<?php if (isset($component)) { $__componentOriginal724bf9534209888ea7ef6376c95c6c32 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal724bf9534209888ea7ef6376c95c6c32 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layouts.admin.sidebar','data' => ['title' => $title ?? null]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('layouts.admin.sidebar'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
@@ -57,12 +57,12 @@
 <?php endif; ?>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginald275691d15a0a68ca98ac956f9920812)): ?>
-<?php $attributes = $__attributesOriginald275691d15a0a68ca98ac956f9920812; ?>
-<?php unset($__attributesOriginald275691d15a0a68ca98ac956f9920812); ?>
+<?php if (isset($__attributesOriginal724bf9534209888ea7ef6376c95c6c32)): ?>
+<?php $attributes = $__attributesOriginal724bf9534209888ea7ef6376c95c6c32; ?>
+<?php unset($__attributesOriginal724bf9534209888ea7ef6376c95c6c32); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginald275691d15a0a68ca98ac956f9920812)): ?>
-<?php $component = $__componentOriginald275691d15a0a68ca98ac956f9920812; ?>
-<?php unset($__componentOriginald275691d15a0a68ca98ac956f9920812); ?>
+<?php if (isset($__componentOriginal724bf9534209888ea7ef6376c95c6c32)): ?>
+<?php $component = $__componentOriginal724bf9534209888ea7ef6376c95c6c32; ?>
+<?php unset($__componentOriginal724bf9534209888ea7ef6376c95c6c32); ?>
 <?php endif; ?>
-<?php /**PATH C:\xampp\htdocs\flexcon-tracker\resources\views/components/layouts/app.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\xampp\htdocs\Laravel\Flexcon-tracker\resources\views/components/layouts/admin.blade.php ENDPATH**/ ?>
