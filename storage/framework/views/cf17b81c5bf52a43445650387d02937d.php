@@ -84,6 +84,9 @@
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Item #</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider"># Parte</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Descripción</th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Mat.</th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Cal.</th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Prod.</th>
                                 <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Cant. WO</th>
                                 <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Pz Enviadas</th>
                                 <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Cant. Pendiente</th>
@@ -91,11 +94,7 @@
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Fecha Prog. A</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Fecha de Envío</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Fecha de Apertura</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Materiales</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Calidad</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Producción</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">EG</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">PR</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -126,13 +125,7 @@
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300"><?php echo e($part->item_number); ?></td>
                                     <td class="px-4 py-3 text-gray-900 dark:text-white font-semibold"><?php echo e($part->number); ?></td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300 max-w-xs truncate" title="<?php echo e($part->description); ?>"><?php echo e($part->description); ?></td>
-                                    <td class="px-4 py-3 text-right text-gray-900 dark:text-white font-medium"><?php echo e(number_format($cantWO)); ?></td>
-                                    <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($pzEnviadas)); ?></td>
-                                    <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($cantAEnviar)); ?></td>
-                                    <td class="px-4 py-3 text-right font-semibold bg-yellow-50 dark:bg-yellow-900/20 text-yellow-900 dark:text-yellow-200"><?php echo e(number_format($toSend)); ?></td>
-                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->scheduled_send_date?->format('m/d/Y') ?? '-'); ?></td>
-                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->actual_send_date?->format('m/d/Y') ?? '-'); ?></td>
-                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->created_at->format('m/d/Y')); ?></td>
+                                    
                                     <td class="px-4 py-3 text-center">
                                         <?php
                                             $materialsColor = match($departmentStatuses['materials']) {
@@ -169,12 +162,28 @@
                                         ?>
                                         <button wire:click="openDepartmentStatusModal(<?php echo e($wo->id); ?>, 'production')" class="w-6 h-6 rounded <?php echo e($productionColor); ?> hover:opacity-80 transition-opacity" title="Producción"></button>
                                     </td>
+                                    
+                                    <td class="px-4 py-3 text-right text-gray-900 dark:text-white font-medium"><?php echo e(number_format($cantWO)); ?></td>
+                                    <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($pzEnviadas)); ?></td>
+                                    <td class="px-4 py-3 text-right text-gray-700 dark:text-gray-300"><?php echo e(number_format($cantAEnviar)); ?></td>
+                                    <td class="px-4 py-3 text-right font-semibold bg-yellow-50 dark:bg-yellow-900/20 text-yellow-900 dark:text-yellow-200"><?php echo e(number_format($toSend)); ?></td>
+                                    
+                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->scheduled_send_date?->format('m/d/Y') ?? '-'); ?></td>
+                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->actual_send_date?->format('m/d/Y') ?? '-'); ?></td>
+                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->created_at->format('m/d/Y')); ?></td>
                                     <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->sentList?->id ?? '-'); ?></td>
-                                    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300"><?php echo e($wo->priority ?? '-'); ?></td>
                                 </tr>
 
                                 
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $allLots; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lot): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
+                                        $lotStatusInfo = match($lot->status) {
+                                            \App\Models\Lot::STATUS_PENDING => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'label' => 'Pendiente'],
+                                            \App\Models\Lot::STATUS_IN_PROGRESS => ['bg' => 'bg-blue-50 dark:bg-blue-900/30', 'text' => 'text-blue-700 dark:text-blue-300', 'label' => 'En Proceso'],
+                                            \App\Models\Lot::STATUS_COMPLETED => ['bg' => 'bg-green-50 dark:bg-green-900/30', 'text' => 'text-green-700 dark:text-green-300', 'label' => 'Completado'],
+                                            default => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'label' => $lot->status],
+                                        };
+                                    ?>
                                     <tr class="bg-gray-50 dark:bg-gray-700/20">
                                         <td class="px-4 py-2 pl-8 text-xs text-gray-600 dark:text-gray-400">Lote</td>
                                         <td class="px-4 py-2 text-xs">
@@ -186,40 +195,32 @@
                                         <td class="px-4 py-2 text-xs text-gray-700 dark:text-gray-300"><?php echo e($part->item_number); ?></td>
                                         <td class="px-4 py-2 text-xs text-gray-700 dark:text-gray-300 font-medium"><?php echo e($part->number); ?></td>
                                         <td class="px-4 py-2 text-xs text-gray-700 dark:text-gray-300 max-w-xs truncate" title="<?php echo e($lot->description ?? $part->description); ?>"><?php echo e($lot->description ?? $part->description); ?></td>
+                                        
+                                        <td colspan="3" class="px-4 py-2 text-center">
+                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded <?php echo e($lotStatusInfo['bg']); ?> <?php echo e($lotStatusInfo['text']); ?>">
+                                                <?php echo e($lotStatusInfo['label']); ?>
+
+                                            </span>
+                                        </td>
+                                        
                                         <td class="px-4 py-2 text-right text-xs"></td>
                                         <td class="px-4 py-2 text-right text-xs"></td>
                                         <td class="px-4 py-2 text-right text-xs"></td>
                                         <td class="px-4 py-2 text-right text-xs font-medium text-gray-900 dark:text-white"><?php echo e(number_format($lot->quantity)); ?></td>
+                                        
                                         <td class="px-4 py-2 text-center text-xs text-gray-600 dark:text-gray-400"><?php echo e($wo->scheduled_send_date?->format('m/d/Y') ?? '-'); ?></td>
                                         <td class="px-4 py-2 text-center text-xs text-gray-600 dark:text-gray-400"><?php echo e($wo->actual_send_date?->format('m/d/Y') ?? '-'); ?></td>
                                         <td class="px-4 py-2 text-center text-xs text-gray-600 dark:text-gray-400"><?php echo e($wo->created_at->format('m/d/Y')); ?></td>
-                                        <td class="px-4 py-2 text-center text-xs"></td>
-                                        <td class="px-4 py-2 text-center text-xs"></td>
-                                        <td class="px-4 py-2 text-center text-xs"></td>
-                                        <td class="px-4 py-2 text-center text-xs text-gray-600 dark:text-gray-400"><?php echo e($wo->sentList?->id ?? '-'); ?></td>
-                                        <td class="px-4 py-2 text-center text-xs">
-                                            <?php
-                                                $statusInfo = match($lot->status) {
-                                                    \App\Models\Lot::STATUS_PENDING => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'label' => 'Pendiente'],
-                                                    \App\Models\Lot::STATUS_IN_PROGRESS => ['bg' => 'bg-blue-50 dark:bg-blue-900/30', 'text' => 'text-blue-700 dark:text-blue-300', 'label' => 'En Proceso'],
-                                                    \App\Models\Lot::STATUS_COMPLETED => ['bg' => 'bg-green-50 dark:bg-green-900/30', 'text' => 'text-green-700 dark:text-green-300', 'label' => 'Completado'],
-                                                    default => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'label' => $lot->status],
-                                                };
-                                            ?>
-                                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded <?php echo e($statusInfo['bg']); ?> <?php echo e($statusInfo['text']); ?>">
-                                                <?php echo e($statusInfo['label']); ?>
-
-                                            </span>
-                                        </td>
+                                        <td class="px-4 py-2 text-center text-xs text-gray-600 dark:text-gray-400">-</td>
                                     </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                                 
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($allLots->count() > 1): ?>
                                     <tr class="bg-gray-100 dark:bg-gray-700/40 font-semibold">
-                                        <td colspan="8" class="px-4 py-2 text-right text-gray-900 dark:text-white">Total:</td>
+                                        <td colspan="11" class="px-4 py-2 text-right text-gray-900 dark:text-white">Total:</td>
                                         <td class="px-4 py-2 text-right text-gray-900 dark:text-white"><?php echo e(number_format($allLots->sum('quantity'))); ?></td>
-                                        <td colspan="8"></td>
+                                        <td colspan="4"></td>
                                     </tr>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
