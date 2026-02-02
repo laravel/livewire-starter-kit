@@ -33,6 +33,15 @@ class MaterialsRoleSeeder extends Seeder
 
         $this->command->info('Materials role and permissions created successfully.');
 
+        // Assign materials permissions to Admin role
+        $adminRole = Role::where('name', 'Admin')->first();
+        if ($adminRole) {
+            $adminRole->givePermissionTo($permissions);
+            $this->command->info('Materials permissions assigned to Admin role.');
+        } else {
+            $this->command->warn('Admin role not found. Materials permissions not assigned to Admin.');
+        }
+
         // Create Quality role permissions if they don't exist
         $qualityPermissions = [
             'view_quality_area',
