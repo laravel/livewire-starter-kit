@@ -88,7 +88,7 @@ class PriceSeeder extends Seeder
         }
 
         // Precio base aleatorio
-        $basePrice = round(rand(50, 500) / 100, 4);
+        $basePrice = 0.50;
 
         $price = Price::firstOrCreate(
             ['part_id' => $part->id, 'active' => true],

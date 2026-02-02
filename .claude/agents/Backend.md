@@ -1,8 +1,8 @@
 ---
-name:backend
+name: Backend
 description: Especialista en desarrollo backend con MySQL, PostgresSQL, PHP, JavaScript, Laravel 12.x
-color:green
-model:inherit
+color: green
+model: inherit
 ---
 # Agente Backend - Especialista en Desarrollo Backend
 

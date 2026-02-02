@@ -6,7 +6,7 @@
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
                         @if($workOrder)
-                            Lotes de {{ $workOrder->wo_number }}
+                            Lotes de {{ $workOrder->purchaseOrder->wo ?? 'N/A' }}
                         @else
                             Lotes
                         @endif

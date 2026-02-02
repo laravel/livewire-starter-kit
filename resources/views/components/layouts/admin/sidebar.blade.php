@@ -9,65 +9,112 @@
     <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-        <a href="{{ route('admin.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+        <a href="{{ route('admin.dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse"
+            wire:navigate>
             <x-app-logo />
         </a>
 
         <flux:navlist variant="outline">
             <flux:navlist.group :heading="__('Dashboard')" class="grid">
-                <flux:navlist.item icon="home" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')"
-                    wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
-                <flux:navlist.item icon="users" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.*')"
-                    wire:navigate>{{ __('Usuarios') }}</flux:navlist.item>
+                <flux:navlist.item icon="home" :href="route('admin.dashboard')"
+                    :current="request()->routeIs('admin.dashboard')" wire:navigate>{{ __('Dashboard') }}
+                </flux:navlist.item>
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Órdenes')" class="grid">
                 <flux:navlist.item icon="document-text" :href="route('admin.purchase-orders.index')"
-                    :current="request()->routeIs('admin.purchase-orders.*')" wire:navigate>{{ __('Purchase Orders') }}</flux:navlist.item>
-                <flux:navlist.item icon="clipboard-document-list" :href="route('admin.work-orders.index')"
-                    :current="request()->routeIs('admin.work-orders.*')" wire:navigate>{{ __('Work Orders') }}</flux:navlist.item>
-                <flux:navlist.item icon="cube" :href="route('admin.parts.index')"
-                    :current="request()->routeIs('admin.parts.*')" wire:navigate>{{ __('Partes') }}</flux:navlist.item>
-                <flux:navlist.item icon="chart-bar" :href="route('admin.standards.index')"
-                    :current="request()->routeIs('admin.standards.*')" wire:navigate>{{ __('Estándares') }}</flux:navlist.item>
+                    :current="request()->routeIs('admin.purchase-orders.*')" wire:navigate>{{ __('Purchase Orders') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="clipboard-document-check" :href="route('admin.work-orders.index')"
+                    :current="request()->routeIs('admin.work-orders.*')" wire:navigate>{{ __('Manage PO') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="clipboard-document-list" :href="route('admin.statuses-wo.index')"
+                    :current="request()->routeIs('admin.statuses-wo.*')" wire:navigate>{{ __('Estados') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="calculator" :href="route('admin.capacity.wizard')"
+                    :current="request()->routeIs('admin.capacity.*', 'admin.sent-lists.*')" wire:navigate>{{ __('Capacidad') }}
+                </flux:navlist.item>
             </flux:navlist.group>
 
-            <flux:navlist.group :heading="__('Production')" class="grid">
+            <flux:navlist.group :heading="__('Catálogos')" class="grid">
+                <flux:navlist.item icon="cube" :href="route('admin.parts.index')"
+                    :current="request()->routeIs('admin.parts.*')" wire:navigate>{{ __('Partes') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="currency-dollar" :href="route('admin.prices.index')"
+                    :current="request()->routeIs('admin.prices.*')" wire:navigate>{{ __('Precios') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="chart-bar" :href="route('admin.standards.index')"
+                    :current="request()->routeIs('admin.standards.*')" wire:navigate>{{ __('Estándares') }}
+                </flux:navlist.item>
+            </flux:navlist.group>
+
+            <flux:navlist.group :heading="__('Producción')" class="grid">
                 <flux:navlist.item icon="calendar-days" :href="route('admin.holidays.index')"
-                    :current="request()->routeIs('admin.holidays.*')" wire:navigate>{{ __('Holidays') }}</flux:navlist.item>
+                    :current="request()->routeIs('admin.holidays.*')" wire:navigate>{{ __('Días Festivos') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="clock" :href="route('admin.shifts.index')"
-                    :current="request()->routeIs('admin.shifts.*')" wire:navigate>{{ __('Turnos') }}</flux:navlist.item>
+                    :current="request()->routeIs('admin.shifts.*')" wire:navigate>{{ __('Turnos') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="pause-circle" :href="route('admin.break-times.index')"
-                    :current="request()->routeIs('admin.break-times.*')" wire:navigate>{{ __('Descansos') }}</flux:navlist.item>
-                <flux:navlist.item icon="signal" :href="route('admin.production-statuses.index')"
-                    :current="request()->routeIs('admin.production-statuses.*')" wire:navigate>{{ __('Estados de Producción') }}</flux:navlist.item>
-                <flux:navlist.item icon="calculator" :href="route('admin.capacity.calculator')"
-                    :current="request()->routeIs('admin.capacity.*')" wire:navigate>{{ __('Capacidad') }}</flux:navlist.item>
-                <flux:navlist.item icon="cube-transparent" :href="route('admin.kits.index')"
-                    :current="request()->routeIs('admin.kits.*')" wire:navigate>{{ __('Kits') }}</flux:navlist.item>
+                    :current="request()->routeIs('admin.break-times.*')" wire:navigate>{{ __('Descansos') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="bolt" :href="route('admin.over-times.index')"
+                    :current="request()->routeIs('admin.over-times.*')" wire:navigate>{{ __('Tiempo Extra') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="cube" :href="route('admin.kits.index')"
+                    :current="request()->routeIs('admin.kits.*')" wire:navigate>{{ __('Kits') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="queue-list" :href="route('admin.lots.index')"
-                    :current="request()->routeIs('admin.lots.*')" wire:navigate>{{ __('Lotes') }}</flux:navlist.item>
+                    :current="request()->routeIs('admin.lots.*')" wire:navigate>{{ __('Lotes') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="truck" :href="route('admin.sent-lists.display')"
-                    :current="request()->routeIs('admin.sent-lists.display')" wire:navigate>{{ __('Lista de Envío') }}</flux:navlist.item>
+                    :current="request()->routeIs('admin.sent-lists.display')" wire:navigate>{{ __('Lista de Envío') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="list-bullet" :href="route('admin.sent-lists.index')"
-                    :current="request()->routeIs('admin.sent-lists.index') || request()->routeIs('admin.sent-lists.show')" wire:navigate>{{ __('Listas Preliminares') }}</flux:navlist.item>
+                    :current="request()->routeIs('admin.sent-lists.index') || request()->routeIs('admin.sent-lists.show')" wire:navigate>{{ __('Listas Preliminares') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="signal" :href="route('admin.production-statuses.index')"
+                    :current="request()->routeIs('admin.production-statuses.*')" wire:navigate>{{ __('Estados de Producción') }}
+                </flux:navlist.item>
+                
+                @can('view_materials_area')
+                <flux:navlist.item icon="archive-box" :href="route('admin.materials.dashboard')"
+                    :current="request()->routeIs('admin.materials.*')" wire:navigate>{{ __('Materiales') }}
+                </flux:navlist.item>
+                @endcan
+                
+                @can('view_quality_area')
+                <flux:navlist.item icon="check-badge" :href="route('admin.quality.dashboard')"
+                    :current="request()->routeIs('admin.quality.*')" wire:navigate>{{ __('Calidad') }}
+                </flux:navlist.item>
+                @endcan
             </flux:navlist.group>
-            <flux:navlist.group :heading="__('Estaciones de Trabajo')" class="grid">
-                <flux:navlist.item icon="table-cells" :href="route('admin.tables.index')"
-                    :current="request()->routeIs('admin.tables.*')" wire:navigate>{{ __('Mesas') }}</flux:navlist.item>
-                <flux:navlist.item icon="bolt" :href="route('admin.semi-automatics.index')"
-                    :current="request()->routeIs('admin.semi-automatics.*')" wire:navigate>{{ __('Semi-Automáticos') }}</flux:navlist.item>
-                <flux:navlist.item icon="cog-6-tooth" :href="route('admin.machines.index')"
-                    :current="request()->routeIs('admin.machines.*')" wire:navigate>{{ __('Máquinas') }}</flux:navlist.item>
-            </flux:navlist.group>
+
             <flux:navlist.group :heading="__('Administración')" class="grid">
+                <flux:navlist.item icon="users" :href="route('admin.users.index')"
+                    :current="request()->routeIs('admin.users.*')" wire:navigate>{{ __('Usuarios') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="user-group" :href="route('admin.employees.index')"
+                    :current="request()->routeIs('admin.employees.*')" wire:navigate>{{ __('Empleados') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="rectangle-group" :href="route('admin.departments.index')"
                     :current="request()->routeIs('admin.departments.*')" wire:navigate>{{ __('Departamentos') }}
                 </flux:navlist.item>
-                <flux:navlist.item icon="shield-check" :href="route('admin.areas.index')"
-                    :current="request()->routeIs('admin.areas.*')" wire:navigate>{{ __('Areas') }}</flux:navlist.item>
+                <flux:navlist.item icon="map-pin" :href="route('admin.areas.index')"
+                    :current="request()->routeIs('admin.areas.*')" wire:navigate>{{ __('Áreas') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="table-cells" :href="route('admin.tables.index')"
+                    :current="request()->routeIs('admin.tables.*')" wire:navigate>{{ __('Mesas') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="wrench-screwdriver" :href="route('admin.semi-automatics.index')"
+                    :current="request()->routeIs('admin.semi-automatics.*')" wire:navigate>{{ __('Semi-Automáticos') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="cog-6-tooth" :href="route('admin.machines.index')"
+                    :current="request()->routeIs('admin.machines.*')" wire:navigate>{{ __('Máquinas') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="shield-check" :href="route('admin.roles.index')"
-                    :current="request()->routeIs('admin.roles.*')" wire:navigate>{{ __('Roles') }}</flux:navlist.item>
+                    :current="request()->routeIs('admin.roles.*')" wire:navigate>{{ __('Roles') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="key" :href="route('admin.permissions.index')"
                     :current="request()->routeIs('admin.permissions.*')" wire:navigate>{{ __('Permisos') }}
                 </flux:navlist.item>
@@ -168,7 +215,7 @@
 
     {{ $slot }}
 
-    {{-- @livewire('components.toast-notification') --}}
+    {{-- @livewire('admin.components.toast-notification') --}}
 
     @fluxScripts
 </body>

@@ -20,10 +20,18 @@ class Lot extends Model
         'quantity',
         'status',
         'comments',
+        'raw_material_batch_numbers',
+        'supplier_id',
+        'supplier_name',
+        'receipt_date',
+        'expiration_date',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
+        'raw_material_batch_numbers' => 'array',
+        'receipt_date' => 'date',
+        'expiration_date' => 'date',
     ];
 
     /**
@@ -83,6 +91,22 @@ class Lot extends Model
     public function workOrder(): BelongsTo
     {
         return $this->belongsTo(WorkOrder::class);
+    }
+
+    /**
+     * Get the kits that were created from this lot.
+     */
+    public function kits(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Kit::class, 'kit_lot')->withTimestamps();
+    }
+
+    /**
+     * Get the audit trail for this lot.
+     */
+    public function auditTrail(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(AuditTrail::class, 'auditable');
     }
 
     /**
@@ -220,7 +244,46 @@ class Lot extends Model
      */
     public function canBeDeleted(): bool
     {
-        // NOTE: Inspection model not implemented yet
+        // Cannot delete if lot has associated kits
+        if ($this->kits()->exists()) {
+            return false;
+        }
+        
         return $this->status === self::STATUS_PENDING;
+    }
+
+    /**
+     * Get complete traceability data for this lot.
+     */
+    public function getTraceabilityData(): array
+    {
+        return [
+            'lot_number' => $this->lot_number,
+            'work_order' => $this->workOrder->wo_number ?? null,
+            'raw_material_batch_numbers' => $this->raw_material_batch_numbers ?? [],
+            'supplier_id' => $this->supplier_id,
+            'supplier_name' => $this->supplier_name,
+            'receipt_date' => $this->receipt_date?->format('Y-m-d'),
+            'expiration_date' => $this->expiration_date?->format('Y-m-d'),
+            'quantity' => $this->quantity,
+            'status' => $this->status,
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'kits' => $this->kits->map(fn($kit) => [
+                'kit_number' => $kit->kit_number,
+                'status' => $kit->status,
+            ])->toArray(),
+        ];
+    }
+
+    /**
+     * Check if the lot has expired.
+     */
+    public function isExpired(): bool
+    {
+        if (!$this->expiration_date) {
+            return false;
+        }
+
+        return $this->expiration_date->isPast();
     }
 }
