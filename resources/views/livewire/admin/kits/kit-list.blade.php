@@ -131,7 +131,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <a href="{{ route('admin.work-orders.show', $kit->workOrder) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400">
-                                            {{ $kit->workOrder->wo_number }}
+                                            {{ $kit->workOrder->purchaseOrder->wo ?? 'N/A' }}
                                         </a>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">

@@ -20,10 +20,17 @@ class Kit extends Model
         'validation_notes',
         'prepared_by',
         'released_by',
+        'submitted_to_quality_at',
+        'approved_at',
+        'approved_by',
+        'current_approval_cycle',
     ];
 
     protected $casts = [
         'validated' => 'boolean',
+        'submitted_to_quality_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'current_approval_cycle' => 'integer',
     ];
 
     /**
@@ -33,6 +40,7 @@ class Kit extends Model
     public const STATUS_READY = 'ready';
     public const STATUS_RELEASED = 'released';
     public const STATUS_IN_ASSEMBLY = 'in_assembly';
+    public const STATUS_REJECTED = 'rejected';
 
     /**
      * Get the work order that owns the kit.
@@ -56,6 +64,38 @@ class Kit extends Model
     public function releasedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'released_by');
+    }
+
+    /**
+     * Get the user who approved the kit.
+     */
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Get the lots that were used to create this kit.
+     */
+    public function lots(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Lot::class, 'kit_lot')->withPivot('created_at');
+    }
+
+    /**
+     * Get the approval cycles for this kit.
+     */
+    public function approvalCycles(): HasMany
+    {
+        return $this->hasMany(KitApprovalCycle::class);
+    }
+
+    /**
+     * Get the audit trail for this kit.
+     */
+    public function auditTrail(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(AuditTrail::class, 'auditable');
     }
 
     /**
@@ -141,6 +181,7 @@ class Kit extends Model
             self::STATUS_READY => 'Listo',
             self::STATUS_RELEASED => 'Liberado',
             self::STATUS_IN_ASSEMBLY => 'En Ensamble',
+            self::STATUS_REJECTED => 'Rechazado',
         ];
     }
 
@@ -162,6 +203,7 @@ class Kit extends Model
             self::STATUS_READY => 'blue',
             self::STATUS_RELEASED => 'green',
             self::STATUS_IN_ASSEMBLY => 'purple',
+            self::STATUS_REJECTED => 'red',
             default => 'gray',
         };
     }
@@ -195,10 +237,11 @@ class Kit extends Model
      */
     public static function generateKitNumber(int $workOrderId): string
     {
-        $workOrder = WorkOrder::find($workOrderId);
+        $workOrder = WorkOrder::with('purchaseOrder')->find($workOrderId);
+        $wo = $workOrder->purchaseOrder->wo ?? $workOrder->wo_number;
         $count = self::where('work_order_id', $workOrderId)->count() + 1;
         
-        return sprintf('KIT-%s-%03d', $workOrder->wo_number, $count);
+        return sprintf('KIT-%s-%03d', $wo, $count);
     }
 
     /**
@@ -207,5 +250,135 @@ class Kit extends Model
     public function hasUnresolvedIncidents(): bool
     {
         return $this->incidents()->where('resolved', false)->exists();
+    }
+
+    /**
+     * Check if the kit can be edited.
+     */
+    public function canBeEdited(): bool
+    {
+        return in_array($this->status, [self::STATUS_PREPARING, self::STATUS_REJECTED]);
+    }
+
+    /**
+     * Check if the kit can be deleted.
+     */
+    public function canBeDeleted(): bool
+    {
+        return $this->status === self::STATUS_PREPARING && !$this->submitted_to_quality_at;
+    }
+
+    /**
+     * Submit the kit to Quality for approval.
+     */
+    public function submitToQuality(User $user): void
+    {
+        $this->update([
+            'status' => self::STATUS_READY,
+            'submitted_to_quality_at' => now(),
+        ]);
+
+        // Create approval cycle
+        $this->approvalCycles()->create([
+            'cycle_number' => $this->current_approval_cycle,
+            'submitted_by' => $user->id,
+            'submitted_at' => now(),
+            'status' => KitApprovalCycle::STATUS_PENDING,
+        ]);
+    }
+
+    /**
+     * Approve the kit.
+     */
+    public function approve(User $user, ?string $comments = null): void
+    {
+        $this->update([
+            'status' => self::STATUS_RELEASED,
+            'approved_at' => now(),
+            'approved_by' => $user->id,
+            'validated' => true,
+        ]);
+
+        // Update current approval cycle
+        $cycle = $this->getCurrentApprovalCycle();
+        if ($cycle) {
+            $cycle->update([
+                'status' => KitApprovalCycle::STATUS_APPROVED,
+                'reviewed_by' => $user->id,
+                'reviewed_at' => now(),
+                'comments' => $comments,
+            ]);
+        }
+    }
+
+    /**
+     * Reject the kit.
+     */
+    public function reject(User $user, string $reason, ?string $comments = null): void
+    {
+        $this->update([
+            'status' => self::STATUS_REJECTED,
+        ]);
+
+        // Update current approval cycle
+        $cycle = $this->getCurrentApprovalCycle();
+        if ($cycle) {
+            $cycle->update([
+                'status' => KitApprovalCycle::STATUS_REJECTED,
+                'reviewed_by' => $user->id,
+                'reviewed_at' => now(),
+                'rejection_reason' => $reason,
+                'comments' => $comments,
+            ]);
+        }
+    }
+
+    /**
+     * Get the full traceability chain from raw materials to kit.
+     */
+    public function getTraceabilityChain(): array
+    {
+        $lots = $this->lots()->with('workOrder')->get();
+
+        return [
+            'kit_number' => $this->kit_number,
+            'status' => $this->status,
+            'work_order' => $this->workOrder->wo_number ?? null,
+            'prepared_by' => $this->preparedBy->name ?? null,
+            'approved_by' => $this->approver->name ?? null,
+            'approved_at' => $this->approved_at?->format('Y-m-d H:i:s'),
+            'lots' => $lots->map(function ($lot) {
+                return [
+                    'lot_number' => $lot->lot_number,
+                    'raw_material_batch_numbers' => $lot->raw_material_batch_numbers ?? [],
+                    'supplier_name' => $lot->supplier_name,
+                    'receipt_date' => $lot->receipt_date?->format('Y-m-d'),
+                    'expiration_date' => $lot->expiration_date?->format('Y-m-d'),
+                    'quantity' => $lot->quantity,
+                ];
+            })->toArray(),
+            'approval_cycles' => $this->approvalCycles()->with(['submitter', 'reviewer'])->get()->map(function ($cycle) {
+                return [
+                    'cycle_number' => $cycle->cycle_number,
+                    'status' => $cycle->status,
+                    'submitted_by' => $cycle->submitter->name ?? null,
+                    'submitted_at' => $cycle->submitted_at?->format('Y-m-d H:i:s'),
+                    'reviewed_by' => $cycle->reviewer->name ?? null,
+                    'reviewed_at' => $cycle->reviewed_at?->format('Y-m-d H:i:s'),
+                    'rejection_reason' => $cycle->rejection_reason,
+                    'comments' => $cycle->comments,
+                ];
+            })->toArray(),
+        ];
+    }
+
+    /**
+     * Get the current (active) approval cycle.
+     */
+    public function getCurrentApprovalCycle(): ?KitApprovalCycle
+    {
+        return $this->approvalCycles()
+            ->where('cycle_number', $this->current_approval_cycle)
+            ->first();
     }
 }

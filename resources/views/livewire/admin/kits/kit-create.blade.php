@@ -34,7 +34,7 @@
                         <option value="">Seleccionar Work Order</option>
                         @foreach($workOrders as $wo)
                             <option value="{{ $wo->id }}">
-                                {{ $wo->wo_number }} - {{ $wo->purchaseOrder->part->number }} ({{ $wo->purchaseOrder->part->description }})
+                                {{ $wo->purchaseOrder->wo ?? 'N/A' }} - {{ $wo->purchaseOrder->part->number }} ({{ $wo->purchaseOrder->part->description }})
                             </option>
                         @endforeach
                     </select>
