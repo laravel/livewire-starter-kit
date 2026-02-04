@@ -32,7 +32,8 @@
                     :current="request()->routeIs('admin.statuses-wo.*')" wire:navigate>{{ __('Estados') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="calculator" :href="route('admin.capacity.wizard')"
-                    :current="request()->routeIs('admin.capacity.*', 'admin.sent-lists.*')" wire:navigate>{{ __('Capacidad') }}
+                    :current="request()->routeIs('admin.capacity.*', 'admin.sent-lists.*')" wire:navigate>
+                    {{ __('Capacidad') }}
                 </flux:navlist.item>
             </flux:navlist.group>
 
@@ -71,23 +72,23 @@
                     :current="request()->routeIs('admin.sent-lists.display')" wire:navigate>{{ __('Lista de Envío') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="list-bullet" :href="route('admin.sent-lists.index')"
-                    :current="request()->routeIs('admin.sent-lists.index') || request()->routeIs('admin.sent-lists.show')" wire:navigate>{{ __('Listas Preliminares') }}
+                    :current="request()->routeIs('admin.sent-lists.index') || request()->routeIs('admin.sent-lists.show')"
+                    wire:navigate>{{ __('Listas Preliminares') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="signal" :href="route('admin.production-statuses.index')"
-                    :current="request()->routeIs('admin.production-statuses.*')" wire:navigate>{{ __('Estados de Producción') }}
+                    :current="request()->routeIs('admin.production-statuses.*')" wire:navigate>
+                    {{ __('Estados de Producción') }}
                 </flux:navlist.item>
-                
+
                 @can('view_materials_area')
-                <flux:navlist.item icon="archive-box" :href="route('admin.materials.dashboard')"
-                    :current="request()->routeIs('admin.materials.*')" wire:navigate>{{ __('Materiales') }}
-                </flux:navlist.item>
+                    <flux:navlist.item icon="archive-box" :href="route('admin.materials.dashboard')"
+                        :current="request()->routeIs('admin.materials.*')" wire:navigate>{{ __('Materiales') }}
+                    </flux:navlist.item>
                 @endcan
-                
-                @can('view_quality_area')
-                <flux:navlist.item icon="check-badge" :href="route('admin.quality.dashboard')"
+
+                <flux:navlist.item icon="check-badge" :href="route('admin.quality.index')"
                     :current="request()->routeIs('admin.quality.*')" wire:navigate>{{ __('Calidad') }}
                 </flux:navlist.item>
-                @endcan
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Administración')" class="grid">
@@ -107,7 +108,8 @@
                     :current="request()->routeIs('admin.tables.*')" wire:navigate>{{ __('Mesas') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="wrench-screwdriver" :href="route('admin.semi-automatics.index')"
-                    :current="request()->routeIs('admin.semi-automatics.*')" wire:navigate>{{ __('Semi-Automáticos') }}
+                    :current="request()->routeIs('admin.semi-automatics.*')" wire:navigate>
+                    {{ __('Semi-Automáticos') }}
                 </flux:navlist.item>
                 <flux:navlist.item icon="cog-6-tooth" :href="route('admin.machines.index')"
                     :current="request()->routeIs('admin.machines.*')" wire:navigate>{{ __('Máquinas') }}

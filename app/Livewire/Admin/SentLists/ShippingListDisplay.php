@@ -32,6 +32,13 @@ class ShippingListDisplay extends Component
         'production' => 'pending',
     ];
 
+    // Modal de calidad por lote
+    public $showQualityModal = false;
+    public $selectedLotId = null;
+    public $selectedLot = null;
+    public $qualityStatus = 'pending';
+    public $qualityComments = '';
+
     public function mount()
     {
         // Inicializar filtros
@@ -194,6 +201,96 @@ class ShippingListDisplay extends Component
         // Cuando tengas la lógica, aquí guardarás en la BD
         session()->flash('message', 'Estados actualizados correctamente (estático por ahora).');
         $this->closeDepartmentStatusModal();
+    }
+
+    /**
+     * Open quality status modal for a specific lot.
+     */
+    public function openQualityModal($lotId)
+    {
+        $this->selectedLotId = $lotId;
+        $this->selectedLot = Lot::with(['workOrder.purchaseOrder.part', 'kits'])->find($lotId);
+
+        if (!$this->selectedLot) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        // VALIDACION DE DEPENDENCIA MAT -> CAL
+        if (!$this->selectedLot->canBeInspectedByQuality()) {
+            $reason = $this->selectedLot->getQualityBlockedReason();
+            session()->flash('error', $reason);
+            return;
+        }
+
+        // Cargar valores actuales
+        $this->qualityStatus = $this->selectedLot->quality_status ?? 'pending';
+        $this->qualityComments = $this->selectedLot->quality_comments ?? '';
+
+        $this->showQualityModal = true;
+    }
+
+    /**
+     * Close quality status modal.
+     */
+    public function closeQualityModal()
+    {
+        $this->showQualityModal = false;
+        $this->selectedLotId = null;
+        $this->selectedLot = null;
+        $this->qualityStatus = 'pending';
+        $this->qualityComments = '';
+        $this->resetErrorBag();
+    }
+
+    /**
+     * Save quality status for the selected lot.
+     */
+    public function saveQualityStatus()
+    {
+        // Validar
+        $rules = [
+            'qualityStatus' => 'required|in:pending,approved,rejected',
+        ];
+
+        // Comentario requerido si es rechazado
+        if ($this->qualityStatus === 'rejected') {
+            $rules['qualityComments'] = 'required|string|min:5|max:1000';
+        } else {
+            $rules['qualityComments'] = 'nullable|string|max:1000';
+        }
+
+        $this->validate($rules, [
+            'qualityStatus.required' => 'Debe seleccionar un status de calidad.',
+            'qualityComments.required' => 'Debe indicar el motivo del rechazo.',
+            'qualityComments.min' => 'El comentario debe tener al menos 5 caracteres.',
+        ]);
+
+        if (!$this->selectedLot) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        // Doble verificacion de dependencia MAT -> CAL
+        if (!$this->selectedLot->canBeInspectedByQuality()) {
+            session()->flash('error', 'Este lote ya no puede ser inspeccionado. El kit asociado no esta liberado.');
+            $this->closeQualityModal();
+            return;
+        }
+
+        // Actualizar lote
+        $this->selectedLot->update([
+            'quality_status' => $this->qualityStatus,
+            'quality_comments' => $this->qualityComments,
+            'quality_inspected_at' => now(),
+            'quality_inspected_by' => auth()->id(),
+        ]);
+
+        $statusLabel = Lot::getQualityStatuses()[$this->qualityStatus];
+        session()->flash('message', "Status de calidad actualizado a: {$statusLabel}");
+
+        $this->closeQualityModal();
+        $this->dispatch('refresh-display');
     }
 
     public function render()

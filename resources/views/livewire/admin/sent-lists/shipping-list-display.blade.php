@@ -183,6 +183,26 @@
                                             \App\Models\Lot::STATUS_COMPLETED => ['bg' => 'bg-green-50 dark:bg-green-900/30', 'text' => 'text-green-700 dark:text-green-300', 'label' => 'Completado'],
                                             default => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'label' => $lot->status],
                                         };
+
+                                        // Verificar si el lote puede ser inspeccionado por calidad
+                                        $canInspectQuality = $lot->canBeInspectedByQuality();
+                                        $qualityStatus = $lot->quality_status ?? 'pending';
+
+                                        // Color del semaforo de calidad
+                                        $lotQualityColor = match($qualityStatus) {
+                                            'rejected' => 'bg-red-500',
+                                            'pending' => 'bg-yellow-400',
+                                            'approved' => 'bg-green-500',
+                                            default => 'bg-gray-400',
+                                        };
+
+                                        // Si no puede ser inspeccionado, mostrar gris
+                                        if (!$canInspectQuality) {
+                                            $lotQualityColor = 'bg-gray-300 dark:bg-gray-600';
+                                        }
+
+                                        // Obtener razon de bloqueo si existe
+                                        $qualityBlockedReason = $lot->getQualityBlockedReason();
                                     @endphp
                                     <tr class="bg-gray-50 dark:bg-gray-700/20">
                                         <td class="px-4 py-2 pl-8 text-xs text-gray-600 dark:text-gray-400">Lote</td>
@@ -194,12 +214,29 @@
                                         <td class="px-4 py-2 text-xs text-gray-700 dark:text-gray-300">{{ $part->item_number }}</td>
                                         <td class="px-4 py-2 text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $part->number }}</td>
                                         <td class="px-4 py-2 text-xs text-gray-700 dark:text-gray-300 max-w-xs truncate" title="{{ $lot->description ?? $part->description }}">{{ $lot->description ?? $part->description }}</td>
-                                        {{-- Estado del lote en lugar de semáforos --}}
-                                        <td colspan="3" class="px-4 py-2 text-center">
+                                        {{-- Semaforo MAT - Estado del lote de produccion --}}
+                                        <td class="px-4 py-2 text-center">
                                             <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded {{ $lotStatusInfo['bg'] }} {{ $lotStatusInfo['text'] }}">
                                                 {{ $lotStatusInfo['label'] }}
                                             </span>
                                         </td>
+                                        {{-- Semaforo CAL - Status de Calidad por Lote --}}
+                                        <td class="px-4 py-2 text-center">
+                                            <button
+                                                wire:click="openQualityModal({{ $lot->id }})"
+                                                class="w-5 h-5 rounded {{ $lotQualityColor }} {{ $canInspectQuality ? 'hover:opacity-80 cursor-pointer' : 'cursor-not-allowed opacity-60' }} transition-opacity relative inline-flex items-center justify-center"
+                                                title="{{ $canInspectQuality ? 'Status de Calidad: ' . ucfirst($qualityStatus) : ($qualityBlockedReason ?? 'Bloqueado') }}"
+                                            >
+                                                @if(!$canInspectQuality)
+                                                    {{-- Icono de candado para indicar que esta bloqueado --}}
+                                                    <svg class="w-3 h-3 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                @endif
+                                            </button>
+                                        </td>
+                                        {{-- Columna Prod vacia por ahora --}}
+                                        <td class="px-4 py-2 text-center text-xs text-gray-500 dark:text-gray-400">-</td>
                                         {{-- Cantidades --}}
                                         <td class="px-4 py-2 text-right text-xs"></td>
                                         <td class="px-4 py-2 text-right text-xs"></td>
@@ -350,25 +387,71 @@
                         </div>
 
                         @foreach($allLots as $lot)
+                            @php
+                                $statusInfo = match($lot->status) {
+                                    \App\Models\Lot::STATUS_PENDING => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'label' => 'Pendiente'],
+                                    \App\Models\Lot::STATUS_IN_PROGRESS => ['bg' => 'bg-blue-50 dark:bg-blue-900/30', 'text' => 'text-blue-700 dark:text-blue-300', 'label' => 'En Proceso'],
+                                    \App\Models\Lot::STATUS_COMPLETED => ['bg' => 'bg-green-50 dark:bg-green-900/30', 'text' => 'text-green-700 dark:text-green-300', 'label' => 'Completado'],
+                                    default => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'label' => $lot->status],
+                                };
+
+                                // Verificar si el lote puede ser inspeccionado por calidad
+                                $canInspectQualityMobile = $lot->canBeInspectedByQuality();
+                                $qualityStatusMobile = $lot->quality_status ?? 'pending';
+
+                                // Color del semaforo de calidad
+                                $lotQualityColorMobile = match($qualityStatusMobile) {
+                                    'rejected' => 'bg-red-500',
+                                    'pending' => 'bg-yellow-400',
+                                    'approved' => 'bg-green-500',
+                                    default => 'bg-gray-400',
+                                };
+
+                                // Si no puede ser inspeccionado, mostrar gris
+                                if (!$canInspectQualityMobile) {
+                                    $lotQualityColorMobile = 'bg-gray-300 dark:bg-gray-600';
+                                }
+
+                                // Obtener razon de bloqueo si existe
+                                $qualityBlockedReasonMobile = $lot->getQualityBlockedReason();
+                            @endphp
                             <div class="p-4 pl-8 bg-gray-50 dark:bg-gray-700/20 space-y-2 border-l-2 border-gray-300 dark:border-gray-600">
                                 <div class="flex items-center justify-between">
                                     <button wire:click="openLotModal({{ $wo->id }})" class="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
                                         <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Lote</span>
                                         <span>{{ $lot->lot_number }}</span>
                                     </button>
-                                    @php
-                                        $statusInfo = match($lot->status) {
-                                            \App\Models\Lot::STATUS_PENDING => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'label' => 'Pendiente'],
-                                            \App\Models\Lot::STATUS_IN_PROGRESS => ['bg' => 'bg-blue-50 dark:bg-blue-900/30', 'text' => 'text-blue-700 dark:text-blue-300', 'label' => 'En Proceso'],
-                                            \App\Models\Lot::STATUS_COMPLETED => ['bg' => 'bg-green-50 dark:bg-green-900/30', 'text' => 'text-green-700 dark:text-green-300', 'label' => 'Completado'],
-                                            default => ['bg' => 'bg-gray-100 dark:bg-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'label' => $lot->status],
-                                        };
-                                    @endphp
                                     <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
                                         {{ $statusInfo['label'] }}
                                     </span>
                                 </div>
                                 <div class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{{ $lot->description ?? $part->description }}</div>
+
+                                {{-- Semaforo de Calidad para movil --}}
+                                <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Calidad:</span>
+                                        <button
+                                            wire:click="openQualityModal({{ $lot->id }})"
+                                            class="w-6 h-6 rounded {{ $lotQualityColorMobile }} {{ $canInspectQualityMobile ? 'hover:opacity-80 cursor-pointer' : 'cursor-not-allowed opacity-60' }} transition-opacity relative inline-flex items-center justify-center"
+                                            title="{{ $canInspectQualityMobile ? 'Status de Calidad: ' . ucfirst($qualityStatusMobile) : ($qualityBlockedReasonMobile ?? 'Bloqueado') }}"
+                                        >
+                                            @if(!$canInspectQualityMobile)
+                                                <svg class="w-3 h-3 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                                                </svg>
+                                            @endif
+                                        </button>
+                                        @if($canInspectQualityMobile)
+                                            <span class="text-xs {{ $qualityStatusMobile === 'approved' ? 'text-green-600 dark:text-green-400' : ($qualityStatusMobile === 'rejected' ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400') }}">
+                                                {{ ucfirst($qualityStatusMobile === 'pending' ? 'Pendiente' : ($qualityStatusMobile === 'approved' ? 'Aprobado' : 'No Aprobado')) }}
+                                            </span>
+                                        @else
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">Bloqueado</span>
+                                        @endif
+                                    </div>
+                                </div>
+
                                 <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
                                     <span class="text-xs text-gray-500 dark:text-gray-400">Cantidad:</span>
                                     <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ number_format($lot->quantity) }}</span>
@@ -564,26 +647,26 @@
                                     {{ $deptLabel }}
                                 </label>
                                 <div class="grid grid-cols-4 gap-2">
-                                    <button 
-                                        wire:click="updateDepartmentStatus('{{ $deptKey }}', 'rejected')" 
+                                    <button
+                                        wire:click="updateDepartmentStatus('{{ $deptKey }}', 'rejected')"
                                         class="px-3 py-2 text-xs font-medium border transition-colors {{ $departmentStatuses[$deptKey] === 'rejected' ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-400' }}"
                                     >
                                         Rechazado
                                     </button>
-                                    <button 
-                                        wire:click="updateDepartmentStatus('{{ $deptKey }}', 'pending')" 
+                                    <button
+                                        wire:click="updateDepartmentStatus('{{ $deptKey }}', 'pending')"
                                         class="px-3 py-2 text-xs font-medium border transition-colors {{ $departmentStatuses[$deptKey] === 'pending' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-400' }}"
                                     >
                                         Pendiente
                                     </button>
-                                    <button 
-                                        wire:click="updateDepartmentStatus('{{ $deptKey }}', 'in_progress')" 
+                                    <button
+                                        wire:click="updateDepartmentStatus('{{ $deptKey }}', 'in_progress')"
                                         class="px-3 py-2 text-xs font-medium border transition-colors {{ $departmentStatuses[$deptKey] === 'in_progress' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-400' }}"
                                     >
                                         En Progreso
                                     </button>
-                                    <button 
-                                        wire:click="updateDepartmentStatus('{{ $deptKey }}', 'approved')" 
+                                    <button
+                                        wire:click="updateDepartmentStatus('{{ $deptKey }}', 'approved')"
                                         class="px-3 py-2 text-xs font-medium border transition-colors {{ $departmentStatuses[$deptKey] === 'approved' ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-400' }}"
                                     >
                                         Aprobado
@@ -594,15 +677,170 @@
                     </div>
 
                     <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
-                        <button 
+                        <button
                             wire:click="closeDepartmentStatusModal"
                             class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         >
                             Cancelar
                         </button>
-                        <button 
+                        <button
                             wire:click="saveDepartmentStatuses"
                             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+                        >
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Modal de Status de Calidad por Lote --}}
+    @if($showQualityModal && $selectedLot)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="quality-modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                {{-- Overlay --}}
+                <div class="fixed inset-0 bg-gray-900/50 transition-opacity" wire:click="closeQualityModal"></div>
+
+                {{-- Modal Container --}}
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700">
+                    {{-- Header --}}
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 id="quality-modal-title" class="text-lg font-semibold text-gray-900 dark:text-white">Status de Calidad - Lote</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    WO: {{ $selectedLot->workOrder->purchaseOrder->wo ?? 'N/A' }} |
+                                    Lote: {{ $selectedLot->lot_number }}
+                                </p>
+                            </div>
+                            <button wire:click="closeQualityModal" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="px-6 py-4 space-y-6">
+                        {{-- Informacion del Lote --}}
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Informacion del Lote</h4>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Parte:</span>
+                                    <span class="ml-2 text-gray-900 dark:text-white font-medium">
+                                        {{ $selectedLot->workOrder->purchaseOrder->part->number ?? 'N/A' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Cantidad:</span>
+                                    <span class="ml-2 text-gray-900 dark:text-white font-medium">
+                                        {{ number_format($selectedLot->quantity) }} piezas
+                                    </span>
+                                </div>
+                                @php
+                                    $releasedKit = $selectedLot->getReleasedKit();
+                                @endphp
+                                @if($releasedKit)
+                                <div class="col-span-2">
+                                    <span class="text-gray-500 dark:text-gray-400">Kit:</span>
+                                    <span class="ml-2 text-green-600 dark:text-green-400 font-medium">
+                                        {{ $releasedKit->kit_number }} (Liberado)
+                                    </span>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Status de Materiales (Solo lectura) --}}
+                        <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded-full bg-green-500 mr-3"></div>
+                                <span class="text-sm font-medium text-green-800 dark:text-green-200">
+                                    MAT. Liberado - Habilitado para inspeccion de calidad
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Status de Calidad --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                Status de Calidad
+                            </label>
+                            <div class="grid grid-cols-3 gap-3">
+                                {{-- Pendiente --}}
+                                <button
+                                    wire:click="$set('qualityStatus', 'pending')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $qualityStatus === 'pending' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}"
+                                >
+                                    <div class="w-8 h-8 rounded-full bg-yellow-400 mb-2"></div>
+                                    <span class="text-sm font-medium {{ $qualityStatus === 'pending' ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        Pendiente
+                                    </span>
+                                </button>
+
+                                {{-- Aprobado --}}
+                                <button
+                                    wire:click="$set('qualityStatus', 'approved')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $qualityStatus === 'approved' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}"
+                                >
+                                    <div class="w-8 h-8 rounded-full bg-green-500 mb-2"></div>
+                                    <span class="text-sm font-medium {{ $qualityStatus === 'approved' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        Aprobado
+                                    </span>
+                                </button>
+
+                                {{-- No Aprobado --}}
+                                <button
+                                    wire:click="$set('qualityStatus', 'rejected')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $qualityStatus === 'rejected' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}"
+                                >
+                                    <div class="w-8 h-8 rounded-full bg-red-500 mb-2"></div>
+                                    <span class="text-sm font-medium {{ $qualityStatus === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        No Aprobado
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Comentarios --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Comentarios de Calidad
+                                @if($qualityStatus === 'rejected')
+                                    <span class="text-red-500">*</span>
+                                @endif
+                            </label>
+                            <textarea
+                                wire:model="qualityComments"
+                                rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="{{ $qualityStatus === 'rejected' ? 'Describa el motivo del rechazo...' : 'Observaciones adicionales (opcional)...' }}"
+                            ></textarea>
+                            @if($qualityStatus === 'rejected')
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400">
+                                    * El motivo del rechazo es requerido
+                                </p>
+                            @endif
+                            @error('qualityComments')
+                                <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    {{-- Footer --}}
+                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
+                        <button
+                            wire:click="closeQualityModal"
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            wire:click="saveQualityStatus"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
                         >
                             Guardar Cambios
                         </button>

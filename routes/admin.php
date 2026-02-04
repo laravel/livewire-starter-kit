@@ -163,6 +163,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/employees/{employee}', \App\Livewire\Admin\Employees\EmployeeShow::class)->name('employees.show');
     Route::get('/employees/{employee}/edit', \App\Livewire\Admin\Employees\EmployeeEdit::class)->name('employees.edit');
 
+    // Gestión de Calidad
+    Route::get('/quality', \App\Livewire\Admin\Quality\QualityInspectionList::class)->name('quality.index');
+
 });
 
 // Materials Area Routes (requires Materials role)
