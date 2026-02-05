@@ -20,6 +20,11 @@ class LotList extends Component
     public string $sortDirection = 'desc';
     public bool $confirmingDeletion = false;
     public ?int $lotToDelete = null;
+    
+    // Modal para cambiar estado
+    public bool $showStatusModal = false;
+    public ?int $selectedLotId = null;
+    public string $newStatus = '';
 
     public function mount(?int $workOrderId = null): void
     {
@@ -95,6 +100,49 @@ class LotList extends Component
             $lot->update(['status' => Lot::STATUS_CANCELLED]);
             session()->flash('message', 'Lote cancelado.');
         }
+    }
+
+    public function openStatusModal(int $id): void
+    {
+        $lot = Lot::find($id);
+        if ($lot) {
+            $this->selectedLotId = $id;
+            $this->newStatus = $lot->status;
+            $this->showStatusModal = true;
+        }
+    }
+
+    public function closeStatusModal(): void
+    {
+        $this->showStatusModal = false;
+        $this->selectedLotId = null;
+        $this->newStatus = '';
+    }
+
+    public function setNewStatus(string $status): void
+    {
+        $this->newStatus = $status;
+    }
+
+    public function updateLotStatus(): void
+    {
+        if (!$this->selectedLotId || !$this->newStatus) {
+            return;
+        }
+
+        $lot = Lot::find($this->selectedLotId);
+        if (!$lot) {
+            session()->flash('error', 'Lote no encontrado.');
+            $this->closeStatusModal();
+            return;
+        }
+
+        $lot->update(['status' => $this->newStatus]);
+        
+        $statusLabels = Lot::getStatuses();
+        session()->flash('message', "Estado del lote actualizado a: {$statusLabels[$this->newStatus]}");
+        
+        $this->closeStatusModal();
     }
 
     public function render()

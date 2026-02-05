@@ -32,7 +32,8 @@
                                     'preparing' => 'yellow',
                                     'ready' => 'blue',
                                     'released' => 'green',
-                                    'in_assembly' => 'purple',
+                                    'in_assembly' => 'orange',
+                                    'rejected' => 'red',
                                 ];
                                 $color = $colors[$status] ?? 'gray';
                             @endphp
@@ -145,12 +146,13 @@
                                                 'preparing' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
                                                 'ready' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
                                                 'released' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-                                                'in_assembly' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+                                                'in_assembly' => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+                                                'rejected' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
                                             ];
                                         @endphp
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$kit->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                        <button wire:click="openStatusModal({{ $kit->id }})" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColors[$kit->status] ?? 'bg-gray-100 text-gray-800' }} hover:opacity-80 cursor-pointer transition-opacity">
                                             {{ $kit->status_label }}
-                                        </span>
+                                        </button>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($kit->validated)
@@ -172,21 +174,12 @@
                                             <a href="{{ route('admin.kits.show', $kit) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400">
                                                 Ver
                                             </a>
-                                            @if($kit->canBeReady())
-                                                <button wire:click="markAsReady({{ $kit->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400">
-                                                    Listo
-                                                </button>
-                                            @endif
-                                            @if($kit->canBeReleased())
-                                                <button wire:click="release({{ $kit->id }})" class="text-green-600 hover:text-green-900 dark:text-green-400">
-                                                    Liberar
-                                                </button>
-                                            @endif
-                                            @if($kit->status === 'preparing')
-                                                <button wire:click="confirmDeletion({{ $kit->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400">
-                                                    Eliminar
-                                                </button>
-                                            @endif
+                                            <button wire:click="openStatusModal({{ $kit->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400">
+                                                Cambiar Estado
+                                            </button>
+                                            <button wire:click="confirmDeletion({{ $kit->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400">
+                                                Eliminar
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -235,6 +228,102 @@
                                 Eliminar
                             </button>
                             <button wire:click="$set('confirmingDeletion', false)" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-600 dark:text-white dark:border-gray-600">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- Modal para Cambiar Estado del Kit --}}
+        @if($showStatusModal)
+            <div class="fixed z-50 inset-0 overflow-y-auto">
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true" wire:click="closeStatusModal">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                    </div>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full dark:bg-gray-800">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 dark:bg-gray-800">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                                    Cambiar Estado del Kit
+                                </h3>
+                                <button wire:click="closeStatusModal" class="text-gray-400 hover:text-gray-500">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                                Seleccione el nuevo estado para el kit
+                            </p>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                {{-- En Preparación --}}
+                                <button wire:click="setNewStatus('preparing')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $newStatus === 'preparing' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
+                                    <div class="w-8 h-8 rounded-full bg-yellow-400 mb-2"></div>
+                                    <span class="text-sm font-medium {{ $newStatus === 'preparing' ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        En Preparación
+                                    </span>
+                                </button>
+
+                                {{-- Listo --}}
+                                <button wire:click="setNewStatus('ready')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $newStatus === 'ready' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
+                                    <div class="w-8 h-8 rounded-full bg-blue-500 mb-2"></div>
+                                    <span class="text-sm font-medium {{ $newStatus === 'ready' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        Listo
+                                    </span>
+                                </button>
+
+                                {{-- Liberado (Aprobado) --}}
+                                <button wire:click="setNewStatus('released')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $newStatus === 'released' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
+                                    <div class="w-8 h-8 rounded-full bg-green-500 mb-2 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium {{ $newStatus === 'released' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        Liberado
+                                    </span>
+                                </button>
+
+                                {{-- En Ensamble --}}
+                                <button wire:click="setNewStatus('in_assembly')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $newStatus === 'in_assembly' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
+                                    <div class="w-8 h-8 rounded-full bg-orange-500 mb-2 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium {{ $newStatus === 'in_assembly' ? 'text-orange-700 dark:text-orange-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        En Ensamble
+                                    </span>
+                                </button>
+
+                                {{-- Rechazado --}}
+                                <button wire:click="setNewStatus('rejected')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all col-span-2 {{ $newStatus === 'rejected' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
+                                    <div class="w-8 h-8 rounded-full bg-red-500 mb-2 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium {{ $newStatus === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        Rechazado
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse dark:bg-gray-700">
+                            <button wire:click="updateKitStatus" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                Guardar Cambios
+                            </button>
+                            <button wire:click="closeStatusModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-600 dark:text-white dark:border-gray-600">
                                 Cancelar
                             </button>
                         </div>

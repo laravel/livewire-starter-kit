@@ -17,6 +17,10 @@ class KitShow extends Component
     public string $incident_description = '';
     public string $fca_44_reference = '';
 
+    // Status modal
+    public bool $showStatusModal = false;
+    public string $newStatus = '';
+
     public function mount(Kit $kit): void
     {
         $this->kit = $kit->load(['workOrder.purchaseOrder.part', 'preparedBy', 'releasedBy', 'incidents.resolvedBy']);
@@ -106,6 +110,38 @@ class KitShow extends Component
             $this->kit->refresh();
             session()->flash('message', 'Incidencia resuelta.');
         }
+    }
+
+    public function openStatusModal(): void
+    {
+        $this->newStatus = $this->kit->status;
+        $this->showStatusModal = true;
+    }
+
+    public function closeStatusModal(): void
+    {
+        $this->showStatusModal = false;
+        $this->newStatus = '';
+    }
+
+    public function setNewStatus(string $status): void
+    {
+        $this->newStatus = $status;
+    }
+
+    public function updateKitStatus(): void
+    {
+        if (!$this->newStatus) {
+            return;
+        }
+
+        $this->kit->update(['status' => $this->newStatus]);
+        $this->kit->refresh();
+        
+        $statusLabels = Kit::getStatuses();
+        session()->flash('message', "Estado del kit actualizado a: {$statusLabels[$this->newStatus]}");
+        
+        $this->closeStatusModal();
     }
 
     public function render()

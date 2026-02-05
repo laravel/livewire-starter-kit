@@ -63,9 +63,9 @@
                                         'cancelled' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
                                     ];
                                 @endphp
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$lot->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                <button wire:click="openStatusModal" class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$lot->status] ?? 'bg-gray-100 text-gray-800' }} hover:opacity-80 cursor-pointer transition-opacity">
                                     {{ $lot->status_label }}
-                                </span>
+                                </button>
                             </dd>
                         </div>
                         
@@ -165,6 +165,14 @@
                                     </div>
                                 </div>
                             @endif
+
+                            <button wire:click="openStatusModal"
+                                class="w-full inline-flex justify-center items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Cambiar Estado
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -222,5 +230,88 @@
                 </div>
             </div>
         </div>
+
+        {{-- Modal para Cambiar Estado del Lote --}}
+        @if($showStatusModal)
+            <div class="fixed z-50 inset-0 overflow-y-auto">
+                <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true" wire:click="closeStatusModal">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                    </div>
+                    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full dark:bg-gray-800">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 dark:bg-gray-800">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+                                    Cambiar Estado del Lote
+                                </h3>
+                                <button wire:click="closeStatusModal" class="text-gray-400 hover:text-gray-500">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                                Lote: <span class="font-semibold">{{ $lot->lot_number }}</span>
+                            </p>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                {{-- Pendiente --}}
+                                <button wire:click="setNewStatus('pending')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $newStatus === 'pending' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
+                                    <div class="w-8 h-8 rounded-full bg-yellow-400 mb-2"></div>
+                                    <span class="text-sm font-medium {{ $newStatus === 'pending' ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        Pendiente
+                                    </span>
+                                </button>
+
+                                {{-- En Progreso --}}
+                                <button wire:click="setNewStatus('in_progress')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $newStatus === 'in_progress' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
+                                    <div class="w-8 h-8 rounded-full bg-blue-500 mb-2"></div>
+                                    <span class="text-sm font-medium {{ $newStatus === 'in_progress' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        En Progreso
+                                    </span>
+                                </button>
+
+                                {{-- Completado --}}
+                                <button wire:click="setNewStatus('completed')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $newStatus === 'completed' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
+                                    <div class="w-8 h-8 rounded-full bg-green-500 mb-2 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium {{ $newStatus === 'completed' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        Completado
+                                    </span>
+                                </button>
+
+                                {{-- Cancelado --}}
+                                <button wire:click="setNewStatus('cancelled')"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $newStatus === 'cancelled' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300' }}">
+                                    <div class="w-8 h-8 rounded-full bg-red-500 mb-2 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium {{ $newStatus === 'cancelled' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        Cancelado
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse dark:bg-gray-700">
+                            <button wire:click="updateLotStatus" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                Guardar Cambios
+                            </button>
+                            <button wire:click="closeStatusModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-600 dark:text-white dark:border-gray-600">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>

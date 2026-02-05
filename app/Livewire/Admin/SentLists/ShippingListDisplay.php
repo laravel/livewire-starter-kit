@@ -39,6 +39,12 @@ class ShippingListDisplay extends Component
     public $qualityStatus = 'pending';
     public $qualityComments = '';
 
+    // Modal de Kit por lote
+    public $showKitModal = false;
+    public $selectedLotForKit = null;
+    public $selectedKit = null;
+    public $kitStatus = 'preparing';
+
     public function mount()
     {
         // Inicializar filtros
@@ -204,6 +210,124 @@ class ShippingListDisplay extends Component
     }
 
     /**
+     * Open kit status modal for a specific lot.
+     */
+    public function openKitModal($lotId)
+    {
+        $this->selectedLotForKit = Lot::with(['workOrder.purchaseOrder.part', 'kits'])->find($lotId);
+
+        if (!$this->selectedLotForKit) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        // Obtener el kit asociado al lote (el más reciente)
+        $this->selectedKit = $this->selectedLotForKit->kits->sortByDesc('created_at')->first();
+        
+        if ($this->selectedKit) {
+            $this->kitStatus = $this->selectedKit->status ?? 'preparing';
+        } else {
+            $this->kitStatus = 'preparing';
+        }
+
+        $this->showKitModal = true;
+    }
+
+    /**
+     * Close kit status modal.
+     */
+    public function closeKitModal()
+    {
+        $this->showKitModal = false;
+        $this->selectedLotForKit = null;
+        $this->selectedKit = null;
+        $this->kitStatus = 'preparing';
+        $this->resetErrorBag();
+    }
+
+    /**
+     * Set kit status (for visual update).
+     */
+    public function setKitStatus($status)
+    {
+        $this->kitStatus = $status;
+    }
+
+    /**
+     * Save kit status.
+     */
+    public function saveKitStatus()
+    {
+        $this->validate([
+            'kitStatus' => 'required|in:released,rejected',
+        ], [
+            'kitStatus.required' => 'Debe seleccionar Aprobado o Rechazado.',
+        ]);
+
+        if (!$this->selectedKit) {
+            session()->flash('error', 'No hay kit asociado a este lote.');
+            $this->closeKitModal();
+            return;
+        }
+
+        // Actualizar kit
+        $this->selectedKit->update([
+            'status' => $this->kitStatus,
+        ]);
+
+        $statusLabels = [
+            'released' => 'Aprobado',
+            'rejected' => 'Rechazado',
+        ];
+        
+        $statusLabel = $statusLabels[$this->kitStatus] ?? $this->kitStatus;
+        session()->flash('message', "Status de kit actualizado a: {$statusLabel}");
+
+        $this->closeKitModal();
+        $this->dispatch('refresh-display');
+    }
+
+    /**
+     * Approve a lot (set status to completed).
+     */
+    public function approveLot($lotId)
+    {
+        $lot = Lot::find($lotId);
+        
+        if (!$lot) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $lot->update([
+            'status' => Lot::STATUS_COMPLETED,
+        ]);
+
+        session()->flash('message', "Lote {$lot->lot_number} aprobado correctamente.");
+        $this->dispatch('refresh-display');
+    }
+
+    /**
+     * Reject a lot (set status to cancelled).
+     */
+    public function rejectLot($lotId)
+    {
+        $lot = Lot::find($lotId);
+        
+        if (!$lot) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $lot->update([
+            'status' => Lot::STATUS_CANCELLED,
+        ]);
+
+        session()->flash('message', "Lote {$lot->lot_number} rechazado.");
+        $this->dispatch('refresh-display');
+    }
+
+    /**
      * Open quality status modal for a specific lot.
      */
     public function openQualityModal($lotId)
@@ -241,6 +365,14 @@ class ShippingListDisplay extends Component
         $this->qualityStatus = 'pending';
         $this->qualityComments = '';
         $this->resetErrorBag();
+    }
+
+    /**
+     * Set quality status (for visual update).
+     */
+    public function setQualityStatus($status)
+    {
+        $this->qualityStatus = $status;
     }
 
     /**
