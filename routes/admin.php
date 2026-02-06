@@ -151,6 +151,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/kits/create', \App\Livewire\Admin\Kits\KitCreate::class)->name('kits.create');
     Route::get('/kits/{kit}', \App\Livewire\Admin\Kits\KitShow::class)->name('kits.show');
 
+    // Producción - Pesadas
+    Route::get('/production/weighings', \App\Livewire\Admin\Production\WeighingManagement::class)->name('production.weighings');
+
     // Gestión de Lotes
     Route::get('/lots', \App\Livewire\Admin\Lots\LotList::class)->name('lots.index');
     Route::get('/lots/create', \App\Livewire\Admin\Lots\LotCreate::class)->name('lots.create');

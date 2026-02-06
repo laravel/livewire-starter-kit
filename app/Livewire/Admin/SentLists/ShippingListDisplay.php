@@ -57,6 +57,17 @@ class ShippingListDisplay extends Component
     public $finalQualityStatus = 'pending';
     public $finalQualityComments = '';
 
+    // Modal de Pesada (Producción) por lote
+    public $showProductionModal = false;
+    public $selectedLotForProduction = null;
+    public $prodGoodPieces = 0;
+    public $prodBadPieces = 0;
+    public $prodWeighedAt = '';
+    public $prodComments = '';
+    public $prodQuantity = 0;
+    public $prodKitId = null;
+    public $prodKits = [];
+
     public function mount()
     {
         // Inicializar filtros
@@ -587,6 +598,80 @@ class ShippingListDisplay extends Component
         $this->dispatch('refresh-display');
     }
 
+    // ===============================================
+    // PRODUCTION (PESADA) MODAL
+    // ===============================================
+
+    public function openProductionModal($lotId)
+    {
+        $lot = Lot::with(['workOrder.purchaseOrder.part', 'kits'])->find($lotId);
+
+        if (!$lot) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $this->selectedLotForProduction = $lot;
+        $this->prodQuantity = $lot->quantity;
+        $this->prodGoodPieces = 0;
+        $this->prodBadPieces = 0;
+        $this->prodWeighedAt = now()->format('Y-m-d\TH:i');
+        $this->prodComments = '';
+        $this->prodKitId = null;
+        $this->prodKits = $lot->kits;
+        $this->showProductionModal = true;
+    }
+
+    public function closeProductionModal()
+    {
+        $this->showProductionModal = false;
+        $this->selectedLotForProduction = null;
+        $this->prodQuantity = 0;
+        $this->prodGoodPieces = 0;
+        $this->prodBadPieces = 0;
+        $this->prodWeighedAt = '';
+        $this->prodComments = '';
+        $this->prodKitId = null;
+        $this->prodKits = [];
+        $this->resetErrorBag();
+    }
+
+    public function saveProduction()
+    {
+        $this->validate([
+            'prodGoodPieces' => 'required|integer|min:0',
+            'prodBadPieces' => 'required|integer|min:0',
+            'prodWeighedAt' => 'required|date',
+            'prodComments' => 'nullable|string|max:1000',
+        ], [
+            'prodGoodPieces.required' => 'Las piezas buenas son requeridas.',
+            'prodGoodPieces.min' => 'Las piezas buenas no pueden ser negativas.',
+            'prodBadPieces.required' => 'Las piezas malas son requeridas.',
+            'prodBadPieces.min' => 'Las piezas malas no pueden ser negativas.',
+            'prodWeighedAt.required' => 'La fecha y hora son requeridas.',
+        ]);
+
+        if (!$this->selectedLotForProduction) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        \App\Models\Weighing::create([
+            'lot_id' => $this->selectedLotForProduction->id,
+            'kit_id' => $this->prodKitId ?: null,
+            'quantity' => $this->selectedLotForProduction->quantity,
+            'good_pieces' => $this->prodGoodPieces,
+            'bad_pieces' => $this->prodBadPieces,
+            'weighed_at' => $this->prodWeighedAt,
+            'weighed_by' => auth()->id(),
+            'comments' => $this->prodComments ?: null,
+        ]);
+
+        session()->flash('message', 'Pesada registrada correctamente.');
+        $this->closeProductionModal();
+        $this->dispatch('refresh-display');
+    }
+
     public function render()
     {
         // Obtener Work Orders con lots (todos los estados)
@@ -594,7 +679,7 @@ class ShippingListDisplay extends Component
             'purchaseOrder.part.standards' => function ($query) {
                 $query->active();
             },
-            'lots', // Cargar todos los lotes sin filtrar por estado
+            'lots.weighings', // Cargar todos los lotes con sus pesadas
             'sentList'
         ])
         ->whereHas('lots'); // Solo WOs que tengan al menos un lote

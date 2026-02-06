@@ -86,6 +86,10 @@
                     </flux:navlist.item>
                 @endcan
 
+                <flux:navlist.item icon="scale" :href="route('admin.production.weighings')"
+                    :current="request()->routeIs('admin.production.weighings')" wire:navigate>{{ __('Pesadas') }}
+                </flux:navlist.item>
+
                 <flux:navlist.item icon="check-badge" :href="route('admin.quality.index')"
                     :current="request()->routeIs('admin.quality.*')" wire:navigate>{{ __('Calidad') }}
                 </flux:navlist.item>

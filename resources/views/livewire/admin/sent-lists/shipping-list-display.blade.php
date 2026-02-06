@@ -114,10 +114,10 @@
                                     Prod.</th>
                                 <th
                                     class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                    Empaque</th>
+                                    Cal.</th>
                                 <th
                                     class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                    Calidad</th>
+                                    Emp.</th>
                                 <th
                                     class="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                     Cant. WO</th>
@@ -299,23 +299,18 @@
                                                 @endif
                                             </button>
                                         </td>
-                                        {{-- Columna Prod vacia por ahora --}}
-                                        <td class="px-4 py-2 text-center text-xs text-gray-500 dark:text-gray-400">-
-                                        </td>
-                                        {{-- Semaforo Empaque --}}
+                                        {{-- Semaforo Prod + Botón Pesada --}}
                                         <td class="px-4 py-2 text-center">
-                                            @php
-                                                $packagingStatus = $lot->packaging_status ?? 'pending';
-                                                $packagingColor = match ($packagingStatus) {
-                                                    'rejected' => 'bg-red-500',
-                                                    'pending' => 'bg-yellow-400',
-                                                    'approved' => 'bg-green-500',
-                                                    default => 'bg-gray-400',
-                                                };
-                                            @endphp
-                                            <button wire:click="openPackagingModal({{ $lot->id }})"
-                                                class="w-5 h-5 rounded {{ $packagingColor }} hover:opacity-80 cursor-pointer transition-opacity"
-                                                title="Empaque: {{ ucfirst($packagingStatus) }}"></button>
+                                            <div class="flex items-center justify-center gap-1">
+                                                <span class="inline-block w-5 h-5 rounded bg-yellow-400" title="Prod: Pendiente"></span>
+                                                <button wire:click="openProductionModal({{ $lot->id }})"
+                                                    class="w-5 h-5 rounded bg-indigo-500 hover:bg-indigo-600 cursor-pointer transition-colors flex items-center justify-center"
+                                                    title="Registrar pesada">
+                                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v12m6-6H6"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </td>
                                         {{-- Semaforo Calidad Final --}}
                                         <td class="px-4 py-2 text-center">
@@ -331,6 +326,21 @@
                                             <button wire:click="openFinalQualityModal({{ $lot->id }})"
                                                 class="w-5 h-5 rounded {{ $finalQualityColor }} hover:opacity-80 cursor-pointer transition-opacity"
                                                 title="Calidad: {{ ucfirst($finalQualityStatus) }}"></button>
+                                        </td>
+                                        {{-- Semaforo Empaque --}}
+                                        <td class="px-4 py-2 text-center">
+                                            @php
+                                                $packagingStatus = $lot->packaging_status ?? 'pending';
+                                                $packagingColor = match ($packagingStatus) {
+                                                    'rejected' => 'bg-red-500',
+                                                    'pending' => 'bg-yellow-400',
+                                                    'approved' => 'bg-green-500',
+                                                    default => 'bg-gray-400',
+                                                };
+                                            @endphp
+                                            <button wire:click="openPackagingModal({{ $lot->id }})"
+                                                class="w-5 h-5 rounded {{ $packagingColor }} hover:opacity-80 cursor-pointer transition-opacity"
+                                                title="Empaque: {{ ucfirst($packagingStatus) }}"></button>
                                         </td>
                                         {{-- Cantidades --}}
                                         <td class="px-4 py-2 text-right text-xs"></td>
@@ -1403,6 +1413,136 @@
                         <button wire:click="saveFinalQualityStatus"
                             class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
                             Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Modal de Pesada (Producción) por Lote --}}
+    @if ($showProductionModal && $selectedLotForProduction)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="production-modal-title" role="dialog"
+            aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                {{-- Overlay --}}
+                <div class="fixed inset-0 bg-gray-900/50 transition-opacity" wire:click="closeProductionModal"></div>
+
+                {{-- Modal Container --}}
+                <div
+                    class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700 rounded-lg">
+                    {{-- Header --}}
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-indigo-600">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 id="production-modal-title" class="text-lg font-semibold text-white">Nueva Pesada - Producción</h3>
+                                <p class="text-sm text-indigo-100 mt-1">
+                                    WO: {{ $selectedLotForProduction->workOrder->purchaseOrder->wo ?? 'N/A' }} |
+                                    Lote: {{ $selectedLotForProduction->lot_number }}
+                                </p>
+                            </div>
+                            <button wire:click="closeProductionModal" class="text-white hover:text-indigo-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="px-6 py-4 space-y-5">
+                        {{-- Info del Lote --}}
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Parte:</span>
+                                    <span class="ml-2 text-gray-900 dark:text-white font-medium">
+                                        {{ $selectedLotForProduction->workOrder->purchaseOrder->part->number ?? 'N/A' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Lote:</span>
+                                    <span class="ml-2 text-blue-600 dark:text-blue-400 font-medium">
+                                        {{ $selectedLotForProduction->lot_number }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Kit (opcional) --}}
+                        @if (count($prodKits) > 0)
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kit (opcional)</label>
+                                <select wire:model="prodKitId"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">Sin kit</option>
+                                    @foreach ($prodKits as $kit)
+                                        <option value="{{ $kit->id }}">{{ $kit->kit_number }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
+                        {{-- Cantidad (solo visual) --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad del Lote</label>
+                            <div class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-white text-sm rounded-lg font-semibold">
+                                {{ number_format($prodQuantity) }} piezas
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Campo informativo - no editable</p>
+                        </div>
+
+                        {{-- Piezas buenas y malas --}}
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Buenas *</label>
+                                <input wire:model="prodGoodPieces" type="number" min="0"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                    placeholder="0">
+                                @error('prodGoodPieces')
+                                    <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Malas *</label>
+                                <input wire:model="prodBadPieces" type="number" min="0"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                    placeholder="0">
+                                @error('prodBadPieces')
+                                    <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Fecha y hora --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha y Hora de Pesada *</label>
+                            <input wire:model="prodWeighedAt" type="datetime-local"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            @error('prodWeighedAt')
+                                <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Comentarios --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comentarios</label>
+                            <textarea wire:model="prodComments" rows="2"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Observaciones (opcional)..."></textarea>
+                        </div>
+                    </div>
+
+                    {{-- Footer --}}
+                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
+                        <button wire:click="closeProductionModal"
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            Cancelar
+                        </button>
+                        <button wire:click="saveProduction"
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                            Registrar Pesada
                         </button>
                     </div>
                 </div>
