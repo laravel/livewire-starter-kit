@@ -201,6 +201,42 @@
                     </div>
                 </div>
 
+                <!-- Lotes Asociados Card -->
+                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Lotes Asociados</h2>
+                        @if($kit->lots->count() > 0)
+                            <div class="space-y-2">
+                                @foreach($kit->lots as $lot)
+                                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <div class="flex items-center justify-between">
+                                            <a href="{{ route('admin.lots.show', $lot) }}" class="text-sm font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                                                {{ $lot->lot_number }}
+                                            </a>
+                                            @php
+                                                $lotStatusColors = [
+                                                    'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                                                    'in_progress' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                                                    'completed' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                                    'cancelled' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                                ];
+                                            @endphp
+                                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ $lotStatusColors[$lot->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                                {{ $lot->status_label }}
+                                            </span>
+                                        </div>
+                                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            {{ number_format($lot->quantity) }} piezas
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-sm text-gray-400 dark:text-gray-500 italic">Sin lotes asociados</p>
+                        @endif
+                    </div>
+                </div>
+
                 <!-- Timestamps Card -->
                 <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="p-6">

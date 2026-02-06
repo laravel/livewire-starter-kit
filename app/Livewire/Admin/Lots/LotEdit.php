@@ -30,6 +30,15 @@ class LotEdit extends Component
     {
         $this->validate();
 
+        // Validar que la suma de lotes no sobrepase la Cant. WO
+        $workOrder = $this->lot->workOrder;
+        $otherLotsTotal = $workOrder->lots()->where('id', '!=', $this->lot->id)->sum('quantity');
+        if (($otherLotsTotal + $this->quantity) > $workOrder->original_quantity) {
+            $available = $workOrder->original_quantity - $otherLotsTotal;
+            $this->addError('quantity', 'La cantidad total de lotes sobrepasaría la Cant. WO (' . number_format($workOrder->original_quantity) . '). Máximo disponible: ' . number_format($available));
+            return;
+        }
+
         $this->lot->update([
             'lot_number' => $this->lot_number,
             'quantity' => $this->quantity,

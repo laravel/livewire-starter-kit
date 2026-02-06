@@ -147,7 +147,7 @@ class LotList extends Component
 
     public function render()
     {
-        $query = Lot::with(['workOrder.purchaseOrder.part'])
+        $query = Lot::with(['workOrder.purchaseOrder.part', 'kits'])
             ->search($this->search)
             ->when($this->filterStatus, fn($q) => $q->status($this->filterStatus))
             ->when($this->workOrderId, fn($q) => $q->where('work_order_id', $this->workOrderId))

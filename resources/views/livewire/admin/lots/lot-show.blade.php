@@ -177,6 +177,38 @@
                     </div>
                 </div>
 
+                <!-- Kit Asociado Card -->
+                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Kit Asociado</h2>
+                        @if($lot->kits->count() > 0)
+                            @foreach($lot->kits as $kit)
+                                <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 mb-2">
+                                    <div class="flex items-center justify-between">
+                                        <a href="{{ route('admin.kits.show', $kit) }}" class="text-sm font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                                            {{ $kit->kit_number }}
+                                        </a>
+                                        @php
+                                            $kitStatusColors = [
+                                                'preparing' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                                                'ready' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                                                'released' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                                'in_assembly' => 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+                                                'rejected' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                            ];
+                                        @endphp
+                                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ $kitStatusColors[$kit->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                            {{ $kit->status_label }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <p class="text-sm text-gray-400 dark:text-gray-500 italic">Sin kit asociado</p>
+                        @endif
+                    </div>
+                </div>
+
                 <!-- Work Order Summary Card -->
                 <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div class="p-6">

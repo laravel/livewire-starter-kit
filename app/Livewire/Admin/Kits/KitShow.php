@@ -23,7 +23,7 @@ class KitShow extends Component
 
     public function mount(Kit $kit): void
     {
-        $this->kit = $kit->load(['workOrder.purchaseOrder.part', 'preparedBy', 'releasedBy', 'incidents.resolvedBy']);
+        $this->kit = $kit->load(['workOrder.purchaseOrder.part', 'preparedBy', 'releasedBy', 'incidents.resolvedBy', 'lots']);
     }
 
     public function validateKit(): void

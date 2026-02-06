@@ -267,6 +267,14 @@ class SentListDepartmentView extends Component
             return;
         }
 
+        // Validar que la suma de lotes no sobrepase la Cant. WO
+        $totalNewQuantity = collect($this->lots)->sum('quantity');
+        $cantWO = $this->selectedWorkOrder->original_quantity;
+        if ($totalNewQuantity > $cantWO) {
+            session()->flash('error', 'ALERTA: La suma de lotes (' . number_format($totalNewQuantity) . ') sobrepasa la Cant. WO (' . number_format($cantWO) . ') por ' . number_format($totalNewQuantity - $cantWO) . ' piezas.');
+            return;
+        }
+
         $po = $this->selectedWorkOrder->purchaseOrder;
         $part = $po->part;
 

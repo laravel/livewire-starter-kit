@@ -172,6 +172,18 @@ class LotManagement extends Component
         // Filter empty batch numbers
         $this->form['raw_material_batch_numbers'] = array_filter($this->form['raw_material_batch_numbers']);
 
+        // Validar que la suma de lotes no sobrepase la Cant. WO
+        $workOrder = \App\Models\WorkOrder::find($this->form['work_order_id']);
+        if ($workOrder) {
+            $excludeId = $this->lotId ?? 0;
+            $otherLotsTotal = $workOrder->lots()->where('id', '!=', $excludeId)->sum('quantity');
+            if (($otherLotsTotal + $this->form['quantity']) > $workOrder->original_quantity) {
+                $available = $workOrder->original_quantity - $otherLotsTotal;
+                $this->addError('form.quantity', 'La suma de lotes sobrepasaría la Cant. WO (' . number_format($workOrder->original_quantity) . '). Máximo disponible: ' . number_format($available));
+                return;
+            }
+        }
+
         if ($this->lotId) {
             // Update existing lot
             $oldValues = $this->lot->toArray();

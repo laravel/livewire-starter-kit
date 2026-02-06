@@ -170,54 +170,10 @@
                                         {{ $part->number }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300 max-w-xs truncate"
                                         title="{{ $part->description }}">{{ $part->description }}</td>
-                                    {{-- Semáforo de Kit --}}
-                                    <td class="px-4 py-3 text-center">
-                                        @php
-                                            // Obtener el estado del kit más reciente del WO
-                                            $latestKit = $wo->kits->sortByDesc('created_at')->first();
-                                            $kitStatus = $latestKit?->status ?? 'none';
-                                            $kitColor = match ($kitStatus) {
-                                                'rejected' => 'bg-red-500',
-                                                'preparing' => 'bg-yellow-400',
-                                                'ready' => 'bg-blue-500',
-                                                'released' => 'bg-green-500',
-                                                'in_assembly' => 'bg-orange-500',
-                                                default => 'bg-gray-400',
-                                            };
-                                        @endphp
-                                        <button wire:click="openKitModal({{ $wo->lots->first()?->id }})"
-                                            class="w-6 h-6 rounded {{ $kitColor }} hover:opacity-80 transition-opacity"
-                                            title="Kit: {{ $latestKit?->status_label ?? 'Sin kit' }}"></button>
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
-                                        @php
-                                            $qualityColor = match ($departmentStatuses['quality']) {
-                                                'rejected' => 'bg-red-500',
-                                                'pending' => 'bg-yellow-400',
-                                                'in_progress' => 'bg-blue-500',
-                                                'approved' => 'bg-green-500',
-                                                default => 'bg-gray-400',
-                                            };
-                                        @endphp
-                                        <button wire:click="openDepartmentStatusModal({{ $wo->id }}, 'quality')"
-                                            class="w-6 h-6 rounded {{ $qualityColor }} hover:opacity-80 transition-opacity"
-                                            title="Calidad"></button>
-                                    </td>
-                                    <td class="px-4 py-3 text-center">
-                                        @php
-                                            $productionColor = match ($departmentStatuses['production']) {
-                                                'rejected' => 'bg-red-500',
-                                                'pending' => 'bg-yellow-400',
-                                                'in_progress' => 'bg-blue-500',
-                                                'approved' => 'bg-green-500',
-                                                default => 'bg-gray-400',
-                                            };
-                                        @endphp
-                                        <button
-                                            wire:click="openDepartmentStatusModal({{ $wo->id }}, 'production')"
-                                            class="w-6 h-6 rounded {{ $productionColor }} hover:opacity-80 transition-opacity"
-                                            title="Producción"></button>
-                                    </td>
+                                    {{-- Celdas vacías para Kit, Cal, Prod en fila WO --}}
+                                    <td class="px-4 py-3"></td>
+                                    <td class="px-4 py-3"></td>
+                                    <td class="px-4 py-3"></td>
                                     {{-- Cantidades --}}
                                     <td class="px-4 py-3 text-right text-gray-900 dark:text-white font-medium">
                                         {{ number_format($cantWO) }}</td>
@@ -344,7 +300,8 @@
                                         <td class="px-4 py-2 text-right text-xs"></td>
                                         <td
                                             class="px-4 py-2 text-right text-xs font-medium text-gray-900 dark:text-white">
-                                            {{ number_format($lot->quantity) }}</td>
+                                            {{ number_format($lot->quantity) }}
+                                        </td>
                                         {{-- Fechas --}}
                                         <td class="px-4 py-2 text-center text-xs text-gray-600 dark:text-gray-400">
                                             {{ $wo->scheduled_send_date?->format('m/d/Y') ?? '-' }}</td>
@@ -357,13 +314,31 @@
                                     </tr>
                                 @endforeach
 
+                                {{-- Alerta si suma de lotes sobrepasa Cant. WO --}}
+                                @php
+                                    $totalLotQuantity = $allLots->sum('quantity');
+                                    $exceedsWO = $totalLotQuantity > $cantWO;
+                                @endphp
+                                @if($exceedsWO)
+                                    <tr class="bg-red-50 dark:bg-red-900/30">
+                                        <td colspan="16" class="px-4 py-2">
+                                            <div class="flex items-center text-red-600 dark:text-red-400 text-xs font-semibold">
+                                                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                </svg>
+                                                ALERTA: La suma de lotes ({{ number_format($totalLotQuantity) }}) sobrepasa la Cant. WO ({{ number_format($cantWO) }}) por {{ number_format($totalLotQuantity - $cantWO) }} piezas.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
+
                                 {{-- Fila de Total --}}
                                 @if ($allLots->count() > 1)
                                     <tr class="bg-gray-100 dark:bg-gray-700/40 font-semibold">
                                         <td colspan="11" class="px-4 py-2 text-right text-gray-900 dark:text-white">
                                             Total:</td>
-                                        <td class="px-4 py-2 text-right text-gray-900 dark:text-white">
-                                            {{ number_format($allLots->sum('quantity')) }}</td>
+                                        <td class="px-4 py-2 text-right {{ $exceedsWO ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">
+                                            {{ number_format($totalLotQuantity) }}</td>
                                         <td colspan="4"></td>
                                     </tr>
                                 @endif

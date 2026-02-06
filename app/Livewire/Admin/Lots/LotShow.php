@@ -15,7 +15,7 @@ class LotShow extends Component
 
     public function mount(Lot $lot): void
     {
-        $this->lot = $lot->load(['workOrder.purchaseOrder.part']);
+        $this->lot = $lot->load(['workOrder.purchaseOrder.part', 'kits']);
     }
 
     public function startLot(): void

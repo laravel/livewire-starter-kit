@@ -115,6 +115,9 @@
                                     @endif
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Lotes
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     Validado
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -155,6 +158,18 @@
                                         </button>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($kit->lots->count() > 0)
+                                            <div class="text-sm text-gray-900 dark:text-white">
+                                                {{ $kit->lots->count() }} lote(s)
+                                            </div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ $kit->lots->pluck('lot_number')->take(2)->join(', ') }}{{ $kit->lots->count() > 2 ? '...' : '' }}
+                                            </div>
+                                        @else
+                                            <span class="text-xs text-gray-400 dark:text-gray-500">Sin lotes</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
                                         @if($kit->validated)
                                             <span class="text-green-600 dark:text-green-400">
                                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -185,7 +200,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                                         No se encontraron kits.
                                     </td>
                                 </tr>
