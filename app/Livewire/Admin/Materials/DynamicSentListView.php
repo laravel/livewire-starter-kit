@@ -21,7 +21,9 @@ class DynamicSentListView extends Component
     public string $filterStatus = '';
 
     // Modal states
+    public bool $showCreateLotModal = false;
     public bool $showEditLotModal = false;
+    public bool $showDeleteLotConfirm = false;
     public bool $showCreateKitModal = false;
     public bool $showEditKitModal = false;
     public bool $showDeleteKitConfirm = false;
@@ -36,10 +38,15 @@ class DynamicSentListView extends Component
     public ?int $selectedWOStatusId = null;
     public string $woStatusAction = '';
 
+    // Form data for lot creation
+    public string $newLotNumber = '';
+    public int $newLotQuantity = 0;
+
     // Form data for lot editing
     public string $lotStatus = '';
     public string $lotComments = '';
     public string $lotDescription = '';
+    public int $lotQuantity = 0;
 
     // Form data for kit creation
     public string $kitStatus = 'preparing';
@@ -128,7 +135,75 @@ class DynamicSentListView extends Component
     }
 
     // ===============================================
-    // LOT MANAGEMENT
+    // LOT MANAGEMENT - CREATE
+    // ===============================================
+
+    /**
+     * Open the create lot modal.
+     */
+    public function openCreateLotModal(int $workOrderId): void
+    {
+        $this->selectedWorkOrderId = $workOrderId;
+        $this->newLotNumber = '';
+        $this->newLotQuantity = 0;
+        $this->showCreateLotModal = true;
+    }
+
+    /**
+     * Close the create lot modal.
+     */
+    public function closeCreateLotModal(): void
+    {
+        $this->showCreateLotModal = false;
+        $this->selectedWorkOrderId = null;
+        $this->newLotNumber = '';
+        $this->newLotQuantity = 0;
+    }
+
+    /**
+     * Create a new lot.
+     */
+    public function createLot(): void
+    {
+        $this->validate([
+            'newLotNumber' => 'required|string|max:255',
+            'newLotQuantity' => 'required|integer|min:1',
+        ], [
+            'newLotNumber.required' => 'El número de lote es obligatorio.',
+            'newLotQuantity.required' => 'La cantidad es obligatoria.',
+            'newLotQuantity.min' => 'La cantidad debe ser mayor a 0.',
+        ]);
+
+        $workOrder = WorkOrder::findOrFail($this->selectedWorkOrderId);
+
+        // Validar que la suma de lotes no sobrepase la Cant. WO
+        $currentTotal = $workOrder->lots()->sum('quantity');
+        if (($currentTotal + $this->newLotQuantity) > $workOrder->original_quantity) {
+            $available = $workOrder->original_quantity - $currentTotal;
+            $this->addError('newLotQuantity', 'La suma de lotes sobrepasaría la Cant. WO (' . number_format($workOrder->original_quantity) . '). Máximo disponible: ' . number_format($available));
+            return;
+        }
+
+        $part = $workOrder->purchaseOrder->part;
+
+        Lot::create([
+            'work_order_id' => $workOrder->id,
+            'lot_number' => $this->newLotNumber,
+            'quantity' => $this->newLotQuantity,
+            'description' => $part->description ?? '',
+            'status' => Lot::STATUS_PENDING,
+        ]);
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Lote creado correctamente'
+        ]);
+
+        $this->closeCreateLotModal();
+    }
+
+    // ===============================================
+    // LOT MANAGEMENT - EDIT
     // ===============================================
 
     /**
@@ -143,6 +218,7 @@ class DynamicSentListView extends Component
             $this->lotStatus = $lot->status;
             $this->lotDescription = $lot->description ?? '';
             $this->lotComments = $lot->comments ?? '';
+            $this->lotQuantity = $lot->quantity;
             $this->showEditLotModal = true;
         }
     }
@@ -165,14 +241,25 @@ class DynamicSentListView extends Component
             'lotStatus' => 'required|in:pending,in_progress,completed,cancelled',
             'lotDescription' => 'nullable|string|max:255',
             'lotComments' => 'nullable|string|max:500',
+            'lotQuantity' => 'required|integer|min:1',
         ]);
 
         $lot = Lot::findOrFail($this->selectedLotId);
+
+        // Validar que la suma de lotes no sobrepase la Cant. WO
+        $workOrder = $lot->workOrder;
+        $otherLotsTotal = $workOrder->lots()->where('id', '!=', $lot->id)->sum('quantity');
+        if (($otherLotsTotal + $this->lotQuantity) > $workOrder->original_quantity) {
+            $available = $workOrder->original_quantity - $otherLotsTotal;
+            $this->addError('lotQuantity', 'La suma de lotes sobrepasaría la Cant. WO (' . number_format($workOrder->original_quantity) . '). Máximo disponible: ' . number_format($available));
+            return;
+        }
 
         $lot->update([
             'status' => $this->lotStatus,
             'description' => $this->lotDescription,
             'comments' => $this->lotComments,
+            'quantity' => $this->lotQuantity,
         ]);
 
         $this->dispatch('lot-updated');
@@ -182,6 +269,53 @@ class DynamicSentListView extends Component
         ]);
 
         $this->closeEditLotModal();
+    }
+
+    // ===============================================
+    // LOT MANAGEMENT - DELETE
+    // ===============================================
+
+    /**
+     * Confirm lot deletion.
+     */
+    public function confirmDeleteLot(int $lotId): void
+    {
+        $this->selectedLotId = $lotId;
+        $this->showDeleteLotConfirm = true;
+    }
+
+    /**
+     * Delete the lot.
+     */
+    public function deleteLot(): void
+    {
+        $lot = Lot::findOrFail($this->selectedLotId);
+
+        if (!$lot->canBeDeleted()) {
+            $this->dispatch('notify', [
+                'type' => 'error',
+                'message' => 'Este lote no puede ser eliminado. Tiene kits asociados.'
+            ]);
+            return;
+        }
+
+        $lot->delete();
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Lote eliminado correctamente'
+        ]);
+
+        $this->cancelDeleteLot();
+    }
+
+    /**
+     * Cancel lot deletion.
+     */
+    public function cancelDeleteLot(): void
+    {
+        $this->showDeleteLotConfirm = false;
+        $this->selectedLotId = null;
     }
 
     // ===============================================
@@ -440,11 +574,27 @@ class DynamicSentListView extends Component
     /**
      * Handle edit-lot-modal close event.
      */
+    #[On('modal-close:create-lot-modal')]
+    public function onCreateLotModalClose(): void
+    {
+        $this->showCreateLotModal = false;
+        $this->selectedWorkOrderId = null;
+        $this->newLotNumber = '';
+        $this->newLotQuantity = 0;
+    }
+
     #[On('modal-close:edit-lot-modal')]
     public function onEditLotModalClose(): void
     {
         $this->showEditLotModal = false;
         $this->resetLotForm();
+    }
+
+    #[On('modal-close:delete-lot-modal')]
+    public function onDeleteLotModalClose(): void
+    {
+        $this->showDeleteLotConfirm = false;
+        $this->selectedLotId = null;
     }
 
     /**
@@ -492,6 +642,7 @@ class DynamicSentListView extends Component
         $this->lotStatus = '';
         $this->lotDescription = '';
         $this->lotComments = '';
+        $this->lotQuantity = 0;
     }
 
     /**
