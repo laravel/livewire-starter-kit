@@ -45,6 +45,18 @@ class ShippingListDisplay extends Component
     public $selectedKit = null;
     public $kitStatus = 'preparing';
 
+    // Modal de Empaque por lote
+    public $showPackagingModal = false;
+    public $selectedLotForPackaging = null;
+    public $packagingStatus = 'pending';
+    public $packagingComments = '';
+
+    // Modal de Calidad Final por lote
+    public $showFinalQualityModal = false;
+    public $selectedLotForFinalQuality = null;
+    public $finalQualityStatus = 'pending';
+    public $finalQualityComments = '';
+
     public function mount()
     {
         // Inicializar filtros
@@ -430,6 +442,148 @@ class ShippingListDisplay extends Component
         session()->flash('message', "Status de calidad actualizado a: {$statusLabel}");
 
         $this->closeQualityModal();
+        $this->dispatch('refresh-display');
+    }
+
+    // ===============================================
+    // PACKAGING (EMPAQUE) MODAL
+    // ===============================================
+
+    public function openPackagingModal($lotId)
+    {
+        $lot = Lot::with(['workOrder.purchaseOrder.part'])->find($lotId);
+
+        if (!$lot) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $this->selectedLotForPackaging = $lot;
+        $this->packagingStatus = $lot->packaging_status ?? 'pending';
+        $this->packagingComments = $lot->packaging_comments ?? '';
+        $this->showPackagingModal = true;
+    }
+
+    public function closePackagingModal()
+    {
+        $this->showPackagingModal = false;
+        $this->selectedLotForPackaging = null;
+        $this->packagingStatus = 'pending';
+        $this->packagingComments = '';
+        $this->resetErrorBag();
+    }
+
+    public function setPackagingStatus($status)
+    {
+        $this->packagingStatus = $status;
+    }
+
+    public function savePackagingStatus()
+    {
+        $rules = [
+            'packagingStatus' => 'required|in:pending,approved,rejected',
+        ];
+
+        if ($this->packagingStatus === 'rejected') {
+            $rules['packagingComments'] = 'required|string|min:5|max:1000';
+        } else {
+            $rules['packagingComments'] = 'nullable|string|max:1000';
+        }
+
+        $this->validate($rules, [
+            'packagingStatus.required' => 'Debe seleccionar un status de empaque.',
+            'packagingComments.required' => 'Debe indicar el motivo del rechazo.',
+            'packagingComments.min' => 'El comentario debe tener al menos 5 caracteres.',
+        ]);
+
+        if (!$this->selectedLotForPackaging) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $this->selectedLotForPackaging->update([
+            'packaging_status' => $this->packagingStatus,
+            'packaging_comments' => $this->packagingComments,
+            'packaging_inspected_at' => now(),
+            'packaging_inspected_by' => auth()->id(),
+        ]);
+
+        $statusLabels = ['pending' => 'Pendiente', 'approved' => 'Aprobado', 'rejected' => 'Rechazado'];
+        $statusLabel = $statusLabels[$this->packagingStatus] ?? $this->packagingStatus;
+        session()->flash('message', "Status de empaque actualizado a: {$statusLabel}");
+
+        $this->closePackagingModal();
+        $this->dispatch('refresh-display');
+    }
+
+    // ===============================================
+    // FINAL QUALITY (CALIDAD) MODAL
+    // ===============================================
+
+    public function openFinalQualityModal($lotId)
+    {
+        $lot = Lot::with(['workOrder.purchaseOrder.part'])->find($lotId);
+
+        if (!$lot) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $this->selectedLotForFinalQuality = $lot;
+        $this->finalQualityStatus = $lot->final_quality_status ?? 'pending';
+        $this->finalQualityComments = $lot->final_quality_comments ?? '';
+        $this->showFinalQualityModal = true;
+    }
+
+    public function closeFinalQualityModal()
+    {
+        $this->showFinalQualityModal = false;
+        $this->selectedLotForFinalQuality = null;
+        $this->finalQualityStatus = 'pending';
+        $this->finalQualityComments = '';
+        $this->resetErrorBag();
+    }
+
+    public function setFinalQualityStatus($status)
+    {
+        $this->finalQualityStatus = $status;
+    }
+
+    public function saveFinalQualityStatus()
+    {
+        $rules = [
+            'finalQualityStatus' => 'required|in:pending,approved,rejected',
+        ];
+
+        if ($this->finalQualityStatus === 'rejected') {
+            $rules['finalQualityComments'] = 'required|string|min:5|max:1000';
+        } else {
+            $rules['finalQualityComments'] = 'nullable|string|max:1000';
+        }
+
+        $this->validate($rules, [
+            'finalQualityStatus.required' => 'Debe seleccionar un status de calidad.',
+            'finalQualityComments.required' => 'Debe indicar el motivo del rechazo.',
+            'finalQualityComments.min' => 'El comentario debe tener al menos 5 caracteres.',
+        ]);
+
+        if (!$this->selectedLotForFinalQuality) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $this->selectedLotForFinalQuality->update([
+            'final_quality_status' => $this->finalQualityStatus,
+            'final_quality_comments' => $this->finalQualityComments,
+            'final_quality_inspected_at' => now(),
+            'final_quality_inspected_by' => auth()->id(),
+        ]);
+
+        $statusLabels = ['pending' => 'Pendiente', 'approved' => 'Aprobado', 'rejected' => 'Rechazado'];
+        $statusLabel = $statusLabels[$this->finalQualityStatus] ?? $this->finalQualityStatus;
+        session()->flash('message', "Status de calidad final actualizado a: {$statusLabel}");
+
+        $this->closeFinalQualityModal();
         $this->dispatch('refresh-display');
     }
 
