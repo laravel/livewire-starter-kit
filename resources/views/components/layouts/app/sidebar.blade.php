@@ -75,6 +75,9 @@
                     :current="request()->routeIs('admin.production-statuses.*')" wire:navigate>
                     {{ __('Estados de Producción') }}
                 </flux:navlist.item>
+                <flux:navlist.item icon="scale" :href="route('admin.production.weighings')"
+                    :current="request()->routeIs('admin.production.weighings')" wire:navigate>{{ __('Pesadas') }}
+                </flux:navlist.item>
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Administración')" class="grid">

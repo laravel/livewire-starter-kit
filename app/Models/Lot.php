@@ -115,6 +115,14 @@ class Lot extends Model
     }
 
     /**
+     * Get the weighings (pesadas) for this lot.
+     */
+    public function weighings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Weighing::class);
+    }
+
+    /**
      * Get the audit trail for this lot.
      */
     public function auditTrail(): \Illuminate\Database\Eloquent\Relations\MorphMany
