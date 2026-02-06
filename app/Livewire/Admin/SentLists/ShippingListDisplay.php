@@ -28,16 +28,16 @@ class ShippingListDisplay extends Component
     public $selectedWoForStatus = null;
     public $departmentStatuses = [
         'materials' => 'pending',
-        'quality' => 'pending',
+        'inspection' => 'pending',
         'production' => 'pending',
     ];
 
-    // Modal de calidad por lote
-    public $showQualityModal = false;
+    // Modal de inspeccion por lote
+    public $showInspectionModal = false;
     public $selectedLotId = null;
     public $selectedLot = null;
-    public $qualityStatus = 'pending';
-    public $qualityComments = '';
+    public $inspectionStatus = 'pending';
+    public $inspectionComments = '';
 
     // Modal de Kit por lote
     public $showKitModal = false;
@@ -51,11 +51,11 @@ class ShippingListDisplay extends Component
     public $packagingStatus = 'pending';
     public $packagingComments = '';
 
-    // Modal de Calidad Final por lote
-    public $showFinalQualityModal = false;
-    public $selectedLotForFinalQuality = null;
-    public $finalQualityStatus = 'pending';
-    public $finalQualityComments = '';
+    // Modal de Inspeccion Final por lote
+    public $showFinalInspectionModal = false;
+    public $selectedLotForFinalInspection = null;
+    public $finalInspectionStatus = 'pending';
+    public $finalInspectionComments = '';
 
     // Modal de Pesada (Producción) por lote
     public $showProductionModal = false;
@@ -359,9 +359,9 @@ class ShippingListDisplay extends Component
     }
 
     /**
-     * Open quality status modal for a specific lot.
+     * Open inspection status modal for a specific lot.
      */
-    public function openQualityModal($lotId)
+    public function openInspectionModal($lotId)
     {
         $this->selectedLotId = $lotId;
         $this->selectedLot = Lot::with(['workOrder.purchaseOrder.part', 'kits'])->find($lotId);
@@ -371,62 +371,62 @@ class ShippingListDisplay extends Component
             return;
         }
 
-        // VALIDACION DE DEPENDENCIA MAT -> CAL
-        if (!$this->selectedLot->canBeInspectedByQuality()) {
-            $reason = $this->selectedLot->getQualityBlockedReason();
+        // VALIDACION DE DEPENDENCIA MAT -> INSP
+        if (!$this->selectedLot->canBeInspected()) {
+            $reason = $this->selectedLot->getInspectionBlockedReason();
             session()->flash('error', $reason);
             return;
         }
 
         // Cargar valores actuales
-        $this->qualityStatus = $this->selectedLot->quality_status ?? 'pending';
-        $this->qualityComments = $this->selectedLot->quality_comments ?? '';
+        $this->inspectionStatus = $this->selectedLot->inspection_status ?? 'pending';
+        $this->inspectionComments = $this->selectedLot->inspection_comments ?? '';
 
-        $this->showQualityModal = true;
+        $this->showInspectionModal = true;
     }
 
     /**
-     * Close quality status modal.
+     * Close inspection status modal.
      */
-    public function closeQualityModal()
+    public function closeInspectionModal()
     {
-        $this->showQualityModal = false;
+        $this->showInspectionModal = false;
         $this->selectedLotId = null;
         $this->selectedLot = null;
-        $this->qualityStatus = 'pending';
-        $this->qualityComments = '';
+        $this->inspectionStatus = 'pending';
+        $this->inspectionComments = '';
         $this->resetErrorBag();
     }
 
     /**
-     * Set quality status (for visual update).
+     * Set inspection status (for visual update).
      */
-    public function setQualityStatus($status)
+    public function setInspectionStatus($status)
     {
-        $this->qualityStatus = $status;
+        $this->inspectionStatus = $status;
     }
 
     /**
-     * Save quality status for the selected lot.
+     * Save inspection status for the selected lot.
      */
-    public function saveQualityStatus()
+    public function saveInspectionStatus()
     {
         // Validar
         $rules = [
-            'qualityStatus' => 'required|in:pending,approved,rejected',
+            'inspectionStatus' => 'required|in:pending,approved,rejected',
         ];
 
         // Comentario requerido si es rechazado
-        if ($this->qualityStatus === 'rejected') {
-            $rules['qualityComments'] = 'required|string|min:5|max:1000';
+        if ($this->inspectionStatus === 'rejected') {
+            $rules['inspectionComments'] = 'required|string|min:5|max:1000';
         } else {
-            $rules['qualityComments'] = 'nullable|string|max:1000';
+            $rules['inspectionComments'] = 'nullable|string|max:1000';
         }
 
         $this->validate($rules, [
-            'qualityStatus.required' => 'Debe seleccionar un status de calidad.',
-            'qualityComments.required' => 'Debe indicar el motivo del rechazo.',
-            'qualityComments.min' => 'El comentario debe tener al menos 5 caracteres.',
+            'inspectionStatus.required' => 'Debe seleccionar un status de inspeccion.',
+            'inspectionComments.required' => 'Debe indicar el motivo del rechazo.',
+            'inspectionComments.min' => 'El comentario debe tener al menos 5 caracteres.',
         ]);
 
         if (!$this->selectedLot) {
@@ -434,25 +434,25 @@ class ShippingListDisplay extends Component
             return;
         }
 
-        // Doble verificacion de dependencia MAT -> CAL
-        if (!$this->selectedLot->canBeInspectedByQuality()) {
+        // Doble verificacion de dependencia MAT -> INSP
+        if (!$this->selectedLot->canBeInspected()) {
             session()->flash('error', 'Este lote ya no puede ser inspeccionado. El kit asociado no esta liberado.');
-            $this->closeQualityModal();
+            $this->closeInspectionModal();
             return;
         }
 
         // Actualizar lote
         $this->selectedLot->update([
-            'quality_status' => $this->qualityStatus,
-            'quality_comments' => $this->qualityComments,
-            'quality_inspected_at' => now(),
-            'quality_inspected_by' => auth()->id(),
+            'inspection_status' => $this->inspectionStatus,
+            'inspection_comments' => $this->inspectionComments,
+            'inspection_completed_at' => now(),
+            'inspection_completed_by' => auth()->id(),
         ]);
 
-        $statusLabel = Lot::getQualityStatuses()[$this->qualityStatus];
-        session()->flash('message', "Status de calidad actualizado a: {$statusLabel}");
+        $statusLabel = Lot::getInspectionStatuses()[$this->inspectionStatus];
+        session()->flash('message', "Status de inspeccion actualizado a: {$statusLabel}");
 
-        $this->closeQualityModal();
+        $this->closeInspectionModal();
         $this->dispatch('refresh-display');
     }
 
@@ -528,10 +528,10 @@ class ShippingListDisplay extends Component
     }
 
     // ===============================================
-    // FINAL QUALITY (CALIDAD) MODAL
+    // FINAL INSPECTION (INSPECCION) MODAL
     // ===============================================
 
-    public function openFinalQualityModal($lotId)
+    public function openFinalInspectionModal($lotId)
     {
         $lot = Lot::with(['workOrder.purchaseOrder.part'])->find($lotId);
 
@@ -540,61 +540,61 @@ class ShippingListDisplay extends Component
             return;
         }
 
-        $this->selectedLotForFinalQuality = $lot;
-        $this->finalQualityStatus = $lot->final_quality_status ?? 'pending';
-        $this->finalQualityComments = $lot->final_quality_comments ?? '';
-        $this->showFinalQualityModal = true;
+        $this->selectedLotForFinalInspection = $lot;
+        $this->finalInspectionStatus = $lot->final_inspection_status ?? 'pending';
+        $this->finalInspectionComments = $lot->final_inspection_comments ?? '';
+        $this->showFinalInspectionModal = true;
     }
 
-    public function closeFinalQualityModal()
+    public function closeFinalInspectionModal()
     {
-        $this->showFinalQualityModal = false;
-        $this->selectedLotForFinalQuality = null;
-        $this->finalQualityStatus = 'pending';
-        $this->finalQualityComments = '';
+        $this->showFinalInspectionModal = false;
+        $this->selectedLotForFinalInspection = null;
+        $this->finalInspectionStatus = 'pending';
+        $this->finalInspectionComments = '';
         $this->resetErrorBag();
     }
 
-    public function setFinalQualityStatus($status)
+    public function setFinalInspectionStatus($status)
     {
-        $this->finalQualityStatus = $status;
+        $this->finalInspectionStatus = $status;
     }
 
-    public function saveFinalQualityStatus()
+    public function saveFinalInspectionStatus()
     {
         $rules = [
-            'finalQualityStatus' => 'required|in:pending,approved,rejected',
+            'finalInspectionStatus' => 'required|in:pending,approved,rejected',
         ];
 
-        if ($this->finalQualityStatus === 'rejected') {
-            $rules['finalQualityComments'] = 'required|string|min:5|max:1000';
+        if ($this->finalInspectionStatus === 'rejected') {
+            $rules['finalInspectionComments'] = 'required|string|min:5|max:1000';
         } else {
-            $rules['finalQualityComments'] = 'nullable|string|max:1000';
+            $rules['finalInspectionComments'] = 'nullable|string|max:1000';
         }
 
         $this->validate($rules, [
-            'finalQualityStatus.required' => 'Debe seleccionar un status de calidad.',
-            'finalQualityComments.required' => 'Debe indicar el motivo del rechazo.',
-            'finalQualityComments.min' => 'El comentario debe tener al menos 5 caracteres.',
+            'finalInspectionStatus.required' => 'Debe seleccionar un status de inspeccion.',
+            'finalInspectionComments.required' => 'Debe indicar el motivo del rechazo.',
+            'finalInspectionComments.min' => 'El comentario debe tener al menos 5 caracteres.',
         ]);
 
-        if (!$this->selectedLotForFinalQuality) {
+        if (!$this->selectedLotForFinalInspection) {
             session()->flash('error', 'Lote no encontrado.');
             return;
         }
 
-        $this->selectedLotForFinalQuality->update([
-            'final_quality_status' => $this->finalQualityStatus,
-            'final_quality_comments' => $this->finalQualityComments,
-            'final_quality_inspected_at' => now(),
-            'final_quality_inspected_by' => auth()->id(),
+        $this->selectedLotForFinalInspection->update([
+            'final_inspection_status' => $this->finalInspectionStatus,
+            'final_inspection_comments' => $this->finalInspectionComments,
+            'final_inspection_completed_at' => now(),
+            'final_inspection_completed_by' => auth()->id(),
         ]);
 
         $statusLabels = ['pending' => 'Pendiente', 'approved' => 'Aprobado', 'rejected' => 'Rechazado'];
-        $statusLabel = $statusLabels[$this->finalQualityStatus] ?? $this->finalQualityStatus;
-        session()->flash('message', "Status de calidad final actualizado a: {$statusLabel}");
+        $statusLabel = $statusLabels[$this->finalInspectionStatus] ?? $this->finalInspectionStatus;
+        session()->flash('message', "Status de inspeccion final actualizado a: {$statusLabel}");
 
-        $this->closeFinalQualityModal();
+        $this->closeFinalInspectionModal();
         $this->dispatch('refresh-display');
     }
 

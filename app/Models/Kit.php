@@ -20,7 +20,7 @@ class Kit extends Model
         'validation_notes',
         'prepared_by',
         'released_by',
-        'submitted_to_quality_at',
+        'submitted_to_inspection_at',
         'approved_at',
         'approved_by',
         'current_approval_cycle',
@@ -28,7 +28,7 @@ class Kit extends Model
 
     protected $casts = [
         'validated' => 'boolean',
-        'submitted_to_quality_at' => 'datetime',
+        'submitted_to_inspection_at' => 'datetime',
         'approved_at' => 'datetime',
         'current_approval_cycle' => 'integer',
     ];
@@ -265,17 +265,17 @@ class Kit extends Model
      */
     public function canBeDeleted(): bool
     {
-        return $this->status === self::STATUS_PREPARING && !$this->submitted_to_quality_at;
+        return $this->status === self::STATUS_PREPARING && !$this->submitted_to_inspection_at;
     }
 
     /**
-     * Submit the kit to Quality for approval.
+     * Submit the kit to Inspection for approval.
      */
-    public function submitToQuality(User $user): void
+    public function submitToInspection(User $user): void
     {
         $this->update([
             'status' => self::STATUS_READY,
-            'submitted_to_quality_at' => now(),
+            'submitted_to_inspection_at' => now(),
         ]);
 
         // Create approval cycle

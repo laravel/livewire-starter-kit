@@ -26,10 +26,10 @@ class Lot extends Model
         'supplier_name',
         'receipt_date',
         'expiration_date',
-        'quality_status',
-        'quality_comments',
-        'quality_inspected_at',
-        'quality_inspected_by',
+        'inspection_status',
+        'inspection_comments',
+        'inspection_completed_at',
+        'inspection_completed_by',
     ];
 
     protected $casts = [
@@ -37,7 +37,7 @@ class Lot extends Model
         'raw_material_batch_numbers' => 'array',
         'receipt_date' => 'date',
         'expiration_date' => 'date',
-        'quality_inspected_at' => 'datetime',
+        'inspection_completed_at' => 'datetime',
     ];
 
     /**
@@ -49,11 +49,11 @@ class Lot extends Model
     public const STATUS_CANCELLED = 'cancelled';
 
     /**
-     * Quality Status constants
+     * Inspection Status constants
      */
-    public const QUALITY_PENDING = 'pending';
-    public const QUALITY_APPROVED = 'approved';
-    public const QUALITY_REJECTED = 'rejected';
+    public const INSPECTION_PENDING = 'pending';
+    public const INSPECTION_APPROVED = 'approved';
+    public const INSPECTION_REJECTED = 'rejected';
 
     /**
      * Boot the model.
@@ -309,43 +309,43 @@ class Lot extends Model
     }
 
     /**
-     * Get all available quality statuses.
+     * Get all available inspection statuses.
      */
-    public static function getQualityStatuses(): array
+    public static function getInspectionStatuses(): array
     {
         return [
-            self::QUALITY_PENDING => 'Pendiente',
-            self::QUALITY_APPROVED => 'Aprobado',
-            self::QUALITY_REJECTED => 'No Aprobado',
+            self::INSPECTION_PENDING => 'Pendiente',
+            self::INSPECTION_APPROVED => 'Aprobado',
+            self::INSPECTION_REJECTED => 'No Aprobado',
         ];
     }
 
     /**
-     * Get the quality status label.
+     * Get the inspection status label.
      */
-    public function getQualityStatusLabelAttribute(): string
+    public function getInspectionStatusLabelAttribute(): string
     {
-        return self::getQualityStatuses()[$this->quality_status] ?? $this->quality_status;
+        return self::getInspectionStatuses()[$this->inspection_status] ?? $this->inspection_status;
     }
 
     /**
-     * Get the quality status color for UI display.
+     * Get the inspection status color for UI display.
      */
-    public function getQualityStatusColorAttribute(): string
+    public function getInspectionStatusColorAttribute(): string
     {
-        return match ($this->quality_status) {
-            self::QUALITY_PENDING => 'yellow',
-            self::QUALITY_APPROVED => 'green',
-            self::QUALITY_REJECTED => 'red',
+        return match ($this->inspection_status) {
+            self::INSPECTION_PENDING => 'yellow',
+            self::INSPECTION_APPROVED => 'green',
+            self::INSPECTION_REJECTED => 'red',
             default => 'gray',
         };
     }
 
     /**
-     * Check if the lot can be inspected by Quality.
-     * Quality can only inspect lots that have an associated Kit with status "released".
+     * Check if the lot can be inspected.
+     * Inspection can only happen on lots that have an associated Kit with status "released".
      */
-    public function canBeInspectedByQuality(): bool
+    public function canBeInspected(): bool
     {
         return $this->kits()
             ->where('status', Kit::STATUS_RELEASED)
@@ -363,11 +363,11 @@ class Lot extends Model
     }
 
     /**
-     * Get the reason why quality inspection is blocked.
+     * Get the reason why inspection is blocked.
      */
-    public function getQualityBlockedReason(): ?string
+    public function getInspectionBlockedReason(): ?string
     {
-        if ($this->canBeInspectedByQuality()) {
+        if ($this->canBeInspected()) {
             return null;
         }
 
@@ -387,66 +387,66 @@ class Lot extends Model
     }
 
     /**
-     * Scope a query to only include lots with pending quality.
+     * Scope a query to only include lots with pending inspection.
      */
-    public function scopeQualityPending($query)
+    public function scopeInspectionPending($query)
     {
-        return $query->where('quality_status', self::QUALITY_PENDING);
+        return $query->where('inspection_status', self::INSPECTION_PENDING);
     }
 
     /**
-     * Scope a query to only include lots with approved quality.
+     * Scope a query to only include lots with approved inspection.
      */
-    public function scopeQualityApproved($query)
+    public function scopeInspectionApproved($query)
     {
-        return $query->where('quality_status', self::QUALITY_APPROVED);
+        return $query->where('inspection_status', self::INSPECTION_APPROVED);
     }
 
     /**
-     * Scope a query to only include lots with rejected quality.
+     * Scope a query to only include lots with rejected inspection.
      */
-    public function scopeQualityRejected($query)
+    public function scopeInspectionRejected($query)
     {
-        return $query->where('quality_status', self::QUALITY_REJECTED);
+        return $query->where('inspection_status', self::INSPECTION_REJECTED);
     }
 
     /**
-     * Relationship with the user who inspected quality.
+     * Relationship with the user who completed the inspection.
      */
-    public function qualityInspector(): BelongsTo
+    public function inspector(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'quality_inspected_by');
+        return $this->belongsTo(User::class, 'inspection_completed_by');
     }
 
     /**
-     * Check if quality inspection is pending.
+     * Check if inspection is pending.
      */
-    public function isQualityPending(): bool
+    public function isInspectionPending(): bool
     {
-        return $this->quality_status === self::QUALITY_PENDING;
+        return $this->inspection_status === self::INSPECTION_PENDING;
     }
 
     /**
-     * Check if quality is approved.
+     * Check if inspection is approved.
      */
-    public function isQualityApproved(): bool
+    public function isInspectionApproved(): bool
     {
-        return $this->quality_status === self::QUALITY_APPROVED;
+        return $this->inspection_status === self::INSPECTION_APPROVED;
     }
 
     /**
-     * Check if quality is rejected.
+     * Check if inspection is rejected.
      */
-    public function isQualityRejected(): bool
+    public function isInspectionRejected(): bool
     {
-        return $this->quality_status === self::QUALITY_REJECTED;
+        return $this->inspection_status === self::INSPECTION_REJECTED;
     }
 
     /**
-     * Check if lot can proceed to packing/shipping (must be quality approved).
+     * Check if lot can proceed to packing/shipping (must be inspection approved).
      */
     public function canProceedToShipping(): bool
     {
-        return $this->isQualityApproved() && $this->status === self::STATUS_COMPLETED;
+        return $this->isInspectionApproved() && $this->status === self::STATUS_COMPLETED;
     }
 }

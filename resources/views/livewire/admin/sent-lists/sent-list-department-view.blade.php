@@ -20,7 +20,7 @@
             @php
                 $departments = [
                     \App\Models\SentList::DEPT_MATERIALS => ['label' => 'Materiales', 'icon' => 'cube'],
-                    \App\Models\SentList::DEPT_QUALITY => ['label' => 'Calidad', 'icon' => 'check-circle'],
+                    \App\Models\SentList::DEPT_INSPECTION => ['label' => 'Inspección', 'icon' => 'check-circle'],
                     \App\Models\SentList::DEPT_PRODUCTION => ['label' => 'Producción', 'icon' => 'cog'],
                     \App\Models\SentList::DEPT_SHIPPING => ['label' => 'Envíos', 'icon' => 'truck'],
                 ];
@@ -64,7 +64,7 @@
                                 $approvedAt = match ($deptKey) {
                                     \App\Models\SentList::DEPT_MATERIALS => $sentList->materials_approved_at,
                                     \App\Models\SentList::DEPT_PRODUCTION => $sentList->production_approved_at,
-                                    \App\Models\SentList::DEPT_QUALITY => $sentList->quality_approved_at,
+                                    \App\Models\SentList::DEPT_INSPECTION => $sentList->inspection_approved_at,
                                     default => null,
                                 };
                             @endphp

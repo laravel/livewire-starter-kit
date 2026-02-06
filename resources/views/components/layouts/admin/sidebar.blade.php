@@ -90,8 +90,8 @@
                     :current="request()->routeIs('admin.production.weighings')" wire:navigate>{{ __('Pesadas') }}
                 </flux:navlist.item>
 
-                <flux:navlist.item icon="check-badge" :href="route('admin.quality.index')"
-                    :current="request()->routeIs('admin.quality.*')" wire:navigate>{{ __('Calidad') }}
+                <flux:navlist.item icon="check-badge" :href="route('admin.inspection.index')"
+                    :current="request()->routeIs('admin.inspection.*')" wire:navigate>{{ __('Inspección') }}
                 </flux:navlist.item>
             </flux:navlist.group>
 

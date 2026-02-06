@@ -4,9 +4,9 @@
         <div class="mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Calidad</h1>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Inspección</h1>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Inspeccion de calidad de lotes de produccion
+                        Inspección de lotes de producción
                     </p>
                 </div>
             </div>
@@ -65,10 +65,10 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     </div>
                     <div>
-                        <select wire:model.live="filterQualityStatus"
+                        <select wire:model.live="filterInspectionStatus"
                             class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="">Todos los estados</option>
-                            @foreach($qualityStatuses as $value => $label)
+                            @foreach($inspectionStatuses as $value => $label)
                                 <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
                         </select>
@@ -120,9 +120,9 @@
                                         <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                                     @endif
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('quality_status')">
-                                    Estado Calidad
-                                    @if ($sortField === 'quality_status')
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('inspection_status')">
+                                    Estado Inspección
+                                    @if ($sortField === 'inspection_status')
                                         <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                                     @endif
                                 </th>
@@ -168,14 +168,14 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php
-                                            $qualityStatusColors = [
+                                            $inspectionStatusColors = [
                                                 'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
                                                 'approved' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
                                                 'rejected' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
                                             ];
                                         @endphp
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $qualityStatusColors[$lot->quality_status] ?? 'bg-gray-100 text-gray-800' }}">
-                                            {{ $lot->quality_status_label }}
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $inspectionStatusColors[$lot->inspection_status] ?? 'bg-gray-100 text-gray-800' }}">
+                                            {{ $lot->inspection_status_label }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -183,13 +183,13 @@
                                             <a href="{{ route('admin.lots.show', $lot) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400">
                                                 Ver
                                             </a>
-                                            @if($lot->canBeInspectedByQuality() && $lot->quality_status === 'pending')
-                                                <button wire:click="openQualityModal({{ $lot->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400">
+                                            @if($lot->canBeInspected() && $lot->inspection_status === 'pending')
+                                                <button wire:click="openInspectionModal({{ $lot->id }})" class="text-blue-600 hover:text-blue-900 dark:text-blue-400">
                                                     Inspeccionar
                                                 </button>
-                                            @elseif($lot->quality_status !== 'pending')
+                                            @elseif($lot->inspection_status !== 'pending')
                                                 <span class="text-gray-400 text-xs">
-                                                    {{ $lot->qualityInspector?->name ?? 'Inspeccionado' }}
+                                                    {{ $lot->inspector?->name ?? 'Inspeccionado' }}
                                                 </span>
                                             @endif
                                         </div>
@@ -198,7 +198,7 @@
                             @empty
                                 <tr>
                                     <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                                        No se encontraron lotes para inspeccion.
+                                        No se encontraron lotes para inspección.
                                     </td>
                                 </tr>
                             @endforelse
@@ -212,8 +212,8 @@
             </div>
         </div>
 
-        <!-- Quality Inspection Modal -->
-        @if($showQualityModal && $selectedLot)
+        <!-- Inspection Modal -->
+        @if($showInspectionModal && $selectedLot)
             <div class="fixed z-10 inset-0 overflow-y-auto">
                 <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                     <div class="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -229,7 +229,7 @@
                                 </div>
                                 <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                                        Inspeccion de Calidad
+                                        Inspección de Lote
                                     </h3>
                                     <div class="mt-4 space-y-4">
                                         <!-- Lot Info -->
@@ -257,19 +257,19 @@
                                         <!-- Decision -->
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                                Decision de Calidad
+                                                Decisión de Inspección
                                             </label>
                                             <div class="flex space-x-4">
                                                 <label class="inline-flex items-center">
-                                                    <input type="radio" wire:model="qualityAction" value="approved" class="form-radio text-green-600">
+                                                    <input type="radio" wire:model="inspectionAction" value="approved" class="form-radio text-green-600">
                                                     <span class="ml-2 text-gray-700 dark:text-gray-300">Aprobar</span>
                                                 </label>
                                                 <label class="inline-flex items-center">
-                                                    <input type="radio" wire:model="qualityAction" value="rejected" class="form-radio text-red-600">
+                                                    <input type="radio" wire:model="inspectionAction" value="rejected" class="form-radio text-red-600">
                                                     <span class="ml-2 text-gray-700 dark:text-gray-300">Rechazar</span>
                                                 </label>
                                             </div>
-                                            @error('qualityAction')
+                                            @error('inspectionAction')
                                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                                             @enderror
                                         </div>
@@ -279,10 +279,10 @@
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                 Comentarios (opcional)
                                             </label>
-                                            <textarea wire:model="qualityComments" rows="3"
+                                            <textarea wire:model="inspectionComments" rows="3"
                                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                                placeholder="Ingrese observaciones de la inspeccion..."></textarea>
-                                            @error('qualityComments')
+                                                placeholder="Ingrese observaciones de la inspección..."></textarea>
+                                            @error('inspectionComments')
                                                 <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
                                             @enderror
                                         </div>
@@ -291,11 +291,11 @@
                             </div>
                         </div>
                         <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse dark:bg-gray-700">
-                            <button wire:click="submitQualityDecision"
+                            <button wire:click="submitInspectionDecision"
                                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 sm:ml-3 sm:w-auto sm:text-sm">
-                                Guardar Decision
+                                Guardar Decisión
                             </button>
-                            <button wire:click="closeQualityModal"
+                            <button wire:click="closeInspectionModal"
                                 class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-600 dark:text-white dark:border-gray-600">
                                 Cancelar
                             </button>

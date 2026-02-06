@@ -1,35 +1,35 @@
 <?php
 
-namespace App\Livewire\Admin\Quality;
+namespace App\Livewire\Admin\Inspection;
 
 use App\Models\Lot;
 use App\Models\Kit;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class QualityInspectionList extends Component
+class InspectionList extends Component
 {
     use WithPagination;
 
     public string $search = '';
-    public string $filterQualityStatus = '';
+    public string $filterInspectionStatus = '';
     public int $perPage = 10;
     public string $sortField = 'created_at';
     public string $sortDirection = 'desc';
 
     // Modal state
-    public bool $showQualityModal = false;
+    public bool $showInspectionModal = false;
     public ?int $selectedLotId = null;
     public ?Lot $selectedLot = null;
-    public string $qualityAction = '';
-    public string $qualityComments = '';
+    public string $inspectionAction = '';
+    public string $inspectionComments = '';
 
     public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
-    public function updatingFilterQualityStatus(): void
+    public function updatingFilterInspectionStatus(): void
     {
         $this->resetPage();
     }
@@ -44,29 +44,29 @@ class QualityInspectionList extends Component
         }
     }
 
-    public function openQualityModal(int $lotId): void
+    public function openInspectionModal(int $lotId): void
     {
         $this->selectedLotId = $lotId;
-        $this->selectedLot = Lot::with(['workOrder.purchaseOrder.part', 'kits', 'qualityInspector'])->find($lotId);
-        $this->qualityAction = '';
-        $this->qualityComments = '';
-        $this->showQualityModal = true;
+        $this->selectedLot = Lot::with(['workOrder.purchaseOrder.part', 'kits', 'inspector'])->find($lotId);
+        $this->inspectionAction = '';
+        $this->inspectionComments = '';
+        $this->showInspectionModal = true;
     }
 
-    public function closeQualityModal(): void
+    public function closeInspectionModal(): void
     {
-        $this->showQualityModal = false;
+        $this->showInspectionModal = false;
         $this->selectedLotId = null;
         $this->selectedLot = null;
-        $this->qualityAction = '';
-        $this->qualityComments = '';
+        $this->inspectionAction = '';
+        $this->inspectionComments = '';
     }
 
-    public function submitQualityDecision(): void
+    public function submitInspectionDecision(): void
     {
         $this->validate([
-            'qualityAction' => 'required|in:approved,rejected',
-            'qualityComments' => 'nullable|string|max:1000',
+            'inspectionAction' => 'required|in:approved,rejected',
+            'inspectionComments' => 'nullable|string|max:1000',
         ]);
 
         if (!$this->selectedLotId) {
@@ -81,21 +81,21 @@ class QualityInspectionList extends Component
             return;
         }
 
-        if (!$lot->canBeInspectedByQuality()) {
-            session()->flash('error', $lot->getQualityBlockedReason() ?? 'Este lote no puede ser inspeccionado.');
-            $this->closeQualityModal();
+        if (!$lot->canBeInspected()) {
+            session()->flash('error', $lot->getInspectionBlockedReason() ?? 'Este lote no puede ser inspeccionado.');
+            $this->closeInspectionModal();
             return;
         }
 
         $lot->update([
-            'quality_status' => $this->qualityAction,
-            'quality_comments' => $this->qualityComments,
-            'quality_inspected_at' => now(),
-            'quality_inspected_by' => auth()->id(),
+            'inspection_status' => $this->inspectionAction,
+            'inspection_comments' => $this->inspectionComments,
+            'inspection_completed_at' => now(),
+            'inspection_completed_by' => auth()->id(),
         ]);
 
         // If approved, transition the kit to in_assembly
-        if ($this->qualityAction === Lot::QUALITY_APPROVED) {
+        if ($this->inspectionAction === Lot::INSPECTION_APPROVED) {
             $releasedKit = $lot->getReleasedKit();
             if ($releasedKit) {
                 $releasedKit->update(['status' => Kit::STATUS_IN_ASSEMBLY]);
@@ -110,22 +110,22 @@ class QualityInspectionList extends Component
             session()->flash('message', 'Lote rechazado. El kit ha sido marcado para correccion.');
         }
 
-        $this->closeQualityModal();
+        $this->closeInspectionModal();
     }
 
     public function render()
     {
-        $query = Lot::with(['workOrder.purchaseOrder.part', 'kits', 'qualityInspector'])
+        $query = Lot::with(['workOrder.purchaseOrder.part', 'kits', 'inspector'])
             ->search($this->search)
-            ->when($this->filterQualityStatus, function ($q) {
-                return $q->where('quality_status', $this->filterQualityStatus);
+            ->when($this->filterInspectionStatus, function ($q) {
+                return $q->where('inspection_status', $this->filterInspectionStatus);
             })
             // Show lots that have at least one kit with status 'released' OR have already been inspected
             ->where(function ($q) {
                 $q->whereHas('kits', function ($kitQuery) {
                     $kitQuery->where('status', Kit::STATUS_RELEASED);
                 })
-                ->orWhereNotNull('quality_inspected_at');
+                ->orWhereNotNull('inspection_completed_at');
             })
             ->orderBy($this->sortField, $this->sortDirection);
 
@@ -134,15 +134,15 @@ class QualityInspectionList extends Component
         // Statistics
         $stats = [
             'pending' => Lot::whereHas('kits', fn($q) => $q->where('status', Kit::STATUS_RELEASED))
-                ->where('quality_status', Lot::QUALITY_PENDING)
+                ->where('inspection_status', Lot::INSPECTION_PENDING)
                 ->count(),
-            'approved' => Lot::where('quality_status', Lot::QUALITY_APPROVED)->count(),
-            'rejected' => Lot::where('quality_status', Lot::QUALITY_REJECTED)->count(),
+            'approved' => Lot::where('inspection_status', Lot::INSPECTION_APPROVED)->count(),
+            'rejected' => Lot::where('inspection_status', Lot::INSPECTION_REJECTED)->count(),
         ];
 
-        return view('livewire.admin.quality.quality-inspection-list', [
+        return view('livewire.admin.inspection.inspection-list', [
             'lots' => $lots,
-            'qualityStatuses' => Lot::getQualityStatuses(),
+            'inspectionStatuses' => Lot::getInspectionStatuses(),
             'stats' => $stats,
         ]);
     }

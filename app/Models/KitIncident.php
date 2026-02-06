@@ -33,7 +33,7 @@ class KitIncident extends Model
     public const TYPE_MISSING_PART = 'missing_part';
     public const TYPE_DAMAGED_PART = 'damaged_part';
     public const TYPE_WRONG_PART = 'wrong_part';
-    public const TYPE_QUALITY_ISSUE = 'quality_issue';
+    public const TYPE_INSPECTION_ISSUE = 'inspection_issue';
     public const TYPE_OTHER = 'other';
 
     /**
@@ -101,7 +101,7 @@ class KitIncident extends Model
             self::TYPE_MISSING_PART => 'Parte Faltante',
             self::TYPE_DAMAGED_PART => 'Parte Dañada',
             self::TYPE_WRONG_PART => 'Parte Incorrecta',
-            self::TYPE_QUALITY_ISSUE => 'Problema de Calidad',
+            self::TYPE_INSPECTION_ISSUE => 'Problema de Inspección',
             self::TYPE_OTHER => 'Otro',
         ];
     }
@@ -123,7 +123,7 @@ class KitIncident extends Model
             self::TYPE_MISSING_PART => 'red',
             self::TYPE_DAMAGED_PART => 'orange',
             self::TYPE_WRONG_PART => 'yellow',
-            self::TYPE_QUALITY_ISSUE => 'purple',
+            self::TYPE_INSPECTION_ISSUE => 'purple',
             self::TYPE_OTHER => 'gray',
             default => 'gray',
         };
