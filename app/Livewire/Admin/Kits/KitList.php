@@ -155,7 +155,7 @@ class KitList extends Component
 
     public function render()
     {
-        $kits = Kit::with(['workOrder.purchaseOrder.part', 'preparedBy', 'releasedBy'])
+        $kits = Kit::with(['workOrder.purchaseOrder.part', 'preparedBy', 'releasedBy', 'lots'])
             ->search($this->search)
             ->when($this->filterStatus, fn($q) => $q->status($this->filterStatus))
             ->orderBy($this->sortField, $this->sortDirection)

@@ -107,11 +107,17 @@
                             </tr>
 
                             {{-- Expandable Lots Row --}}
-                            @if($workOrder->lots->isNotEmpty())
-                                <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                    <td colspan="8" class="px-6 py-3">
-                                        <div class="pl-4 border-l-2 border-blue-300 dark:border-blue-600">
-                                            <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Lotes de esta WO:</div>
+                            <tr class="bg-gray-50 dark:bg-gray-900/50">
+                                <td colspan="8" class="px-6 py-3">
+                                    {{-- Lotes Section --}}
+                                    <div class="pl-4 border-l-2 border-blue-300 dark:border-blue-600 mb-4">
+                                        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                            Lotes de esta WO:
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 ml-1">
+                                                {{ $workOrder->lots->count() }}
+                                            </span>
+                                        </div>
+                                        @if($workOrder->lots->isNotEmpty())
                                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                                 @foreach($workOrder->lots as $lot)
                                                     <div 
@@ -137,100 +143,104 @@
                                                     </div>
                                                 @endforeach
                                             </div>
-
-                                            {{-- Kits Section --}}
-                                            <div class="mt-4 pl-4 border-l-2 border-green-300 dark:border-green-600">
-                                                <div class="flex items-center justify-between mb-2">
-                                                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                                        Kits de esta WO:
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 ml-1">
-                                                            {{ $workOrder->kits->count() }}
-                                                        </span>
-                                                    </div>
-                                                    <button 
-                                                        wire:click="openCreateKitModal({{ $workOrder->id }})"
-                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                                    >
-                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                        Agregar Kit
-                                                    </button>
-                                                </div>
-
-                                                @if($workOrder->kits->isEmpty())
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 italic p-2">
-                                                        No hay kits creados para esta WO. Haz clic en "Agregar Kit" para crear uno.
-                                                    </div>
-                                                @else
-                                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                                        @foreach($workOrder->kits as $kit)
-                                                            <div class="p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:border-green-400 dark:hover:border-green-500 transition-colors">
-                                                                <div class="flex items-start justify-between mb-2">
-                                                                    <div class="flex-1">
-                                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                                                            {{ $kit->kit_number }}
-                                                                        </div>
-                                                                        @php
-                                                                            $kitStatusColor = match($kit->status) {
-                                                                                'preparing' => 'yellow',
-                                                                                'ready' => 'blue',
-                                                                                'released' => 'green',
-                                                                                'in_assembly' => 'purple',
-                                                                                'rejected' => 'red',
-                                                                                default => 'zinc',
-                                                                            };
-                                                                        @endphp
-                                                                        <flux:badge :color="$kitStatusColor" size="sm" class="mt-1">
-                                                                            {{ $kit->status_label }}
-                                                                        </flux:badge>
-                                                                    </div>
-                                                                    <div class="flex gap-1">
-                                                                        <button 
-                                                                            wire:click="openEditKitModal({{ $kit->id }})"
-                                                                            class="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                                                                            title="Editar kit"
-                                                                        >
-                                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                                            </svg>
-                                                                        </button>
-                                                                        @if($kit->canBeDeleted())
-                                                                            <button 
-                                                                                wire:click="confirmDeleteKit({{ $kit->id }})"
-                                                                                class="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                                                                                title="Eliminar kit"
-                                                                            >
-                                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                                </svg>
-                                                                            </button>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                                                                    @if($kit->preparedBy)
-                                                                        <div>
-                                                                            <span class="font-medium">Preparado:</span> {{ $kit->preparedBy->name }}
-                                                                        </div>
-                                                                    @endif
-                                                                    @if($kit->releasedBy)
-                                                                        <div>
-                                                                            <span class="font-medium">Liberado:</span> {{ $kit->releasedBy->name }}
-                                                                        </div>
-                                                                    @endif
-                                                                    <div>
-                                                                        <span class="font-medium">Lotes:</span> {{ $kit->lots->count() }}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                @endif
+                                        @else
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 italic p-2">
+                                                No hay lotes creados para esta WO.
                                             </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- Kits Section (independiente de lotes) --}}
+                                    <div class="pl-4 border-l-2 border-green-300 dark:border-green-600">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                Kits de esta WO:
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 ml-1">
+                                                    {{ $workOrder->kits->count() }}
+                                                </span>
+                                            </div>
+                                            <button 
+                                                wire:click="openCreateKitModal({{ $workOrder->id }})"
+                                                class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                            >
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                Agregar Kit
+                                            </button>
                                         </div>
-                                    </td>
-                                </tr>
-                            @endif
+
+                                        @if($workOrder->kits->isEmpty())
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 italic p-2">
+                                                No hay kits creados para esta WO. Haz clic en "Agregar Kit" para crear uno.
+                                            </div>
+                                        @else
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                                @foreach($workOrder->kits as $kit)
+                                                    <div class="p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:border-green-400 dark:hover:border-green-500 transition-colors">
+                                                        <div class="flex items-start justify-between mb-2">
+                                                            <div class="flex-1">
+                                                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                    {{ $kit->kit_number }}
+                                                                </div>
+                                                                @php
+                                                                    $kitStatusColor = match($kit->status) {
+                                                                        'preparing' => 'yellow',
+                                                                        'ready' => 'blue',
+                                                                        'released' => 'green',
+                                                                        'in_assembly' => 'orange',
+                                                                        'rejected' => 'red',
+                                                                        default => 'zinc',
+                                                                    };
+                                                                @endphp
+                                                                <flux:badge :color="$kitStatusColor" size="sm" class="mt-1">
+                                                                    {{ $kit->status_label }}
+                                                                </flux:badge>
+                                                            </div>
+                                                            <div class="flex gap-1">
+                                                                <button 
+                                                                    wire:click="openEditKitModal({{ $kit->id }})"
+                                                                    class="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                                                    title="Editar kit"
+                                                                >
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                    </svg>
+                                                                </button>
+                                                                @if($kit->canBeDeleted())
+                                                                    <button 
+                                                                        wire:click="confirmDeleteKit({{ $kit->id }})"
+                                                                        class="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                                                                        title="Eliminar kit"
+                                                                    >
+                                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                        </svg>
+                                                                    </button>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                                                            @if($kit->preparedBy)
+                                                                <div>
+                                                                    <span class="font-medium">Preparado:</span> {{ $kit->preparedBy->name }}
+                                                                </div>
+                                                            @endif
+                                                            @if($kit->releasedBy)
+                                                                <div>
+                                                                    <span class="font-medium">Liberado:</span> {{ $kit->releasedBy->name }}
+                                                                </div>
+                                                            @endif
+                                                            <div>
+                                                                <span class="font-medium">Lotes:</span> {{ $kit->lots->count() > 0 ? $kit->lots->pluck('lot_number')->join(', ') : 'Sin lotes' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -317,7 +327,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lotes a Incluir</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lotes a Incluir <span class="text-xs text-gray-400 font-normal">(opcional)</span></label>
                                 <div class="mt-1 space-y-2 max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-3">
                                     @forelse($this->availableLotsForKit as $lot)
                                         <label class="flex items-center space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">

@@ -213,12 +213,9 @@ class DynamicSentListView extends Component
     {
         $this->validate([
             'kitStatus' => 'required|in:preparing,ready',
-            'selectedLots' => 'required|array|min:1',
+            'selectedLots' => 'nullable|array',
             'selectedLots.*' => 'exists:lots,id',
             'kitValidationNotes' => 'nullable|string|max:500',
-        ], [
-            'selectedLots.required' => 'Debes seleccionar al menos un lote',
-            'selectedLots.min' => 'Debes seleccionar al menos un lote',
         ]);
 
         $workOrder = WorkOrder::findOrFail($this->selectedWorkOrderId);
@@ -232,8 +229,10 @@ class DynamicSentListView extends Component
             'prepared_by' => auth()->id(),
         ]);
 
-        // Attach lots
-        $kit->lots()->attach($this->selectedLots);
+        // Attach lots if any selected
+        if (!empty($this->selectedLots)) {
+            $kit->lots()->attach($this->selectedLots);
+        }
 
         $this->dispatch('kit-created');
         $this->dispatch('notify', [

@@ -135,6 +135,9 @@
                                     @endif
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Kit
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     Acciones
                                 </th>
                             </tr>
@@ -180,6 +183,17 @@
                                             {{ $lot->status_label }}
                                         </button>
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($lot->kits->count() > 0)
+                                            @php $latestKit = $lot->kits->sortByDesc('created_at')->first(); @endphp
+                                            <a href="{{ route('admin.kits.show', $latestKit) }}" class="text-sm text-blue-600 hover:text-blue-900 dark:text-blue-400">
+                                                {{ $latestKit->kit_number }}
+                                            </a>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $latestKit->status_label }}</div>
+                                        @else
+                                            <span class="text-xs text-gray-400 dark:text-gray-500">Sin kit</span>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
                                             <a href="{{ route('admin.lots.show', $lot) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400">
@@ -201,7 +215,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $workOrder ? 4 : 5 }}" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="{{ $workOrder ? 5 : 6 }}" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                                         No se encontraron lotes.
                                     </td>
                                 </tr>
