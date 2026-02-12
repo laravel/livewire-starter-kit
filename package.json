@@ -12,6 +12,7 @@
         "axios": "^1.7.4",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^2.0",
+        "lodash": "^4.17.23",
         "tailwindcss": "^4.0.7",
         "vite": "^7.0.4"
     },
@@ -19,5 +20,12 @@
         "@rollup/rollup-linux-x64-gnu": "4.9.5",
         "@tailwindcss/oxide-linux-x64-gnu": "^4.0.1",
         "lightningcss-linux-x64-gnu": "^1.29.1"
+    },
+    "devDependencies": {
+        "@tailwindcss/forms": "^0.5.2",
+        "alpinejs": "^3.4.2",
+        "autoprefixer": "^10.4.2",
+        "postcss": "^8.4.31",
+        "tailwindcss": "^3.1.0"
     }
 }

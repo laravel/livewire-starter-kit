@@ -46,7 +46,7 @@ new class extends Component {
 }; ?>
 
 <div
-    class="py-6 space-y-6 border shadow-sm rounded-xl border-zinc-200 dark:border-white/10"
+    class="py-6 space-y-6 border shadow-sm rounded-xl border-zinc-200"
     wire:cloak
     x-data="{ showRecoveryCodes: false }"
 >
@@ -112,7 +112,7 @@ new class extends Component {
 
                 @if (filled($recoveryCodes))
                     <div
-                        class="grid gap-1 p-4 font-mono text-sm rounded-lg bg-zinc-100 dark:bg-white/5"
+                        class="grid gap-1 p-4 font-mono text-sm rounded-lg bg-zinc-100"
                         role="list"
                         aria-label="{{ __('Recovery codes') }}"
                     >

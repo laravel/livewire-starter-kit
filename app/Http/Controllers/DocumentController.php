@@ -33,7 +33,8 @@ class DocumentController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'document_name' => 'required|string|max:255',
-            'url' => 'required|url'
+            'url' => 'required|url',
+            'is_admin' => 'boolean'
         ]);
 
         $category = Category::find($request->category_id);
@@ -42,7 +43,8 @@ class DocumentController extends Controller
             'category_id' => $request->category_id,
             'category_name' => $category->category_name,
             'document_name' => $request->document_name,
-            'url' => $request->url
+            'url' => $request->url,
+            'is_admin' => $request->is_admin ?? false
         ]);
 
         return response()->json($document->load('category'), 201);

@@ -15,6 +15,7 @@ class Document extends Model
         'category_name',
         'document_name',
         'url',
+        'is_admin',
     ];
 
     public function category(): BelongsTo
