@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>OIESD File Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-100" x-data="fileTracker()">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">OIESD File Tracker</h1>
+            <button class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 transition">
+                ACCOUNT
+            </button>
+        </div>
+    </header>
+
+    <div class="flex h-screen pt-16">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg">
+            <div class="p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-700">CATEGORY</h2>
+                    <button @click="showAddCategory = true" class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-blue-600 transition">
+                        +
+                    </button>
+                </div>
+                
+                <!-- Category List -->
+                <div class="space-y-2">
+                    <template x-for="category in categories" :key="category.id">
+                        <div @click="selectCategory(category.id)" 
+                             class="p-3 rounded cursor-pointer transition"
+                             :class="selectedCategory === category.id ? 'bg-blue-100 border-l-4 border-blue-500' : 'hover:bg-gray-100'">
+                            <div class="flex justify-between items-center">
+                                <span x-text="category.category_name" class="text-gray-700"></span>
+                                <span class="text-xs text-gray-500" x-text="category.documents?.length || 0"></span>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <div @click="selectCategory(null)" 
+                         class="p-3 rounded cursor-pointer transition"
+                         :class="selectedCategory === null ? 'bg-blue-100 border-l-4 border-blue-500' : 'hover:bg-gray-100'">
+                        <span class="text-gray-700">All Categories</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <!-- Search Bar -->
+                <div class="mb-6">
+                    <div class="relative">
+                        <input type="text" 
+                               x-model="searchTerm" 
+                               @input="searchDocuments"
+                               placeholder="Admin Filter" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg class="absolute right-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Documents Section -->
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">DOCUMENTS</h2>
+                    
+                    <!-- Add Document Button -->
+                    <div class="mb-4">
+                        <button @click="showAddDocument = true" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+                            + Add Document
+                        </button>
+                    </div>
+
+                    <!-- Documents List -->
+                    <div class="space-y-3">
+                        <template x-for="document in filteredDocuments" :key="document.id">
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <input type="checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                        <div>
+                                            <h3 class="font-semibold text-gray-800" x-text="document.document_name"></h3>
+                                            <p class="text-sm text-gray-600">
+                                                <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs" x-text="document.category_name"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <a :href="document.url" target="_blank" class="text-blue-500 hover:text-blue-700">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                            </svg>
+                                        </a>
+                                        <button @click="editDocument(document)" class="text-yellow-500 hover:text-yellow-700">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </button>
+                                        <button @click="deleteDocument(document.id)" class="text-red-500 hover:text-red-700">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <div x-show="filteredDocuments.length === 0" class="text-center py-8 text-gray-500">
+                            No documents found
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div x-show="showAddCategory" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" x-cloak>
+        <div class="bg-white rounded-lg p-6 w-96">
+            <h3 class="text-lg font-semibold mb-4">Add Category</h3>
+            <input type="text" x-model="newCategoryName" placeholder="Category Name" class="w-full px-3 py-2 border border-gray-300 rounded mb-4">
+            <div class="flex justify-end space-x-2">
+                <button @click="showAddCategory = false" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Cancel</button>
+                <button @click="addCategory" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Document Modal -->
+    <div x-show="showAddDocument" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" x-cloak>
+        <div class="bg-white rounded-lg p-6 w-96">
+            <h3 class="text-lg font-semibold mb-4">Add Document</h3>
+            <select x-model="newDocument.category_id" class="w-full px-3 py-2 border border-gray-300 rounded mb-4">
+                <option value="">Select Category</option>
+                <template x-for="category in categories" :key="category.id">
+                    <option :value="category.id" x-text="category.category_name"></option>
+                </template>
+            </select>
+            <input type="text" x-model="newDocument.document_name" placeholder="Document Name" class="w-full px-3 py-2 border border-gray-300 rounded mb-4">
+            <input type="url" x-model="newDocument.url" placeholder="Document URL" class="w-full px-3 py-2 border border-gray-300 rounded mb-4">
+            <div class="flex justify-end space-x-2">
+                <button @click="showAddDocument = false" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Cancel</button>
+                <button @click="addDocument" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function fileTracker() {
+            return {
+                categories: @json($categories),
+                documents: @json($documents),
+                selectedCategory: null,
+                searchTerm: '',
+                showAddCategory: false,
+                showAddDocument: false,
+                newCategoryName: '',
+                newDocument: {
+                    category_id: '',
+                    document_name: '',
+                    url: ''
+                },
+                
+                get filteredDocuments() {
+                    let filtered = this.documents;
+                    
+                    if (this.selectedCategory !== null) {
+                        filtered = filtered.filter(doc => doc.category_id === this.selectedCategory);
+                    }
+                    
+                    if (this.searchTerm) {
+                        const search = this.searchTerm.toLowerCase();
+                        filtered = filtered.filter(doc => 
+                            doc.document_name.toLowerCase().includes(search) ||
+                            doc.category_name.toLowerCase().includes(search)
+                        );
+                    }
+                    
+                    return filtered;
+                },
+                
+                selectCategory(categoryId) {
+                    this.selectedCategory = categoryId;
+                },
+                
+                async addCategory() {
+                    if (!this.newCategoryName.trim()) return;
+                    
+                    try {
+                        const response = await fetch('/api/categories', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                category_name: this.newCategoryName
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            const newCategory = await response.json();
+                            this.categories.push(newCategory);
+                            this.newCategoryName = '';
+                            this.showAddCategory = false;
+                        }
+                    } catch (error) {
+                        console.error('Error adding category:', error);
+                    }
+                },
+                
+                async addDocument() {
+                    if (!this.newDocument.document_name.trim() || !this.newDocument.url.trim() || !this.newDocument.category_id) return;
+                    
+                    try {
+                        const response = await fetch('/api/documents', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(this.newDocument)
+                        });
+                        
+                        if (response.ok) {
+                            const newDocument = await response.json();
+                            this.documents.push(newDocument);
+                            this.newDocument = { category_id: '', document_name: '', url: '' };
+                            this.showAddDocument = false;
+                        }
+                    } catch (error) {
+                        console.error('Error adding document:', error);
+                    }
+                },
+                
+                async deleteDocument(documentId) {
+                    if (!confirm('Are you sure you want to delete this document?')) return;
+                    
+                    try {
+                        const response = await fetch(`/api/documents/${documentId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            this.documents = this.documents.filter(doc => doc.id !== documentId);
+                        }
+                    } catch (error) {
+                        console.error('Error deleting document:', error);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
