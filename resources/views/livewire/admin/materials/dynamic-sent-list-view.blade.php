@@ -432,7 +432,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lotes a Incluir <span class="text-xs text-gray-400 font-normal">(opcional)</span></label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lotes a Incluir <span class="text-xs text-red-500 font-normal">* (obligatorio)</span></label>
                                 <div class="mt-1 space-y-2 max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-3">
                                     @forelse($this->availableLotsForKit as $lot)
                                         <label class="flex items-center space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">

@@ -265,12 +265,7 @@ class Lot extends Model
      */
     public function canBeDeleted(): bool
     {
-        // Cannot delete if lot has associated kits
-        if ($this->kits()->exists()) {
-            return false;
-        }
-        
-        return $this->status === self::STATUS_PENDING;
+        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_IN_PROGRESS, self::STATUS_COMPLETED, self::STATUS_CANCELLED]);
     }
 
     /**

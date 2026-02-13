@@ -1108,6 +1108,44 @@
                             </div>
                         </div>
 
+                        {{-- Formulario crear kit cuando no hay kit --}}
+                        @if (!$selectedKit && !$showCreateKitForm)
+                            <div class="text-center">
+                                <button wire:click="openCreateKitForm"
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                    </svg>
+                                    Agregar Kit
+                                </button>
+                            </div>
+                        @endif
+
+                        @if ($showCreateKitForm && !$selectedKit)
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg space-y-4">
+                                <h4 class="text-sm font-semibold text-blue-700 dark:text-blue-300">Crear Nuevo Kit</h4>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Número de Kit *</label>
+                                    <input wire:model="newKitNumber" type="text"
+                                        class="w-full p-5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="KIT-XXXXXXX-001">
+                                    @error('newKitNumber')
+                                        <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="flex gap-3 justify-end">
+                                    <button wire:click="closeCreateKitForm"
+                                        class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        Cancelar
+                                    </button>
+                                    <button wire:click="saveNewKit"
+                                        class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                        Crear Kit
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+
                         @if ($selectedKit)
                             {{-- Status de Kit --}}
                             <div>
@@ -1484,13 +1522,30 @@
                             </div>
                         @endif
 
-                        {{-- Cantidad (solo visual) --}}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad del Lote</label>
-                            <div class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-white text-sm rounded-lg font-semibold">
-                                {{ number_format($prodQuantity) }} piezas
+                        {{-- Cantidad del lote y pendiente de pesar --}}
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad del Lote</label>
+                                <div class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-white text-sm rounded-lg font-semibold">
+                                    {{ number_format($prodQuantity) }}
+                                </div>
                             </div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Campo informativo - no editable</p>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ya Pesadas</label>
+                                <div class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-white text-sm rounded-lg font-semibold">
+                                    {{ number_format($prodAlreadyWeighed) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pendiente de Pesar</label>
+                            <div class="w-full px-3 py-2 border rounded-lg font-bold text-lg text-center
+                                {{ $prodRemainingPieces > 0 ? 'border-indigo-300 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' }}">
+                                {{ number_format($prodRemainingPieces) }} piezas
+                                @if ($prodRemainingPieces <= 0)
+                                    <span class="text-xs font-normal ml-2">(Lote completamente pesado)</span>
+                                @endif
+                            </div>
                         </div>
 
                         {{-- Piezas buenas y malas --}}

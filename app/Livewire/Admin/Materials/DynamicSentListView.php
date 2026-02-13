@@ -294,11 +294,13 @@ class DynamicSentListView extends Component
         if (!$lot->canBeDeleted()) {
             $this->dispatch('notify', [
                 'type' => 'error',
-                'message' => 'Este lote no puede ser eliminado. Tiene kits asociados.'
+                'message' => 'Este lote no puede ser eliminado en su estado actual.'
             ]);
             return;
         }
 
+        // Desasociar kits antes de eliminar
+        $lot->kits()->detach();
         $lot->delete();
 
         $this->dispatch('notify', [
@@ -347,9 +349,12 @@ class DynamicSentListView extends Component
     {
         $this->validate([
             'kitStatus' => 'required|in:preparing,ready',
-            'selectedLots' => 'nullable|array',
+            'selectedLots' => 'required|array|min:1',
             'selectedLots.*' => 'exists:lots,id',
             'kitValidationNotes' => 'nullable|string|max:500',
+        ], [
+            'selectedLots.required' => 'Debe seleccionar al menos un lote para crear el kit.',
+            'selectedLots.min' => 'Debe seleccionar al menos un lote para crear el kit.',
         ]);
 
         $workOrder = WorkOrder::findOrFail($this->selectedWorkOrderId);

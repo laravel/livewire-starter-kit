@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\SentLists;
 use App\Models\SentList;
 use App\Models\WorkOrder;
 use App\Models\Lot;
+use App\Models\Kit;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
@@ -45,6 +46,10 @@ class ShippingListDisplay extends Component
     public $selectedKit = null;
     public $kitStatus = 'preparing';
 
+    // Sub-modal crear kit desde el modal de kit
+    public $showCreateKitForm = false;
+    public $newKitNumber = '';
+
     // Modal de Empaque por lote
     public $showPackagingModal = false;
     public $selectedLotForPackaging = null;
@@ -67,6 +72,8 @@ class ShippingListDisplay extends Component
     public $prodQuantity = 0;
     public $prodKitId = null;
     public $prodKits = [];
+    public $prodRemainingPieces = 0;
+    public $prodAlreadyWeighed = 0;
 
     public function mount()
     {
@@ -273,7 +280,67 @@ class ShippingListDisplay extends Component
         $this->selectedLotForKit = null;
         $this->selectedKit = null;
         $this->kitStatus = 'preparing';
+        $this->showCreateKitForm = false;
+        $this->newKitNumber = '';
         $this->resetErrorBag();
+    }
+
+    /**
+     * Show the create kit form inside the kit modal.
+     */
+    public function openCreateKitForm()
+    {
+        if ($this->selectedLotForKit) {
+            $this->newKitNumber = Kit::generateKitNumber($this->selectedLotForKit->work_order_id);
+        }
+        $this->showCreateKitForm = true;
+    }
+
+    /**
+     * Close the create kit form.
+     */
+    public function closeCreateKitForm()
+    {
+        $this->showCreateKitForm = false;
+        $this->newKitNumber = '';
+        $this->resetErrorBag();
+    }
+
+    /**
+     * Save the new kit and associate it to the lot.
+     */
+    public function saveNewKit()
+    {
+        $this->validate([
+            'newKitNumber' => 'required|string|max:255|unique:kits,kit_number',
+        ], [
+            'newKitNumber.required' => 'El número de kit es requerido.',
+            'newKitNumber.unique' => 'Este número de kit ya existe.',
+        ]);
+
+        if (!$this->selectedLotForKit) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $kit = Kit::create([
+            'work_order_id' => $this->selectedLotForKit->work_order_id,
+            'kit_number' => $this->newKitNumber,
+            'status' => Kit::STATUS_PREPARING,
+            'current_approval_cycle' => 1,
+        ]);
+
+        // Asociar kit al lote via pivot
+        $this->selectedLotForKit->kits()->attach($kit->id);
+
+        // Actualizar el modal con el kit recién creado
+        $this->selectedKit = $kit;
+        $this->kitStatus = $kit->status;
+        $this->showCreateKitForm = false;
+        $this->newKitNumber = '';
+
+        session()->flash('message', "Kit {$kit->kit_number} creado y asociado al lote.");
+        $this->dispatch('refresh-display');
     }
 
     /**
@@ -613,6 +680,14 @@ class ShippingListDisplay extends Component
 
         $this->selectedLotForProduction = $lot;
         $this->prodQuantity = $lot->quantity;
+
+        // Calcular piezas ya pesadas (buenas + malas de pesadas anteriores)
+        $alreadyWeighed = \App\Models\Weighing::where('lot_id', $lot->id)
+            ->selectRaw('COALESCE(SUM(good_pieces), 0) + COALESCE(SUM(bad_pieces), 0) as total')
+            ->value('total');
+        $this->prodAlreadyWeighed = (int) $alreadyWeighed;
+        $this->prodRemainingPieces = $lot->quantity - $this->prodAlreadyWeighed;
+
         $this->prodGoodPieces = 0;
         $this->prodBadPieces = 0;
         $this->prodWeighedAt = now()->format('Y-m-d\TH:i');
@@ -633,6 +708,8 @@ class ShippingListDisplay extends Component
         $this->prodComments = '';
         $this->prodKitId = null;
         $this->prodKits = [];
+        $this->prodRemainingPieces = 0;
+        $this->prodAlreadyWeighed = 0;
         $this->resetErrorBag();
     }
 
@@ -653,6 +730,18 @@ class ShippingListDisplay extends Component
 
         if (!$this->selectedLotForProduction) {
             session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        // Validar que buenas + malas no sobrepasen la cantidad pendiente de pesar
+        $total = $this->prodGoodPieces + $this->prodBadPieces;
+        if ($total > $this->prodRemainingPieces) {
+            $this->addError('prodGoodPieces', 'La suma de piezas buenas + malas (' . number_format($total) . ') sobrepasa la cantidad pendiente de pesar (' . number_format($this->prodRemainingPieces) . ').');
+            return;
+        }
+
+        if ($total <= 0) {
+            $this->addError('prodGoodPieces', 'Debe registrar al menos 1 pieza (buena o mala).');
             return;
         }
 
