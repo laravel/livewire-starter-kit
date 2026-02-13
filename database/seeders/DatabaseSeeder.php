@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             
+            MaterialsRoleSeeder::class,
+            
             // 2. Catálogos base
             StatusWOSeeder::class,
             ProductionStatusSeeder::class,   // Estados para mesas/máquinas
