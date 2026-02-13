@@ -27,9 +27,7 @@ class StandardShow extends Component
     protected function calculateInfo(): void
     {
         // Check if this standard is current (effective and active)
-        $this->is_current = $this->standard->active &&
-                           $this->standard->effective_date &&
-                           $this->standard->effective_date->lte(now());
+        $this->is_current = $this->standard->active;
 
         // Calculate configuration stats
         $this->configurationStats = $this->standard->getConfigurationsStats();

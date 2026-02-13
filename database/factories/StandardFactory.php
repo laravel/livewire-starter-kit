@@ -29,7 +29,6 @@ class StandardFactory extends Factory
             'persons_2' => $this->faker->numberBetween(1, 3000),
             'persons_3' => $this->faker->numberBetween(1, 3000),
             'units_per_hour' => $this->faker->numberBetween(50, 500), // Para cálculo de capacidad
-            'effective_date' => $this->faker->dateTimeBetween('-1 year', '+1 month'),
             'active' => $this->faker->boolean(80),
             'description' => $this->faker->optional()->sentence(),
         ];

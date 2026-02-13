@@ -15,7 +15,6 @@ class StandardCreate extends Component
 {
     // Propiedades del Standard
     public ?int $part_id = null;
-    public string $effective_date = '';
     public bool $active = true;
     public string $description = '';
 
@@ -36,7 +35,6 @@ class StandardCreate extends Component
 
     public function mount(): void
     {
-        $this->effective_date = now()->format('Y-m-d');
         // Agregar una configuracion inicial
         $this->addConfiguration();
     }
@@ -121,7 +119,6 @@ class StandardCreate extends Component
     {
         $rules = [
             'part_id' => 'required|exists:parts,id',
-            'effective_date' => 'nullable|date',
             'active' => 'boolean',
             'description' => 'nullable|string|max:500',
         ];
@@ -152,7 +149,6 @@ class StandardCreate extends Component
         return [
             'part_id.required' => 'Debe seleccionar una parte.',
             'part_id.exists' => 'La parte seleccionada no existe.',
-            'effective_date.date' => 'La fecha efectiva no es valida.',
             'description.max' => 'La descripcion no puede exceder 500 caracteres.',
 
             // Mensajes para configuraciones
@@ -232,7 +228,6 @@ class StandardCreate extends Component
                 // Crear el standard
                 $standard = Standard::create([
                     'part_id' => $this->part_id,
-                    'effective_date' => $this->effective_date ?: null,
                     'active' => $this->active,
                     'description' => $this->description ?: null,
                     'is_migrated' => true,
@@ -266,7 +261,6 @@ class StandardCreate extends Component
                 'persons_1' => $this->persons_1 ?: null,
                 'persons_2' => $this->persons_2 ?: null,
                 'persons_3' => $this->persons_3 ?: null,
-                'effective_date' => $this->effective_date ?: null,
                 'active' => $this->active,
                 'description' => $this->description ?: null,
                 'is_migrated' => false,

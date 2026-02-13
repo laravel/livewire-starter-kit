@@ -28,7 +28,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $persons_2
  * @property int|null $persons_3
  * @property int|null $units_per_hour
- * @property \Illuminate\Support\Carbon|null $effective_date
  * @property bool $active
  * @property bool $is_migrated
  * @property string|null $description
@@ -56,7 +55,6 @@ class Standard extends Model
         'persons_1',
         'persons_2',
         'persons_3',
-        'effective_date',
         'active',
         'is_migrated',
         'description',
@@ -68,7 +66,6 @@ class Standard extends Model
     ];
 
     protected $casts = [
-        'effective_date' => 'date',
         'persons_1' => 'integer',
         'persons_2' => 'integer',
         'persons_3' => 'integer',
@@ -251,9 +248,7 @@ class Standard extends Model
         $total = self::count();
         $active = self::where('active', true)->count();
         $inactive = self::where('active', false)->count();
-        $current = self::where('effective_date', '<=', now())
-                       ->where('active', true)
-                       ->count();
+        $current = self::where('active', true)->count();
 
         return [
             'total' => $total,

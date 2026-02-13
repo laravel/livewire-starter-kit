@@ -239,7 +239,6 @@ class CapacityWizardTestSeeder extends Seeder
                 'persons_2' => 2,
                 'persons_3' => 3,
                 'units_per_hour' => $partData['configs'][0]['uph'],
-                'effective_date' => now()->subDays(30),
                 'active' => true,
                 'is_migrated' => true,  // Marcar como migrado
                 'description' => "Estándar para {$partData['number']}",

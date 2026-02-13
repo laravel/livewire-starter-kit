@@ -357,31 +357,17 @@
                         </div>
                     @endif
 
-                    <!-- Effective Date and Active Status -->
+                    <!-- Active Status -->
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label for="effective_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Fecha Efectiva
-                                </label>
-                                <input wire:model="effective_date" id="effective_date" type="date"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" />
-                                @error('effective_date')
-                                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <!-- Active Status -->
-                            <div class="flex items-center pt-6">
-                                <label class="flex items-center">
-                                    <input wire:model="active" type="checkbox" id="active"
-                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                    <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Estandar activo</span>
-                                </label>
-                                @error('active')
-                                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <div class="flex items-center">
+                            <label class="flex items-center">
+                                <input wire:model="active" type="checkbox" id="active"
+                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Estandar activo</span>
+                            </label>
+                            @error('active')
+                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
