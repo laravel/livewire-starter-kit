@@ -54,8 +54,8 @@ class SentListDepartmentView extends Component
         if ($user->hasRole('production')) {
             return SentList::DEPT_PRODUCTION;
         }
-        if ($user->hasRole('quality')) {
-            return SentList::DEPT_QUALITY;
+        if ($user->hasRole('inspection') || $user->hasRole('quality')) {
+            return SentList::DEPT_INSPECTION;
         }
         if ($user->hasRole('shipping')) {
             return SentList::DEPT_SHIPPING;
@@ -168,7 +168,7 @@ class SentListDepartmentView extends Component
     {
         $order = [
             SentList::DEPT_MATERIALS => 1,
-            SentList::DEPT_QUALITY => 2,
+            SentList::DEPT_INSPECTION => 2,
             SentList::DEPT_PRODUCTION => 3,
             SentList::DEPT_SHIPPING => 4,
         ];
@@ -183,7 +183,7 @@ class SentListDepartmentView extends Component
     {
         $order = [
             SentList::DEPT_MATERIALS => 1,
-            SentList::DEPT_QUALITY => 2,
+            SentList::DEPT_INSPECTION => 2,
             SentList::DEPT_PRODUCTION => 3,
             SentList::DEPT_SHIPPING => 4,
         ];

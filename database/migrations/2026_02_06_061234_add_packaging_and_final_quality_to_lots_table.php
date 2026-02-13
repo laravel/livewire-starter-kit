@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('lots', function (Blueprint $table) {
-            $table->string('packaging_status')->default('pending')->after('quality_inspected_by');
+            $table->string('packaging_status')->default('pending')->after('inspection_completed_by');
             $table->string('packaging_comments')->nullable()->after('packaging_status');
             $table->unsignedBigInteger('packaging_inspected_by')->nullable()->after('packaging_comments');
             $table->timestamp('packaging_inspected_at')->nullable()->after('packaging_inspected_by');

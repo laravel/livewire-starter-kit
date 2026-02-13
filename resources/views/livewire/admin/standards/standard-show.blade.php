@@ -76,13 +76,6 @@
                                 </dd>
                             </div>
 
-                            @if($standard->effective_date)
-                                <div>
-                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha Efectiva</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $standard->effective_date->format('d/m/Y') }}</dd>
-                                </div>
-                            @endif
-
                             @if($configurationStats['total'] > 0)
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Resumen de Configuraciones</dt>

@@ -235,9 +235,9 @@ class KitManagement extends Component
     }
 
     /**
-     * Submit kit to Quality for approval.
+     * Submit kit to Inspection for approval.
      */
-    public function submitToQuality(int $kitId): void
+    public function submitToInspection(int $kitId): void
     {
         $kit = Kit::findOrFail($kitId);
 
@@ -247,8 +247,8 @@ class KitManagement extends Component
         }
 
         DB::transaction(function () use ($kit) {
-            $kit->submitToQuality(Auth::user());
-            
+            $kit->submitToInspection(Auth::user());
+
             // Record audit trail
             $this->auditTrailService->recordStatusChange(
                 $kit,
@@ -258,7 +258,7 @@ class KitManagement extends Component
             );
         });
 
-        session()->flash('message', 'Kit enviado a Calidad para aprobación.');
+        session()->flash('message', 'Kit enviado a Inspección para aprobación.');
         $this->dispatch('kit-submitted');
     }
 

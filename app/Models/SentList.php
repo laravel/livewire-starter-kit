@@ -31,8 +31,8 @@ class SentList extends Model
         'materials_approved_by',
         'production_approved_at',
         'production_approved_by',
-        'quality_approved_at',
-        'quality_approved_by',
+        'inspection_approved_at',
+        'inspection_approved_by',
         'shipping_approved_at',
         'shipping_approved_by',
         'notes',
@@ -48,7 +48,7 @@ class SentList extends Model
         'department_history' => 'array',
         'materials_approved_at' => 'datetime',
         'production_approved_at' => 'datetime',
-        'quality_approved_at' => 'datetime',
+        'inspection_approved_at' => 'datetime',
         'shipping_approved_at' => 'datetime',
     ];
 
@@ -64,7 +64,7 @@ class SentList extends Model
      */
     public const DEPT_MATERIALS = 'materiales';
     public const DEPT_PRODUCTION = 'produccion';
-    public const DEPT_QUALITY = 'calidad';
+    public const DEPT_INSPECTION = 'inspeccion';
     public const DEPT_SHIPPING = 'envios';
 
     /**
@@ -114,9 +114,9 @@ class SentList extends Model
         return $this->belongsTo(User::class, 'production_approved_by');
     }
 
-    public function qualityApprover(): BelongsTo
+    public function inspectionApprover(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'quality_approved_by');
+        return $this->belongsTo(User::class, 'inspection_approved_by');
     }
 
     public function shippingApprover(): BelongsTo
@@ -144,7 +144,7 @@ class SentList extends Model
         return [
             self::DEPT_MATERIALS => 'Materiales',
             self::DEPT_PRODUCTION => 'Producción',
-            self::DEPT_QUALITY => 'Calidad',
+            self::DEPT_INSPECTION => 'Inspección',
             self::DEPT_SHIPPING => 'Envíos',
         ];
     }
@@ -167,18 +167,18 @@ class SentList extends Model
 
     /**
      * Move to next department in workflow.
-     * Flow: Materiales → Calidad → Producción → Envíos
+     * Flow: Materiales → Inspección → Producción → Envíos
      */
     public function moveToNextDepartment(?int $userId = null): bool
     {
         $departments = [
-            self::DEPT_MATERIALS => self::DEPT_QUALITY,
-            self::DEPT_QUALITY => self::DEPT_PRODUCTION,
+            self::DEPT_MATERIALS => self::DEPT_INSPECTION,
+            self::DEPT_INSPECTION => self::DEPT_PRODUCTION,
             self::DEPT_PRODUCTION => self::DEPT_SHIPPING,
         ];
 
         $currentDept = $this->current_department;
-        
+
         if (!isset($departments[$currentDept])) {
             return false; // Already at last department
         }
@@ -186,7 +186,7 @@ class SentList extends Model
         // Update approval for current department
         $approvalField = match($currentDept) {
             self::DEPT_MATERIALS => 'materials_approved',
-            self::DEPT_QUALITY => 'quality_approved',
+            self::DEPT_INSPECTION => 'inspection_approved',
             self::DEPT_PRODUCTION => 'production_approved',
             self::DEPT_SHIPPING => 'shipping_approved',
             default => null,

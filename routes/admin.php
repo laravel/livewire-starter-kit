@@ -166,8 +166,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/employees/{employee}', \App\Livewire\Admin\Employees\EmployeeShow::class)->name('employees.show');
     Route::get('/employees/{employee}/edit', \App\Livewire\Admin\Employees\EmployeeEdit::class)->name('employees.edit');
 
-    // Gestión de Calidad
-    Route::get('/quality', \App\Livewire\Admin\Quality\QualityInspectionList::class)->name('quality.index');
+    // Gestión de Inspección
+    Route::get('/inspection', \App\Livewire\Admin\Inspection\InspectionList::class)->name('inspection.index');
 
 });
 
@@ -176,7 +176,7 @@ Route::middleware(['auth', 'verified', 'permission:view_materials_area'])->prefi
     Route::get('/', \App\Livewire\Admin\Materials\MaterialsAreaDashboard::class)->name('dashboard');
 });
 
-// Quality Area Routes (requires Quality role)
-// Route::middleware(['auth', 'verified', 'permission:view_quality_area'])->prefix('quality')->name('quality.')->group(function () {
-//     Route::get('/', \App\Livewire\Admin\Quality\QualityApprovalInterface::class)->name('dashboard');
+// Inspection Area Routes (requires Inspection role)
+// Route::middleware(['auth', 'verified', 'permission:view_inspection_area'])->prefix('inspection')->name('inspection.')->group(function () {
+//     Route::get('/', \App\Livewire\Admin\Inspection\InspectionApprovalInterface::class)->name('dashboard');
 // });

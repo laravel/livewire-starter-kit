@@ -55,7 +55,6 @@ class StandardSeeder extends Seeder
                 'persons_2' => 2,
                 'persons_3' => 3,
                 'units_per_hour' => rand(100, 350),
-                'effective_date' => now()->subDays(rand(1, 30)),
                 'active' => true,
                 'is_migrated' => true,  // Marcar como migrado
                 'description' => "Estándar de producción para {$part->number}",

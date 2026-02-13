@@ -169,11 +169,11 @@
 
                                         @if($kit->status === 'preparing')
                                             <flux:button
-                                                wire:click="submitToQuality({{ $kit->id }})"
+                                                wire:click="submitToInspection({{ $kit->id }})"
                                                 size="sm"
                                                 variant="primary"
                                                 icon="paper-airplane"
-                                                title="Enviar a Calidad"
+                                                title="Enviar a Inspección"
                                             />
                                         @endif
 

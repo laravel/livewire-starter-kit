@@ -34,7 +34,7 @@ class MaterialsAreaDashboard extends Component
             'pending_lots' => Lot::where('status', 'pending')->count(),
             'total_kits' => Kit::count(),
             'kits_preparing' => Kit::where('status', 'preparing')->count(),
-            'kits_pending_quality' => Kit::where('status', 'pending_quality')->count(),
+            'kits_pending_inspection' => Kit::where('status', 'ready')->count(),
         ];
     }
 

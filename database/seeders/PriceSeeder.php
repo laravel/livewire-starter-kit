@@ -51,8 +51,8 @@ class PriceSeeder extends Seeder
             Part::firstOrCreate(
                 ['number' => $data['number']],
                 [
-                    'item_number' => '189-' . substr($data['number'], -3),
-                    'description' => $data['description'],
+                    'item_number' => $data['description'],
+                    'description' => 'Part ' . $data['number'],
                     'unit_of_measure' => 'PC',
                     'active' => true,
                 ]

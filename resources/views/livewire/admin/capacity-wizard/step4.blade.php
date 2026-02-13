@@ -20,7 +20,7 @@
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">¡Lista Preliminar Generada Exitosamente!</h3>
             <p class="text-gray-600 dark:text-gray-400 mb-6">
                 La lista preliminar #{{ $generatedSentListId }} ha sido creada y enviada al departamento de Materiales.
-                Ahora pasará por todos los departamentos: Materiales → Calidad → Producción → Envíos.
+                Ahora pasará por todos los departamentos: Materiales → Inspección → Producción → Envíos.
             </p>
             <div class="flex justify-center gap-4">
                 <flux:button wire:click="viewSentList" variant="primary">
