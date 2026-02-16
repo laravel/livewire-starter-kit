@@ -6,6 +6,7 @@ use App\Models\SentList;
 use App\Models\WorkOrder;
 use App\Models\Lot;
 use App\Models\Kit;
+use App\Models\QualityWeighing;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
@@ -56,12 +57,6 @@ class ShippingListDisplay extends Component
     public $packagingStatus = 'pending';
     public $packagingComments = '';
 
-    // Modal de Inspeccion Final por lote
-    public $showFinalInspectionModal = false;
-    public $selectedLotForFinalInspection = null;
-    public $finalInspectionStatus = 'pending';
-    public $finalInspectionComments = '';
-
     // Modal de Pesada (Producción) por lote
     public $showProductionModal = false;
     public $selectedLotForProduction = null;
@@ -74,6 +69,20 @@ class ShippingListDisplay extends Component
     public $prodKits = [];
     public $prodRemainingPieces = 0;
     public $prodAlreadyWeighed = 0;
+
+    // Modal de Pesada (Calidad) por lote
+    public $showQualityModal = false;
+    public $selectedLotForQuality = null;
+    public $qualGoodPieces = 0;
+    public $qualBadPieces = 0;
+    public $qualWeighedAt = '';
+    public $qualComments = '';
+    public $qualProductionGoodPieces = 0;
+    public $qualAlreadyWeighed = 0;
+    public $qualRemainingPieces = 0;
+    public $qualKitId = null;
+    public $qualKits = [];
+    public $qualWeighingsList = [];
 
     public function mount()
     {
@@ -595,77 +604,6 @@ class ShippingListDisplay extends Component
     }
 
     // ===============================================
-    // FINAL INSPECTION (INSPECCION) MODAL
-    // ===============================================
-
-    public function openFinalInspectionModal($lotId)
-    {
-        $lot = Lot::with(['workOrder.purchaseOrder.part'])->find($lotId);
-
-        if (!$lot) {
-            session()->flash('error', 'Lote no encontrado.');
-            return;
-        }
-
-        $this->selectedLotForFinalInspection = $lot;
-        $this->finalInspectionStatus = $lot->final_inspection_status ?? 'pending';
-        $this->finalInspectionComments = $lot->final_inspection_comments ?? '';
-        $this->showFinalInspectionModal = true;
-    }
-
-    public function closeFinalInspectionModal()
-    {
-        $this->showFinalInspectionModal = false;
-        $this->selectedLotForFinalInspection = null;
-        $this->finalInspectionStatus = 'pending';
-        $this->finalInspectionComments = '';
-        $this->resetErrorBag();
-    }
-
-    public function setFinalInspectionStatus($status)
-    {
-        $this->finalInspectionStatus = $status;
-    }
-
-    public function saveFinalInspectionStatus()
-    {
-        $rules = [
-            'finalInspectionStatus' => 'required|in:pending,approved,rejected',
-        ];
-
-        if ($this->finalInspectionStatus === 'rejected') {
-            $rules['finalInspectionComments'] = 'required|string|min:5|max:1000';
-        } else {
-            $rules['finalInspectionComments'] = 'nullable|string|max:1000';
-        }
-
-        $this->validate($rules, [
-            'finalInspectionStatus.required' => 'Debe seleccionar un status de inspeccion.',
-            'finalInspectionComments.required' => 'Debe indicar el motivo del rechazo.',
-            'finalInspectionComments.min' => 'El comentario debe tener al menos 5 caracteres.',
-        ]);
-
-        if (!$this->selectedLotForFinalInspection) {
-            session()->flash('error', 'Lote no encontrado.');
-            return;
-        }
-
-        $this->selectedLotForFinalInspection->update([
-            'final_inspection_status' => $this->finalInspectionStatus,
-            'final_inspection_comments' => $this->finalInspectionComments,
-            'final_inspection_completed_at' => now(),
-            'final_inspection_completed_by' => auth()->id(),
-        ]);
-
-        $statusLabels = ['pending' => 'Pendiente', 'approved' => 'Aprobado', 'rejected' => 'Rechazado'];
-        $statusLabel = $statusLabels[$this->finalInspectionStatus] ?? $this->finalInspectionStatus;
-        session()->flash('message', "Status de inspeccion final actualizado a: {$statusLabel}");
-
-        $this->closeFinalInspectionModal();
-        $this->dispatch('refresh-display');
-    }
-
-    // ===============================================
     // PRODUCTION (PESADA) MODAL
     // ===============================================
 
@@ -686,7 +624,10 @@ class ShippingListDisplay extends Component
             ->selectRaw('COALESCE(SUM(good_pieces), 0) + COALESCE(SUM(bad_pieces), 0) as total')
             ->value('total');
         $this->prodAlreadyWeighed = (int) $alreadyWeighed;
-        $this->prodRemainingPieces = $lot->quantity - $this->prodAlreadyWeighed;
+
+        // Incluir piezas de retrabajo (rechazadas por calidad pendientes de re-pesar)
+        $reworkPieces = $lot->getReworkPendingPieces();
+        $this->prodRemainingPieces = ($lot->quantity - $this->prodAlreadyWeighed) + $reworkPieces;
 
         $this->prodGoodPieces = 0;
         $this->prodBadPieces = 0;
@@ -761,6 +702,134 @@ class ShippingListDisplay extends Component
         $this->dispatch('refresh-display');
     }
 
+    // ===============================================
+    // QUALITY (CALIDAD) MODAL
+    // ===============================================
+
+    public function openQualityModal($lotId)
+    {
+        $lot = Lot::with(['workOrder.purchaseOrder.part', 'kits', 'weighings', 'qualityWeighings.weighedBy'])->find($lotId);
+
+        if (!$lot) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        // Verificar que haya pesadas de produccion
+        if (!$lot->hasProductionWeighings()) {
+            session()->flash('error', 'Este lote no tiene pesadas de produccion aun. Produccion debe pesar primero.');
+            return;
+        }
+
+        $this->selectedLotForQuality = $lot;
+        $this->qualProductionGoodPieces = $lot->getProductionGoodPieces();
+        $this->qualAlreadyWeighed = $lot->getQualityAlreadyWeighed();
+        $this->qualRemainingPieces = $lot->getQualityPendingPieces();
+        $this->qualGoodPieces = 0;
+        $this->qualBadPieces = 0;
+        $this->qualWeighedAt = now()->format('Y-m-d\TH:i');
+        $this->qualComments = '';
+        $this->qualKitId = null;
+        $this->qualKits = $lot->kits;
+        $this->qualWeighingsList = $lot->qualityWeighings->map(function ($qw) {
+            return [
+                'id' => $qw->id,
+                'good_pieces' => $qw->good_pieces,
+                'bad_pieces' => $qw->bad_pieces,
+                'disposition' => $qw->disposition,
+                'rework_status' => $qw->rework_status,
+                'weighed_at' => $qw->weighed_at->format('d/m/Y H:i'),
+                'weighed_by' => $qw->weighedBy->name ?? 'N/A',
+                'comments' => $qw->comments,
+            ];
+        })->toArray();
+        $this->showQualityModal = true;
+    }
+
+    public function closeQualityModal()
+    {
+        $this->showQualityModal = false;
+        $this->selectedLotForQuality = null;
+        $this->qualProductionGoodPieces = 0;
+        $this->qualAlreadyWeighed = 0;
+        $this->qualRemainingPieces = 0;
+        $this->qualGoodPieces = 0;
+        $this->qualBadPieces = 0;
+        $this->qualWeighedAt = '';
+        $this->qualComments = '';
+        $this->qualKitId = null;
+        $this->qualKits = [];
+        $this->qualWeighingsList = [];
+        $this->resetErrorBag();
+    }
+
+    public function saveQuality()
+    {
+        $this->validate([
+            'qualGoodPieces' => 'required|integer|min:0',
+            'qualBadPieces' => 'required|integer|min:0',
+            'qualWeighedAt' => 'required|date',
+            'qualComments' => 'nullable|string|max:1000',
+        ], [
+            'qualGoodPieces.required' => 'Las piezas aprobadas son requeridas.',
+            'qualGoodPieces.min' => 'Las piezas aprobadas no pueden ser negativas.',
+            'qualBadPieces.required' => 'Las piezas rechazadas son requeridas.',
+            'qualBadPieces.min' => 'Las piezas rechazadas no pueden ser negativas.',
+            'qualWeighedAt.required' => 'La fecha y hora son requeridas.',
+        ]);
+
+        if (!$this->selectedLotForQuality) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $total = $this->qualGoodPieces + $this->qualBadPieces;
+        if ($total > $this->qualRemainingPieces) {
+            $this->addError('qualGoodPieces', 'La suma de piezas aprobadas + rechazadas (' . number_format($total) . ') sobrepasa la cantidad pendiente de verificar (' . number_format($this->qualRemainingPieces) . ').');
+            return;
+        }
+
+        if ($total <= 0) {
+            $this->addError('qualGoodPieces', 'Debe registrar al menos 1 pieza (aprobada o rechazada).');
+            return;
+        }
+
+        $qw = QualityWeighing::create([
+            'lot_id' => $this->selectedLotForQuality->id,
+            'kit_id' => $this->qualKitId ?: null,
+            'production_good_pieces' => $this->qualProductionGoodPieces,
+            'good_pieces' => $this->qualGoodPieces,
+            'bad_pieces' => $this->qualBadPieces,
+            'disposition' => QualityWeighing::DISPOSITION_REWORK,
+            'rework_status' => $this->qualBadPieces > 0 ? QualityWeighing::REWORK_PENDING : null,
+            'weighed_at' => $this->qualWeighedAt,
+            'weighed_by' => auth()->id(),
+            'comments' => $this->qualComments ?: null,
+        ]);
+
+        $message = 'Pesada de calidad registrada correctamente.';
+        if ($this->qualBadPieces > 0) {
+            $message .= ' ' . number_format($this->qualBadPieces) . ' piezas marcadas para retrabajo.';
+        }
+
+        session()->flash('message', $message);
+        $this->closeQualityModal();
+        $this->dispatch('refresh-display');
+    }
+
+    /**
+     * Mark rework as complete for a quality weighing (called from Quality Area).
+     */
+    public function markReworkComplete($qualityWeighingId)
+    {
+        $qw = QualityWeighing::find($qualityWeighingId);
+        if ($qw && $qw->rework_status === QualityWeighing::REWORK_PENDING) {
+            $qw->update(['rework_status' => QualityWeighing::REWORK_COMPLETE]);
+            session()->flash('message', 'Retrabajo marcado como completado.');
+            $this->dispatch('refresh-display');
+        }
+    }
+
     public function render()
     {
         // Obtener Work Orders con lots (todos los estados)
@@ -769,6 +838,7 @@ class ShippingListDisplay extends Component
                 $query->active();
             },
             'lots.weighings', // Cargar todos los lotes con sus pesadas
+            'lots.qualityWeighings', // Cargar pesadas de calidad
             'sentList'
         ])
         ->whereHas('lots'); // Solo WOs que tengan al menos un lote

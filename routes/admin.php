@@ -166,8 +166,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/employees/{employee}', \App\Livewire\Admin\Employees\EmployeeShow::class)->name('employees.show');
     Route::get('/employees/{employee}/edit', \App\Livewire\Admin\Employees\EmployeeEdit::class)->name('employees.edit');
 
-    // Gestión de Inspección
-    Route::get('/inspection', \App\Livewire\Admin\Inspection\InspectionList::class)->name('inspection.index');
+    // Área de Calidad (hub + sub-secciones)
+    Route::get('/quality', \App\Livewire\Admin\Quality\QualityAreaDashboard::class)->name('quality.index');
+    Route::get('/quality/inspection', \App\Livewire\Admin\Inspection\InspectionList::class)->name('quality.inspection');
+    Route::get('/quality/weighings', \App\Livewire\Admin\Quality\QualityWeighings::class)->name('quality.weighings');
+
+    // Redirect legacy inspection route
+    Route::redirect('/inspection', '/admin/quality/inspection');
 
 });
 

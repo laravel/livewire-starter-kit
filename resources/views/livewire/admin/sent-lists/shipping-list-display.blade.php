@@ -301,8 +301,32 @@
                                         </td>
                                         {{-- Semaforo Prod + Botón Pesada --}}
                                         <td class="px-4 py-2 text-center">
+                                            @php
+                                                $prodTotalWeighed = $lot->weighings->sum('good_pieces') + $lot->weighings->sum('bad_pieces');
+                                                $prodReworkPending = $lot->qualityWeighings
+                                                    ->where('rework_status', 'pending_rework')
+                                                    ->sum('bad_pieces');
+                                                $prodTotalToWeigh = $lot->quantity + $prodReworkPending;
+                                                $prodSemaphore = 'gray';
+                                                if ($prodTotalWeighed > 0 && $prodTotalWeighed >= $prodTotalToWeigh) {
+                                                    $prodSemaphore = 'green';
+                                                } elseif ($prodTotalWeighed > 0) {
+                                                    $prodSemaphore = 'yellow';
+                                                }
+                                                $prodSemColor = match ($prodSemaphore) {
+                                                    'green' => 'bg-green-500',
+                                                    'yellow' => 'bg-yellow-400',
+                                                    default => 'bg-gray-300 dark:bg-gray-600',
+                                                };
+                                                $prodRemaining = max(0, $prodTotalToWeigh - $prodTotalWeighed);
+                                                $prodTitle = match ($prodSemaphore) {
+                                                    'green' => 'Prod: Completado',
+                                                    'yellow' => 'Prod: Pendiente (' . number_format($prodRemaining) . ' pz)',
+                                                    default => 'Prod: Sin pesadas',
+                                                };
+                                            @endphp
                                             <div class="flex items-center justify-center gap-1">
-                                                <span class="inline-block w-5 h-5 rounded bg-yellow-400" title="Prod: Pendiente"></span>
+                                                <span class="inline-block w-5 h-5 rounded {{ $prodSemColor }}" title="{{ $prodTitle }}"></span>
                                                 <button wire:click="openProductionModal({{ $lot->id }})"
                                                     class="w-5 h-5 rounded bg-indigo-500 hover:bg-indigo-600 cursor-pointer transition-colors flex items-center justify-center"
                                                     title="Registrar pesada">
@@ -312,20 +336,38 @@
                                                 </button>
                                             </div>
                                         </td>
-                                        {{-- Semaforo Inspeccion Final --}}
+                                        {{-- Semaforo Calidad + Boton Pesada --}}
                                         <td class="px-4 py-2 text-center">
                                             @php
-                                                $finalInspectionStatus = $lot->final_inspection_status ?? 'pending';
-                                                $finalInspectionColor = match ($finalInspectionStatus) {
-                                                    'rejected' => 'bg-red-500',
-                                                    'pending' => 'bg-yellow-400',
-                                                    'approved' => 'bg-green-500',
+                                                $qualSemaphore = $lot->getQualitySemaphoreStatus();
+                                                $qualColor = match ($qualSemaphore) {
+                                                    'green' => 'bg-green-500',
+                                                    'yellow' => 'bg-yellow-400',
+                                                    'gray' => 'bg-gray-300 dark:bg-gray-600',
                                                     default => 'bg-gray-400',
                                                 };
+                                                $qualHasProduction = $lot->hasProductionWeighings();
+                                                $qualPending = $lot->getQualityPendingPieces();
+                                                $qualTitle = match ($qualSemaphore) {
+                                                    'green' => 'Calidad: Verificado completamente',
+                                                    'yellow' => 'Calidad: Pendiente (' . number_format($qualPending) . ' piezas)',
+                                                    'gray' => 'Calidad: Sin pesadas de produccion',
+                                                    default => 'Calidad',
+                                                };
                                             @endphp
-                                            <button wire:click="openFinalInspectionModal({{ $lot->id }})"
-                                                class="w-5 h-5 rounded {{ $finalInspectionColor }} hover:opacity-80 cursor-pointer transition-opacity"
-                                                title="Inspeccion: {{ ucfirst($finalInspectionStatus) }}"></button>
+                                            <div class="flex items-center justify-center gap-1">
+                                                <span class="inline-block w-5 h-5 rounded {{ $qualColor }} {{ !$qualHasProduction ? 'opacity-60' : '' }}"
+                                                    title="{{ $qualTitle }}"></span>
+                                                @if ($qualHasProduction)
+                                                    <button wire:click="openQualityModal({{ $lot->id }})"
+                                                        class="w-5 h-5 rounded bg-teal-500 hover:bg-teal-600 cursor-pointer transition-colors flex items-center justify-center"
+                                                        title="Registrar pesada de calidad">
+                                                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v12m6-6H6"/>
+                                                        </svg>
+                                                    </button>
+                                                @endif
+                                            </div>
                                         </td>
                                         {{-- Semaforo Empaque --}}
                                         <td class="px-4 py-2 text-center">
@@ -1334,28 +1376,28 @@
         </div>
     @endif
 
-    {{-- Modal de Status de Inspeccion Final por Lote --}}
-    @if ($showFinalInspectionModal && $selectedLotForFinalInspection)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="final-inspection-modal-title" role="dialog"
+    {{-- Modal de Pesada (Calidad) por Lote --}}
+    @if ($showQualityModal && $selectedLotForQuality)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="quality-modal-title" role="dialog"
             aria-modal="true">
             <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 {{-- Overlay --}}
-                <div class="fixed inset-0 bg-gray-900/50 transition-opacity" wire:click="closeFinalInspectionModal"></div>
+                <div class="fixed inset-0 bg-gray-900/50 transition-opacity" wire:click="closeQualityModal"></div>
 
                 {{-- Modal Container --}}
                 <div
-                    class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700">
+                    class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-200 dark:border-gray-700 rounded-lg">
                     {{-- Header --}}
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-purple-600">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-teal-600">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 id="final-inspection-modal-title" class="text-lg font-semibold text-white">Inspeccion Final - Lote</h3>
-                                <p class="text-sm text-purple-100 mt-1">
-                                    WO: {{ $selectedLotForFinalInspection->workOrder->purchaseOrder->wo ?? 'N/A' }} |
-                                    Lote: {{ $selectedLotForFinalInspection->lot_number }}
+                                <h3 id="quality-modal-title" class="text-lg font-semibold text-white">Pesada de Calidad - Lote</h3>
+                                <p class="text-sm text-teal-100 mt-1">
+                                    WO: {{ $selectedLotForQuality->workOrder->purchaseOrder->wo ?? 'N/A' }} |
+                                    Lote: {{ $selectedLotForQuality->lot_number }}
                                 </p>
                             </div>
-                            <button wire:click="closeFinalInspectionModal" class="text-white hover:text-purple-200">
+                            <button wire:click="closeQualityModal" class="text-white hover:text-teal-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
@@ -1365,93 +1407,204 @@
                     </div>
 
                     {{-- Body --}}
-                    <div class="px-6 py-4 space-y-6">
-                        {{-- Informacion del Lote --}}
+                    <div class="px-6 py-4 space-y-5 max-h-[70vh] overflow-y-auto">
+                        {{-- Info del Lote y Produccion --}}
                         <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Informacion del Lote</h4>
                             <div class="grid grid-cols-2 gap-4 text-sm">
                                 <div>
                                     <span class="text-gray-500 dark:text-gray-400">Parte:</span>
                                     <span class="ml-2 text-gray-900 dark:text-white font-medium">
-                                        {{ $selectedLotForFinalInspection->workOrder->purchaseOrder->part->number ?? 'N/A' }}
+                                        {{ $selectedLotForQuality->workOrder->purchaseOrder->part->number ?? 'N/A' }}
                                     </span>
                                 </div>
                                 <div>
-                                    <span class="text-gray-500 dark:text-gray-400">Cantidad:</span>
-                                    <span class="ml-2 text-gray-900 dark:text-white font-medium">
-                                        {{ number_format($selectedLotForFinalInspection->quantity) }} piezas
+                                    <span class="text-gray-500 dark:text-gray-400">Lote:</span>
+                                    <span class="ml-2 text-blue-600 dark:text-blue-400 font-medium">
+                                        {{ $selectedLotForQuality->lot_number }}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Status de Inspeccion Final --}}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                Status de Inspeccion Final
-                            </label>
-                            <div class="grid grid-cols-3 gap-3">
-                                {{-- Pendiente --}}
-                                <button wire:click="setFinalInspectionStatus('pending')"
-                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $finalInspectionStatus === 'pending' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
-                                    <div class="w-8 h-8 rounded-full bg-yellow-400 mb-2"></div>
-                                    <span class="text-sm font-medium {{ $finalInspectionStatus === 'pending' ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-700 dark:text-gray-300' }}">
-                                        Pendiente
-                                    </span>
-                                </button>
-
-                                {{-- Aprobado --}}
-                                <button wire:click="setFinalInspectionStatus('approved')"
-                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $finalInspectionStatus === 'approved' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
-                                    <div class="w-8 h-8 rounded-full bg-green-500 mb-2"></div>
-                                    <span class="text-sm font-medium {{ $finalInspectionStatus === 'approved' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300' }}">
-                                        Aprobado
-                                    </span>
-                                </button>
-
-                                {{-- Rechazado --}}
-                                <button wire:click="setFinalInspectionStatus('rejected')"
-                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $finalInspectionStatus === 'rejected' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
-                                    <div class="w-8 h-8 rounded-full bg-red-500 mb-2"></div>
-                                    <span class="text-sm font-medium {{ $finalInspectionStatus === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300' }}">
-                                        Rechazado
-                                    </span>
-                                </button>
+                        {{-- Resumen de Produccion --}}
+                        <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-3">Resumen de Produccion</h4>
+                            <div class="grid grid-cols-3 gap-3 text-sm">
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Pz Buenas Prod.</div>
+                                    <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ number_format($qualProductionGoodPieces) }}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Ya Verificadas</div>
+                                    <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ number_format($qualAlreadyWeighed) }}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Pendientes</div>
+                                    <div class="text-lg font-bold {{ $qualRemainingPieces > 0 ? 'text-teal-600 dark:text-teal-400' : 'text-green-600 dark:text-green-400' }}">
+                                        {{ number_format($qualRemainingPieces) }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {{-- Comentarios --}}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Comentarios de Inspeccion
-                                @if ($finalInspectionStatus === 'rejected')
-                                    <span class="text-red-500">*</span>
+                        {{-- Historial de pesadas de calidad --}}
+                        @if (count($qualWeighingsList) > 0)
+                            <div>
+                                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Historial de Pesadas de Calidad</h4>
+                                <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                                    <table class="w-full text-xs">
+                                        <thead class="bg-gray-50 dark:bg-gray-900/50">
+                                            <tr>
+                                                <th class="px-3 py-2 text-left text-gray-600 dark:text-gray-400">Fecha</th>
+                                                <th class="px-3 py-2 text-right text-green-600 dark:text-green-400">Aprobadas</th>
+                                                <th class="px-3 py-2 text-right text-red-600 dark:text-red-400">Rechazadas</th>
+                                                <th class="px-3 py-2 text-center text-gray-600 dark:text-gray-400">Retrabajo</th>
+                                                <th class="px-3 py-2 text-left text-gray-600 dark:text-gray-400">Por</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                            @foreach ($qualWeighingsList as $qw)
+                                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                                                    <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ $qw['weighed_at'] }}</td>
+                                                    <td class="px-3 py-2 text-right font-medium text-green-600 dark:text-green-400">{{ number_format($qw['good_pieces']) }}</td>
+                                                    <td class="px-3 py-2 text-right font-medium text-red-600 dark:text-red-400">{{ number_format($qw['bad_pieces']) }}</td>
+                                                    <td class="px-3 py-2 text-center">
+                                                        @if ($qw['bad_pieces'] > 0)
+                                                            @php
+                                                                $reworkLabel = match ($qw['rework_status']) {
+                                                                    'pending_rework' => 'Pendiente',
+                                                                    'in_rework' => 'En Proceso',
+                                                                    'rework_complete' => 'Completado',
+                                                                    default => '-',
+                                                                };
+                                                                $reworkColor = match ($qw['rework_status']) {
+                                                                    'pending_rework' => 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20',
+                                                                    'in_rework' => 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20',
+                                                                    'rework_complete' => 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20',
+                                                                    default => 'text-gray-500',
+                                                                };
+                                                            @endphp
+                                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $reworkColor }}">
+                                                                {{ $reworkLabel }}
+                                                            </span>
+                                                        @else
+                                                            <span class="text-gray-400">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-3 py-2 text-gray-600 dark:text-gray-400">{{ $qw['weighed_by'] }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- Formulario de nueva pesada (solo si hay piezas pendientes) --}}
+                        @if ($qualRemainingPieces > 0)
+                            <div class="border-t border-gray-200 dark:border-gray-700 pt-5">
+                                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Nueva Pesada de Calidad</h4>
+
+                                {{-- Pendiente de verificar --}}
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pendiente de Verificar</label>
+                                    <div class="w-full px-3 py-2 border rounded-lg font-bold text-lg text-center
+                                        border-teal-300 dark:border-teal-600 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300">
+                                        {{ number_format($qualRemainingPieces) }} piezas
+                                    </div>
+                                </div>
+
+                                {{-- Kit (opcional) --}}
+                                @if (count($qualKits) > 0)
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kit (opcional)</label>
+                                        <select wire:model="qualKitId"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                                            <option value="">Sin kit</option>
+                                            @foreach ($qualKits as $kit)
+                                                <option value="{{ $kit->id }}">{{ $kit->kit_number }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 @endif
-                            </label>
-                            <textarea wire:model="finalInspectionComments" rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                                placeholder="{{ $finalInspectionStatus === 'rejected' ? 'Describa el motivo del rechazo...' : 'Observaciones adicionales (opcional)...' }}"></textarea>
-                            @if ($finalInspectionStatus === 'rejected')
-                                <p class="mt-1 text-xs text-red-600 dark:text-red-400">
-                                    * El motivo del rechazo es requerido
+
+                                {{-- Piezas aprobadas y rechazadas --}}
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Aprobadas *</label>
+                                        <input wire:model="qualGoodPieces" type="number" min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                            placeholder="0">
+                                        @error('qualGoodPieces')
+                                            <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Rechazadas *</label>
+                                        <input wire:model="qualBadPieces" type="number" min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                            placeholder="0">
+                                        @error('qualBadPieces')
+                                            <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                {{-- Info de retrabajo --}}
+                                @if ($qualBadPieces > 0)
+                                    <div class="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3 rounded-lg">
+                                        <div class="flex items-center text-sm text-yellow-700 dark:text-yellow-300">
+                                            <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                            </svg>
+                                            Las {{ number_format($qualBadPieces) }} piezas rechazadas seran enviadas a Produccion para retrabajo.
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- Fecha y hora --}}
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha y Hora *</label>
+                                    <input wire:model="qualWeighedAt" type="datetime-local"
+                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                                    @error('qualWeighedAt')
+                                        <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                {{-- Comentarios --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comentarios</label>
+                                    <textarea wire:model="qualComments" rows="2"
+                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                                        placeholder="Observaciones (opcional)..."></textarea>
+                                </div>
+                            </div>
+                        @else
+                            {{-- Lote completamente verificado --}}
+                            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-lg text-center">
+                                <svg class="w-8 h-8 text-green-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <p class="text-sm font-medium text-green-700 dark:text-green-300">
+                                    Todas las piezas de produccion han sido verificadas por Calidad.
                                 </p>
-                            @endif
-                            @error('finalInspectionComments')
-                                <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Footer --}}
                     <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
-                        <button wire:click="closeFinalInspectionModal"
+                        <button wire:click="closeQualityModal"
                             class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            Cancelar
+                            Cerrar
                         </button>
-                        <button wire:click="saveFinalInspectionStatus"
-                            class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
-                            Guardar Cambios
-                        </button>
+                        @if ($qualRemainingPieces > 0)
+                            <button wire:click="saveQuality"
+                                class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors">
+                                Registrar Pesada
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>

@@ -89,9 +89,17 @@
                 <flux:navlist.item icon="scale" :href="route('admin.production.weighings')"
                     :current="request()->routeIs('admin.production.weighings')" wire:navigate>{{ __('Pesadas') }}
                 </flux:navlist.item>
+            </flux:navlist.group>
 
-                <flux:navlist.item icon="check-badge" :href="route('admin.inspection.index')"
-                    :current="request()->routeIs('admin.inspection.*')" wire:navigate>{{ __('Inspección') }}
+            <flux:navlist.group :heading="__('Calidad')" class="grid">
+                <flux:navlist.item icon="shield-check" :href="route('admin.quality.index')"
+                    :current="request()->routeIs('admin.quality.index')" wire:navigate>{{ __('Dashboard') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="check-badge" :href="route('admin.quality.inspection')"
+                    :current="request()->routeIs('admin.quality.inspection')" wire:navigate>{{ __('Inspección') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="scale" :href="route('admin.quality.weighings')"
+                    :current="request()->routeIs('admin.quality.weighings')" wire:navigate>{{ __('Pesadas Calidad') }}
                 </flux:navlist.item>
             </flux:navlist.group>
 

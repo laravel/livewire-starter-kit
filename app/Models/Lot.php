@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Kit;
+use App\Models\QualityWeighing;
 
 class Lot extends Model
 {
@@ -120,6 +121,14 @@ class Lot extends Model
     public function weighings(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Weighing::class);
+    }
+
+    /**
+     * Get the quality weighings for this lot.
+     */
+    public function qualityWeighings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(QualityWeighing::class);
     }
 
     /**
@@ -443,5 +452,113 @@ class Lot extends Model
     public function canProceedToShipping(): bool
     {
         return $this->isInspectionApproved() && $this->status === self::STATUS_COMPLETED;
+    }
+
+    // =====================================================
+    // QUALITY WEIGHING HELPERS
+    // =====================================================
+
+    /**
+     * Get total good pieces from production weighings for this lot.
+     */
+    public function getProductionGoodPieces(): int
+    {
+        return (int) $this->weighings()->sum('good_pieces');
+    }
+
+    /**
+     * Get total bad pieces from production weighings for this lot.
+     */
+    public function getProductionBadPieces(): int
+    {
+        return (int) $this->weighings()->sum('bad_pieces');
+    }
+
+    /**
+     * Get total pieces already weighed by production.
+     */
+    public function getProductionTotalWeighed(): int
+    {
+        return $this->getProductionGoodPieces() + $this->getProductionBadPieces();
+    }
+
+    /**
+     * Get total pieces already verified by quality (good + bad).
+     */
+    public function getQualityAlreadyWeighed(): int
+    {
+        return (int) $this->qualityWeighings()
+            ->selectRaw('COALESCE(SUM(good_pieces), 0) + COALESCE(SUM(bad_pieces), 0) as total')
+            ->value('total');
+    }
+
+    /**
+     * Get pieces pending quality verification.
+     * = Production good pieces - Quality already weighed
+     */
+    public function getQualityPendingPieces(): int
+    {
+        return max(0, $this->getProductionGoodPieces() - $this->getQualityAlreadyWeighed());
+    }
+
+    /**
+     * Get total quality approved pieces.
+     */
+    public function getQualityGoodPieces(): int
+    {
+        return (int) $this->qualityWeighings()->sum('good_pieces');
+    }
+
+    /**
+     * Get total quality rejected pieces.
+     */
+    public function getQualityBadPieces(): int
+    {
+        return (int) $this->qualityWeighings()->sum('bad_pieces');
+    }
+
+    /**
+     * Get pieces pending rework (quality rejected, not yet re-weighed by production).
+     */
+    public function getReworkPendingPieces(): int
+    {
+        return (int) $this->qualityWeighings()
+            ->where('rework_status', QualityWeighing::REWORK_PENDING)
+            ->sum('bad_pieces');
+    }
+
+    /**
+     * Get the quality semaphore status.
+     * gray = no production weighings
+     * yellow = pending (production has weighings, quality hasn't verified all)
+     * green = all production good pieces verified by quality
+     */
+    public function getQualitySemaphoreStatus(): string
+    {
+        $prodGood = $this->getProductionGoodPieces();
+
+        if ($prodGood <= 0) {
+            return 'gray';
+        }
+
+        $qualityWeighed = $this->getQualityAlreadyWeighed();
+
+        if ($qualityWeighed <= 0) {
+            return 'yellow';
+        }
+
+        if ($qualityWeighed >= $prodGood) {
+            return 'green';
+        }
+
+        return 'yellow';
+    }
+
+    /**
+     * Check if this lot has production weighings available for quality inspection.
+     */
+    public function hasProductionWeighings(): bool
+    {
+        return $this->weighings()->exists();
     }
 }
