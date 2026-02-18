@@ -80,14 +80,23 @@
                     {{ __('Estados de Producción') }}
                 </flux:navlist.item>
 
-                @can('view_materials_area')
-                    <flux:navlist.item icon="archive-box" :href="route('admin.materials.dashboard')"
-                        :current="request()->routeIs('admin.materials.*')" wire:navigate>{{ __('Materiales') }}
-                    </flux:navlist.item>
-                @endcan
+            </flux:navlist.group>
 
+            <flux:navlist.group :heading="__('Pesadas')" class="grid">
+                <flux:navlist.item icon="chart-bar-square" :href="route('admin.production.index')"
+                    :current="request()->routeIs('admin.production.index')" wire:navigate>{{ __('Dashboard') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="scale" :href="route('admin.production.weighings')"
                     :current="request()->routeIs('admin.production.weighings')" wire:navigate>{{ __('Pesadas') }}
+                </flux:navlist.item>
+            </flux:navlist.group>
+
+            <flux:navlist.group :heading="__('Materiales')" class="grid">
+                <flux:navlist.item icon="chart-bar-square" :href="route('admin.materials.index')"
+                    :current="request()->routeIs('admin.materials.index')" wire:navigate>{{ __('Dashboard') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="archive-box" :href="route('admin.materials.manage')"
+                    :current="request()->routeIs('admin.materials.manage')" wire:navigate>{{ __('Gestión') }}
                 </flux:navlist.item>
             </flux:navlist.group>
 

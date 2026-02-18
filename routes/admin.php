@@ -151,7 +151,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/kits/create', \App\Livewire\Admin\Kits\KitCreate::class)->name('kits.create');
     Route::get('/kits/{kit}', \App\Livewire\Admin\Kits\KitShow::class)->name('kits.show');
 
-    // Producción - Pesadas
+    // Área de Producción (hub + pesadas)
+    Route::get('/production', \App\Livewire\Admin\Production\ProductionHubDashboard::class)->name('production.index');
     Route::get('/production/weighings', \App\Livewire\Admin\Production\WeighingManagement::class)->name('production.weighings');
 
     // Gestión de Lotes
@@ -174,11 +175,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     // Redirect legacy inspection route
     Route::redirect('/inspection', '/admin/quality/inspection');
 
-});
+    // Área de Materiales (hub + gestión)
+    Route::get('/materials', \App\Livewire\Admin\Materials\MaterialsHubDashboard::class)->name('materials.index');
+    Route::get('/materials/manage', \App\Livewire\Admin\Materials\MaterialsAreaDashboard::class)->name('materials.manage');
 
-// Materials Area Routes (requires Materials role)
-Route::middleware(['auth', 'verified', 'permission:view_materials_area'])->prefix('materials')->name('materials.')->group(function () {
-    Route::get('/', \App\Livewire\Admin\Materials\MaterialsAreaDashboard::class)->name('dashboard');
 });
 
 // Inspection Area Routes (requires Inspection role)

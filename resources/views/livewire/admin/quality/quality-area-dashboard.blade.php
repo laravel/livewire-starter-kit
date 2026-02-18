@@ -201,6 +201,7 @@
                                     <th class="px-4 py-3 text-right text-xs font-semibold text-red-600 dark:text-red-400 uppercase">Rechazadas</th>
                                     <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Retrabajo</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Inspector</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -234,6 +235,12 @@
                                             @endif
                                         </td>
                                         <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $qw->weighedBy->name ?? 'N/A' }}</td>
+                                        <td class="px-4 py-3 text-center">
+                                            <a href="{{ route('admin.quality.weighings', ['search' => $qw->lot->lot_number ?? '']) }}" wire:navigate
+                                                class="inline-flex items-center px-2 py-1 text-xs font-medium text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded hover:bg-teal-100 dark:hover:bg-teal-900/40 transition-colors">
+                                                Ver
+                                            </a>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

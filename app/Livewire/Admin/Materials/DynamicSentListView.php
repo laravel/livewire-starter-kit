@@ -690,13 +690,18 @@ class DynamicSentListView extends Component
      */
     public function render()
     {
+        $closedStatusIds = \App\Models\StatusWO::whereIn('name', ['Completed', 'Cancelled'])
+            ->pluck('id')
+            ->toArray();
+
         $query = WorkOrder::with([
             'purchaseOrder.part',
             'lots',
             'kits.preparedBy',
             'kits.releasedBy',
             'kits.lots'
-        ])->whereHas('lots'); // Solo WOs que tengan lotes
+        ])->whereHas('lots') // Solo WOs que tengan lotes
+          ->whereNotIn('status_id', $closedStatusIds); // Excluir cerrados/cancelados
 
         // Apply search
         if (!empty($this->searchTerm)) {
