@@ -14,6 +14,7 @@ class PartEdit extends Component
     public string $description = '';
     public string $notes = '';
     public bool $active = true;
+    public bool $is_crimp = true;
 
     public function mount(Part $part): void
     {
@@ -24,6 +25,7 @@ class PartEdit extends Component
         $this->description = $part->description ?? '';
         $this->notes = $part->notes ?? '';
         $this->active = (bool) $part->active;
+        $this->is_crimp = (bool) $part->is_crimp;
     }
 
     protected function rules(): array
@@ -35,6 +37,7 @@ class PartEdit extends Component
             'description' => 'nullable|string',
             'notes' => 'nullable|string|max:255',
             'active' => 'boolean',
+            'is_crimp' => 'boolean',
         ];
     }
 
@@ -59,6 +62,7 @@ class PartEdit extends Component
             'description' => $this->description ?: null,
             'notes' => $this->notes ?: null,
             'active' => $this->active,
+            'is_crimp' => $this->is_crimp,
         ]);
 
         session()->flash('flash.banner', 'Parte actualizada correctamente.');

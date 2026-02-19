@@ -518,13 +518,11 @@ class Lot extends Model
     }
 
     /**
-     * Get pieces pending rework (quality rejected, not yet re-weighed by production).
+     * Get pieces pending rework (deprecated - rework removed, rejected = discard).
      */
     public function getReworkPendingPieces(): int
     {
-        return (int) $this->qualityWeighings()
-            ->where('rework_status', QualityWeighing::REWORK_PENDING)
-            ->sum('bad_pieces');
+        return 0;
     }
 
     /**

@@ -48,9 +48,9 @@
                 <div class="text-sm text-green-600 dark:text-green-400">Verificados</div>
                 <div class="text-2xl font-bold text-green-700 dark:text-green-300 mt-1">{{ $stats['completed'] }}</div>
             </div>
-            <div class="bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
-                <div class="text-sm text-orange-600 dark:text-orange-400">Retrabajo Pendiente</div>
-                <div class="text-2xl font-bold text-orange-700 dark:text-orange-300 mt-1">{{ $stats['rework'] }}</div>
+            <div class="bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <div class="text-sm text-red-600 dark:text-red-400">Con Rechazos</div>
+                <div class="text-2xl font-bold text-red-700 dark:text-red-300 mt-1">{{ $stats['rejected'] }}</div>
             </div>
         </div>
 
@@ -67,7 +67,7 @@
                     <option value="">Todos los estados</option>
                     <option value="pending">Pendientes</option>
                     <option value="completed">Verificados</option>
-                    <option value="rework">Con Retrabajo</option>
+                    <option value="rejected">Con Rechazos</option>
                 </select>
             </div>
         </div>
@@ -101,7 +101,7 @@
                                 $qualBad = $lot->getQualityBadPieces();
                                 $qualPendingPcs = $lot->getQualityPendingPieces();
                                 $semaphore = $lot->getQualitySemaphoreStatus();
-                                $hasRework = $lot->getReworkPendingPieces() > 0;
+                                $hasRejected = $qualBad > 0;
                             @endphp
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
                                 <td class="px-4 py-3 text-blue-600 dark:text-blue-400 font-medium">{{ $po->wo }}</td>
@@ -124,9 +124,9 @@
                                             };
                                         @endphp
                                         <span class="inline-block w-4 h-4 rounded {{ $semColor }}" title="Calidad: {{ ucfirst($semaphore) }}"></span>
-                                        @if ($hasRework)
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20">
-                                                Retrabajo
+                                        @if ($hasRejected)
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20">
+                                                Descarte
                                             </span>
                                         @endif
                                     </div>
@@ -229,8 +229,7 @@
                                         <thead class="bg-indigo-50 dark:bg-indigo-900/20">
                                             <tr>
                                                 <th class="px-3 py-2 text-left text-gray-600 dark:text-gray-400">Fecha</th>
-                                                <th class="px-3 py-2 text-right text-green-600 dark:text-green-400">Buenas</th>
-                                                <th class="px-3 py-2 text-right text-red-600 dark:text-red-400">Malas</th>
+                                                <th class="px-3 py-2 text-right text-indigo-600 dark:text-indigo-400">Pz Pesadas</th>
                                                 <th class="px-3 py-2 text-left text-gray-600 dark:text-gray-400">Por</th>
                                                 <th class="px-3 py-2 text-left text-gray-600 dark:text-gray-400">Comentarios</th>
                                             </tr>
@@ -239,8 +238,7 @@
                                             @foreach ($productionWeighings as $pw)
                                                 <tr>
                                                     <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ $pw['weighed_at'] }}</td>
-                                                    <td class="px-3 py-2 text-right font-medium text-green-600 dark:text-green-400">{{ number_format($pw['good_pieces']) }}</td>
-                                                    <td class="px-3 py-2 text-right font-medium text-red-600 dark:text-red-400">{{ number_format($pw['bad_pieces']) }}</td>
+                                                    <td class="px-3 py-2 text-right font-medium text-indigo-600 dark:text-indigo-400">{{ number_format($pw['good_pieces']) }}</td>
                                                     <td class="px-3 py-2 text-gray-600 dark:text-gray-400">{{ $pw['weighed_by'] }}</td>
                                                     <td class="px-3 py-2 text-gray-500 dark:text-gray-400 max-w-xs truncate">{{ $pw['comments'] ?? '-' }}</td>
                                                 </tr>
@@ -249,8 +247,7 @@
                                         <tfoot class="bg-indigo-50 dark:bg-indigo-900/20 font-semibold">
                                             <tr>
                                                 <td class="px-3 py-2 text-gray-700 dark:text-gray-300">Total</td>
-                                                <td class="px-3 py-2 text-right text-green-600 dark:text-green-400">{{ number_format($prodGoodTotal) }}</td>
-                                                <td class="px-3 py-2 text-right text-red-600 dark:text-red-400">{{ number_format($prodBadTotal) }}</td>
+                                                <td class="px-3 py-2 text-right text-indigo-600 dark:text-indigo-400">{{ number_format($prodGoodTotal) }}</td>
                                                 <td colspan="2"></td>
                                             </tr>
                                         </tfoot>
@@ -275,9 +272,8 @@
                                                 <th class="px-3 py-2 text-left text-gray-600 dark:text-gray-400">Fecha</th>
                                                 <th class="px-3 py-2 text-right text-green-600 dark:text-green-400">Aprobadas</th>
                                                 <th class="px-3 py-2 text-right text-red-600 dark:text-red-400">Rechazadas</th>
-                                                <th class="px-3 py-2 text-center text-gray-600 dark:text-gray-400">Retrabajo</th>
                                                 <th class="px-3 py-2 text-left text-gray-600 dark:text-gray-400">Por</th>
-                                                <th class="px-3 py-2 text-center text-gray-600 dark:text-gray-400">Accion</th>
+                                                <th class="px-3 py-2 text-center text-gray-600 dark:text-gray-400">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -285,40 +281,21 @@
                                                 <tr>
                                                     <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ $qw['weighed_at'] }}</td>
                                                     <td class="px-3 py-2 text-right font-medium text-green-600 dark:text-green-400">{{ number_format($qw['good_pieces']) }}</td>
-                                                    <td class="px-3 py-2 text-right font-medium text-red-600 dark:text-red-400">{{ number_format($qw['bad_pieces']) }}</td>
-                                                    <td class="px-3 py-2 text-center">
+                                                    <td class="px-3 py-2 text-right font-medium text-red-600 dark:text-red-400">
+                                                        {{ number_format($qw['bad_pieces']) }}
                                                         @if ($qw['bad_pieces'] > 0)
-                                                            @php
-                                                                $rLabel = match ($qw['rework_status']) {
-                                                                    'pending_rework' => 'Pendiente',
-                                                                    'in_rework' => 'En Proceso',
-                                                                    'rework_complete' => 'Completado',
-                                                                    default => '-',
-                                                                };
-                                                                $rColor = match ($qw['rework_status']) {
-                                                                    'pending_rework' => 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20',
-                                                                    'in_rework' => 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20',
-                                                                    'rework_complete' => 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20',
-                                                                    default => 'text-gray-500',
-                                                                };
-                                                            @endphp
-                                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $rColor }}">
-                                                                {{ $rLabel }}
-                                                            </span>
-                                                        @else
-                                                            <span class="text-gray-400">-</span>
+                                                            <span class="ml-1 text-gray-400 text-xs">(descarte)</span>
                                                         @endif
                                                     </td>
                                                     <td class="px-3 py-2 text-gray-600 dark:text-gray-400">{{ $qw['weighed_by'] }}</td>
                                                     <td class="px-3 py-2 text-center">
-                                                        @if ($qw['bad_pieces'] > 0 && $qw['rework_status'] === 'pending_rework')
-                                                            <button wire:click="markReworkComplete({{ $qw['id'] }})"
-                                                                class="text-xs text-green-600 dark:text-green-400 hover:underline font-medium">
-                                                                Completar Retrabajo
-                                                            </button>
-                                                        @else
-                                                            <span class="text-gray-400">-</span>
-                                                        @endif
+                                                        <button wire:click="deleteQualityWeighing({{ $qw['id'] }})"
+                                                            wire:confirm="¿Eliminar esta pesada de calidad?"
+                                                            class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" title="Eliminar">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -328,7 +305,7 @@
                                                 <td class="px-3 py-2 text-gray-700 dark:text-gray-300">Total</td>
                                                 <td class="px-3 py-2 text-right text-green-600 dark:text-green-400">{{ number_format($qualGoodTotal) }}</td>
                                                 <td class="px-3 py-2 text-right text-red-600 dark:text-red-400">{{ number_format($qualBadTotal) }}</td>
-                                                <td colspan="3"></td>
+                                                <td colspan="2"></td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -380,8 +357,8 @@
                             </div>
                         </div>
 
-                        {{-- Kit --}}
-                        @if (count($qualKits) > 0)
+                        {{-- Kit (solo CRIMP) --}}
+                        @if ($qualIsCrimp && count($qualKits) > 0)
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kit (opcional)</label>
                                 <select wire:model="qualKitId"
@@ -416,14 +393,14 @@
                             </div>
                         </div>
 
-                        {{-- Rework warning --}}
+                        {{-- Discard warning --}}
                         @if ($qualBadPieces > 0)
-                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3 rounded-lg">
-                                <div class="flex items-center text-sm text-yellow-700 dark:text-yellow-300">
+                            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-lg">
+                                <div class="flex items-center text-sm text-red-700 dark:text-red-300">
                                     <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                                     </svg>
-                                    {{ number_format($qualBadPieces) }} piezas seran enviadas a Produccion para retrabajo.
+                                    {{ number_format($qualBadPieces) }} piezas rechazadas seran descartadas.
                                 </div>
                             </div>
                         @endif

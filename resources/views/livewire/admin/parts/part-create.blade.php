@@ -92,13 +92,22 @@
                         @enderror
                     </div>
 
-                    <!-- Estado Activo -->
-                    <div class="flex items-center">
-                        <input wire:model="active" id="active" type="checkbox"
-                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                        <label for="active" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Parte activa
-                        </label>
+                    <!-- Estado Activo y Crimp -->
+                    <div class="flex items-center gap-8">
+                        <div class="flex items-center">
+                            <input wire:model="active" id="active" type="checkbox"
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                            <label for="active" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Parte activa
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input wire:model="is_crimp" id="is_crimp" type="checkbox"
+                                class="w-4 h-4 text-amber-600 bg-gray-100 border-gray-300 rounded focus:ring-amber-500 dark:focus:ring-amber-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                            <label for="is_crimp" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Es CRIMP <span class="text-xs text-gray-500">(puede tener multiples kits)</span>
+                            </label>
+                        </div>
                     </div>
 
                     <!-- Botones -->

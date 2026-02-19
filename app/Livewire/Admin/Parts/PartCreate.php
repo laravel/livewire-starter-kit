@@ -13,6 +13,7 @@ class PartCreate extends Component
     public string $description = '';
     public string $notes = '';
     public bool $active = true;
+    public bool $is_crimp = true;
 
     protected function rules(): array
     {
@@ -23,6 +24,7 @@ class PartCreate extends Component
             'description' => 'nullable|string',
             'notes' => 'nullable|string|max:255',
             'active' => 'boolean',
+            'is_crimp' => 'boolean',
         ];
     }
 
@@ -47,6 +49,7 @@ class PartCreate extends Component
             'description' => $this->description ?: null,
             'notes' => $this->notes ?: null,
             'active' => $this->active,
+            'is_crimp' => $this->is_crimp,
         ]);
 
         session()->flash('flash.banner', 'Parte creada correctamente.');

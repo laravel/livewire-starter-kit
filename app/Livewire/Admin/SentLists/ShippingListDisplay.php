@@ -60,13 +60,10 @@ class ShippingListDisplay extends Component
     // Modal de Pesada (Producción) por lote
     public $showProductionModal = false;
     public $selectedLotForProduction = null;
-    public $prodGoodPieces = 0;
-    public $prodBadPieces = 0;
+    public $prodWeighedPieces = 0;
     public $prodWeighedAt = '';
     public $prodComments = '';
     public $prodQuantity = 0;
-    public $prodKitId = null;
-    public $prodKits = [];
     public $prodRemainingPieces = 0;
     public $prodAlreadyWeighed = 0;
 
@@ -83,6 +80,8 @@ class ShippingListDisplay extends Component
     public $qualKitId = null;
     public $qualKits = [];
     public $qualWeighingsList = [];
+    public $qualEditingId = null;
+    public $qualIsCrimp = true;
 
     public function mount()
     {
@@ -265,6 +264,13 @@ class ShippingListDisplay extends Component
 
         if (!$this->selectedLotForKit) {
             session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        // No abrir modal de kit para partes que no son CRIMP
+        $isCrimp = (bool) ($this->selectedLotForKit->workOrder->purchaseOrder->part->is_crimp ?? true);
+        if (!$isCrimp) {
+            session()->flash('error', 'Esta parte no es CRIMP — el lote funciona como kit.');
             return;
         }
 
@@ -619,22 +625,16 @@ class ShippingListDisplay extends Component
         $this->selectedLotForProduction = $lot;
         $this->prodQuantity = $lot->quantity;
 
-        // Calcular piezas ya pesadas (buenas + malas de pesadas anteriores)
+        // Calcular piezas ya pesadas
         $alreadyWeighed = \App\Models\Weighing::where('lot_id', $lot->id)
-            ->selectRaw('COALESCE(SUM(good_pieces), 0) + COALESCE(SUM(bad_pieces), 0) as total')
+            ->selectRaw('COALESCE(SUM(good_pieces), 0) as total')
             ->value('total');
         $this->prodAlreadyWeighed = (int) $alreadyWeighed;
+        $this->prodRemainingPieces = max(0, $lot->quantity - $this->prodAlreadyWeighed);
 
-        // Incluir piezas de retrabajo (rechazadas por calidad pendientes de re-pesar)
-        $reworkPieces = $lot->getReworkPendingPieces();
-        $this->prodRemainingPieces = ($lot->quantity - $this->prodAlreadyWeighed) + $reworkPieces;
-
-        $this->prodGoodPieces = 0;
-        $this->prodBadPieces = 0;
+        $this->prodWeighedPieces = 0;
         $this->prodWeighedAt = now()->format('Y-m-d\TH:i');
         $this->prodComments = '';
-        $this->prodKitId = null;
-        $this->prodKits = $lot->kits;
         $this->showProductionModal = true;
     }
 
@@ -643,12 +643,9 @@ class ShippingListDisplay extends Component
         $this->showProductionModal = false;
         $this->selectedLotForProduction = null;
         $this->prodQuantity = 0;
-        $this->prodGoodPieces = 0;
-        $this->prodBadPieces = 0;
+        $this->prodWeighedPieces = 0;
         $this->prodWeighedAt = '';
         $this->prodComments = '';
-        $this->prodKitId = null;
-        $this->prodKits = [];
         $this->prodRemainingPieces = 0;
         $this->prodAlreadyWeighed = 0;
         $this->resetErrorBag();
@@ -657,15 +654,12 @@ class ShippingListDisplay extends Component
     public function saveProduction()
     {
         $this->validate([
-            'prodGoodPieces' => 'required|integer|min:0',
-            'prodBadPieces' => 'required|integer|min:0',
+            'prodWeighedPieces' => 'required|integer|min:1',
             'prodWeighedAt' => 'required|date',
             'prodComments' => 'nullable|string|max:1000',
         ], [
-            'prodGoodPieces.required' => 'Las piezas buenas son requeridas.',
-            'prodGoodPieces.min' => 'Las piezas buenas no pueden ser negativas.',
-            'prodBadPieces.required' => 'Las piezas malas son requeridas.',
-            'prodBadPieces.min' => 'Las piezas malas no pueden ser negativas.',
+            'prodWeighedPieces.required' => 'Las piezas pesadas son requeridas.',
+            'prodWeighedPieces.min' => 'Debe registrar al menos 1 pieza.',
             'prodWeighedAt.required' => 'La fecha y hora son requeridas.',
         ]);
 
@@ -674,24 +668,17 @@ class ShippingListDisplay extends Component
             return;
         }
 
-        // Validar que buenas + malas no sobrepasen la cantidad pendiente de pesar
-        $total = $this->prodGoodPieces + $this->prodBadPieces;
-        if ($total > $this->prodRemainingPieces) {
-            $this->addError('prodGoodPieces', 'La suma de piezas buenas + malas (' . number_format($total) . ') sobrepasa la cantidad pendiente de pesar (' . number_format($this->prodRemainingPieces) . ').');
-            return;
-        }
-
-        if ($total <= 0) {
-            $this->addError('prodGoodPieces', 'Debe registrar al menos 1 pieza (buena o mala).');
+        if ($this->prodWeighedPieces > $this->prodRemainingPieces) {
+            $this->addError('prodWeighedPieces', 'Las piezas pesadas (' . number_format($this->prodWeighedPieces) . ') sobrepasan la cantidad pendiente (' . number_format($this->prodRemainingPieces) . ').');
             return;
         }
 
         \App\Models\Weighing::create([
             'lot_id' => $this->selectedLotForProduction->id,
-            'kit_id' => $this->prodKitId ?: null,
+            'kit_id' => null,
             'quantity' => $this->selectedLotForProduction->quantity,
-            'good_pieces' => $this->prodGoodPieces,
-            'bad_pieces' => $this->prodBadPieces,
+            'good_pieces' => $this->prodWeighedPieces,
+            'bad_pieces' => 0,
             'weighed_at' => $this->prodWeighedAt,
             'weighed_by' => auth()->id(),
             'comments' => $this->prodComments ?: null,
@@ -729,8 +716,9 @@ class ShippingListDisplay extends Component
         $this->qualBadPieces = 0;
         $this->qualWeighedAt = now()->format('Y-m-d\TH:i');
         $this->qualComments = '';
+        $this->qualIsCrimp = (bool) ($lot->workOrder->purchaseOrder->part->is_crimp ?? true);
         $this->qualKitId = null;
-        $this->qualKits = $lot->kits;
+        $this->qualKits = $this->qualIsCrimp ? $lot->kits : collect([]);
         $this->qualWeighingsList = $lot->qualityWeighings->map(function ($qw) {
             return [
                 'id' => $qw->id,
@@ -760,6 +748,8 @@ class ShippingListDisplay extends Component
         $this->qualKitId = null;
         $this->qualKits = [];
         $this->qualWeighingsList = [];
+        $this->qualEditingId = null;
+        $this->qualIsCrimp = true;
         $this->resetErrorBag();
     }
 
@@ -794,22 +784,35 @@ class ShippingListDisplay extends Component
             return;
         }
 
-        $qw = QualityWeighing::create([
+        $data = [
             'lot_id' => $this->selectedLotForQuality->id,
             'kit_id' => $this->qualKitId ?: null,
             'production_good_pieces' => $this->qualProductionGoodPieces,
             'good_pieces' => $this->qualGoodPieces,
             'bad_pieces' => $this->qualBadPieces,
-            'disposition' => QualityWeighing::DISPOSITION_REWORK,
-            'rework_status' => $this->qualBadPieces > 0 ? QualityWeighing::REWORK_PENDING : null,
+            'disposition' => $this->qualBadPieces > 0 ? QualityWeighing::DISPOSITION_SCRAP : null,
+            'rework_status' => null,
             'weighed_at' => $this->qualWeighedAt,
             'weighed_by' => auth()->id(),
             'comments' => $this->qualComments ?: null,
-        ]);
+        ];
 
-        $message = 'Pesada de calidad registrada correctamente.';
+        if ($this->qualEditingId) {
+            $qw = QualityWeighing::find($this->qualEditingId);
+            if ($qw) {
+                $qw->update($data);
+                $message = 'Pesada de calidad actualizada correctamente.';
+            } else {
+                session()->flash('error', 'Pesada no encontrada.');
+                return;
+            }
+        } else {
+            $qw = QualityWeighing::create($data);
+            $message = 'Pesada de calidad registrada correctamente.';
+        }
+
         if ($this->qualBadPieces > 0) {
-            $message .= ' ' . number_format($this->qualBadPieces) . ' piezas marcadas para retrabajo.';
+            $message .= ' ' . number_format($this->qualBadPieces) . ' piezas descartadas.';
         }
 
         session()->flash('message', $message);
@@ -817,15 +820,43 @@ class ShippingListDisplay extends Component
         $this->dispatch('refresh-display');
     }
 
-    /**
-     * Mark rework as complete for a quality weighing (called from Quality Area).
-     */
-    public function markReworkComplete($qualityWeighingId)
+    public function editQualityWeighing($qualityWeighingId)
     {
         $qw = QualityWeighing::find($qualityWeighingId);
-        if ($qw && $qw->rework_status === QualityWeighing::REWORK_PENDING) {
-            $qw->update(['rework_status' => QualityWeighing::REWORK_COMPLETE]);
-            session()->flash('message', 'Retrabajo marcado como completado.');
+        if (!$qw) {
+            session()->flash('error', 'Pesada no encontrada.');
+            return;
+        }
+
+        $this->qualEditingId = $qw->id;
+        $this->qualGoodPieces = $qw->good_pieces;
+        $this->qualBadPieces = $qw->bad_pieces;
+        $this->qualWeighedAt = $qw->weighed_at->format('Y-m-d\TH:i');
+        $this->qualComments = $qw->comments ?? '';
+        $this->qualKitId = $qw->kit_id;
+    }
+
+    public function cancelEditQuality()
+    {
+        $this->qualEditingId = null;
+        $this->qualGoodPieces = 0;
+        $this->qualBadPieces = 0;
+        $this->qualWeighedAt = now()->format('Y-m-d\TH:i');
+        $this->qualComments = '';
+        $this->qualKitId = null;
+        $this->resetErrorBag();
+    }
+
+    public function deleteQualityWeighing($qualityWeighingId)
+    {
+        $qw = QualityWeighing::find($qualityWeighingId);
+        if ($qw) {
+            $qw->delete();
+            // Refresh the modal data
+            if ($this->selectedLotForQuality) {
+                $this->openQualityModal($this->selectedLotForQuality->id);
+            }
+            session()->flash('message', 'Pesada de calidad eliminada.');
             $this->dispatch('refresh-display');
         }
     }

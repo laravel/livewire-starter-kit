@@ -37,8 +37,8 @@ class QualityAreaDashboard extends Component
         $completedQuality = Lot::whereHas('weighings')
             ->whereRaw('(SELECT COALESCE(SUM(good_pieces),0) + COALESCE(SUM(bad_pieces),0) FROM quality_weighings WHERE quality_weighings.lot_id = lots.id AND quality_weighings.deleted_at IS NULL) >= (SELECT COALESCE(SUM(good_pieces),0) FROM weighings WHERE weighings.lot_id = lots.id AND weighings.deleted_at IS NULL)')
             ->count();
-        $pendingRework = Lot::whereHas('qualityWeighings', function ($q) {
-            $q->where('rework_status', QualityWeighing::REWORK_PENDING);
+        $withRejected = Lot::whereHas('qualityWeighings', function ($q) {
+            $q->where('bad_pieces', '>', 0);
         })->count();
 
         // ── Recent quality weighings ──
@@ -57,7 +57,7 @@ class QualityAreaDashboard extends Component
             'totalWithProd' => $totalWithProd,
             'pendingQuality' => $pendingQuality,
             'completedQuality' => $completedQuality,
-            'pendingRework' => $pendingRework,
+            'withRejected' => $withRejected,
             'recentQualityWeighings' => $recentQualityWeighings,
         ])->layout('components.layouts.app');
     }

@@ -329,6 +329,12 @@ class DynamicSentListView extends Component
      */
     public function openCreateKitModal(int $workOrderId): void
     {
+        $wo = \App\Models\WorkOrder::with('purchaseOrder.part')->find($workOrderId);
+        if ($wo && !($wo->purchaseOrder->part->is_crimp ?? true)) {
+            session()->flash('error', 'Esta parte no es CRIMP — el lote funciona como kit.');
+            return;
+        }
+
         $this->selectedWorkOrderId = $workOrderId;
         $this->showCreateKitModal = true;
     }

@@ -40,6 +40,7 @@ class QualityWeighings extends Component
     public ?int $qualKitId = null;
     public $qualKits = [];
     public int $qualRemainingPieces = 0;
+    public bool $qualIsCrimp = true;
 
     public function updatingSearch(): void
     {
@@ -139,8 +140,9 @@ class QualityWeighings extends Component
         $this->qualBadPieces = 0;
         $this->qualWeighedAt = now()->format('Y-m-d\TH:i');
         $this->qualComments = '';
+        $this->qualIsCrimp = (bool) ($this->selectedLot->workOrder->purchaseOrder->part->is_crimp ?? true);
         $this->qualKitId = null;
-        $this->qualKits = $this->selectedLot->kits;
+        $this->qualKits = $this->qualIsCrimp ? $this->selectedLot->kits : collect([]);
         $this->showWeighingModal = true;
     }
 
@@ -154,6 +156,7 @@ class QualityWeighings extends Component
         $this->qualKitId = null;
         $this->qualKits = [];
         $this->qualRemainingPieces = 0;
+        $this->qualIsCrimp = true;
         $this->resetErrorBag();
     }
 
@@ -193,8 +196,8 @@ class QualityWeighings extends Component
             'production_good_pieces' => $lot->getProductionGoodPieces(),
             'good_pieces' => $this->qualGoodPieces,
             'bad_pieces' => $this->qualBadPieces,
-            'disposition' => QualityWeighing::DISPOSITION_REWORK,
-            'rework_status' => $this->qualBadPieces > 0 ? QualityWeighing::REWORK_PENDING : null,
+            'disposition' => $this->qualBadPieces > 0 ? QualityWeighing::DISPOSITION_SCRAP : null,
+            'rework_status' => null,
             'weighed_at' => $this->qualWeighedAt,
             'weighed_by' => auth()->id(),
             'comments' => $this->qualComments ?: null,
@@ -202,7 +205,7 @@ class QualityWeighings extends Component
 
         $message = 'Pesada de calidad registrada.';
         if ($this->qualBadPieces > 0) {
-            $message .= ' ' . number_format($this->qualBadPieces) . ' piezas para retrabajo.';
+            $message .= ' ' . number_format($this->qualBadPieces) . ' piezas descartadas.';
         }
 
         session()->flash('message', $message);
@@ -212,14 +215,14 @@ class QualityWeighings extends Component
     }
 
     /**
-     * Mark rework as complete.
+     * Delete a quality weighing.
      */
-    public function markReworkComplete(int $qualityWeighingId): void
+    public function deleteQualityWeighing(int $qualityWeighingId): void
     {
         $qw = QualityWeighing::find($qualityWeighingId);
-        if ($qw && $qw->rework_status === QualityWeighing::REWORK_PENDING) {
-            $qw->update(['rework_status' => QualityWeighing::REWORK_COMPLETE]);
-            session()->flash('message', 'Retrabajo marcado como completado.');
+        if ($qw) {
+            $qw->delete();
+            session()->flash('message', 'Pesada de calidad eliminada.');
             if ($this->selectedLotId) {
                 $this->openDetailModal($this->selectedLotId);
             }
@@ -249,10 +252,10 @@ class QualityWeighings extends Component
         } elseif ($this->filterQualityStatus === 'completed') {
             // Quality has verified all production good pieces
             $query->whereRaw('(SELECT COALESCE(SUM(good_pieces),0) + COALESCE(SUM(bad_pieces),0) FROM quality_weighings WHERE quality_weighings.lot_id = lots.id AND quality_weighings.deleted_at IS NULL) >= (SELECT COALESCE(SUM(good_pieces),0) FROM weighings WHERE weighings.lot_id = lots.id AND weighings.deleted_at IS NULL)');
-        } elseif ($this->filterQualityStatus === 'rework') {
-            // Has pending rework
+        } elseif ($this->filterQualityStatus === 'rejected') {
+            // Has rejected/discarded pieces
             $query->whereHas('qualityWeighings', function ($q) {
-                $q->where('rework_status', QualityWeighing::REWORK_PENDING);
+                $q->where('bad_pieces', '>', 0);
             });
         }
 
@@ -269,15 +272,15 @@ class QualityWeighings extends Component
         $completedQuality = Lot::whereHas('weighings')
             ->whereRaw('(SELECT COALESCE(SUM(good_pieces),0) + COALESCE(SUM(bad_pieces),0) FROM quality_weighings WHERE quality_weighings.lot_id = lots.id AND quality_weighings.deleted_at IS NULL) >= (SELECT COALESCE(SUM(good_pieces),0) FROM weighings WHERE weighings.lot_id = lots.id AND weighings.deleted_at IS NULL)')
             ->count();
-        $pendingRework = Lot::whereHas('qualityWeighings', function ($q) {
-            $q->where('rework_status', QualityWeighing::REWORK_PENDING);
+        $withRejected = Lot::whereHas('qualityWeighings', function ($q) {
+            $q->where('bad_pieces', '>', 0);
         })->count();
 
         $stats = [
             'total' => $totalWithProd,
             'pending' => $pendingQuality,
             'completed' => $completedQuality,
-            'rework' => $pendingRework,
+            'rejected' => $withRejected,
         ];
 
         return view('livewire.admin.quality.quality-weighings', [

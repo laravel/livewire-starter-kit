@@ -87,9 +87,7 @@
                             <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                 Cantidad</th>
                             <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                Pz Buenas</th>
-                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                Pz Malas</th>
+                                Pz Pesadas</th>
                             <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('weighed_at')">
                                 Fecha Pesada
                                 @if($sortField === 'weighed_at')
@@ -116,16 +114,17 @@
                                     {{ $weighing->lot->workOrder->purchaseOrder->part->number ?? 'N/A' }}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $weighing->kit->kit_number ?? '-' }}
+                                    @if ($weighing->lot->workOrder->purchaseOrder->part->is_crimp ?? true)
+                                        {{ $weighing->kit->kit_number ?? '-' }}
+                                    @else
+                                        <span class="text-gray-400">—</span>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 text-sm text-right text-gray-500 dark:text-gray-400">
                                     {{ number_format($weighing->quantity) }}
                                 </td>
-                                <td class="px-4 py-3 text-sm text-right font-medium text-green-600 dark:text-green-400">
+                                <td class="px-4 py-3 text-sm text-right font-medium text-indigo-600 dark:text-indigo-400">
                                     {{ number_format($weighing->good_pieces) }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-right font-medium text-red-600 dark:text-red-400">
-                                    {{ number_format($weighing->bad_pieces) }}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
                                     {{ $weighing->weighed_at->format('m/d/Y H:i') }}
@@ -165,7 +164,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="10" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                                     <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                                     </svg>
@@ -234,18 +233,19 @@
                             @enderror
                         </div>
 
-                        {{-- Kit (opcional) --}}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kit (opcional)</label>
-                            <select wire:model="selectedKitId"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                {{ count($kits) === 0 ? 'disabled' : '' }}>
-                                <option value="">Sin kit</option>
-                                @foreach ($kits as $kit)
-                                    <option value="{{ $kit->id }}">{{ $kit->kit_number }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        {{-- Kit (opcional, solo si es CRIMP) --}}
+                        @if ($isCrimp && count($kits) > 0)
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kit (opcional)</label>
+                                <select wire:model="selectedKitId"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">Sin kit</option>
+                                    @foreach ($kits as $kit)
+                                        <option value="{{ $kit->id }}">{{ $kit->kit_number }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
 
                         {{-- Cantidad (solo visual) --}}
                         <div>
@@ -256,26 +256,15 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Campo informativo - no editable</p>
                         </div>
 
-                        {{-- Piezas buenas y malas --}}
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Buenas *</label>
-                                <input wire:model="formGoodPieces" type="number" min="0"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                    placeholder="0">
-                                @error('formGoodPieces')
-                                    <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Malas *</label>
-                                <input wire:model="formBadPieces" type="number" min="0"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    placeholder="0">
-                                @error('formBadPieces')
-                                    <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
-                                @enderror
-                            </div>
+                        {{-- Piezas pesadas --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Pesadas *</label>
+                            <input wire:model="formWeighedPieces" type="number" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="0">
+                            @error('formWeighedPieces')
+                                <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                            @enderror
                         </div>
 
                         {{-- Fecha y hora --}}
@@ -360,28 +349,26 @@
                                     {{ $detailWeighing->lot->lot_number ?? 'N/A' }}
                                 </span>
                             </div>
+                            @if ($detailWeighing->lot->workOrder->purchaseOrder->part->is_crimp ?? true)
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400 block">Kit:</span>
                                 <span class="text-gray-900 dark:text-white font-medium">
                                     {{ $detailWeighing->kit->kit_number ?? 'Sin kit' }}
                                 </span>
                             </div>
+                            @endif
                         </div>
 
                         <hr class="border-gray-200 dark:border-gray-700">
 
-                        <div class="grid grid-cols-3 gap-4">
+                        <div class="grid grid-cols-2 gap-4">
                             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-center">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Cantidad</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Cantidad del Lote</p>
                                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($detailWeighing->quantity) }}</p>
                             </div>
-                            <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center">
-                                <p class="text-xs text-green-600 dark:text-green-400">Pz Buenas</p>
-                                <p class="text-lg font-bold text-green-700 dark:text-green-300">{{ number_format($detailWeighing->good_pieces) }}</p>
-                            </div>
-                            <div class="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-center">
-                                <p class="text-xs text-red-600 dark:text-red-400">Pz Malas</p>
-                                <p class="text-lg font-bold text-red-700 dark:text-red-300">{{ number_format($detailWeighing->bad_pieces) }}</p>
+                            <div class="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg text-center">
+                                <p class="text-xs text-indigo-600 dark:text-indigo-400">Pz Pesadas</p>
+                                <p class="text-lg font-bold text-indigo-700 dark:text-indigo-300">{{ number_format($detailWeighing->good_pieces) }}</p>
                             </div>
                         </div>
 

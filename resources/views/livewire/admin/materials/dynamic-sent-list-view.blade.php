@@ -89,9 +89,13 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                        {{ $kitsCount }}
-                                    </span>
+                                    @if ($part && $part->is_crimp)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                            {{ $kitsCount }}
+                                        </span>
+                                    @else
+                                        <span class="text-xs text-gray-400" title="No aplica (no es CRIMP)">—</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <button 
@@ -180,7 +184,8 @@
                                         @endif
                                     </div>
 
-                                    {{-- Kits Section (independiente de lotes) --}}
+                                    {{-- Kits Section (solo para partes CRIMP) --}}
+                                    @if ($part && $part->is_crimp)
                                     <div class="pl-4 border-l-2 border-green-300 dark:border-green-600">
                                         <div class="flex items-center justify-between mb-2">
                                             <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -269,6 +274,13 @@
                                             </div>
                                         @endif
                                     </div>
+                                    @else
+                                    <div class="pl-4 border-l-2 border-gray-200 dark:border-gray-600">
+                                        <div class="text-xs text-gray-400 dark:text-gray-500 italic p-2">
+                                            Esta parte no es CRIMP — el lote funciona como kit.
+                                        </div>
+                                    </div>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

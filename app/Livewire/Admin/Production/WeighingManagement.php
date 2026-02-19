@@ -24,8 +24,7 @@ class WeighingManagement extends Component
     public ?int $selectedLotId = null;
     public ?int $selectedKitId = null;
     public int $formQuantity = 0;
-    public int $formGoodPieces = 0;
-    public int $formBadPieces = 0;
+    public int $formWeighedPieces = 0;
     public string $formWeighedAt = '';
     public string $formComments = '';
 
@@ -36,6 +35,8 @@ class WeighingManagement extends Component
     // Modal confirmar eliminación
     public bool $confirmingDeletion = false;
     public ?int $weighingToDelete = null;
+
+    public bool $isCrimp = true;
 
     // Datos para selects
     public $lots = [];
@@ -59,12 +60,16 @@ class WeighingManagement extends Component
         $this->kits = [];
         $this->selectedKitId = null;
         $this->formQuantity = 0;
+        $this->isCrimp = true;
 
         if ($value) {
-            $lot = Lot::with('kits')->find($value);
+            $lot = Lot::with(['kits', 'workOrder.purchaseOrder.part'])->find($value);
             if ($lot) {
                 $this->formQuantity = $lot->quantity;
-                $this->kits = $lot->kits;
+                $this->isCrimp = (bool) ($lot->workOrder->purchaseOrder->part->is_crimp ?? true);
+                if ($this->isCrimp) {
+                    $this->kits = $lot->kits;
+                }
             }
         }
     }
@@ -116,14 +121,16 @@ class WeighingManagement extends Component
         $this->selectedLotId = $weighing->lot_id;
         $this->selectedKitId = $weighing->kit_id;
         $this->formQuantity = $weighing->quantity;
-        $this->formGoodPieces = $weighing->good_pieces;
-        $this->formBadPieces = $weighing->bad_pieces;
+        $this->formWeighedPieces = $weighing->good_pieces;
         $this->formWeighedAt = $weighing->weighed_at->format('Y-m-d\TH:i');
         $this->formComments = $weighing->comments ?? '';
 
-        // Cargar kits del lote seleccionado
+        // Cargar kits del lote seleccionado y determinar crimp
         if ($weighing->lot) {
-            $this->kits = $weighing->lot->kits;
+            $this->isCrimp = (bool) ($weighing->lot->workOrder->purchaseOrder->part->is_crimp ?? true);
+            if ($this->isCrimp) {
+                $this->kits = $weighing->lot->kits;
+            }
         }
 
         $this->showFormModal = true;
@@ -138,16 +145,13 @@ class WeighingManagement extends Component
         $this->validate([
             'selectedLotId' => 'required|exists:lots,id',
             'selectedKitId' => 'nullable|exists:kits,id',
-            'formGoodPieces' => 'required|integer|min:0',
-            'formBadPieces' => 'required|integer|min:0',
+            'formWeighedPieces' => 'required|integer|min:1',
             'formWeighedAt' => 'required|date',
             'formComments' => 'nullable|string|max:1000',
         ], [
             'selectedLotId.required' => 'Debe seleccionar un lote.',
-            'formGoodPieces.required' => 'Las piezas buenas son requeridas.',
-            'formGoodPieces.min' => 'Las piezas buenas no pueden ser negativas.',
-            'formBadPieces.required' => 'Las piezas malas son requeridas.',
-            'formBadPieces.min' => 'Las piezas malas no pueden ser negativas.',
+            'formWeighedPieces.required' => 'Las piezas pesadas son requeridas.',
+            'formWeighedPieces.min' => 'Debe registrar al menos 1 pieza.',
             'formWeighedAt.required' => 'La fecha y hora son requeridas.',
         ]);
 
@@ -155,10 +159,10 @@ class WeighingManagement extends Component
 
         $data = [
             'lot_id' => $this->selectedLotId,
-            'kit_id' => $this->selectedKitId ?: null,
+            'kit_id' => $this->isCrimp ? ($this->selectedKitId ?: null) : null,
             'quantity' => $lot->quantity,
-            'good_pieces' => $this->formGoodPieces,
-            'bad_pieces' => $this->formBadPieces,
+            'good_pieces' => $this->formWeighedPieces,
+            'bad_pieces' => 0,
             'weighed_at' => $this->formWeighedAt,
             'weighed_by' => auth()->id(),
             'comments' => $this->formComments ?: null,
@@ -245,8 +249,8 @@ class WeighingManagement extends Component
         $this->selectedLotId = null;
         $this->selectedKitId = null;
         $this->formQuantity = 0;
-        $this->formGoodPieces = 0;
-        $this->formBadPieces = 0;
+        $this->formWeighedPieces = 0;
+        $this->isCrimp = true;
         $this->formWeighedAt = now()->format('Y-m-d\TH:i');
         $this->formComments = '';
         $this->kits = [];

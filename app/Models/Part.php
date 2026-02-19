@@ -18,12 +18,14 @@ class Part extends Model
         'item_number',
         'unit_of_measure',
         'active',
+        'is_crimp',
         'description',
         'notes',
     ];
 
     protected $casts = [
         'active' => 'boolean',
+        'is_crimp' => 'boolean',
     ];
 
     /**

@@ -121,7 +121,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">Pesadas de Calidad</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Verificar pesadas de produccion y gestionar retrabajo</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Verificar pesadas de produccion</p>
                             <div class="flex items-center gap-4 mt-4">
                                 <div class="flex items-center gap-1.5">
                                     <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
@@ -131,10 +131,10 @@
                                     <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
                                     <span class="text-sm text-gray-500 dark:text-gray-400">{{ $completedQuality }} verificados</span>
                                 </div>
-                                @if ($pendingRework > 0)
+                                @if ($withRejected > 0)
                                     <div class="flex items-center gap-1.5">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
-                                        <span class="text-sm font-medium text-orange-600 dark:text-orange-400">{{ $pendingRework }} retrabajo</span>
+                                        <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                                        <span class="text-sm font-medium text-red-600 dark:text-red-400">{{ $withRejected }} con rechazos</span>
                                     </div>
                                 @endif
                             </div>
@@ -170,9 +170,9 @@
                     <div class="text-sm text-green-600 dark:text-green-400">Verificados</div>
                     <div class="text-2xl font-bold text-green-700 dark:text-green-300 mt-1">{{ number_format($completedQuality) }}</div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-800 rounded-xl p-4 text-center">
-                    <div class="text-sm text-orange-600 dark:text-orange-400">Retrabajo Pendiente</div>
-                    <div class="text-2xl font-bold text-orange-700 dark:text-orange-300 mt-1">{{ number_format($pendingRework) }}</div>
+                <div class="bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-xl p-4 text-center">
+                    <div class="text-sm text-red-600 dark:text-red-400">Con Rechazos</div>
+                    <div class="text-2xl font-bold text-red-700 dark:text-red-300 mt-1">{{ number_format($withRejected) }}</div>
                 </div>
             </div>
         </section>
@@ -199,7 +199,6 @@
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Parte</th>
                                     <th class="px-4 py-3 text-right text-xs font-semibold text-green-600 dark:text-green-400 uppercase">Aprobadas</th>
                                     <th class="px-4 py-3 text-right text-xs font-semibold text-red-600 dark:text-red-400 uppercase">Rechazadas</th>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Retrabajo</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Inspector</th>
                                     <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Acciones</th>
                                 </tr>
@@ -213,27 +212,6 @@
                                         <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ $qw->lot->workOrder->purchaseOrder->part->number ?? 'N/A' }}</td>
                                         <td class="px-4 py-3 text-right font-medium text-green-600 dark:text-green-400">{{ number_format($qw->good_pieces) }}</td>
                                         <td class="px-4 py-3 text-right font-medium text-red-600 dark:text-red-400">{{ number_format($qw->bad_pieces) }}</td>
-                                        <td class="px-4 py-3 text-center">
-                                            @if ($qw->bad_pieces > 0)
-                                                @php
-                                                    $rLabel = match ($qw->rework_status) {
-                                                        'pending_rework' => 'Pendiente',
-                                                        'in_rework' => 'En Proceso',
-                                                        'rework_complete' => 'Completado',
-                                                        default => '-',
-                                                    };
-                                                    $rColor = match ($qw->rework_status) {
-                                                        'pending_rework' => 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20',
-                                                        'in_rework' => 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20',
-                                                        'rework_complete' => 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20',
-                                                        default => 'text-gray-500',
-                                                    };
-                                                @endphp
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $rColor }}">{{ $rLabel }}</span>
-                                            @else
-                                                <span class="text-gray-400">-</span>
-                                            @endif
-                                        </td>
                                         <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $qw->weighedBy->name ?? 'N/A' }}</td>
                                         <td class="px-4 py-3 text-center">
                                             <a href="{{ route('admin.quality.weighings', ['search' => $qw->lot->lot_number ?? '']) }}" wire:navigate

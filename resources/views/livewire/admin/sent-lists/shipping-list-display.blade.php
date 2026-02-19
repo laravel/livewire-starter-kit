@@ -264,24 +264,30 @@
                                         <td class="px-4 py-2 text-xs text-gray-700 dark:text-gray-300 max-w-xs truncate"
                                             title="{{ $lot->description ?? $part->description }}">
                                             {{ $lot->description ?? $part->description }}</td>
-                                        {{-- Semaforo Kit - Click para abrir modal de Kit --}}
+                                        {{-- Semaforo Kit - Click para abrir modal de Kit (solo CRIMP) --}}
                                         <td class="px-4 py-2 text-center">
-                                            @php
-                                                // Obtener el kit asociado al lote
-                                                $lotKit = $lot->kits->sortByDesc('created_at')->first();
-                                                $lotKitStatus = $lotKit?->status ?? 'none';
-                                                $lotKitColor = match ($lotKitStatus) {
-                                                    'rejected' => 'bg-red-500',
-                                                    'preparing' => 'bg-yellow-400',
-                                                    'ready' => 'bg-blue-500',
-                                                    'released' => 'bg-green-500',
-                                                    'in_assembly' => 'bg-orange-500',
-                                                    default => 'bg-gray-400',
-                                                };
-                                            @endphp
-                                            <button wire:click="openKitModal({{ $lot->id }})"
-                                                class="w-5 h-5 rounded {{ $lotKitColor }} hover:opacity-80 cursor-pointer transition-opacity"
-                                                title="Kit: {{ $lotKit?->kit_number ?? 'Sin kit' }} - {{ $lotKit?->status_label ?? 'N/A' }}"></button>
+                                            @if ($part->is_crimp)
+                                                @php
+                                                    // Obtener el kit asociado al lote
+                                                    $lotKit = $lot->kits->sortByDesc('created_at')->first();
+                                                    $lotKitStatus = $lotKit?->status ?? 'none';
+                                                    $lotKitColor = match ($lotKitStatus) {
+                                                        'rejected' => 'bg-red-500',
+                                                        'preparing' => 'bg-yellow-400',
+                                                        'ready' => 'bg-blue-500',
+                                                        'released' => 'bg-green-500',
+                                                        'in_assembly' => 'bg-orange-500',
+                                                        default => 'bg-gray-400',
+                                                    };
+                                                @endphp
+                                                <button wire:click="openKitModal({{ $lot->id }})"
+                                                    class="w-5 h-5 rounded {{ $lotKitColor }} hover:opacity-80 cursor-pointer transition-opacity"
+                                                    title="Kit: {{ $lotKit?->kit_number ?? 'Sin kit' }} - {{ $lotKit?->status_label ?? 'N/A' }}"></button>
+                                            @else
+                                                {{-- No es CRIMP: lote = kit, se considera aprobado automaticamente --}}
+                                                <div class="w-5 h-5 rounded bg-green-500 opacity-70 inline-block"
+                                                    title="No CRIMP — Lote funciona como Kit (aprobado)"></div>
+                                            @endif
                                         </td>
                                         {{-- Semaforo INSP - Status de Inspeccion por Lote --}}
                                         <td class="px-4 py-2 text-center">
@@ -980,16 +986,18 @@
                                         {{ number_format($selectedLot->quantity) }} piezas
                                     </span>
                                 </div>
-                                @php
-                                    $releasedKit = $selectedLot->getReleasedKit();
-                                @endphp
-                                @if ($releasedKit)
-                                    <div class="col-span-2">
-                                        <span class="text-gray-500 dark:text-gray-400">Kit:</span>
-                                        <span class="ml-2 text-green-600 dark:text-green-400 font-medium">
-                                            {{ $releasedKit->kit_number }} (Liberado)
-                                        </span>
-                                    </div>
+                                @if ($selectedLot->workOrder->purchaseOrder->part->is_crimp ?? false)
+                                    @php
+                                        $releasedKit = $selectedLot->getReleasedKit();
+                                    @endphp
+                                    @if ($releasedKit)
+                                        <div class="col-span-2">
+                                            <span class="text-gray-500 dark:text-gray-400">Kit:</span>
+                                            <span class="ml-2 text-green-600 dark:text-green-400 font-medium">
+                                                {{ $releasedKit->kit_number }} (Liberado)
+                                            </span>
+                                        </div>
+                                    @endif
                                 @endif
                             </div>
                         </div>
@@ -1512,8 +1520,8 @@
                                                 <th class="px-3 py-2 text-left text-gray-600 dark:text-gray-400">Fecha</th>
                                                 <th class="px-3 py-2 text-right text-green-600 dark:text-green-400">Aprobadas</th>
                                                 <th class="px-3 py-2 text-right text-red-600 dark:text-red-400">Rechazadas</th>
-                                                <th class="px-3 py-2 text-center text-gray-600 dark:text-gray-400">Retrabajo</th>
                                                 <th class="px-3 py-2 text-left text-gray-600 dark:text-gray-400">Por</th>
+                                                <th class="px-3 py-2 text-center text-gray-600 dark:text-gray-400">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -1521,31 +1529,30 @@
                                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
                                                     <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ $qw['weighed_at'] }}</td>
                                                     <td class="px-3 py-2 text-right font-medium text-green-600 dark:text-green-400">{{ number_format($qw['good_pieces']) }}</td>
-                                                    <td class="px-3 py-2 text-right font-medium text-red-600 dark:text-red-400">{{ number_format($qw['bad_pieces']) }}</td>
-                                                    <td class="px-3 py-2 text-center">
+                                                    <td class="px-3 py-2 text-right font-medium text-red-600 dark:text-red-400">
+                                                        {{ number_format($qw['bad_pieces']) }}
                                                         @if ($qw['bad_pieces'] > 0)
-                                                            @php
-                                                                $reworkLabel = match ($qw['rework_status']) {
-                                                                    'pending_rework' => 'Pendiente',
-                                                                    'in_rework' => 'En Proceso',
-                                                                    'rework_complete' => 'Completado',
-                                                                    default => '-',
-                                                                };
-                                                                $reworkColor = match ($qw['rework_status']) {
-                                                                    'pending_rework' => 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20',
-                                                                    'in_rework' => 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20',
-                                                                    'rework_complete' => 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20',
-                                                                    default => 'text-gray-500',
-                                                                };
-                                                            @endphp
-                                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $reworkColor }}">
-                                                                {{ $reworkLabel }}
-                                                            </span>
-                                                        @else
-                                                            <span class="text-gray-400">-</span>
+                                                            <span class="ml-1 text-gray-400">(descarte)</span>
                                                         @endif
                                                     </td>
                                                     <td class="px-3 py-2 text-gray-600 dark:text-gray-400">{{ $qw['weighed_by'] }}</td>
+                                                    <td class="px-3 py-2 text-center">
+                                                        <div class="flex items-center justify-center gap-1">
+                                                            <button wire:click="editQualityWeighing({{ $qw['id'] }})"
+                                                                class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300" title="Editar">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                                </svg>
+                                                            </button>
+                                                            <button wire:click="deleteQualityWeighing({{ $qw['id'] }})"
+                                                                wire:confirm="¿Eliminar esta pesada de calidad?"
+                                                                class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" title="Eliminar">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -1554,10 +1561,20 @@
                             </div>
                         @endif
 
-                        {{-- Formulario de nueva pesada (solo si hay piezas pendientes) --}}
-                        @if ($qualRemainingPieces > 0)
+                        {{-- Formulario de nueva/editar pesada --}}
+                        @if ($qualRemainingPieces > 0 || $qualEditingId)
                             <div class="border-t border-gray-200 dark:border-gray-700 pt-5">
-                                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Nueva Pesada de Calidad</h4>
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        {{ $qualEditingId ? 'Editar Pesada de Calidad' : 'Nueva Pesada de Calidad' }}
+                                    </h4>
+                                    @if ($qualEditingId)
+                                        <button wire:click="cancelEditQuality"
+                                            class="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 underline">
+                                            Cancelar edicion
+                                        </button>
+                                    @endif
+                                </div>
 
                                 {{-- Pendiente de verificar --}}
                                 <div class="mb-4">
@@ -1568,8 +1585,8 @@
                                     </div>
                                 </div>
 
-                                {{-- Kit (opcional) --}}
-                                @if (count($qualKits) > 0)
+                                {{-- Kit (opcional, solo CRIMP) --}}
+                                @if ($qualIsCrimp && count($qualKits) > 0)
                                     <div class="mb-4">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kit (opcional)</label>
                                         <select wire:model="qualKitId"
@@ -1604,14 +1621,14 @@
                                     </div>
                                 </div>
 
-                                {{-- Info de retrabajo --}}
+                                {{-- Info de descarte --}}
                                 @if ($qualBadPieces > 0)
-                                    <div class="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3 rounded-lg">
-                                        <div class="flex items-center text-sm text-yellow-700 dark:text-yellow-300">
+                                    <div class="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-lg">
+                                        <div class="flex items-center text-sm text-red-700 dark:text-red-300">
                                             <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                                             </svg>
-                                            Las {{ number_format($qualBadPieces) }} piezas rechazadas seran enviadas a Produccion para retrabajo.
+                                            Las {{ number_format($qualBadPieces) }} piezas rechazadas seran descartadas.
                                         </div>
                                     </div>
                                 @endif
@@ -1653,10 +1670,10 @@
                             class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             Cerrar
                         </button>
-                        @if ($qualRemainingPieces > 0)
+                        @if ($qualRemainingPieces > 0 || $qualEditingId)
                             <button wire:click="saveQuality"
                                 class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors">
-                                Registrar Pesada
+                                {{ $qualEditingId ? 'Actualizar Pesada' : 'Registrar Pesada' }}
                             </button>
                         @endif
                     </div>
@@ -1715,20 +1732,6 @@
                             </div>
                         </div>
 
-                        {{-- Kit (opcional) --}}
-                        @if (count($prodKits) > 0)
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kit (opcional)</label>
-                                <select wire:model="prodKitId"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="">Sin kit</option>
-                                    @foreach ($prodKits as $kit)
-                                        <option value="{{ $kit->id }}">{{ $kit->kit_number }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        @endif
-
                         {{-- Cantidad del lote y pendiente de pesar --}}
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -1755,26 +1758,15 @@
                             </div>
                         </div>
 
-                        {{-- Piezas buenas y malas --}}
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Buenas *</label>
-                                <input wire:model="prodGoodPieces" type="number" min="0"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                    placeholder="0">
-                                @error('prodGoodPieces')
-                                    <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Malas *</label>
-                                <input wire:model="prodBadPieces" type="number" min="0"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                                    placeholder="0">
-                                @error('prodBadPieces')
-                                    <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
-                                @enderror
-                            </div>
+                        {{-- Piezas pesadas --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Pesadas *</label>
+                            <input wire:model="prodWeighedPieces" type="number" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="0">
+                            @error('prodWeighedPieces')
+                                <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                            @enderror
                         </div>
 
                         {{-- Fecha y hora --}}
