@@ -12,7 +12,7 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "laravel/workos": "^0.5.0",
+        "laravel/workos": "^0.6.0",
         "livewire/flux": "^2.1.1",
         "livewire/livewire": "^4.0"
     },
