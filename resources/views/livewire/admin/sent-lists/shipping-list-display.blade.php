@@ -1005,64 +1005,94 @@
                             </div>
                         </div>
 
-                        {{-- Status de Inspeccion --}}
-                        <div>
+                        {{-- Status de Inspeccion (Alpine.js para feedback visual inmediato) --}}
+                        <div x-data="{ status: $wire.entangle('inspectionStatus') }">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                                 Status de Inspeccion
                             </label>
                             <div class="grid grid-cols-3 gap-3">
                                 {{-- Pendiente --}}
-                                <button wire:click="setInspectionStatus('pending')"
-                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $inspectionStatus === 'pending' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
-                                    <div class="w-8 h-8 rounded-full bg-yellow-400 mb-2"></div>
+                                <button type="button"
+                                    x-on:click="status = 'pending'"
+                                    :class="status === 'pending'
+                                        ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/30 ring-2 ring-yellow-300 dark:ring-yellow-700 shadow-sm'
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-yellow-300 dark:hover:border-yellow-600 hover:bg-yellow-50/50 dark:hover:bg-yellow-900/10'"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 cursor-pointer">
+                                    <div
+                                        :class="status === 'pending' ? 'ring-2 ring-yellow-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
+                                        class="w-8 h-8 rounded-full bg-yellow-400 mb-2"></div>
                                     <span
-                                        class="text-sm font-medium {{ $inspectionStatus === 'pending' ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        :class="status === 'pending' ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-700 dark:text-gray-300'"
+                                        class="text-sm font-medium">
                                         Pendiente
                                     </span>
                                 </button>
 
                                 {{-- Aprobado --}}
-                                <button wire:click="setInspectionStatus('approved')"
-                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $inspectionStatus === 'approved' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
-                                    <div class="w-8 h-8 rounded-full bg-green-500 mb-2"></div>
+                                <button type="button"
+                                    x-on:click="status = 'approved'"
+                                    :class="status === 'approved'
+                                        ? 'border-green-500 bg-green-50 dark:bg-green-900/30 ring-2 ring-green-300 dark:ring-green-700 shadow-sm'
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-green-300 dark:hover:border-green-600 hover:bg-green-50/50 dark:hover:bg-green-900/10'"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 cursor-pointer">
+                                    <div
+                                        :class="status === 'approved' ? 'ring-2 ring-green-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
+                                        class="w-8 h-8 rounded-full bg-green-500 mb-2"></div>
                                     <span
-                                        class="text-sm font-medium {{ $inspectionStatus === 'approved' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        :class="status === 'approved' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300'"
+                                        class="text-sm font-medium">
                                         Aprobado
                                     </span>
                                 </button>
 
                                 {{-- No Aprobado --}}
-                                <button wire:click="setInspectionStatus('rejected')"
-                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $inspectionStatus === 'rejected' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
-                                    <div class="w-8 h-8 rounded-full bg-red-500 mb-2"></div>
+                                <button type="button"
+                                    x-on:click="status = 'rejected'"
+                                    :class="status === 'rejected'
+                                        ? 'border-red-500 bg-red-50 dark:bg-red-900/30 ring-2 ring-red-300 dark:ring-red-700 shadow-sm'
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50/50 dark:hover:bg-red-900/10'"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 cursor-pointer">
+                                    <div
+                                        :class="status === 'rejected' ? 'ring-2 ring-red-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
+                                        class="w-8 h-8 rounded-full bg-red-500 mb-2"></div>
                                     <span
-                                        class="text-sm font-medium {{ $inspectionStatus === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                        :class="status === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300'"
+                                        class="text-sm font-medium">
                                         No Aprobado
                                     </span>
                                 </button>
                             </div>
-                        </div>
 
-                        {{-- Comentarios --}}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Comentarios de Inspeccion
-                                @if ($inspectionStatus === 'rejected')
-                                    <span class="text-red-500">*</span>
-                                @endif
-                            </label>
-                            <textarea wire:model="inspectionComments" rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="{{ $inspectionStatus === 'rejected' ? 'Describa el motivo del rechazo...' : 'Observaciones adicionales (opcional)...' }}"></textarea>
-                            @if ($inspectionStatus === 'rejected')
-                                <p class="mt-1 text-xs text-red-600 dark:text-red-400">
+                            {{-- Texto descriptivo del status seleccionado --}}
+                            <div class="mt-3 text-sm text-center py-2 px-3 rounded-md transition-all duration-200"
+                                :class="{
+                                    'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300': status === 'pending',
+                                    'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300': status === 'approved',
+                                    'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300': status === 'rejected'
+                                }">
+                                <span x-show="status === 'pending'">Lote pendiente de inspeccion</span>
+                                <span x-show="status === 'approved'">Lote aprobado - Habilitado para empaque</span>
+                                <span x-show="status === 'rejected'">Lote rechazado - Requiere accion correctiva</span>
+                            </div>
+
+                            {{-- Comentarios --}}
+                            <div class="mt-6">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Comentarios de Inspeccion
+                                    <span x-show="status === 'rejected'" class="text-red-500">*</span>
+                                </label>
+                                <textarea wire:model="inspectionComments" rows="3"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    :placeholder="status === 'rejected' ? 'Describa el motivo del rechazo...' : 'Observaciones adicionales (opcional)...'"
+                                ></textarea>
+                                <p x-show="status === 'rejected'" class="mt-1 text-xs text-red-600 dark:text-red-400">
                                     * El motivo del rechazo es requerido
                                 </p>
-                            @endif
-                            @error('inspectionComments')
-                                <span
-                                    class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
-                            @enderror
+                                @error('inspectionComments')
+                                    <span
+                                        class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
                         </div>
                     </div>
 
@@ -1189,16 +1219,21 @@
                         @endif
 
                         @if ($selectedKit)
-                            {{-- Status de Kit --}}
-                            <div>
+                            {{-- Status de Kit (Alpine.js para feedback visual inmediato) --}}
+                            <div x-data="{ kitSt: $wire.entangle('kitStatus') }">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                                     Status del Kit
                                 </label>
                                 <div class="grid grid-cols-2 gap-3">
                                     {{-- Aprobado --}}
-                                    <button wire:click="setKitStatus('released')"
-                                        class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $kitStatus === 'released' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
+                                    <button type="button"
+                                        x-on:click="kitSt = 'released'"
+                                        :class="kitSt === 'released'
+                                            ? 'border-green-500 bg-green-50 dark:bg-green-900/30 ring-2 ring-green-300 dark:ring-green-700 shadow-sm'
+                                            : 'border-gray-200 dark:border-gray-600 hover:border-green-300 dark:hover:border-green-600 hover:bg-green-50/50 dark:hover:bg-green-900/10'"
+                                        class="flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 cursor-pointer">
                                         <div
+                                            :class="kitSt === 'released' ? 'ring-2 ring-green-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
                                             class="w-8 h-8 rounded-full bg-green-500 mb-2 flex items-center justify-center">
                                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -1207,15 +1242,21 @@
                                             </svg>
                                         </div>
                                         <span
-                                            class="text-sm font-medium {{ $kitStatus === 'released' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                            :class="kitSt === 'released' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300'"
+                                            class="text-sm font-medium">
                                             Aprobado
                                         </span>
                                     </button>
 
                                     {{-- Rechazado --}}
-                                    <button wire:click="setKitStatus('rejected')"
-                                        class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $kitStatus === 'rejected' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
+                                    <button type="button"
+                                        x-on:click="kitSt = 'rejected'"
+                                        :class="kitSt === 'rejected'
+                                            ? 'border-red-500 bg-red-50 dark:bg-red-900/30 ring-2 ring-red-300 dark:ring-red-700 shadow-sm'
+                                            : 'border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50/50 dark:hover:bg-red-900/10'"
+                                        class="flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 cursor-pointer">
                                         <div
+                                            :class="kitSt === 'rejected' ? 'ring-2 ring-red-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
                                             class="w-8 h-8 rounded-full bg-red-500 mb-2 flex items-center justify-center">
                                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -1224,10 +1265,23 @@
                                             </svg>
                                         </div>
                                         <span
-                                            class="text-sm font-medium {{ $kitStatus === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300' }}">
+                                            :class="kitSt === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300'"
+                                            class="text-sm font-medium">
                                             Rechazado
                                         </span>
                                     </button>
+                                </div>
+
+                                {{-- Texto descriptivo del status seleccionado --}}
+                                <div class="mt-3 text-sm text-center py-2 px-3 rounded-md transition-all duration-200"
+                                    :class="{
+                                        'bg-gray-50 dark:bg-gray-700/20 text-gray-500 dark:text-gray-400': kitSt === 'preparing',
+                                        'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300': kitSt === 'released',
+                                        'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300': kitSt === 'rejected'
+                                    }">
+                                    <span x-show="kitSt === 'preparing'">Kit pendiente de revision</span>
+                                    <span x-show="kitSt === 'released'">Kit aprobado - Listo para produccion</span>
+                                    <span x-show="kitSt === 'rejected'">Kit rechazado - Requiere correccion</span>
                                 </div>
                             </div>
                         @endif
