@@ -122,6 +122,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Kit</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Work Order</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Parte</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cantidad</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Lotes</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preparado Por</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Estado</th>
@@ -139,7 +140,11 @@
                                     {{ $kit->workOrder->purchaseOrder->wo ?? 'N/A' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $kit->workOrder->purchaseOrder->part->number ?? 'N/A' }}
+                                    <div>{{ $kit->workOrder->purchaseOrder->part->number ?? 'N/A' }}</div>
+                                    <div class="text-xs text-gray-400 dark:text-gray-500">{{ $kit->workOrder->purchaseOrder->part->description ?? '' }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ number_format($kit->quantity ?? 0) }} pz
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
@@ -221,12 +226,45 @@
             </div>
 
             <div class="space-y-4">
-                <flux:input 
-                    wire:model="form.kit_number" 
-                    label="Número de Kit" 
-                    required
-                    readonly
-                />
+                {{-- Part Info (if lots selected) --}}
+                @if(!empty($selectedLots))
+                    @php
+                        $firstLotInfo = \App\Models\Lot::with('workOrder.purchaseOrder.part')->find($selectedLots[0]);
+                        $partInfo = $firstLotInfo?->workOrder?->purchaseOrder?->part;
+                    @endphp
+                    @if($partInfo)
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400 block text-xs">No. Parte</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white">{{ $partInfo->number }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400 block text-xs">Descripción</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white">{{ $partInfo->description ?? 'N/A' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endif
+
+                <div class="grid grid-cols-2 gap-4">
+                    <flux:input 
+                        wire:model="form.kit_number" 
+                        label="Número de Kit" 
+                        required
+                        readonly
+                    />
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad *</label>
+                        <input wire:model="form.quantity" type="number" min="1"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Ej: 500">
+                        @error('form.quantity')
+                            <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
 
                 {{-- Selected Lots Display --}}
                 @if(!empty($selectedLots))

@@ -12,6 +12,18 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/dashboard', function () {
+    $user = auth()->user();
+
+    if ($user->hasRole('employee') && !$user->hasRole('admin')) {
+        return redirect()->route('employee.dashboard');
+    } elseif ($user->hasRole('Materiales') && !$user->hasRole('admin')) {
+        return redirect()->route('admin.materials.index');
+    } elseif ($user->hasRole('Produccion') && !$user->hasRole('admin')) {
+        return redirect()->route('admin.production.index');
+    } elseif ($user->hasRole('Calidad') && !$user->hasRole('admin')) {
+        return redirect()->route('admin.quality.index');
+    }
+
     return redirect()->route('admin.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 

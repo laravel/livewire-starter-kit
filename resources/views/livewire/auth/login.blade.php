@@ -40,11 +40,17 @@ new #[Layout('components.layouts.auth')] class extends Component {
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        // Redirect based on user role
+        // Redirect based on user role to their area dashboard
         $user = Auth::user();
         
         if ($user->hasRole('employee') && !$user->hasRole('admin')) {
             $this->redirect(route('employee.dashboard', absolute: false), navigate: true);
+        } elseif ($user->hasRole('Materiales') && !$user->hasRole('admin')) {
+            $this->redirectIntended(default: route('admin.materials.index', absolute: false), navigate: true);
+        } elseif ($user->hasRole('Produccion') && !$user->hasRole('admin')) {
+            $this->redirectIntended(default: route('admin.production.index', absolute: false), navigate: true);
+        } elseif ($user->hasRole('Calidad') && !$user->hasRole('admin')) {
+            $this->redirectIntended(default: route('admin.quality.index', absolute: false), navigate: true);
         } else {
             $this->redirectIntended(default: route('admin.dashboard', absolute: false), navigate: true);
         }

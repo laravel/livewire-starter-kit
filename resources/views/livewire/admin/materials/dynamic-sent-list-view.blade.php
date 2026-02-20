@@ -219,6 +219,7 @@
                                                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
                                                                     {{ $kit->kit_number }}
                                                                 </div>
+                                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($kit->quantity ?? 0) }} pz</div>
                                                                 @php
                                                                     $kitStatusColor = match($kit->status) {
                                                                         'preparing' => 'yellow',
@@ -481,10 +482,35 @@
                     <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Crear Nuevo Kit</h3>
                         @if($selectedWorkOrderId)
+                        @php
+                            $createKitWO = \App\Models\WorkOrder::with('purchaseOrder.part')->find($selectedWorkOrderId);
+                            $createKitPart = $createKitWO?->purchaseOrder?->part;
+                        @endphp
+                        @if($createKitPart)
+                        <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400 block text-xs">No. Parte</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white">{{ $createKitPart->number }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400 block text-xs">Descripción</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white">{{ $createKitPart->description ?? 'N/A' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                         <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Número de Kit</label>
-                                <input type="text" disabled value="(Se generará automáticamente)" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shadow-sm">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Número de Kit</label>
+                                    <input type="text" disabled value="(Se generará automáticamente)" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shadow-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad *</label>
+                                    <input type="number" wire:model="kitQuantity" min="1" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: 500">
+                                    @error('kitQuantity') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado Inicial</label>
@@ -534,10 +560,34 @@
                 <form wire:submit="updateKit">
                     <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Editar Kit</h3>
+                        @php
+                            $editKitPart = $this->selectedKit->workOrder?->purchaseOrder?->part;
+                        @endphp
+                        @if($editKitPart)
+                        <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400 block text-xs">No. Parte</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white">{{ $editKitPart->number }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400 block text-xs">Descripción</span>
+                                    <span class="font-semibold text-gray-900 dark:text-white">{{ $editKitPart->description ?? 'N/A' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                         <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Número de Kit</label>
-                                <input type="text" disabled value="{{ $this->selectedKit->kit_number }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Número de Kit</label>
+                                    <input type="text" disabled value="{{ $this->selectedKit->kit_number }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad *</label>
+                                    <input type="number" wire:model="editKitQuantity" min="1" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: 500">
+                                    @error('editKitQuantity') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>

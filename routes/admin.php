@@ -13,16 +13,23 @@ use Livewire\Volt\Volt;
 |
 */
 
-Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
-
-    // Dashboard Admin
-    Route::view('/', 'admin.dashboard')->name('dashboard');
-
-    // Settings
+// ===================================================================
+// SHARED: Settings & Profile (all authenticated users)
+// ===================================================================
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect('settings', 'admin/settings/profile');
     Volt::route('settings/profile', 'admin.settings.profile')->name('settings.profile');
     Volt::route('settings/password', 'admin.settings.password')->name('settings.password');
     Volt::route('settings/appearance', 'admin.settings.appearance')->name('settings.appearance');
+});
+
+// ===================================================================
+// ADMIN-ONLY: Full admin panel (dashboard, users, catalogs, etc.)
+// ===================================================================
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+
+    // Dashboard Admin
+    Route::view('/', 'admin.dashboard')->name('dashboard');
 
     // Gestión de usuarios
     Route::get('/users', \App\Livewire\Admin\Users\UserList::class)->name('users.index');
@@ -151,10 +158,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/kits/create', \App\Livewire\Admin\Kits\KitCreate::class)->name('kits.create');
     Route::get('/kits/{kit}', \App\Livewire\Admin\Kits\KitShow::class)->name('kits.show');
 
-    // Área de Producción (hub + pesadas)
-    Route::get('/production', \App\Livewire\Admin\Production\ProductionHubDashboard::class)->name('production.index');
-    Route::get('/production/weighings', \App\Livewire\Admin\Production\WeighingManagement::class)->name('production.weighings');
-
     // Gestión de Lotes
     Route::get('/lots', \App\Livewire\Admin\Lots\LotList::class)->name('lots.index');
     Route::get('/lots/create', \App\Livewire\Admin\Lots\LotCreate::class)->name('lots.create');
@@ -167,18 +170,33 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/employees/{employee}', \App\Livewire\Admin\Employees\EmployeeShow::class)->name('employees.show');
     Route::get('/employees/{employee}/edit', \App\Livewire\Admin\Employees\EmployeeEdit::class)->name('employees.edit');
 
-    // Área de Calidad (hub + sub-secciones)
+    // Redirect legacy inspection route
+    Route::redirect('/inspection', '/admin/quality/inspection');
+});
+
+// ===================================================================
+// PRODUCCIÓN: Dashboard + Pesadas (role: admin OR Produccion)
+// ===================================================================
+Route::middleware(['auth', 'verified', 'role:admin|Produccion'])->group(function () {
+    Route::get('/production', \App\Livewire\Admin\Production\ProductionHubDashboard::class)->name('production.index');
+    Route::get('/production/weighings', \App\Livewire\Admin\Production\WeighingManagement::class)->name('production.weighings');
+});
+
+// ===================================================================
+// CALIDAD: Dashboard + Inspección + Pesadas Calidad (role: admin OR Calidad)
+// ===================================================================
+Route::middleware(['auth', 'verified', 'role:admin|Calidad'])->group(function () {
     Route::get('/quality', \App\Livewire\Admin\Quality\QualityAreaDashboard::class)->name('quality.index');
     Route::get('/quality/inspection', \App\Livewire\Admin\Inspection\InspectionList::class)->name('quality.inspection');
     Route::get('/quality/weighings', \App\Livewire\Admin\Quality\QualityWeighings::class)->name('quality.weighings');
+});
 
-    // Redirect legacy inspection route
-    Route::redirect('/inspection', '/admin/quality/inspection');
-
-    // Área de Materiales (hub + gestión)
+// ===================================================================
+// MATERIALES: Dashboard + Gestión (role: admin OR Materiales)
+// ===================================================================
+Route::middleware(['auth', 'verified', 'role:admin|Materiales'])->group(function () {
     Route::get('/materials', \App\Livewire\Admin\Materials\MaterialsHubDashboard::class)->name('materials.index');
     Route::get('/materials/manage', \App\Livewire\Admin\Materials\MaterialsAreaDashboard::class)->name('materials.manage');
-
 });
 
 // Inspection Area Routes (requires Inspection role)

@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             
             MaterialsRoleSeeder::class,
+            AreaUsersSeeder::class,
             
             // 2. Catálogos base
             StatusWOSeeder::class,

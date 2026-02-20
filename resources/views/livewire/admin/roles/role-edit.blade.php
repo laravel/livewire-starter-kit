@@ -78,21 +78,68 @@
                                     class="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300">
                                     Deseleccionar todos
                                 </button>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ count($selectedPermissions) }} / {{ $permissions->count() }} seleccionados
+                                </span>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                @foreach($permissions as $permission)
-                                    <div class="flex items-center">
-                                        <input 
-                                            type="checkbox" 
-                                            id="permission_{{ $permission->id }}"
-                                            wire:model="selectedPermissions" 
-                                            value="{{ $permission->id }}"
-                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-                                        >
-                                        <label for="permission_{{ $permission->id }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $permission->name }}
-                                        </label>
+                            @php
+                                $groupColors = [
+                                    'admin' => 'blue',
+                                    'usuarios' => 'purple',
+                                    'catalogos' => 'amber',
+                                    'ordenes' => 'indigo',
+                                    'produccion' => 'green',
+                                    'calidad' => 'teal',
+                                    'materiales' => 'orange',
+                                    'otros' => 'gray',
+                                ];
+                            @endphp
+
+                            <div class="space-y-3">
+                                @foreach($groupedPermissions as $group => $groupPerms)
+                                    @php
+                                        $color = $groupColors[$group] ?? 'gray';
+                                        $label = $groupLabels[$group] ?? ucfirst($group);
+                                        $groupPermIds = $groupPerms->pluck('id')->toArray();
+                                        $selectedInGroup = count(array_intersect($selectedPermissions, $groupPermIds));
+                                        $totalInGroup = count($groupPermIds);
+                                    @endphp
+                                    <div x-data="{ open: false }" class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                                        <button type="button" @click="open = !open"
+                                            class="w-full flex items-center justify-between px-4 py-3 bg-{{ $color }}-50 dark:bg-{{ $color }}-900/20 hover:bg-{{ $color }}-100 dark:hover:bg-{{ $color }}-900/30 transition-colors">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-3 h-3 rounded-full bg-{{ $color }}-500"></div>
+                                                <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $label }}</span>
+                                                <span class="text-xs px-2 py-0.5 rounded-full bg-{{ $color }}-100 dark:bg-{{ $color }}-900/50 text-{{ $color }}-700 dark:text-{{ $color }}-300">
+                                                    {{ $selectedInGroup }}/{{ $totalInGroup }}
+                                                </span>
+                                            </div>
+                                            <svg :class="{ 'rotate-180': open }" class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </button>
+                                        <div x-show="open" x-collapse class="px-4 py-3 bg-white dark:bg-gray-800">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                @foreach($groupPerms as $permission)
+                                                    @php
+                                                        $shortName = str_replace($group . '.', '', $permission->name);
+                                                    @endphp
+                                                    <div class="flex items-center">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            id="permission_{{ $permission->id }}"
+                                                            wire:model="selectedPermissions" 
+                                                            value="{{ $permission->id }}"
+                                                            class="h-4 w-4 text-{{ $color }}-600 focus:ring-{{ $color }}-500 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
+                                                        >
+                                                        <label for="permission_{{ $permission->id }}" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">
+                                                            {{ $shortName }}
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>

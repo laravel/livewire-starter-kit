@@ -27,6 +27,7 @@ class KitManagement extends Component
     public array $form = [
         'work_order_id' => null,
         'kit_number' => '',
+        'quantity' => '',
         'status' => 'preparing',
         'validated' => false,
         'validation_notes' => '',
@@ -156,6 +157,7 @@ class KitManagement extends Component
         $this->form = [
             'work_order_id' => $this->kit->work_order_id,
             'kit_number' => $this->kit->kit_number,
+            'quantity' => $this->kit->quantity ?? '',
             'status' => $this->kit->status,
             'validated' => $this->kit->validated,
             'validation_notes' => $this->kit->validation_notes ?? '',
@@ -172,12 +174,28 @@ class KitManagement extends Component
         $this->validate([
             'form.work_order_id' => 'required|exists:work_orders,id',
             'form.kit_number' => 'required|string|max:100|unique:kits,kit_number,' . ($this->kitId ?? 'NULL'),
+            'form.quantity' => 'required|integer|min:1',
             'selectedLots' => 'required|array|min:1',
             'selectedLots.*' => 'exists:lots,id',
         ], [
+            'form.quantity.required' => 'La cantidad es requerida.',
+            'form.quantity.integer' => 'La cantidad debe ser un número entero.',
+            'form.quantity.min' => 'La cantidad debe ser mayor a 0.',
             'selectedLots.required' => 'Debe seleccionar al menos un lote.',
             'selectedLots.min' => 'Debe seleccionar al menos un lote.',
         ]);
+
+        // Validate quantity doesn't exceed lot totals
+        $lotsTotalQty = Lot::whereIn('id', $this->selectedLots)->sum('quantity');
+        $existingKitsQty = Kit::whereHas('lots', function ($q) {
+            $q->whereIn('lots.id', $this->selectedLots);
+        })->where('id', '!=', $this->kitId ?? 0)->sum('quantity');
+        $newTotal = $existingKitsQty + (int) $this->form['quantity'];
+        if ($newTotal > $lotsTotalQty) {
+            $remaining = max(0, $lotsTotalQty - $existingKitsQty);
+            $this->addError('form.quantity', 'La suma de kits (' . number_format($newTotal) . ') sobrepasa la cantidad de lotes (' . number_format($lotsTotalQty) . '). Disponible: ' . number_format($remaining) . ' pz.');
+            return;
+        }
 
         // Validate that no cancelled lots are selected
         $cancelledLots = Lot::whereIn('id', $this->selectedLots)
@@ -317,6 +335,7 @@ class KitManagement extends Component
         $this->form = [
             'work_order_id' => null,
             'kit_number' => '',
+            'quantity' => '',
             'status' => 'preparing',
             'validated' => false,
             'validation_notes' => '',

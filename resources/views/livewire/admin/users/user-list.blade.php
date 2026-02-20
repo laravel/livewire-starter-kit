@@ -1,57 +1,64 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 sm:py-8">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
-        <div class="mb-6 sm:mb-8">
+        <div class="mb-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div class="flex items-center gap-3 sm:gap-4">
-                    <div class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Gestión de Usuarios</h1>
-                        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Administra los usuarios del sistema</p>
-                    </div>
+                <div>
+                    <h1 class="text-3xl font-semibold text-gray-900 dark:text-white tracking-tight">Usuarios</h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Gestiona los usuarios del sistema</p>
                 </div>
                 
                 <a href="{{ route('admin.users.create') }}" 
-                   class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm sm:text-base shadow-sm">
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
-                    <span class="hidden sm:inline">Nuevo Usuario</span>
-                    <span class="sm:hidden">Nuevo</span>
+                    Nuevo Usuario
                 </a>
             </div>
         </div>
 
-        <!-- Filters Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
-            <div class="p-4 sm:p-6">
+        <!-- Stats -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5">
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Total</div>
+                <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $totalUsers }}</div>
+            </div>
+
+            @foreach($usersByRole as $roleData)
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $roleData->name }}</div>
+                    <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $roleData->users_count }}</div>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
+            <div class="p-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Search -->
                     <div class="sm:col-span-2">
-                        <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
                             </div>
                             <input 
                                 type="text" 
                                 wire:model.live.debounce.300ms="search"
-                                placeholder="Buscar por nombre, email..."
-                                class="block w-full pl-9 sm:pl-10 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                placeholder="Nombre, email o cuenta..."
+                                class="block w-full pl-10 pr-3 py-2.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white focus:border-gray-900 dark:focus:border-white"
                             />
                         </div>
                     </div>
 
                     <!-- Role Filter -->
                     <div>
-                        <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol</label>
-                        <select wire:model.live="roleFilter" class="block w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol</label>
+                        <select wire:model.live="roleFilter" class="block w-full px-3 py-2.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white focus:border-gray-900 dark:focus:border-white">
                             <option value="">Todos</option>
                             @foreach($roles as $role)
                                 <option value="{{ $role->name }}">{{ $role->name }}</option>
@@ -61,8 +68,8 @@
 
                     <!-- Department Filter -->
                     <div>
-                        <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
-                        <select wire:model.live="departmentFilter" class="block w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
+                        <select wire:model.live="departmentFilter" class="block w-full px-3 py-2.5 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white focus:border-gray-900 dark:focus:border-white">
                             <option value="">Todos</option>
                             @foreach($departments as $department)
                                 <option value="{{ $department->id }}">{{ $department->name }}</option>
@@ -73,100 +80,53 @@
 
                 @if($search || $roleFilter || $departmentFilter)
                     <div class="mt-4 flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                            Mostrando resultados filtrados
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Resultados filtrados
                         </div>
                         <button 
                             wire:click="clearFilters"
-                            class="text-xs sm:text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                            class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
                         >
-                            Limpiar filtros
+                            Limpiar
                         </button>
                     </div>
                 @endif
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-3 min-w-0">
-                        <p class="text-xs text-gray-600 dark:text-gray-400 truncate">Total</p>
-                        <p class="text-lg sm:text-2xl font-semibold text-gray-900 dark:text-white">{{ $totalUsers }}</p>
-                    </div>
-                </div>
-            </div>
-
-            @foreach($usersByRole as $roleData)
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 @if($roleData->name === 'Admin') bg-red-100 dark:bg-red-900/30 @elseif($roleData->name === 'Supervisor') bg-amber-100 dark:bg-amber-900/30 @else bg-green-100 dark:bg-green-900/30 @endif rounded-lg flex items-center justify-center">
-                                @if($roleData->name === 'Admin')
-                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                    </svg>
-                                @elseif($roleData->name === 'Supervisor')
-                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                @else
-                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                    </svg>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="ml-3 min-w-0">
-                            <p class="text-xs text-gray-600 dark:text-gray-400 truncate">{{ $roleData->name }}</p>
-                            <p class="text-lg sm:text-2xl font-semibold text-gray-900 dark:text-white">{{ $roleData->users_count }}</p>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-
-        <!-- Users Table Card - Desktop -->
-        <div class="hidden lg:block bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <!-- Users Table - Desktop -->
+        <div class="hidden lg:block bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-900/50">
-                        <tr>
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
                             <th class="px-6 py-3 text-left">
-                                <button wire:click="sortBy('name')" class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200">
+                                <button wire:click="sortBy('name')" class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-900 dark:hover:text-white transition-colors">
                                     Usuario
                                     @if($sortField === 'name')
-                                        <svg class="w-4 h-4 {{ $sortDirection === 'asc' ? 'rotate-0' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-3 h-3 {{ $sortDirection === 'asc' ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
                                         </svg>
                                     @endif
                                 </button>
                             </th>
                             <th class="px-6 py-3 text-left">
-                                <button wire:click="sortBy('email')" class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200">
+                                <button wire:click="sortBy('email')" class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-900 dark:hover:text-white transition-colors">
                                     Email
                                     @if($sortField === 'email')
-                                        <svg class="w-4 h-4 {{ $sortDirection === 'asc' ? 'rotate-0' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-3 h-3 {{ $sortDirection === 'asc' ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
                                         </svg>
                                     @endif
                                 </button>
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rol</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Área Asignada</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Área</th>
                             <th class="px-6 py-3 text-left">
-                                <button wire:click="sortBy('created_at')" class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200">
-                                    Fecha Registro
+                                <button wire:click="sortBy('created_at')" class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-900 dark:hover:text-white transition-colors">
+                                    Registro
                                     @if($sortField === 'created_at')
-                                        <svg class="w-4 h-4 {{ $sortDirection === 'asc' ? 'rotate-0' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-3 h-3 {{ $sortDirection === 'asc' ? '' : 'rotate-180' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
                                         </svg>
                                     @endif
@@ -175,66 +135,61 @@
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($users as $user)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                <td class="px-6 py-4">
                                     <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10">
-                                            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                                        <div class="flex-shrink-0 h-9 w-9">
+                                            <div class="h-9 w-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm">
                                                 {{ $user->initials }}
                                             </div>
                                         </div>
-                                        <div class="ml-4">
+                                        <div class="ml-3">
                                             <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }} {{ $user->last_name }}</div>
                                             @if($user->account)
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Cuenta: {{ $user->account }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $user->account }}</div>
                                             @endif
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900 dark:text-white">{{ $user->email }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4">
                                     @if($user->roles->isNotEmpty())
                                         @php
                                             $roleName = $user->roles->first()->name;
-                                            $roleColors = [
-                                                'Admin' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-                                                'Supervisor' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-                                                'User' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                            ];
                                         @endphp
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $roleColors[$roleName] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
+                                        <span class="inline-flex px-2.5 py-1 text-xs font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                                             {{ $roleName }}
                                         </span>
                                     @else
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">Sin rol</span>
+                                        <span class="inline-flex px-2.5 py-1 text-xs font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">Sin rol</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4">
                                     @if($user->areas->isNotEmpty())
                                         @foreach($user->areas as $area)
                                             <div class="text-sm text-gray-900 dark:text-white">{{ $area->name }}</div>
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $area->department->name }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $area->department->name }}</div>
                                         @endforeach
                                     @else
-                                        <span class="text-sm text-gray-500 dark:text-gray-400">Sin asignar</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">—</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                     {{ $user->created_at->format('d/m/Y') }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center px-3 py-1.5 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 rounded-lg transition-colors">
+                                        <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                             </svg>
                                         </a>
                                         @if($user->id !== auth()->id())
-                                            <button wire:click="deleteUser({{ $user->id }})" wire:confirm="¿Estás seguro de que quieres eliminar este usuario?" class="inline-flex items-center px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg transition-colors">
+                                            <button wire:click="deleteUser({{ $user->id }})" wire:confirm="¿Estás seguro de que quieres eliminar este usuario?" class="inline-flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                 </svg>
@@ -245,15 +200,11 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center">
+                                <td colspan="6" class="px-6 py-16 text-center">
                                     <div class="flex flex-col items-center">
-                                        <svg class="w-12 h-12 text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                                        </svg>
-                                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No hay usuarios</h3>
-                                        <p class="text-gray-500 dark:text-gray-400 mb-4">No se encontraron usuarios que coincidan con los filtros aplicados.</p>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">No se encontraron usuarios</div>
                                         @if($search || $roleFilter || $departmentFilter)
-                                            <button wire:click="clearFilters" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Limpiar filtros</button>
+                                            <button wire:click="clearFilters" class="mt-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium">Limpiar filtros</button>
                                         @endif
                                     </div>
                                 </td>
@@ -273,28 +224,28 @@
         <!-- Users Cards - Mobile/Tablet -->
         <div class="lg:hidden space-y-4">
             @forelse($users as $user)
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5">
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex items-center gap-3 flex-1 min-w-0">
-                            <div class="flex-shrink-0 h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 font-medium text-sm">
                                 {{ $user->initials }}
                             </div>
                             <div class="min-w-0 flex-1">
-                                <div class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">{{ $user->name }} {{ $user->last_name }}</div>
+                                <div class="text-base font-medium text-gray-900 dark:text-white truncate">{{ $user->name }} {{ $user->last_name }}</div>
                                 <div class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ $user->email }}</div>
                                 @if($user->account)
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cuenta: {{ $user->account }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $user->account }}</div>
                                 @endif
                             </div>
                         </div>
                         <div class="flex items-center gap-2 ml-2">
-                            <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center justify-center w-9 h-9 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 rounded-lg transition-colors">
+                            <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
                             </a>
                             @if($user->id !== auth()->id())
-                                <button wire:click="deleteUser({{ $user->id }})" wire:confirm="¿Estás seguro de que quieres eliminar este usuario?" class="inline-flex items-center justify-center w-9 h-9 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 rounded-lg transition-colors">
+                                <button wire:click="deleteUser({{ $user->id }})" wire:confirm="¿Estás seguro de que quieres eliminar este usuario?" class="inline-flex items-center justify-center w-8 h-8 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                     </svg>
@@ -305,32 +256,24 @@
 
                     <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Rol</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Rol</div>
                             @if($user->roles->isNotEmpty())
-                                @php
-                                    $roleName = $user->roles->first()->name;
-                                    $roleColors = [
-                                        'Admin' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-                                        'Supervisor' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-                                        'User' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                    ];
-                                @endphp
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $roleColors[$roleName] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
-                                    {{ $roleName }}
+                                <span class="inline-flex px-2.5 py-1 text-xs font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    {{ $user->roles->first()->name }}
                                 </span>
                             @else
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">Sin rol</span>
+                                <span class="inline-flex px-2.5 py-1 text-xs font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">Sin rol</span>
                             @endif
                         </div>
                         <div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Fecha Registro</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Registro</div>
                             <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->created_at->format('d/m/Y') }}</div>
                         </div>
                     </div>
 
                     @if($user->areas->isNotEmpty())
                         <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Área Asignada</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Área</div>
                             @foreach($user->areas as $area)
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $area->name }}</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ $area->department->name }}</div>
@@ -339,14 +282,10 @@
                     @endif
                 </div>
             @empty
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-                    <svg class="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                    </svg>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No hay usuarios</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">No se encontraron usuarios que coincidan con los filtros aplicados.</p>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-12 text-center">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">No se encontraron usuarios</div>
                     @if($search || $roleFilter || $departmentFilter)
-                        <button wire:click="clearFilters" class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">Limpiar filtros</button>
+                        <button wire:click="clearFilters" class="mt-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium">Limpiar filtros</button>
                     @endif
                 </div>
             @endforelse

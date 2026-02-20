@@ -15,6 +15,7 @@ class Kit extends Model
     protected $fillable = [
         'work_order_id',
         'kit_number',
+        'quantity',
         'status',
         'validated',
         'validation_notes',

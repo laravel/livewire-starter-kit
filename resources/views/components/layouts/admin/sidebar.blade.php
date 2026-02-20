@@ -50,6 +50,12 @@
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Producción')" class="grid">
+                <flux:navlist.item icon="chart-bar-square" :href="route('admin.production.index')"
+                    :current="request()->routeIs('admin.production.index')" wire:navigate>{{ __('Dashboard') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="scale" :href="route('admin.production.weighings')"
+                    :current="request()->routeIs('admin.production.weighings')" wire:navigate>{{ __('Pesadas') }}
+                </flux:navlist.item>
                 <flux:navlist.item icon="calendar-days" :href="route('admin.holidays.index')"
                     :current="request()->routeIs('admin.holidays.*')" wire:navigate>{{ __('Días Festivos') }}
                 </flux:navlist.item>
@@ -82,14 +88,7 @@
 
             </flux:navlist.group>
 
-            <flux:navlist.group :heading="__('Pesadas')" class="grid">
-                <flux:navlist.item icon="chart-bar-square" :href="route('admin.production.index')"
-                    :current="request()->routeIs('admin.production.index')" wire:navigate>{{ __('Dashboard') }}
-                </flux:navlist.item>
-                <flux:navlist.item icon="scale" :href="route('admin.production.weighings')"
-                    :current="request()->routeIs('admin.production.weighings')" wire:navigate>{{ __('Pesadas') }}
-                </flux:navlist.item>
-            </flux:navlist.group>
+
 
             <flux:navlist.group :heading="__('Materiales')" class="grid">
                 <flux:navlist.item icon="chart-bar-square" :href="route('admin.materials.index')"

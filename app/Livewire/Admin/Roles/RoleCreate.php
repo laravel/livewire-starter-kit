@@ -44,8 +44,26 @@ class RoleCreate extends Component
     {
         $permissions = Permission::orderBy('name')->get();
 
+        $groupedPermissions = $permissions->groupBy(function ($permission) {
+            $parts = explode('.', $permission->name);
+            return count($parts) > 1 ? $parts[0] : 'otros';
+        });
+
+        $groupLabels = [
+            'admin' => 'Administración General',
+            'usuarios' => 'Usuarios & Seguridad',
+            'catalogos' => 'Catálogos',
+            'ordenes' => 'Órdenes (PO / WO)',
+            'produccion' => 'Producción',
+            'calidad' => 'Calidad',
+            'materiales' => 'Materiales',
+            'otros' => 'Otros',
+        ];
+
         return view('livewire.admin.roles.role-create', [
             'permissions' => $permissions,
+            'groupedPermissions' => $groupedPermissions,
+            'groupLabels' => $groupLabels,
         ]);
     }
 }

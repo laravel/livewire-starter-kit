@@ -10,169 +10,172 @@ class PermissionSeeder extends Seeder
     /**
      * Run the database seeds.
      */
+    /**
+     * Permissions organized by area.
+     * Format: 'area.permission-name'
+     * This prefix is used to group them in the UI.
+     */
+    public static function groupedPermissions(): array
+    {
+        return [
+            // ── ADMINISTRACIÓN GENERAL ──
+            'admin' => [
+                'admin.view-dashboard',
+                'admin.view-analytics',
+                'admin.view-settings',
+                'admin.edit-settings',
+                'admin.view-reports',
+                'admin.create-reports',
+                'admin.export-reports',
+            ],
+
+            // ── USUARIOS & SEGURIDAD ──
+            'usuarios' => [
+                'usuarios.view-users',
+                'usuarios.create-users',
+                'usuarios.edit-users',
+                'usuarios.delete-users',
+                'usuarios.view-roles',
+                'usuarios.create-roles',
+                'usuarios.edit-roles',
+                'usuarios.delete-roles',
+                'usuarios.view-permissions',
+                'usuarios.create-permissions',
+                'usuarios.edit-permissions',
+                'usuarios.delete-permissions',
+                'usuarios.view-employees',
+                'usuarios.create-employees',
+                'usuarios.edit-employees',
+                'usuarios.delete-employees',
+            ],
+
+            // ── CATÁLOGOS ──
+            'catalogos' => [
+                'catalogos.view-departments',
+                'catalogos.create-departments',
+                'catalogos.edit-departments',
+                'catalogos.delete-departments',
+                'catalogos.view-areas',
+                'catalogos.create-areas',
+                'catalogos.edit-areas',
+                'catalogos.delete-areas',
+                'catalogos.view-shifts',
+                'catalogos.create-shifts',
+                'catalogos.edit-shifts',
+                'catalogos.delete-shifts',
+                'catalogos.view-break-times',
+                'catalogos.create-break-times',
+                'catalogos.edit-break-times',
+                'catalogos.delete-break-times',
+                'catalogos.view-holidays',
+                'catalogos.create-holidays',
+                'catalogos.edit-holidays',
+                'catalogos.delete-holidays',
+                'catalogos.view-parts',
+                'catalogos.create-parts',
+                'catalogos.edit-parts',
+                'catalogos.delete-parts',
+                'catalogos.view-prices',
+                'catalogos.create-prices',
+                'catalogos.edit-prices',
+                'catalogos.delete-prices',
+                'catalogos.view-production-statuses',
+                'catalogos.create-production-statuses',
+                'catalogos.edit-production-statuses',
+                'catalogos.delete-production-statuses',
+                'catalogos.view-statuses-wo',
+                'catalogos.create-statuses-wo',
+                'catalogos.edit-statuses-wo',
+                'catalogos.delete-statuses-wo',
+            ],
+
+            // ── ÓRDENES (PO / WO) ──
+            'ordenes' => [
+                'ordenes.view-purchase-orders',
+                'ordenes.create-purchase-orders',
+                'ordenes.edit-purchase-orders',
+                'ordenes.delete-purchase-orders',
+                'ordenes.approve-purchase-orders',
+                'ordenes.view-work-orders',
+                'ordenes.create-work-orders',
+                'ordenes.edit-work-orders',
+                'ordenes.delete-work-orders',
+                'ordenes.view-sent-lists',
+                'ordenes.create-sent-lists',
+                'ordenes.edit-sent-lists',
+                'ordenes.delete-sent-lists',
+            ],
+
+            // ── PRODUCCIÓN ──
+            'produccion' => [
+                'produccion.view-dashboard',
+                'produccion.view-weighings',
+                'produccion.create-weighings',
+                'produccion.edit-weighings',
+                'produccion.delete-weighings',
+                'produccion.view-tables',
+                'produccion.create-tables',
+                'produccion.edit-tables',
+                'produccion.delete-tables',
+                'produccion.view-semi-automatics',
+                'produccion.create-semi-automatics',
+                'produccion.edit-semi-automatics',
+                'produccion.delete-semi-automatics',
+                'produccion.view-machines',
+                'produccion.create-machines',
+                'produccion.edit-machines',
+                'produccion.delete-machines',
+                'produccion.view-standards',
+                'produccion.create-standards',
+                'produccion.edit-standards',
+                'produccion.delete-standards',
+                'produccion.view-over-times',
+                'produccion.create-over-times',
+                'produccion.edit-over-times',
+                'produccion.delete-over-times',
+                'produccion.view-capacity',
+                'produccion.use-capacity-wizard',
+            ],
+
+            // ── CALIDAD ──
+            'calidad' => [
+                'calidad.view-dashboard',
+                'calidad.view-inspection',
+                'calidad.approve-inspection',
+                'calidad.reject-inspection',
+                'calidad.view-weighings',
+                'calidad.create-weighings',
+                'calidad.edit-weighings',
+                'calidad.delete-weighings',
+                'calidad.approve-kits',
+                'calidad.reject-kits',
+            ],
+
+            // ── MATERIALES ──
+            'materiales' => [
+                'materiales.view-dashboard',
+                'materiales.view-manage',
+                'materiales.manage-lots',
+                'materiales.manage-kits',
+                'materiales.submit-to-quality',
+            ],
+        ];
+    }
+
     public function run(): void
     {
-        // Permisos para gestión de usuarios
-        $permissions = [
-            // Dashboard
-            'view-dashboard',
-            'view-analytics',
-            
-            // Users
-            'view-users',
-            'create-users',
-            'edit-users',
-            'delete-users',
-            
-            // Roles
-            'view-roles',
-            'create-roles',
-            'edit-roles',
-            'delete-roles',
-            
-            // Permissions
-            'view-permissions',
-            'create-permissions',
-            'edit-permissions',
-            'delete-permissions',
-            
-            // Departments
-            'view-departments',
-            'create-departments',
-            'edit-departments',
-            'delete-departments',
-            
-            // Areas
-            'view-areas',
-            'create-areas',
-            'edit-areas',
-            'delete-areas',
-            
-            // Shifts
-            'view-shifts',
-            'create-shifts',
-            'edit-shifts',
-            'delete-shifts',
-            
-            // Break Times
-            'view-break-times',
-            'create-break-times',
-            'edit-break-times',
-            'delete-break-times',
-            
-            // Holidays
-            'view-holidays',
-            'create-holidays',
-            'edit-holidays',
-            'delete-holidays',
-            
-            // Parts
-            'view-parts',
-            'create-parts',
-            'edit-parts',
-            'delete-parts',
-            
-            // Prices
-            'view-prices',
-            'create-prices',
-            'edit-prices',
-            'delete-prices',
-            
-            // Purchase Orders
-            'view-purchase-orders',
-            'create-purchase-orders',
-            'edit-purchase-orders',
-            'delete-purchase-orders',
-            'approve-purchase-orders',
-            
-            // Work Orders
-            'view-work-orders',
-            'create-work-orders',
-            'edit-work-orders',
-            'delete-work-orders',
-            
-            // Standards
-            'view-standards',
-            'create-standards',
-            'edit-standards',
-            'delete-standards',
-            
-            // Production Statuses
-            'view-production-statuses',
-            'create-production-statuses',
-            'edit-production-statuses',
-            'delete-production-statuses',
-            
-            // Tables (Mesas)
-            'view-tables',
-            'create-tables',
-            'edit-tables',
-            'delete-tables',
-            
-            // Semi-Automatics
-            'view-semi-automatics',
-            'create-semi-automatics',
-            'edit-semi-automatics',
-            'delete-semi-automatics',
-            
-            // Machines
-            'view-machines',
-            'create-machines',
-            'edit-machines',
-            'delete-machines',
-            
-            // Over Times
-            'view-over-times',
-            'create-over-times',
-            'edit-over-times',
-            'delete-over-times',
-            
-            // Capacity Calculator/Wizard
-            'view-capacity',
-            'use-capacity-wizard',
-            
-            // Sent Lists
-            'view-sent-lists',
-            'create-sent-lists',
-            'edit-sent-lists',
-            'delete-sent-lists',
-            
-            // Kits
-            'view-kits',
-            'create-kits',
-            'edit-kits',
-            'delete-kits',
-            
-            // Lots
-            'view-lots',
-            'create-lots',
-            'edit-lots',
-            'delete-lots',
-            
-            // Employees
-            'view-employees',
-            'create-employees',
-            'edit-employees',
-            'delete-employees',
-            
-            // Reports
-            'view-reports',
-            'create-reports',
-            'export-reports',
-            
-            // Settings
-            'view-settings',
-            'edit-settings',
-        ];
+        $allPermissions = [];
 
-        // Crear permisos
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate([
-                'name' => $permission,
-                'guard_name' => 'web',
-            ]);
+        foreach (self::groupedPermissions() as $group => $permissions) {
+            foreach ($permissions as $permission) {
+                Permission::firstOrCreate([
+                    'name' => $permission,
+                    'guard_name' => 'web',
+                ]);
+                $allPermissions[] = $permission;
+            }
         }
 
-        $this->command->info('Permisos creados correctamente: ' . count($permissions) . ' permisos.');
+        $this->command->info('Permisos creados correctamente: ' . count($allPermissions) . ' permisos (organizados en ' . count(self::groupedPermissions()) . ' grupos).');
     }
 }
