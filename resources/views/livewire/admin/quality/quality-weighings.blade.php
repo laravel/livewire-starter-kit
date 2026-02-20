@@ -289,13 +289,21 @@
                                                     </td>
                                                     <td class="px-3 py-2 text-gray-600 dark:text-gray-400">{{ $qw['weighed_by'] }}</td>
                                                     <td class="px-3 py-2 text-center">
-                                                        <button wire:click="deleteQualityWeighing({{ $qw['id'] }})"
-                                                            wire:confirm="¿Eliminar esta pesada de calidad?"
-                                                            class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" title="Eliminar">
-                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                            </svg>
-                                                        </button>
+                                                        <div class="flex items-center justify-center gap-2">
+                                                            <button wire:click="editQualityWeighing({{ $qw['id'] }})"
+                                                                class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300" title="Editar">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                                </svg>
+                                                            </button>
+                                                            <button wire:click="deleteQualityWeighing({{ $qw['id'] }})"
+                                                                wire:confirm="¿Eliminar esta pesada de calidad?"
+                                                                class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" title="Eliminar">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -344,8 +352,10 @@
                 <div class="fixed inset-0 bg-gray-900/60 transition-opacity" wire:click="closeWeighingModal"></div>
 
                 <div class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-teal-700">
-                        <h3 id="weighing-modal-title" class="text-lg font-semibold text-white">Nueva Pesada de Calidad</h3>
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 {{ $editingQualityWeighingId ? 'bg-blue-700' : 'bg-teal-700' }}">
+                        <h3 id="weighing-modal-title" class="text-lg font-semibold text-white">
+                            {{ $editingQualityWeighingId ? 'Editar Pesada de Calidad' : 'Nueva Pesada de Calidad' }}
+                        </h3>
                     </div>
 
                     <div class="px-6 py-4 space-y-4">
@@ -430,8 +440,8 @@
                             Cancelar
                         </button>
                         <button wire:click="saveQualityWeighing"
-                            class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors">
-                            Registrar Pesada
+                            class="px-4 py-2 {{ $editingQualityWeighingId ? 'bg-blue-600 hover:bg-blue-700' : 'bg-teal-600 hover:bg-teal-700' }} text-white font-medium rounded-lg transition-colors">
+                            {{ $editingQualityWeighingId ? 'Actualizar Pesada' : 'Registrar Pesada' }}
                         </button>
                     </div>
                 </div>

@@ -31,8 +31,9 @@ class QualityWeighings extends Component
     public int $qualBadTotal = 0;
     public int $qualPending = 0;
 
-    // Modal de nueva pesada
+    // Modal de nueva/editar pesada
     public bool $showWeighingModal = false;
+    public ?int $editingQualityWeighingId = null;
     public int $qualGoodPieces = 0;
     public int $qualBadPieces = 0;
     public string $qualWeighedAt = '';
@@ -149,6 +150,7 @@ class QualityWeighings extends Component
     public function closeWeighingModal(): void
     {
         $this->showWeighingModal = false;
+        $this->editingQualityWeighingId = null;
         $this->qualGoodPieces = 0;
         $this->qualBadPieces = 0;
         $this->qualWeighedAt = '';
@@ -158,6 +160,29 @@ class QualityWeighings extends Component
         $this->qualRemainingPieces = 0;
         $this->qualIsCrimp = true;
         $this->resetErrorBag();
+    }
+
+    /**
+     * Open weighing modal in edit mode with existing data.
+     */
+    public function editQualityWeighing(int $qualityWeighingId): void
+    {
+        $qw = QualityWeighing::find($qualityWeighingId);
+        if (!$qw || !$this->selectedLot) return;
+
+        $this->editingQualityWeighingId = $qw->id;
+        $this->qualGoodPieces = $qw->good_pieces;
+        $this->qualBadPieces = $qw->bad_pieces;
+        $this->qualWeighedAt = $qw->weighed_at->format('Y-m-d\TH:i');
+        $this->qualComments = $qw->comments ?? '';
+        $this->qualKitId = $qw->kit_id;
+        $this->qualIsCrimp = (bool) ($this->selectedLot->workOrder->purchaseOrder->part->is_crimp ?? true);
+        $this->qualKits = $this->qualIsCrimp ? $this->selectedLot->kits : collect([]);
+
+        // Remaining = pending + current weighing pieces (so user can redistribute)
+        $this->qualRemainingPieces = $this->qualPending + $qw->good_pieces + $qw->bad_pieces;
+
+        $this->showWeighingModal = true;
     }
 
     public function saveQualityWeighing(): void
@@ -190,20 +215,39 @@ class QualityWeighings extends Component
             return;
         }
 
-        QualityWeighing::create([
-            'lot_id' => $lot->id,
-            'kit_id' => $this->qualKitId ?: null,
-            'production_good_pieces' => $lot->getProductionGoodPieces(),
-            'good_pieces' => $this->qualGoodPieces,
-            'bad_pieces' => $this->qualBadPieces,
-            'disposition' => $this->qualBadPieces > 0 ? QualityWeighing::DISPOSITION_SCRAP : null,
-            'rework_status' => null,
-            'weighed_at' => $this->qualWeighedAt,
-            'weighed_by' => auth()->id(),
-            'comments' => $this->qualComments ?: null,
-        ]);
+        if ($this->editingQualityWeighingId) {
+            $qw = QualityWeighing::find($this->editingQualityWeighingId);
+            if (!$qw) {
+                session()->flash('error', 'Pesada no encontrada.');
+                return;
+            }
+            $qw->update([
+                'kit_id' => $this->qualKitId ?: null,
+                'production_good_pieces' => $lot->getProductionGoodPieces(),
+                'good_pieces' => $this->qualGoodPieces,
+                'bad_pieces' => $this->qualBadPieces,
+                'disposition' => $this->qualBadPieces > 0 ? QualityWeighing::DISPOSITION_SCRAP : null,
+                'rework_status' => null,
+                'weighed_at' => $this->qualWeighedAt,
+                'comments' => $this->qualComments ?: null,
+            ]);
+            $message = 'Pesada de calidad actualizada.';
+        } else {
+            QualityWeighing::create([
+                'lot_id' => $lot->id,
+                'kit_id' => $this->qualKitId ?: null,
+                'production_good_pieces' => $lot->getProductionGoodPieces(),
+                'good_pieces' => $this->qualGoodPieces,
+                'bad_pieces' => $this->qualBadPieces,
+                'disposition' => $this->qualBadPieces > 0 ? QualityWeighing::DISPOSITION_SCRAP : null,
+                'rework_status' => null,
+                'weighed_at' => $this->qualWeighedAt,
+                'weighed_by' => auth()->id(),
+                'comments' => $this->qualComments ?: null,
+            ]);
+            $message = 'Pesada de calidad registrada.';
+        }
 
-        $message = 'Pesada de calidad registrada.';
         if ($this->qualBadPieces > 0) {
             $message .= ' ' . number_format($this->qualBadPieces) . ' piezas descartadas.';
         }

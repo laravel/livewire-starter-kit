@@ -96,7 +96,7 @@
                                     @else
                                         {{-- No crimp: mostrar indicador de material por lotes --}}
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" title="No CRIMP — Lote = Kit">
-                                            Mat.
+                                            Por Lote
                                         </span>
                                     @endif
                                 </td>
