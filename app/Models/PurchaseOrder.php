@@ -177,19 +177,19 @@ class PurchaseOrder extends Model
      */
     public function forceDeleteWithRelations(): bool
     {
-        // Delete related work orders first
+        // Force delete related work orders first
         if ($this->hasWorkOrder()) {
-            $this->workOrder->delete();
+            $this->workOrder->forceDeleteWithRelations();
         }
 
         // Delete signatures
-        $this->signatures()->delete();
+        $this->signatures()->forceDelete();
 
         // Detach from sent lists
         $this->sentLists()->detach();
 
-        // Finally delete the purchase order
-        return $this->delete();
+        // Finally force delete the purchase order
+        return $this->forceDelete();
     }
 
     /**

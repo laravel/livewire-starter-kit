@@ -284,9 +284,23 @@
                                                     class="w-5 h-5 rounded {{ $lotKitColor }} hover:opacity-80 cursor-pointer transition-opacity"
                                                     title="Kit: {{ $lotKit?->kit_number ?? 'Sin kit' }} - {{ $lotKit?->status_label ?? 'N/A' }}"></button>
                                             @else
-                                                {{-- No es CRIMP: lote = kit, se considera aprobado automaticamente --}}
-                                                <div class="w-5 h-5 rounded bg-green-500 opacity-70 inline-block"
-                                                    title="No CRIMP — Lote funciona como Kit (aprobado)"></div>
+                                                {{-- No es CRIMP: lote = kit, semaforo basado en material_status --}}
+                                                @php
+                                                    $matStatus = $lot->material_status ?? 'pending';
+                                                    $matColor = match ($matStatus) {
+                                                        'released' => 'bg-green-500',
+                                                        'rejected' => 'bg-red-500',
+                                                        default => 'bg-gray-400',
+                                                    };
+                                                    $matLabel = match ($matStatus) {
+                                                        'released' => 'Aprobado',
+                                                        'rejected' => 'Rechazado',
+                                                        default => 'Pendiente',
+                                                    };
+                                                @endphp
+                                                <button wire:click="openMaterialModal({{ $lot->id }})"
+                                                    class="w-5 h-5 rounded {{ $matColor }} hover:opacity-80 cursor-pointer transition-opacity"
+                                                    title="Material (No CRIMP): {{ $matLabel }}"></button>
                                             @endif
                                         </td>
                                         {{-- Semaforo INSP - Status de Inspeccion por Lote --}}
@@ -1308,6 +1322,161 @@
                                 Guardar Cambios
                             </button>
                         @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Modal de Material (No CRIMP: Lote = Kit) --}}
+    @if ($showMaterialModal && $selectedLotForMaterial)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="material-modal-title" role="dialog"
+            aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                {{-- Overlay --}}
+                <div class="fixed inset-0 bg-gray-900/50 transition-opacity" wire:click="closeMaterialModal"></div>
+
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                {{-- Modal --}}
+                <div
+                    class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    {{-- Header --}}
+                    <div class="bg-gradient-to-r from-amber-600 to-amber-700 px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white" id="material-modal-title">
+                                    Material del Lote
+                                </h3>
+                                <p class="text-sm text-amber-100 mt-1">
+                                    WO: {{ $selectedLotForMaterial->workOrder->purchaseOrder->wo ?? 'N/A' }} |
+                                    Lote: {{ $selectedLotForMaterial->lot_number }}
+                                </p>
+                            </div>
+                            <button wire:click="closeMaterialModal" class="text-white hover:text-amber-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="px-6 py-4 space-y-6">
+                        {{-- Informacion del Lote --}}
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Información del Lote</h4>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Parte:</span>
+                                    <span class="ml-2 text-gray-900 dark:text-white font-medium">
+                                        {{ $selectedLotForMaterial->workOrder->purchaseOrder->part->number ?? 'N/A' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Cantidad:</span>
+                                    <span class="ml-2 text-gray-900 dark:text-white font-medium">
+                                        {{ number_format($selectedLotForMaterial->quantity) }} piezas
+                                    </span>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-gray-500 dark:text-gray-400">Lote:</span>
+                                    <span class="ml-2 text-blue-600 dark:text-blue-400 font-medium">
+                                        {{ $selectedLotForMaterial->lot_number }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Aviso: No es CRIMP --}}
+                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3 rounded-lg">
+                            <div class="flex items-center text-sm text-amber-700 dark:text-amber-300">
+                                <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>Esta parte <strong>no es CRIMP</strong> — el lote funciona como kit. Apruebe o rechace el material directamente.</span>
+                            </div>
+                        </div>
+
+                        {{-- Status selector (Alpine.js) --}}
+                        <div x-data="{ matSt: $wire.entangle('materialStatus') }">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                Status del Material
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                {{-- Aprobado --}}
+                                <button type="button"
+                                    x-on:click="matSt = 'released'"
+                                    :class="matSt === 'released'
+                                        ? 'border-green-500 bg-green-50 dark:bg-green-900/30 ring-2 ring-green-300 dark:ring-green-700 shadow-sm'
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-green-300 dark:hover:border-green-600 hover:bg-green-50/50 dark:hover:bg-green-900/10'"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 cursor-pointer">
+                                    <div
+                                        :class="matSt === 'released' ? 'ring-2 ring-green-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
+                                        class="w-8 h-8 rounded-full bg-green-500 mb-2 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span
+                                        :class="matSt === 'released' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300'"
+                                        class="text-sm font-medium">
+                                        Aprobado
+                                    </span>
+                                </button>
+
+                                {{-- Rechazado --}}
+                                <button type="button"
+                                    x-on:click="matSt = 'rejected'"
+                                    :class="matSt === 'rejected'
+                                        ? 'border-red-500 bg-red-50 dark:bg-red-900/30 ring-2 ring-red-300 dark:ring-red-700 shadow-sm'
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50/50 dark:hover:bg-red-900/10'"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 cursor-pointer">
+                                    <div
+                                        :class="matSt === 'rejected' ? 'ring-2 ring-red-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
+                                        class="w-8 h-8 rounded-full bg-red-500 mb-2 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </div>
+                                    <span
+                                        :class="matSt === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300'"
+                                        class="text-sm font-medium">
+                                        Rechazado
+                                    </span>
+                                </button>
+                            </div>
+
+                            {{-- Texto descriptivo --}}
+                            <div class="mt-3 text-sm text-center py-2 px-3 rounded-md transition-all duration-200"
+                                :class="{
+                                    'bg-gray-50 dark:bg-gray-700/20 text-gray-500 dark:text-gray-400': matSt === 'pending',
+                                    'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300': matSt === 'released',
+                                    'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300': matSt === 'rejected'
+                                }">
+                                <span x-show="matSt === 'pending'">Material pendiente de revision</span>
+                                <span x-show="matSt === 'released'">Material aprobado - Listo para produccion</span>
+                                <span x-show="matSt === 'rejected'">Material rechazado - Requiere correccion</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Footer --}}
+                    <div
+                        class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
+                        <button wire:click="closeMaterialModal"
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            Cancelar
+                        </button>
+                        <button wire:click="saveMaterialStatus"
+                            class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors">
+                            Guardar Cambios
+                        </button>
                     </div>
                 </div>
             </div>

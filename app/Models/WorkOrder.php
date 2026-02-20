@@ -198,16 +198,22 @@ class WorkOrder extends Model
      */
     public function forceDeleteWithRelations(): bool
     {
-        // Delete related lots
-        if (class_exists(\App\Models\Lot::class)) {
-            $this->lots()->delete();
+        // Force delete related lots and their children
+        foreach ($this->lots as $lot) {
+            $lot->kits()->detach();
+            $lot->weighings()->forceDelete();
+            $lot->qualityWeighings()->forceDelete();
+            $lot->forceDelete();
         }
 
-        // Delete status logs
-        $this->statusLogs()->delete();
+        // Force delete kits belonging to this WO
+        $this->kits()->forceDelete();
 
-        // Finally delete the work order
-        return $this->delete();
+        // Delete status logs
+        $this->statusLogs()->forceDelete();
+
+        // Finally force delete the work order
+        return $this->forceDelete();
     }
 
     /**

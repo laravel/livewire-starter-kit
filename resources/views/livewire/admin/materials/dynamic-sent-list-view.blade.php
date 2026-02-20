@@ -94,7 +94,10 @@
                                             {{ $kitsCount }}
                                         </span>
                                     @else
-                                        <span class="text-xs text-gray-400" title="No aplica (no es CRIMP)">—</span>
+                                        {{-- No crimp: mostrar indicador de material por lotes --}}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" title="No CRIMP — Lote = Kit">
+                                            Mat.
+                                        </span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -275,10 +278,57 @@
                                         @endif
                                     </div>
                                     @else
-                                    <div class="pl-4 border-l-2 border-gray-200 dark:border-gray-600">
-                                        <div class="text-xs text-gray-400 dark:text-gray-500 italic p-2">
-                                            Esta parte no es CRIMP — el lote funciona como kit.
+                                    {{-- No CRIMP: Material section con semaforos por lote --}}
+                                    <div class="pl-4 border-l-2 border-amber-300 dark:border-amber-600">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                Material por Lote (No CRIMP — Lote = Kit):
+                                            </div>
                                         </div>
+
+                                        @if($workOrder->lots->isEmpty())
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 italic p-2">
+                                                No hay lotes creados para esta WO.
+                                            </div>
+                                        @else
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                                @foreach($workOrder->lots as $matLot)
+                                                    @php
+                                                        $matSt = $matLot->material_status ?? 'pending';
+                                                        $matColor = match ($matSt) {
+                                                            'released' => 'bg-green-500',
+                                                            'rejected' => 'bg-red-500',
+                                                            default => 'bg-gray-400',
+                                                        };
+                                                        $matLabel = match ($matSt) {
+                                                            'released' => 'Aprobado',
+                                                            'rejected' => 'Rechazado',
+                                                            default => 'Pendiente',
+                                                        };
+                                                        $matBadgeColor = match ($matSt) {
+                                                            'released' => 'green',
+                                                            'rejected' => 'red',
+                                                            default => 'zinc',
+                                                        };
+                                                    @endphp
+                                                    <div class="p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 transition-colors cursor-pointer"
+                                                        wire:click="openMaterialModal({{ $matLot->id }})">
+                                                        <div class="flex items-center justify-between">
+                                                            <div class="flex items-center gap-2">
+                                                                <div class="w-4 h-4 rounded-full {{ $matColor }}"></div>
+                                                                <div>
+                                                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $matLot->lot_number }}</div>
+                                                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($matLot->quantity) }} pcs</div>
+                                                                </div>
+                                                            </div>
+                                                            <flux:badge :color="$matBadgeColor" size="sm">
+                                                                {{ $matLabel }}
+                                                            </flux:badge>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                     @endif
                                 </td>
@@ -615,5 +665,135 @@
             </div>
         </div>
     </div>
+    @endif
+
+    {{-- Modal de Material (No CRIMP: Lote = Kit) --}}
+    @if ($showMaterialModal && $selectedLotForMaterial)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="material-modal-title" role="dialog"
+            aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeMaterialModal"></div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    {{-- Header --}}
+                    <div class="bg-gradient-to-r from-amber-600 to-amber-700 px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white" id="material-modal-title">
+                                    Material del Lote
+                                </h3>
+                                <p class="text-sm text-amber-100 mt-1">
+                                    WO: {{ $selectedLotForMaterial->workOrder->purchaseOrder->wo ?? 'N/A' }} |
+                                    Lote: {{ $selectedLotForMaterial->lot_number }}
+                                </p>
+                            </div>
+                            <button wire:click="closeMaterialModal" class="text-white hover:text-amber-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="px-6 py-4 space-y-6">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Información del Lote</h4>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Parte:</span>
+                                    <span class="ml-2 text-gray-900 dark:text-white font-medium">
+                                        {{ $selectedLotForMaterial->workOrder->purchaseOrder->part->number ?? 'N/A' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Cantidad:</span>
+                                    <span class="ml-2 text-gray-900 dark:text-white font-medium">
+                                        {{ number_format($selectedLotForMaterial->quantity) }} piezas
+                                    </span>
+                                </div>
+                                <div class="col-span-2">
+                                    <span class="text-gray-500 dark:text-gray-400">Lote:</span>
+                                    <span class="ml-2 text-blue-600 dark:text-blue-400 font-medium">
+                                        {{ $selectedLotForMaterial->lot_number }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3 rounded-lg">
+                            <div class="flex items-center text-sm text-amber-700 dark:text-amber-300">
+                                <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>Esta parte <strong>no es CRIMP</strong> — el lote funciona como kit. Apruebe o rechace el material directamente.</span>
+                            </div>
+                        </div>
+
+                        <div x-data="{ matSt: $wire.entangle('materialStatus') }">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                                Status del Material
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button type="button"
+                                    x-on:click="matSt = 'released'"
+                                    :class="matSt === 'released'
+                                        ? 'border-green-500 bg-green-50 dark:bg-green-900/30 ring-2 ring-green-300 dark:ring-green-700 shadow-sm'
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-green-300 dark:hover:border-green-600 hover:bg-green-50/50 dark:hover:bg-green-900/10'"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 cursor-pointer">
+                                    <div
+                                        :class="matSt === 'released' ? 'ring-2 ring-green-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
+                                        class="w-8 h-8 rounded-full bg-green-500 mb-2 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <span :class="matSt === 'released' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300'" class="text-sm font-medium">
+                                        Aprobado
+                                    </span>
+                                </button>
+
+                                <button type="button"
+                                    x-on:click="matSt = 'rejected'"
+                                    :class="matSt === 'rejected'
+                                        ? 'border-red-500 bg-red-50 dark:bg-red-900/30 ring-2 ring-red-300 dark:ring-red-700 shadow-sm'
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50/50 dark:hover:bg-red-900/10'"
+                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 cursor-pointer">
+                                    <div
+                                        :class="matSt === 'rejected' ? 'ring-2 ring-red-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
+                                        class="w-8 h-8 rounded-full bg-red-500 mb-2 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </div>
+                                    <span :class="matSt === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300'" class="text-sm font-medium">
+                                        Rechazado
+                                    </span>
+                                </button>
+                            </div>
+
+                            <div class="mt-3 text-sm text-center py-2 px-3 rounded-md transition-all duration-200"
+                                :class="{
+                                    'bg-gray-50 dark:bg-gray-700/20 text-gray-500 dark:text-gray-400': matSt === 'pending',
+                                    'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300': matSt === 'released',
+                                    'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300': matSt === 'rejected'
+                                }">
+                                <span x-show="matSt === 'pending'">Material pendiente de revision</span>
+                                <span x-show="matSt === 'released'">Material aprobado - Listo para produccion</span>
+                                <span x-show="matSt === 'rejected'">Material rechazado - Requiere correccion</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Footer --}}
+                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                        <button wire:click="saveMaterialStatus" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Guardar Cambios</button>
+                        <button wire:click="closeMaterialModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endif
 </div>

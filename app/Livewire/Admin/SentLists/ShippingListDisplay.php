@@ -51,6 +51,11 @@ class ShippingListDisplay extends Component
     public $showCreateKitForm = false;
     public $newKitNumber = '';
 
+    // Modal de Material (no-crimp: lote = kit)
+    public $showMaterialModal = false;
+    public $selectedLotForMaterial = null;
+    public $materialStatus = 'pending';
+
     // Modal de Empaque por lote
     public $showPackagingModal = false;
     public $selectedLotForPackaging = null;
@@ -267,10 +272,11 @@ class ShippingListDisplay extends Component
             return;
         }
 
-        // No abrir modal de kit para partes que no son CRIMP
+        // Si no es CRIMP, abrir modal de material en vez de kit
         $isCrimp = (bool) ($this->selectedLotForKit->workOrder->purchaseOrder->part->is_crimp ?? true);
         if (!$isCrimp) {
-            session()->flash('error', 'Esta parte no es CRIMP — el lote funciona como kit.');
+            $this->openMaterialModal($lotId);
+            $this->selectedLotForKit = null;
             return;
         }
 
@@ -400,6 +406,78 @@ class ShippingListDisplay extends Component
         $this->dispatch('refresh-display');
     }
 
+    // ===============================================
+    // MATERIAL MODAL (NO-CRIMP: LOTE = KIT)
+    // ===============================================
+
+    /**
+     * Open material status modal for non-crimp lots.
+     */
+    public function openMaterialModal($lotId)
+    {
+        $this->selectedLotForMaterial = Lot::with(['workOrder.purchaseOrder.part'])->find($lotId);
+
+        if (!$this->selectedLotForMaterial) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $this->materialStatus = $this->selectedLotForMaterial->material_status ?? 'pending';
+        $this->showMaterialModal = true;
+    }
+
+    /**
+     * Close material status modal.
+     */
+    public function closeMaterialModal()
+    {
+        $this->showMaterialModal = false;
+        $this->selectedLotForMaterial = null;
+        $this->materialStatus = 'pending';
+        $this->resetErrorBag();
+    }
+
+    /**
+     * Set material status (for visual update via Alpine).
+     */
+    public function setMaterialStatus($status)
+    {
+        $this->materialStatus = $status;
+    }
+
+    /**
+     * Save material status for non-crimp lot.
+     */
+    public function saveMaterialStatus()
+    {
+        if (!$this->selectedLotForMaterial) {
+            session()->flash('error', 'Lote no encontrado.');
+            $this->closeMaterialModal();
+            return;
+        }
+
+        $this->validate([
+            'materialStatus' => 'required|in:released,rejected',
+        ], [
+            'materialStatus.required' => 'Debe seleccionar Aprobado o Rechazado.',
+        ]);
+
+        $this->selectedLotForMaterial->update([
+            'material_status' => $this->materialStatus,
+        ]);
+
+        $statusLabels = [
+            'released' => 'Aprobado',
+            'rejected' => 'Rechazado',
+        ];
+
+        $statusLabel = $statusLabels[$this->materialStatus] ?? $this->materialStatus;
+        session()->flash('message', "Material del lote actualizado a: {$statusLabel}");
+
+        $this->closeMaterialModal();
+        $this->dispatch('refresh-display');
+    }
+
     /**
      * Approve a lot (set status to completed).
      */
@@ -518,7 +596,7 @@ class ShippingListDisplay extends Component
 
         // Doble verificacion de dependencia MAT -> INSP
         if (!$this->selectedLot->canBeInspected()) {
-            session()->flash('error', 'Este lote ya no puede ser inspeccionado. El kit asociado no esta liberado.');
+            session()->flash('error', $this->selectedLot->getInspectionBlockedReason() ?? 'Este lote ya no puede ser inspeccionado.');
             $this->closeInspectionModal();
             return;
         }

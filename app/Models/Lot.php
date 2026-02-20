@@ -31,6 +31,7 @@ class Lot extends Model
         'inspection_comments',
         'inspection_completed_at',
         'inspection_completed_by',
+        'material_status',
     ];
 
     protected $casts = [
@@ -347,10 +348,18 @@ class Lot extends Model
 
     /**
      * Check if the lot can be inspected.
-     * Inspection can only happen on lots that have an associated Kit with status "released".
+     * For crimp parts: requires an associated Kit with status "released".
+     * For non-crimp parts: lote = kit, so inspection is allowed if material_status is "released".
      */
     public function canBeInspected(): bool
     {
+        $isCrimp = (bool) ($this->workOrder->purchaseOrder->part->is_crimp ?? true);
+
+        if (!$isCrimp) {
+            // Non-crimp: lote = kit, allow inspection if material approved
+            return ($this->material_status ?? 'pending') === 'released';
+        }
+
         return $this->kits()
             ->where('status', Kit::STATUS_RELEASED)
             ->exists();
@@ -373,6 +382,17 @@ class Lot extends Model
     {
         if ($this->canBeInspected()) {
             return null;
+        }
+
+        $isCrimp = (bool) ($this->workOrder->purchaseOrder->part->is_crimp ?? true);
+
+        if (!$isCrimp) {
+            $matStatus = $this->material_status ?? 'pending';
+            return match ($matStatus) {
+                'pending' => 'El material de este lote aun no ha sido aprobado. Materiales debe aprobar el material primero.',
+                'rejected' => 'El material de este lote fue rechazado. Materiales debe corregir y aprobar el material.',
+                default => 'El material de este lote no tiene un status valido para inspeccion.',
+            };
         }
 
         $kit = $this->kits()->first();

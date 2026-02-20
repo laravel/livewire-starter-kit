@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Part;
-use App\Models\Price;
 use App\Models\PurchaseOrder;
 use App\Models\StatusWO;
 use App\Models\User;
@@ -38,11 +37,8 @@ class WorkOrderTestSeeder extends Seeder
             ]
         );
 
-        // Crear partes de prueba
-        $parts = $this->createTestParts();
-
-        // Crear precios para las partes
-        $this->createTestPrices($parts);
+        // Usar partes existentes que ya tienen estándares y configuraciones
+        $parts = $this->getExistingParts();
 
         // Escenario 1: PO con precio correcto → Aprobada → WO creada
         $this->createScenario1_SuccessfulFlow($parts['part1'], $user);
@@ -85,104 +81,29 @@ class WorkOrderTestSeeder extends Seeder
         }
     }
 
-    private function createTestParts(): array
+    private function getExistingParts(): array
     {
-        $parts = [];
+        // Usar partes que ya tienen estándares activos con configuraciones
+        $partsWithStandards = Part::active()
+            ->whereHas('standards', function ($q) {
+                $q->where('active', true)->has('configurations');
+            })
+            ->take(5)
+            ->get();
 
-        for ($i = 1; $i <= 5; $i++) {
-            $parts["part{$i}"] = Part::firstOrCreate(
-                ['number' => "PART-TEST-{$i}"],
-                [
-                    'item_number' => "ITEM-{$i}",
-                    'unit_of_measure' => 'PCS',
-                    'active' => true,
-                    'description' => "Parte de prueba #{$i} para verificación de flujo",
-                    'notes' => "Parte creada por WorkOrderTestSeeder",
-                ]
-            );
+        if ($partsWithStandards->count() < 5) {
+            $this->command->warn('WorkOrderTestSeeder: No hay suficientes partes con estándares. Se necesitan 5, hay ' . $partsWithStandards->count());
+        }
+
+        $parts = [];
+        foreach ($partsWithStandards->values() as $i => $part) {
+            $parts['part' . ($i + 1)] = $part;
         }
 
         return $parts;
     }
 
-    private function createTestPrices(array $parts): void
-    {
-        // Precios para cada parte con diferentes tipos de estación
-        $priceData = [
-            // Mesa de Trabajo (4 niveles)
-            'part1' => [
-                'sample' => 1.5000,
-                'type' => 'table',
-                'tiers' => [
-                    ['min' => 1, 'max' => 999, 'price' => 1.5000],
-                    ['min' => 1000, 'max' => 10999, 'price' => 1.3000],
-                    ['min' => 11000, 'max' => 99999, 'price' => 1.1000],
-                    ['min' => 100000, 'max' => null, 'price' => 0.9000],
-                ],
-            ],
-            // Mesa de Trabajo
-            'part2' => [
-                'sample' => 2.0000,
-                'type' => 'table',
-                'tiers' => [
-                    ['min' => 1, 'max' => 999, 'price' => 2.0000],
-                    ['min' => 1000, 'max' => 10999, 'price' => 1.8000],
-                    ['min' => 11000, 'max' => 99999, 'price' => 1.5000],
-                    ['min' => 100000, 'max' => null, 'price' => 1.2000],
-                ],
-            ],
-            // Máquina (3 niveles)
-            'part3' => [
-                'sample' => 0.7500,
-                'type' => 'machine',
-                'tiers' => [
-                    ['min' => 1, 'max' => 9999, 'price' => 0.7500],
-                    ['min' => 10000, 'max' => 49999, 'price' => 0.6500],
-                    ['min' => 50000, 'max' => null, 'price' => 0.5500],
-                ],
-            ],
-            // Máquina
-            'part4' => [
-                'sample' => 3.2500,
-                'type' => 'machine',
-                'tiers' => [
-                    ['min' => 1, 'max' => 9999, 'price' => 3.2500],
-                    ['min' => 10000, 'max' => 49999, 'price' => 2.9000],
-                    ['min' => 50000, 'max' => null, 'price' => 2.5000],
-                ],
-            ],
-            // Semi-Automática (2 niveles)
-            'part5' => [
-                'sample' => 1.0000,
-                'type' => 'semi_automatic',
-                'tiers' => [
-                    ['min' => 2000, 'max' => 10000, 'price' => 1.0000],
-                    ['min' => 11000, 'max' => null, 'price' => 0.8000],
-                ],
-            ],
-        ];
-
-        foreach ($priceData as $key => $data) {
-            $price = Price::firstOrCreate(
-                ['part_id' => $parts[$key]->id, 'active' => true],
-                [
-                    'sample_price' => $data['sample'],
-                    'workstation_type' => $data['type'],
-                    'effective_date' => Carbon::now()->subMonth(),
-                    'active' => true,
-                    'comments' => 'Precio de prueba - ' . ucfirst($data['type']),
-                ]
-            );
-
-            // Crear los tiers en la tabla pivote
-            foreach ($data['tiers'] as $tier) {
-                $price->tiers()->firstOrCreate(
-                    ['min_quantity' => $tier['min'], 'max_quantity' => $tier['max']],
-                    ['tier_price' => $tier['price']]
-                );
-            }
-        }
-    }
+    // Prices already exist from PriceSeeder — no need to create them here
 
     /**
      * Escenario 1: Flujo exitoso completo
@@ -192,14 +113,17 @@ class WorkOrderTestSeeder extends Seeder
      */
     private function createScenario1_SuccessfulFlow(Part $part, User $user): void
     {
+        $price = $part->prices()->where('active', true)->first();
+        $unitPrice = $price ? $price->sample_price : 1.0000;
+
         $po = PurchaseOrder::firstOrCreate(
             ['po_number' => 'PO-TEST-001'],
             [
                 'part_id' => $part->id,
                 'po_date' => Carbon::now()->subDays(5),
                 'due_date' => Carbon::now()->addDays(10),
-                'quantity' => 500, // Tier 1-999, precio: 1.5000
-                'unit_price' => 1.5000, // Precio correcto
+                'quantity' => 500,
+                'unit_price' => $unitPrice,
                 'status' => PurchaseOrder::STATUS_APPROVED,
                 'comments' => 'Escenario 1: PO aprobada con precio correcto',
             ]
@@ -238,16 +162,19 @@ class WorkOrderTestSeeder extends Seeder
      */
     private function createScenario2_PriceError(Part $part, User $user): void
     {
+        $price = $part->prices()->where('active', true)->first();
+        $wrongPrice = $price ? round($price->sample_price * 0.85, 4) : 1.7500;
+
         PurchaseOrder::firstOrCreate(
             ['po_number' => 'PO-TEST-002'],
             [
                 'part_id' => $part->id,
                 'po_date' => Carbon::now()->subDays(3),
                 'due_date' => Carbon::now()->addDays(15),
-                'quantity' => 500, // Tier 1-999, precio esperado: 2.0000
-                'unit_price' => 1.7500, // Precio INCORRECTO (debería ser 2.0000)
+                'quantity' => 500,
+                'unit_price' => $wrongPrice,
                 'status' => PurchaseOrder::STATUS_PENDING_CORRECTION,
-                'comments' => 'Escenario 2: ERROR - Precio no coincide. Precio en PO: $1.7500, Precio esperado: $2.0000',
+                'comments' => 'Escenario 2: ERROR - Precio no coincide',
             ]
         );
         // NO se crea WO porque el precio es incorrecto
@@ -260,14 +187,17 @@ class WorkOrderTestSeeder extends Seeder
      */
     private function createScenario3_RejectedPO(Part $part, User $user): void
     {
+        $price = $part->prices()->where('active', true)->first();
+        $unitPrice = $price ? $price->sample_price : 0.6500;
+
         PurchaseOrder::firstOrCreate(
             ['po_number' => 'PO-TEST-003'],
             [
                 'part_id' => $part->id,
                 'po_date' => Carbon::now()->subDays(7),
                 'due_date' => Carbon::now()->addDays(5),
-                'quantity' => 1000, // Tier 1000-10999
-                'unit_price' => 0.6500, // Precio correcto para tier
+                'quantity' => 1000,
+                'unit_price' => $unitPrice,
                 'status' => PurchaseOrder::STATUS_REJECTED,
                 'comments' => 'Escenario 3: PO rechazada manualmente por el usuario - Cliente canceló el pedido',
             ]
@@ -283,14 +213,17 @@ class WorkOrderTestSeeder extends Seeder
      */
     private function createScenario4_InProgressWO(Part $part, User $user): void
     {
+        $price = $part->prices()->where('active', true)->first();
+        $unitPrice = $price ? $price->sample_price : 2.9000;
+
         $po = PurchaseOrder::firstOrCreate(
             ['po_number' => 'PO-TEST-004'],
             [
                 'part_id' => $part->id,
                 'po_date' => Carbon::now()->subDays(10),
                 'due_date' => Carbon::now()->addDays(3),
-                'quantity' => 1000, // Cantidad total
-                'unit_price' => 2.9000, // Precio correcto para tier 1000-10999
+                'quantity' => 1000,
+                'unit_price' => $unitPrice,
                 'status' => PurchaseOrder::STATUS_APPROVED,
                 'comments' => 'Escenario 4: PO aprobada, WO en progreso',
             ]
@@ -340,6 +273,9 @@ class WorkOrderTestSeeder extends Seeder
      */
     private function createScenario5_CompletedWO(Part $part, User $user): void
     {
+        $price = $part->prices()->where('active', true)->first();
+        $unitPrice = $price ? $price->sample_price : 0.9000;
+
         $po = PurchaseOrder::firstOrCreate(
             ['po_number' => 'PO-TEST-005'],
             [
@@ -347,7 +283,7 @@ class WorkOrderTestSeeder extends Seeder
                 'po_date' => Carbon::now()->subDays(20),
                 'due_date' => Carbon::now()->subDays(5),
                 'quantity' => 2000,
-                'unit_price' => 0.9000, // Precio correcto para tier 1000-10999
+                'unit_price' => $unitPrice,
                 'status' => PurchaseOrder::STATUS_APPROVED,
                 'comments' => 'Escenario 5: PO aprobada, WO completada',
             ]

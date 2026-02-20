@@ -57,6 +57,11 @@ class DynamicSentListView extends Component
     public string $editKitStatus = '';
     public string $editKitValidationNotes = '';
 
+    // Modal de Material (no-crimp: lote = kit)
+    public bool $showMaterialModal = false;
+    public $selectedLotForMaterial = null;
+    public string $materialStatus = 'pending';
+
     // ===============================================
     // COMPUTED PROPERTIES
     // ===============================================
@@ -706,8 +711,7 @@ class DynamicSentListView extends Component
             'kits.preparedBy',
             'kits.releasedBy',
             'kits.lots'
-        ])->whereHas('lots') // Solo WOs que tengan lotes
-          ->whereNotIn('status_id', $closedStatusIds); // Excluir cerrados/cancelados
+        ])->whereNotIn('status_id', $closedStatusIds); // Excluir cerrados/cancelados
 
         // Apply search
         if (!empty($this->searchTerm)) {
@@ -736,5 +740,59 @@ class DynamicSentListView extends Component
         return view('livewire.admin.materials.dynamic-sent-list-view', [
             'workOrders' => $workOrders,
         ]);
+    }
+
+    // ===============================================
+    // MATERIAL MODAL (NO-CRIMP: LOTE = KIT)
+    // ===============================================
+
+    public function openMaterialModal(int $lotId): void
+    {
+        $this->selectedLotForMaterial = Lot::with(['workOrder.purchaseOrder.part'])->find($lotId);
+
+        if (!$this->selectedLotForMaterial) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $this->materialStatus = $this->selectedLotForMaterial->material_status ?? 'pending';
+        $this->showMaterialModal = true;
+    }
+
+    public function closeMaterialModal(): void
+    {
+        $this->showMaterialModal = false;
+        $this->selectedLotForMaterial = null;
+        $this->materialStatus = 'pending';
+        $this->resetErrorBag();
+    }
+
+    public function saveMaterialStatus(): void
+    {
+        if (!$this->selectedLotForMaterial) {
+            session()->flash('error', 'Lote no encontrado.');
+            $this->closeMaterialModal();
+            return;
+        }
+
+        $this->validate([
+            'materialStatus' => 'required|in:released,rejected',
+        ], [
+            'materialStatus.required' => 'Debe seleccionar Aprobado o Rechazado.',
+        ]);
+
+        $this->selectedLotForMaterial->update([
+            'material_status' => $this->materialStatus,
+        ]);
+
+        $statusLabels = [
+            'released' => 'Aprobado',
+            'rejected' => 'Rechazado',
+        ];
+
+        $statusLabel = $statusLabels[$this->materialStatus] ?? $this->materialStatus;
+        session()->flash('message', "Material del lote actualizado a: {$statusLabel}");
+
+        $this->closeMaterialModal();
     }
 }
