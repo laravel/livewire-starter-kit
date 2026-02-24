@@ -424,9 +424,9 @@ class ShippingListDisplay extends Component
     public function saveKitStatus()
     {
         $this->validate([
-            'kitStatus' => 'required|in:released,rejected',
+            'kitStatus' => 'required|in:released,in_process',
         ], [
-            'kitStatus.required' => 'Debe seleccionar Aprobado o Rechazado.',
+            'kitStatus.required' => 'Debe seleccionar Aprobado o En Proceso.',
         ]);
 
         if (!$this->selectedKit) {
@@ -441,7 +441,7 @@ class ShippingListDisplay extends Component
 
         $statusLabels = [
             'released' => 'Aprobado',
-            'rejected' => 'Rechazado',
+            'in_process' => 'En Proceso',
         ];
         
         $statusLabel = $statusLabels[$this->kitStatus] ?? $this->kitStatus;
@@ -544,7 +544,7 @@ class ShippingListDisplay extends Component
      */
     public function updateKitStatus($kitId, $status)
     {
-        if (!in_array($status, ['released', 'rejected', 'preparing'])) {
+        if (!in_array($status, ['released', 'in_process', 'preparing'])) {
             return;
         }
 
@@ -561,7 +561,7 @@ class ShippingListDisplay extends Component
             $this->lotKits = $this->selectedLotForKitManage->kits->sortByDesc('created_at')->values()->toArray();
         }
 
-        $statusLabels = ['released' => 'Aprobado', 'rejected' => 'Rechazado', 'preparing' => 'En preparación'];
+        $statusLabels = ['released' => 'Aprobado', 'in_process' => 'En Proceso', 'preparing' => 'En preparación'];
         $statusLabel = $statusLabels[$status] ?? $status;
         session()->flash('message', "Kit {$kit->kit_number} actualizado a: {$statusLabel}");
         $this->dispatch('refresh-display');

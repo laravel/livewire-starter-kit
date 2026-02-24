@@ -49,7 +49,7 @@
                 {{-- Filtros --}}
                 <div class="flex flex-col sm:flex-row gap-3">
                     <select wire:model.live="filterDepartment"
-                        class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                        class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">Todos los Departamentos</option>
                         @foreach (\App\Models\SentList::getDepartments() as $key => $label)
                             <option value="{{ $key }}">{{ $label }}</option>
@@ -57,7 +57,7 @@
                     </select>
 
                     <select wire:model.live="filterStatus"
-                        class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                        class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">Todos los Estados</option>
                         @foreach (\App\Models\SentList::getStatuses() as $key => $label)
                             <option value="{{ $key }}">{{ $label }}</option>
@@ -79,7 +79,7 @@
             {{-- Sección por Tipo de Estación --}}
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 {{-- Header de Sección --}}
-                <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-blue-800 dark:bg-gray-900/50">
+                <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-indigo-800 dark:bg-gray-900/50">
                     <h2 class="text-white font-semibold text-gray-900 ">{{ $workstationType }}</h2>
                 </div>
 
@@ -131,6 +131,9 @@
                                     class="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                     Cant. a Enviar</th>
                                 <th
+                                    class="px-4 py-3 text-right text-xs font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider">
+                                    Pz Sobrantes</th>
+                                <th
                                     class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                     Fecha Prog. A</th>
                                 <th
@@ -157,6 +160,11 @@
                                     $cantAEnviar = $cantWO - $pzEnviadas; // Cant. a Enviar = Cant. WO - Pz Enviadas
                                     $toSend = $cantAEnviar;
 
+                                    // Piezas sobrantes: pesadas producción - verificadas calidad (por WO, sumando lotes)
+                                    $woSobrantes = $allLots->sum(function ($l) {
+                                        return $l->getQualityPendingPieces();
+                                    });
+
                                     // Obtener estados de departamentos (simulado por ahora)
                                     $departmentStatuses = [
                                         'materials' => 'pending',
@@ -168,7 +176,7 @@
                                 {{-- Fila Principal de WO --}}
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
                                     <td class="px-4 py-3 text-gray-900 dark:text-white font-medium">WO</td>
-                                    <td class="px-4 py-3 text-blue-600 dark:text-blue-400 font-medium">
+                                    <td class="px-4 py-3 text-indigo-600 dark:text-indigo-400 font-medium">
                                         {{ $po->wo }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ $part->item_number }}
                                     </td>
@@ -192,6 +200,8 @@
                                     <td
                                         class="px-4 py-3 text-right font-semibold bg-yellow-50 dark:bg-yellow-900/20 text-yellow-900 dark:text-yellow-200">
                                         {{ number_format($toSend) }}</td>
+                                    <td class="px-4 py-3 text-right font-semibold {{ $woSobrantes > 0 ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20' : 'text-gray-400 dark:text-gray-500' }}">
+                                        {{ number_format($woSobrantes) }}</td>
                                     {{-- Fechas --}}
                                     <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300">
                                         {{ $wo->scheduled_send_date?->format('m/d/Y') ?? '-' }}</td>
@@ -213,8 +223,8 @@
                                                 'label' => 'Pendiente',
                                             ],
                                             \App\Models\Lot::STATUS_IN_PROGRESS => [
-                                                'bg' => 'bg-blue-50 dark:bg-blue-900/30',
-                                                'text' => 'text-blue-700 dark:text-blue-300',
+                                                'bg' => 'bg-indigo-50 dark:bg-indigo-900/30',
+                                                'text' => 'text-indigo-700 dark:text-indigo-300',
                                                 'label' => 'En Proceso',
                                             ],
                                             \App\Models\Lot::STATUS_COMPLETED => [
@@ -253,7 +263,7 @@
                                         <td class="px-4 py-2 pl-8 text-xs text-gray-600 dark:text-gray-400">Lote</td>
                                         <td class="px-4 py-2 text-xs">
                                             <button wire:click="openLotModal({{ $wo->id }})"
-                                                class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+                                                class="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer">
                                                 {{ $lot->lot_number }}
                                             </button>
                                         </td>
@@ -272,9 +282,9 @@
                                                     $lotKit = $lot->kits->sortByDesc('created_at')->first();
                                                     $lotKitStatus = $lotKit?->status ?? 'none';
                                                     $lotKitColor = match ($lotKitStatus) {
-                                                        'rejected' => 'bg-red-500',
+                                                        'in_process' => 'bg-indigo-500',
                                                         'preparing' => 'bg-yellow-400',
-                                                        'ready' => 'bg-blue-500',
+                                                        'ready' => 'bg-indigo-500',
                                                         'released' => 'bg-green-500',
                                                         'in_assembly' => 'bg-orange-500',
                                                         default => 'bg-gray-400',
@@ -285,7 +295,7 @@
                                                         class="w-5 h-5 rounded {{ $lotKitColor }} hover:opacity-80 cursor-pointer transition-opacity"
                                                         title="Kit: {{ $lotKit?->kit_number ?? 'Sin kit' }} - {{ $lotKit?->status_label ?? 'N/A' }}"></button>
                                                     <button wire:click="openKitManageModal({{ $lot->id }})"
-                                                        class="w-5 h-5 rounded bg-blue-500 hover:bg-blue-600 cursor-pointer transition-colors flex items-center justify-center"
+                                                        class="w-5 h-5 rounded bg-indigo-500 hover:bg-indigo-600 cursor-pointer transition-colors flex items-center justify-center"
                                                         title="Gestionar Kits">
                                                         <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -439,6 +449,12 @@
                                             class="px-4 py-2 text-right text-xs font-medium text-gray-900 dark:text-white">
                                             {{ number_format($lot->quantity) }}
                                         </td>
+                                        @php
+                                            $lotSobrantes = $lot->getQualityPendingPieces();
+                                        @endphp
+                                        <td class="px-4 py-2 text-right text-xs font-medium {{ $lotSobrantes > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500' }}">
+                                            {{ number_format($lotSobrantes) }}
+                                        </td>
                                         {{-- Fechas --}}
                                         <td class="px-4 py-2 text-center text-xs text-gray-600 dark:text-gray-400">
                                             {{ $wo->scheduled_send_date?->format('m/d/Y') ?? '-' }}</td>
@@ -458,7 +474,7 @@
                                 @endphp
                                 @if($exceedsWO)
                                     <tr class="bg-red-50 dark:bg-red-900/30">
-                                        <td colspan="18" class="px-4 py-2">
+                                        <td colspan="19" class="px-4 py-2">
                                             <div class="flex items-center text-red-600 dark:text-red-400 text-xs font-semibold">
                                                 <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
@@ -476,7 +492,7 @@
                                             Total:</td>
                                         <td class="px-4 py-2 text-right {{ $exceedsWO ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white' }}">
                                             {{ number_format($totalLotQuantity) }}</td>
-                                        <td colspan="6"></td>
+                                        <td colspan="7"></td>
                                     </tr>
                                 @endif
                             @endforeach
@@ -497,6 +513,10 @@
                             $cantAEnviar = $cantWO - $pzEnviadas; // Cant. a Enviar = Cant. WO - Pz Enviadas
                             $toSend = $cantAEnviar;
 
+                            $woSobrantesMobile = $allLots->sum(function ($l) {
+                                return $l->getQualityPendingPieces();
+                            });
+
                             $departmentStatuses = [
                                 'materials' => 'pending',
                                 'inspection' => 'pending',
@@ -511,7 +531,7 @@
                                         <span
                                             class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">WO</span>
                                         <span
-                                            class="text-base font-semibold text-blue-600 dark:text-blue-400">{{ $po->wo }}</span>
+                                            class="text-base font-semibold text-indigo-600 dark:text-indigo-400">{{ $po->wo }}</span>
                                     </div>
                                     <div class="text-sm font-medium text-gray-900 dark:text-white mb-1">
                                         {{ $part->item_number }}</div>
@@ -541,6 +561,11 @@
                                         Enviar</div>
                                     <div class="text-sm font-semibold text-yellow-900 dark:text-yellow-200">
                                         {{ number_format($toSend) }}</div>
+                                </div>
+                                <div class="{{ $woSobrantesMobile > 0 ? 'bg-orange-50 dark:bg-orange-900/20' : '' }} p-2">
+                                    <div class="text-xs {{ $woSobrantesMobile > 0 ? 'text-orange-700 dark:text-orange-300 font-medium' : 'text-gray-500 dark:text-gray-400' }} mb-1">Pz Sobrantes</div>
+                                    <div class="text-sm font-semibold {{ $woSobrantesMobile > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500' }}">
+                                        {{ number_format($woSobrantesMobile) }}</div>
                                 </div>
                             </div>
 
@@ -586,7 +611,7 @@
                                             $materialsColor = match ($departmentStatuses['materials']) {
                                                 'rejected' => 'bg-red-500',
                                                 'pending' => 'bg-yellow-400',
-                                                'in_progress' => 'bg-blue-500',
+                                                'in_progress' => 'bg-indigo-500',
                                                 'approved' => 'bg-green-500',
                                                 default => 'bg-gray-400',
                                             };
@@ -602,7 +627,7 @@
                                             $inspectionColor = match ($departmentStatuses['inspection']) {
                                                 'rejected' => 'bg-red-500',
                                                 'pending' => 'bg-yellow-400',
-                                                'in_progress' => 'bg-blue-500',
+                                                'in_progress' => 'bg-indigo-500',
                                                 'approved' => 'bg-green-500',
                                                 default => 'bg-gray-400',
                                             };
@@ -617,7 +642,7 @@
                                             $productionColor = match ($departmentStatuses['production']) {
                                                 'rejected' => 'bg-red-500',
                                                 'pending' => 'bg-yellow-400',
-                                                'in_progress' => 'bg-blue-500',
+                                                'in_progress' => 'bg-indigo-500',
                                                 'approved' => 'bg-green-500',
                                                 default => 'bg-gray-400',
                                             };
@@ -641,8 +666,8 @@
                                         'label' => 'Pendiente',
                                     ],
                                     \App\Models\Lot::STATUS_IN_PROGRESS => [
-                                        'bg' => 'bg-blue-50 dark:bg-blue-900/30',
-                                        'text' => 'text-blue-700 dark:text-blue-300',
+                                        'bg' => 'bg-indigo-50 dark:bg-indigo-900/30',
+                                        'text' => 'text-indigo-700 dark:text-indigo-300',
                                         'label' => 'En Proceso',
                                     ],
                                     \App\Models\Lot::STATUS_COMPLETED => [
@@ -681,7 +706,7 @@
                                 class="p-4 pl-8 bg-gray-50 dark:bg-gray-700/20 space-y-2 border-l-2 border-gray-300 dark:border-gray-600">
                                 <div class="flex items-center justify-between">
                                     <button wire:click="openLotModal({{ $wo->id }})"
-                                        class="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                                        class="flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
                                         <span
                                             class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Lote</span>
                                         <span>{{ $lot->lot_number }}</span>
@@ -829,7 +854,7 @@
                                                     No. Lote/Viajero
                                                 </label>
                                                 <input type="text" wire:model="lots.{{ $index }}.number"
-                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                                                     placeholder="Ej: 001">
                                                 @error("lots.{$index}.number")
                                                     <span
@@ -842,7 +867,7 @@
                                                     Cantidad
                                                 </label>
                                                 <input type="number" wire:model="lots.{{ $index }}.quantity"
-                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                                                     placeholder="Ej: 100" min="1">
                                                 @error("lots.{$index}.quantity")
                                                     <span
@@ -894,7 +919,7 @@
                             Cancelar
                         </button>
                         <button wire:click="saveLots"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors">
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition-colors">
                             Guardar Cambios
                         </button>
                     </div>
@@ -947,7 +972,7 @@
                                         Pendiente
                                     </button>
                                     <button wire:click="updateDepartmentStatus('{{ $deptKey }}', 'in_progress')"
-                                        class="px-3 py-2 text-xs font-medium border transition-colors {{ $departmentStatuses[$deptKey] === 'in_progress' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-400' }}">
+                                        class="px-3 py-2 text-xs font-medium border transition-colors {{ $departmentStatuses[$deptKey] === 'in_progress' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-400' }}">
                                         En Progreso
                                     </button>
                                     <button wire:click="updateDepartmentStatus('{{ $deptKey }}', 'approved')"
@@ -966,7 +991,7 @@
                             Cancelar
                         </button>
                         <button wire:click="saveDepartmentStatuses"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors">
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition-colors">
                             Guardar Cambios
                         </button>
                     </div>
@@ -999,7 +1024,7 @@
                                 </p>
                             </div>
                             <button wire:click="closeInspectionModal"
-                                class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 cursor-pointer">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
@@ -1131,7 +1156,7 @@
                                     <span x-show="status === 'rejected'" class="text-red-500">*</span>
                                 </label>
                                 <textarea wire:model="inspectionComments" rows="3"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                     :placeholder="status === 'rejected' ? 'Describa el motivo del rechazo...' : 'Observaciones adicionales (opcional)...'"
                                 ></textarea>
                                 <p x-show="status === 'rejected'" class="mt-1 text-xs text-red-600 dark:text-red-400">
@@ -1149,11 +1174,11 @@
                     <div
                         class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
                         <button wire:click="closeInspectionModal"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                             Cancelar
                         </button>
                         <button wire:click="saveInspectionStatus"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors cursor-pointer">
                             Guardar Cambios
                         </button>
                     </div>
@@ -1174,17 +1199,17 @@
                 <div
                     class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700">
                     {{-- Header --}}
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-blue-600">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-indigo-600">
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 id="kit-modal-title" class="text-lg font-semibold text-white">Status de Kit - Lote
                                 </h3>
-                                <p class="text-sm text-blue-100 mt-1">
+                                <p class="text-sm text-indigo-100 mt-1">
                                     WO: {{ $selectedLotForKit->workOrder->purchaseOrder->wo ?? 'N/A' }} |
                                     Lote: {{ $selectedLotForKit->lot_number }}
                                 </p>
                             </div>
-                            <button wire:click="closeKitModal" class="text-white hover:text-blue-200">
+                            <button wire:click="closeKitModal" class="text-white hover:text-indigo-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
@@ -1215,7 +1240,7 @@
                                 @if ($selectedKit)
                                     <div class="col-span-2">
                                         <span class="text-gray-500 dark:text-gray-400">Kit:</span>
-                                        <span class="ml-2 text-blue-600 dark:text-blue-400 font-medium">
+                                        <span class="ml-2 text-indigo-600 dark:text-indigo-400 font-medium">
                                             {{ $selectedKit->kit_number }}
                                         </span>
                                     </div>
@@ -1233,7 +1258,7 @@
                         @if (!$selectedKit)
                             <div class="text-center">
                                 <button wire:click="switchToKitManageModal({{ $selectedLotForKit->id }})"
-                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
+                                    class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                     </svg>
@@ -1272,26 +1297,26 @@
                                         </span>
                                     </button>
 
-                                    {{-- Rechazado --}}
+                                    {{-- En Proceso --}}
                                     <button type="button"
-                                        x-on:click="kitSt = 'rejected'"
-                                        :class="kitSt === 'rejected'
-                                            ? 'border-red-500 bg-red-50 dark:bg-red-900/30 ring-2 ring-red-300 dark:ring-red-700 shadow-sm'
-                                            : 'border-gray-200 dark:border-gray-600 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50/50 dark:hover:bg-red-900/10'"
+                                        x-on:click="kitSt = 'in_process'"
+                                        :class="kitSt === 'in_process'
+                                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-2 ring-indigo-300 dark:ring-indigo-700 shadow-sm'
+                                            : 'border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10'"
                                         class="flex flex-col items-center p-4 border-2 rounded-lg transition-all duration-200 cursor-pointer">
                                         <div
-                                            :class="kitSt === 'rejected' ? 'ring-2 ring-red-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
-                                            class="w-8 h-8 rounded-full bg-red-500 mb-2 flex items-center justify-center">
+                                            :class="kitSt === 'in_process' ? 'ring-2 ring-indigo-300 ring-offset-2 dark:ring-offset-gray-800' : ''"
+                                            class="w-8 h-8 rounded-full bg-indigo-500 mb-2 flex items-center justify-center">
                                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12" />
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
                                         <span
-                                            :class="kitSt === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300'"
+                                            :class="kitSt === 'in_process' ? 'text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300'"
                                             class="text-sm font-medium">
-                                            Rechazado
+                                            En Proceso
                                         </span>
                                     </button>
                                 </div>
@@ -1301,11 +1326,11 @@
                                     :class="{
                                         'bg-gray-50 dark:bg-gray-700/20 text-gray-500 dark:text-gray-400': kitSt === 'preparing',
                                         'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300': kitSt === 'released',
-                                        'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300': kitSt === 'rejected'
+                                        'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300': kitSt === 'in_process'
                                     }">
                                     <span x-show="kitSt === 'preparing'">Kit pendiente de revision</span>
                                     <span x-show="kitSt === 'released'">Kit aprobado - Listo para produccion</span>
-                                    <span x-show="kitSt === 'rejected'">Kit rechazado - Requiere correccion</span>
+                                    <span x-show="kitSt === 'in_process'">Kit en proceso - En preparacion</span>
                                 </div>
                             </div>
                         @endif
@@ -1320,7 +1345,7 @@
                         </button>
                         @if ($selectedKit)
                             <button wire:click="saveKitStatus"
-                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
                                 Guardar Cambios
                             </button>
                         @endif
@@ -1340,17 +1365,17 @@
                 <div
                     class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-200 dark:border-gray-700 rounded-lg">
                     {{-- Header --}}
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-blue-600">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-indigo-600">
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 id="kit-manage-modal-title" class="text-lg font-semibold text-white">Gestión de Kits</h3>
-                                <p class="text-sm text-blue-100 mt-1">
+                                <p class="text-sm text-indigo-100 mt-1">
                                     WO: {{ $selectedLotForKitManage->workOrder->purchaseOrder->wo ?? 'N/A' }} |
                                     Lote: {{ $selectedLotForKitManage->lot_number }} |
                                     Parte: {{ $selectedLotForKitManage->workOrder->purchaseOrder->part->number ?? 'N/A' }}
                                 </p>
                             </div>
-                            <button wire:click="closeKitManageModal" class="text-white hover:text-blue-200">
+                            <button wire:click="closeKitManageModal" class="text-white hover:text-indigo-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
@@ -1375,7 +1400,7 @@
                                 </div>
                                 <div>
                                     <span class="text-gray-500 dark:text-gray-400 block">Asignado</span>
-                                    <span class="font-bold text-blue-600 dark:text-blue-400">{{ number_format($mkUsedQty) }}</span>
+                                    <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ number_format($mkUsedQty) }}</span>
                                 </div>
                                 <div>
                                     <span class="text-gray-500 dark:text-gray-400 block">Disponible</span>
@@ -1391,13 +1416,13 @@
                                     @php
                                         $mkStatusColor = match ($kit['status'] ?? 'preparing') {
                                             'released' => 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20',
-                                            'rejected' => 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20',
-                                            'ready' => 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20',
+                                            'in_process' => 'border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20',
+                                            'ready' => 'border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20',
                                             default => 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30',
                                         };
                                         $mkStatusLabel = match ($kit['status'] ?? 'preparing') {
                                             'released' => 'Aprobado',
-                                            'rejected' => 'Rechazado',
+                                            'in_process' => 'En Proceso',
                                             'ready' => 'Listo',
                                             'in_assembly' => 'En ensamble',
                                             default => 'En preparación',
@@ -1415,7 +1440,7 @@
                                                 <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full
                                                     {{ match ($kit['status'] ?? 'preparing') {
                                                         'released' => 'bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-300',
-                                                        'rejected' => 'bg-red-100 text-red-800 dark:bg-red-800/30 dark:text-red-300',
+                                                        'in_process' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-800/30 dark:text-indigo-300',
                                                         default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
                                                     } }}">
                                                     {{ $mkStatusLabel }}
@@ -1431,12 +1456,12 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                                 </svg>
                                             </button>
-                                            <button wire:click="updateKitStatus({{ $kit['id'] }}, 'rejected')"
+                                            <button wire:click="updateKitStatus({{ $kit['id'] }}, 'in_process')"
                                                 class="w-7 h-7 rounded-full flex items-center justify-center transition-all
-                                                    {{ ($kit['status'] ?? '') === 'rejected' ? 'bg-red-500 ring-2 ring-red-300 dark:ring-red-700' : 'bg-red-400/50 hover:bg-red-500' }}"
-                                                title="Rechazar">
+                                                    {{ ($kit['status'] ?? '') === 'in_process' ? 'bg-indigo-500 ring-2 ring-indigo-300 dark:ring-indigo-700' : 'bg-indigo-400/50 hover:bg-indigo-500' }}"
+                                                title="En Proceso">
                                                 <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                                 </svg>
                                             </button>
                                             <button wire:click="removeKit({{ $kit['id'] }})"
@@ -1464,13 +1489,13 @@
 
                         {{-- Formulario crear nuevo kit --}}
                         @if ($showCreateKitForm)
-                            <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg space-y-4">
-                                <h4 class="text-sm font-semibold text-blue-700 dark:text-blue-300">Crear Nuevo Kit</h4>
+                            <div class="mt-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 p-4 rounded-lg space-y-4">
+                                <h4 class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Crear Nuevo Kit</h4>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">No. Kit *</label>
                                         <input wire:model="newKitNumber" type="text"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                             placeholder="KIT-XXXXXXX-001">
                                         @error('newKitNumber')
                                             <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
@@ -1479,7 +1504,7 @@
                                     <div>
                                         <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad *</label>
                                         <input wire:model="newKitQuantity" type="number" min="1"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                             placeholder="Ej: 100">
                                         @error('newKitQuantity')
                                             <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
@@ -1492,7 +1517,7 @@
                                         Cancelar
                                     </button>
                                     <button wire:click="saveNewKitManage"
-                                        class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                        class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
                                         Crear Kit
                                     </button>
                                 </div>
@@ -1548,7 +1573,7 @@
                                     Lote: {{ $selectedLotForMaterial->lot_number }}
                                 </p>
                             </div>
-                            <button wire:click="closeMaterialModal" class="text-white hover:text-amber-200">
+                            <button wire:click="closeMaterialModal" class="text-white hover:text-amber-200 cursor-pointer">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
@@ -1577,7 +1602,7 @@
                                 </div>
                                 <div class="col-span-2">
                                     <span class="text-gray-500 dark:text-gray-400">Lote:</span>
-                                    <span class="ml-2 text-blue-600 dark:text-blue-400 font-medium">
+                                    <span class="ml-2 text-indigo-600 dark:text-indigo-400 font-medium">
                                         {{ $selectedLotForMaterial->lot_number }}
                                     </span>
                                 </div>
@@ -1655,11 +1680,11 @@
                     <div
                         class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
                         <button wire:click="closeMaterialModal"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                             Cancelar
                         </button>
                         <button wire:click="saveMaterialStatus"
-                            class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors">
+                            class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors cursor-pointer">
                             Guardar Cambios
                         </button>
                     </div>
@@ -1813,7 +1838,7 @@
                                     Lote: {{ $selectedLotForQuality->lot_number }}
                                 </p>
                             </div>
-                            <button wire:click="closeQualityModal" class="text-white hover:text-teal-200">
+                            <button wire:click="closeQualityModal" class="text-white hover:text-teal-200 cursor-pointer">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
@@ -1835,7 +1860,7 @@
                                 </div>
                                 <div>
                                     <span class="text-gray-500 dark:text-gray-400">Lote:</span>
-                                    <span class="ml-2 text-blue-600 dark:text-blue-400 font-medium">
+                                    <span class="ml-2 text-indigo-600 dark:text-indigo-400 font-medium">
                                         {{ $selectedLotForQuality->lot_number }}
                                     </span>
                                 </div>
@@ -1847,12 +1872,12 @@
                             <h4 class="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-3">Resumen de Produccion</h4>
                             <div class="grid grid-cols-3 gap-3 text-sm">
                                 <div class="text-center">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Pz Buenas Prod.</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Pz Pesadas Prod.</div>
                                     <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ number_format($qualProductionGoodPieces) }}</div>
                                 </div>
                                 <div class="text-center">
                                     <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Ya Verificadas</div>
-                                    <div class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ number_format($qualAlreadyWeighed) }}</div>
+                                    <div class="text-lg font-bold text-indigo-600 dark:text-indigo-400">{{ number_format($qualAlreadyWeighed) }}</div>
                                 </div>
                                 <div class="text-center">
                                     <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Pendientes</div>
@@ -2007,12 +2032,12 @@
                     {{-- Footer --}}
                     <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
                         <button wire:click="closeQualityModal"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                             Cerrar
                         </button>
                         @if ($qualRemainingPieces > 0 || $qualEditingId)
                             <button wire:click="saveQuality"
-                                class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors">
+                                class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors cursor-pointer">
                                 {{ $qualEditingId ? 'Actualizar Pesada' : 'Registrar Pesada' }}
                             </button>
                         @endif
@@ -2043,7 +2068,7 @@
                                     Lote: {{ $selectedLotForProduction->lot_number }}
                                 </p>
                             </div>
-                            <button wire:click="closeProductionModal" class="text-white hover:text-indigo-200">
+                            <button wire:click="closeProductionModal" class="text-white hover:text-indigo-200 cursor-pointer">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
@@ -2065,7 +2090,7 @@
                                 </div>
                                 <div>
                                     <span class="text-gray-500 dark:text-gray-400">Lote:</span>
-                                    <span class="ml-2 text-blue-600 dark:text-blue-400 font-medium">
+                                    <span class="ml-2 text-indigo-600 dark:text-indigo-400 font-medium">
                                         {{ $selectedLotForProduction->lot_number }}
                                     </span>
                                 </div>
@@ -2131,11 +2156,11 @@
                     {{-- Footer --}}
                     <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
                         <button wire:click="closeProductionModal"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                             Cancelar
                         </button>
                         <button wire:click="saveProduction"
-                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors cursor-pointer">
                             Registrar Pesada
                         </button>
                     </div>
@@ -2193,7 +2218,7 @@
                                 </div>
                                 <div class="text-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
                                     <span class="text-xs text-gray-500 dark:text-gray-400 block">Pesadas</span>
-                                    <span class="font-bold text-blue-600 dark:text-blue-400">{{ number_format($prodKitAlreadyWeighed) }}</span>
+                                    <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ number_format($prodKitAlreadyWeighed) }}</span>
                                 </div>
                                 <div class="text-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
                                     <span class="text-xs text-gray-500 dark:text-gray-400 block">Pendiente</span>
@@ -2296,7 +2321,7 @@
                                 </div>
                                 <div class="text-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
                                     <span class="text-xs text-gray-500 dark:text-gray-400 block">Verificadas</span>
-                                    <span class="font-bold text-blue-600 dark:text-blue-400">{{ number_format($qualKitAlreadyWeighed) }}</span>
+                                    <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ number_format($qualKitAlreadyWeighed) }}</span>
                                 </div>
                                 <div class="text-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
                                     <span class="text-xs text-gray-500 dark:text-gray-400 block">Pendiente</span>
