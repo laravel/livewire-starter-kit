@@ -1,12 +1,10 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Validation\Rule;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
-new class extends Component {
+new #[Title('Profile settings')] class extends Component {
     public string $name = '';
     public string $email = '';
 
