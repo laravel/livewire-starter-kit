@@ -41,7 +41,7 @@ class ProfileUpdateTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = Livewire::test('pages::settings.delete-user-form')
+        $response = Livewire::test('pages::settings.delete-user-modal')
             ->call('deleteUser');
 
         $response->assertRedirect('/');
