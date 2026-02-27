@@ -160,8 +160,10 @@
                                     $cantAEnviar = $cantWO - $pzEnviadas; // Cant. a Enviar = Cant. WO - Pz Enviadas
                                     $toSend = $cantAEnviar;
 
-                                    // Piezas sobrantes: pesadas producción - verificadas calidad (por WO, sumando lotes)
+                                    // Piezas sobrantes: si hay registros de empaque usa surplus de empaque, sino pendientes de calidad
                                     $woSobrantes = $allLots->sum(function ($l) {
+                                        if ($l->isSurplusReceived()) return 0;
+                                        if ($l->hasPackagingRecords()) return $l->getPackagingTotalSurplus();
                                         return $l->getQualityPendingPieces();
                                     });
 
@@ -429,17 +431,25 @@
                                         {{-- Semaforo Empaque --}}
                                         <td class="px-4 py-2 text-center">
                                             @php
-                                                $packagingStatus = $lot->packaging_status ?? 'pending';
-                                                $packagingColor = match ($packagingStatus) {
-                                                    'rejected' => 'bg-red-500',
-                                                    'pending' => 'bg-yellow-400',
-                                                    'approved' => 'bg-green-500',
-                                                    default => 'bg-gray-400',
+                                                $pkgSem = $lot->getPackagingSemaphoreStatus();
+                                                $pkgSemColor = match ($pkgSem) {
+                                                    'green' => 'bg-green-500',
+                                                    'yellow' => 'bg-yellow-400',
+                                                    'blue' => 'bg-blue-500',
+                                                    'orange' => 'bg-orange-500',
+                                                    default => 'bg-gray-300 dark:bg-gray-600',
+                                                };
+                                                $pkgSemTitle = match ($pkgSem) {
+                                                    'green' => 'Empaque: Completado',
+                                                    'yellow' => 'Empaque: Pendiente',
+                                                    'blue' => 'Empaque: Viajero recibido, pendiente decisión',
+                                                    'orange' => 'Empaque: Cerrado con sobrantes',
+                                                    default => 'Empaque: Sin piezas de calidad',
                                                 };
                                             @endphp
                                             <button wire:click="openPackagingModal({{ $lot->id }})"
-                                                class="w-5 h-5 rounded {{ $packagingColor }} hover:opacity-80 cursor-pointer transition-opacity"
-                                                title="Empaque: {{ ucfirst($packagingStatus) }}"></button>
+                                                class="w-5 h-5 rounded {{ $pkgSemColor }} hover:opacity-80 cursor-pointer transition-opacity"
+                                                title="{{ $pkgSemTitle }}"></button>
                                         </td>
                                         {{-- Cantidades --}}
                                         <td class="px-4 py-2 text-right text-xs"></td>
@@ -450,7 +460,7 @@
                                             {{ number_format($lot->quantity) }}
                                         </td>
                                         @php
-                                            $lotSobrantes = $lot->getQualityPendingPieces();
+                                            $lotSobrantes = $lot->isSurplusReceived() ? 0 : ($lot->hasPackagingRecords() ? $lot->getPackagingTotalSurplus() : $lot->getQualityPendingPieces());
                                         @endphp
                                         <td class="px-4 py-2 text-right text-xs font-medium {{ $lotSobrantes > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-400 dark:text-gray-500' }}">
                                             {{ number_format($lotSobrantes) }}
@@ -514,6 +524,8 @@
                             $toSend = $cantAEnviar;
 
                             $woSobrantesMobile = $allLots->sum(function ($l) {
+                                if ($l->isSurplusReceived()) return 0;
+                                if ($l->hasPackagingRecords()) return $l->getPackagingTotalSurplus();
                                 return $l->getQualityPendingPieces();
                             });
 
@@ -1693,7 +1705,7 @@
         </div>
     @endif
 
-    {{-- Modal de Status de Empaque por Lote --}}
+    {{-- Modal de Empaque por Lote — 4 Fases --}}
     @if ($showPackagingModal && $selectedLotForPackaging)
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="packaging-modal-title" role="dialog"
             aria-modal="true">
@@ -1703,18 +1715,18 @@
 
                 {{-- Modal Container --}}
                 <div
-                    class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700">
+                    class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full border border-gray-200 dark:border-gray-700 rounded-lg">
                     {{-- Header --}}
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-orange-600">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 id="packaging-modal-title" class="text-lg font-semibold text-white">Status de Empaque - Lote</h3>
+                                <h3 id="packaging-modal-title" class="text-lg font-semibold text-white">Empaque - Lote {{ $selectedLotForPackaging->lot_number }}</h3>
                                 <p class="text-sm text-orange-100 mt-1">
                                     WO: {{ $selectedLotForPackaging->workOrder->purchaseOrder->wo ?? 'N/A' }} |
-                                    Lote: {{ $selectedLotForPackaging->lot_number }}
+                                    Parte: {{ $selectedLotForPackaging->workOrder->purchaseOrder->part->number ?? 'N/A' }}
                                 </p>
                             </div>
-                            <button wire:click="closePackagingModal" class="text-white hover:text-orange-200">
+                            <button wire:click="closePackagingModal" class="text-white hover:text-orange-200 cursor-pointer">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
@@ -1724,92 +1736,377 @@
                     </div>
 
                     {{-- Body --}}
-                    <div class="px-6 py-4 space-y-6">
-                        {{-- Informacion del Lote --}}
-                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
-                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Información del Lote</h4>
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <span class="text-gray-500 dark:text-gray-400">Parte:</span>
-                                    <span class="ml-2 text-gray-900 dark:text-white font-medium">
-                                        {{ $selectedLotForPackaging->workOrder->purchaseOrder->part->number ?? 'N/A' }}
-                                    </span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500 dark:text-gray-400">Cantidad:</span>
-                                    <span class="ml-2 text-gray-900 dark:text-white font-medium">
-                                        {{ number_format($selectedLotForPackaging->quantity) }} piezas
-                                    </span>
-                                </div>
+                    <div class="px-6 py-4 max-h-[75vh] overflow-y-auto space-y-6">
+
+                        {{-- Resumen de piezas --}}
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-center">
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Disponibles (Calidad)</div>
+                                <div class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($pkgAvailablePieces) }}</div>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center">
+                                <div class="text-xs text-green-600 dark:text-green-400 mb-1">Ya Empacadas</div>
+                                <div class="text-lg font-bold text-green-700 dark:text-green-300">{{ number_format($pkgAlreadyPacked) }}</div>
+                            </div>
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-center">
+                                <div class="text-xs text-yellow-600 dark:text-yellow-400 mb-1">Pendientes</div>
+                                <div class="text-lg font-bold text-yellow-700 dark:text-yellow-300">{{ number_format($pkgPendingPieces) }}</div>
+                            </div>
+                            <div class="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg text-center">
+                                <div class="text-xs text-orange-600 dark:text-orange-400 mb-1">Sobrantes Total</div>
+                                <div class="text-lg font-bold text-orange-700 dark:text-orange-300">{{ number_format($pkgTotalSurplus) }}</div>
                             </div>
                         </div>
 
-                        {{-- Status de Empaque --}}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                Status de Empaque
-                            </label>
-                            <div class="grid grid-cols-3 gap-3">
-                                {{-- Pendiente --}}
-                                <button wire:click="setPackagingStatus('pending')"
-                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $packagingStatus === 'pending' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
-                                    <div class="w-8 h-8 rounded-full bg-yellow-400 mb-2"></div>
-                                    <span class="text-sm font-medium {{ $packagingStatus === 'pending' ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-700 dark:text-gray-300' }}">
-                                        Pendiente
-                                    </span>
-                                </button>
+                        {{-- ================================================ --}}
+                        {{-- FASE 1: Registrar Empaque --}}
+                        {{-- ================================================ --}}
+                        @if ($pkgAvailablePieces > 0)
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 rounded-t-lg">
+                                    <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center font-bold">1</span>
+                                        Registrar Empaque
+                                    </h4>
+                                </div>
+                                <div class="p-4 space-y-4">
+                                    {{-- Tabla de registros previos --}}
+                                    @if (count($pkgRecordsList) > 0)
+                                        <div class="overflow-x-auto">
+                                            <table class="w-full text-xs">
+                                                <thead class="bg-gray-50 dark:bg-gray-700/50">
+                                                    <tr>
+                                                        <th class="px-2 py-2 text-left text-gray-600 dark:text-gray-400">Empacadas</th>
+                                                        <th class="px-2 py-2 text-left text-gray-600 dark:text-gray-400">Sobrantes</th>
+                                                        <th class="px-2 py-2 text-left text-gray-600 dark:text-gray-400">Ajuste</th>
+                                                        <th class="px-2 py-2 text-left text-gray-600 dark:text-gray-400">Fecha</th>
+                                                        <th class="px-2 py-2 text-left text-gray-600 dark:text-gray-400">Usuario</th>
+                                                        <th class="px-2 py-2 text-center text-gray-600 dark:text-gray-400">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                                    @foreach ($pkgRecordsList as $pr)
+                                                        <tr class="{{ $pkgAdjustRecordId === $pr['id'] ? 'bg-yellow-50 dark:bg-yellow-900/10' : '' }}">
+                                                            <td class="px-2 py-2 font-medium text-gray-900 dark:text-white">{{ number_format($pr['packed_pieces']) }}</td>
+                                                            <td class="px-2 py-2 {{ $pr['surplus_pieces'] > 0 ? 'text-orange-600 dark:text-orange-400 font-medium' : 'text-gray-500' }}">{{ number_format($pr['surplus_pieces']) }}</td>
+                                                            <td class="px-2 py-2">
+                                                                @if ($pr['adjusted_surplus'] !== null)
+                                                                    <span class="text-blue-600 dark:text-blue-400 font-medium">{{ number_format($pr['adjusted_surplus']) }}</span>
+                                                                    @if ($pr['adjustment_reason'])
+                                                                        <span class="text-gray-400 ml-1" title="{{ $pr['adjustment_reason'] }}">ℹ</span>
+                                                                    @endif
+                                                                @else
+                                                                    <span class="text-gray-400">-</span>
+                                                                @endif
+                                                            </td>
+                                                            <td class="px-2 py-2 text-gray-600 dark:text-gray-400">{{ $pr['packed_at'] }}</td>
+                                                            <td class="px-2 py-2 text-gray-600 dark:text-gray-400">{{ $pr['packed_by'] }}</td>
+                                                            <td class="px-2 py-2 text-center">
+                                                                <div class="flex items-center justify-center gap-1">
+                                                                    @if (!$pkgViajeroReceived)
+                                                                        <button wire:click="editPackagingRecord({{ $pr['id'] }})"
+                                                                            class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer" title="Editar">
+                                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                                        </button>
+                                                                        <button wire:click="deletePackagingRecord({{ $pr['id'] }})"
+                                                                            wire:confirm="¿Eliminar este registro de empaque?"
+                                                                            class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 cursor-pointer" title="Eliminar">
+                                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                                        </button>
+                                                                    @endif
+                                                                    @if ($pr['surplus_pieces'] > 0 && !$pkgViajeroReceived)
+                                                                        <button wire:click="startAdjustSurplus({{ $pr['id'] }})"
+                                                                            class="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer" title="Ajustar sobrantes">
+                                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                                                                        </button>
+                                                                    @endif
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endif
 
-                                {{-- Aprobado --}}
-                                <button wire:click="setPackagingStatus('approved')"
-                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $packagingStatus === 'approved' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
-                                    <div class="w-8 h-8 rounded-full bg-green-500 mb-2"></div>
-                                    <span class="text-sm font-medium {{ $packagingStatus === 'approved' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300' }}">
-                                        Aprobado
-                                    </span>
-                                </button>
+                                    {{-- Formulario de ajuste de sobrantes (Fase 2, inline) --}}
+                                    @if ($pkgAdjustRecordId)
+                                        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4 space-y-3">
+                                            <h5 class="text-sm font-semibold text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+                                                <span class="w-5 h-5 rounded-full bg-yellow-500 text-white text-xs flex items-center justify-center font-bold">2</span>
+                                                Ajustar Sobrantes
+                                            </h5>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Sobrantes Ajustados</label>
+                                                    <input type="number" wire:model="pkgAdjustedSurplus" min="0"
+                                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded focus:ring-1 focus:ring-yellow-500">
+                                                    @error('pkgAdjustedSurplus')
+                                                        <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Motivo del Ajuste *</label>
+                                                    <input type="text" wire:model="pkgAdjustmentReason"
+                                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded focus:ring-1 focus:ring-yellow-500"
+                                                        placeholder="Ej: Reconteo manual">
+                                                    @error('pkgAdjustmentReason')
+                                                        <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-end gap-2">
+                                                <button wire:click="cancelAdjustSurplus"
+                                                    class="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
+                                                    Cancelar
+                                                </button>
+                                                <button wire:click="saveAdjustSurplus"
+                                                    class="px-3 py-1.5 text-xs bg-yellow-600 hover:bg-yellow-700 text-white rounded cursor-pointer">
+                                                    Guardar Ajuste
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @endif
 
-                                {{-- Rechazado --}}
-                                <button wire:click="setPackagingStatus('rejected')"
-                                    class="flex flex-col items-center p-4 border-2 rounded-lg transition-all {{ $packagingStatus === 'rejected' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500' }}">
-                                    <div class="w-8 h-8 rounded-full bg-red-500 mb-2"></div>
-                                    <span class="text-sm font-medium {{ $packagingStatus === 'rejected' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300' }}">
-                                        Rechazado
-                                    </span>
-                                </button>
+                                    {{-- Formulario de nuevo empaque --}}
+                                    @if ($pkgPendingPieces > 0 && !$pkgViajeroReceived)
+                                        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                                            <h5 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                                {{ $pkgEditingId ? 'Editar Registro' : 'Nuevo Registro de Empaque' }}
+                                            </h5>
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Empacadas *</label>
+                                                    <input type="number" wire:model.live="pkgPackedPieces" min="0" max="{{ $pkgPendingPieces }}"
+                                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded focus:ring-1 focus:ring-orange-500">
+                                                    @error('pkgPackedPieces')
+                                                        <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Sobrantes</label>
+                                                    <input type="number" value="{{ $pkgSurplusPieces }}" readonly
+                                                        class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded cursor-not-allowed">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha/Hora *</label>
+                                                    <input type="datetime-local" wire:model="pkgPackedAt"
+                                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded focus:ring-1 focus:ring-orange-500">
+                                                    @error('pkgPackedAt')
+                                                        <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Comentarios</label>
+                                                <textarea wire:model="pkgComments" rows="2"
+                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded focus:ring-1 focus:ring-orange-500"
+                                                    placeholder="Observaciones (opcional)..."></textarea>
+                                            </div>
+                                            <div class="mt-3 flex justify-end gap-2">
+                                                @if ($pkgEditingId)
+                                                    <button wire:click="cancelEditPackaging"
+                                                        class="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer">
+                                                        Cancelar Edición
+                                                    </button>
+                                                @endif
+                                                <button wire:click="savePackaging"
+                                                    class="px-4 py-1.5 text-xs bg-orange-600 hover:bg-orange-700 text-white font-medium rounded cursor-pointer">
+                                                    {{ $pkgEditingId ? 'Actualizar' : 'Registrar Empaque' }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @elseif ($pkgAvailablePieces > 0 && $pkgPendingPieces <= 0 && !$pkgViajeroReceived)
+                                        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded p-3 text-center">
+                                            <span class="text-sm text-green-700 dark:text-green-300 font-medium">Todas las piezas disponibles han sido empacadas.</span>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
+                        @else
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 text-center">
+                                <svg class="mx-auto h-10 w-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">No hay piezas disponibles para empacar. Calidad debe verificar piezas primero.</p>
+                            </div>
+                        @endif
 
-                        {{-- Comentarios --}}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Comentarios de Empaque
-                                @if ($packagingStatus === 'rejected')
-                                    <span class="text-red-500">*</span>
-                                @endif
-                            </label>
-                            <textarea wire:model="packagingComments" rows="3"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                                placeholder="{{ $packagingStatus === 'rejected' ? 'Describa el motivo del rechazo...' : 'Observaciones adicionales (opcional)...' }}"></textarea>
-                            @if ($packagingStatus === 'rejected')
-                                <p class="mt-1 text-xs text-red-600 dark:text-red-400">
-                                    * El motivo del rechazo es requerido
-                                </p>
+                        {{-- ================================================ --}}
+                        {{-- FASE 3: Recibí Viajero --}}
+                        {{-- ================================================ --}}
+                        @if ($pkgAlreadyPacked > 0 && !$pkgViajeroReceived)
+                            <div class="border border-blue-200 dark:border-blue-700 rounded-lg">
+                                <div class="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-700 rounded-t-lg">
+                                    <h4 class="text-sm font-semibold text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold">3</span>
+                                        Recibir Viajero
+                                    </h4>
+                                </div>
+                                <div class="p-4">
+                                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded p-4 mb-4">
+                                        <div class="grid grid-cols-2 gap-3 text-sm">
+                                            <div>
+                                                <span class="text-gray-500 dark:text-gray-400">Total Empacadas:</span>
+                                                <span class="ml-2 font-bold text-green-600 dark:text-green-400">{{ number_format($pkgAlreadyPacked) }}</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 dark:text-gray-400">Sobrantes Finales:</span>
+                                                <span class="ml-2 font-bold text-orange-600 dark:text-orange-400">{{ number_format($pkgTotalSurplus) }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button wire:click="receiveViajero"
+                                        wire:confirm="¿Confirma que recibió el viajero? Esta acción no se puede deshacer."
+                                        class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Recibí Viajero
+                                    </button>
+                                </div>
+                            </div>
+                        @elseif ($pkgViajeroReceived)
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-blue-800 dark:text-blue-200">Viajero recibido</span>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- ================================================ --}}
+                        {{-- FASE 4: Decisión Control de Materiales --}}
+                        {{-- ================================================ --}}
+                        @if ($pkgViajeroReceived && !$pkgClosureDecision)
+                            <div class="border border-purple-200 dark:border-purple-700 rounded-lg">
+                                <div class="px-4 py-3 bg-purple-50 dark:bg-purple-900/20 border-b border-purple-200 dark:border-purple-700 rounded-t-lg">
+                                    <h4 class="text-sm font-semibold text-purple-800 dark:text-purple-200 flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full bg-purple-500 text-white text-xs flex items-center justify-center font-bold">4</span>
+                                        Decisión - Control de Materiales
+                                    </h4>
+                                </div>
+                                <div class="p-4 space-y-3">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        Empaque: <strong>{{ number_format($pkgAlreadyPacked) }}</strong> piezas |
+                                        Sobrantes: <strong class="text-orange-600">{{ number_format($pkgTotalSurplus) }}</strong> piezas
+                                    </p>
+
+                                    @if ($pkgTotalSurplus > 0)
+                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                            {{-- Opción 1: Completar Lote --}}
+                                            <button wire:click="completeLot"
+                                                wire:confirm="¿Crear kit de {{ number_format($pkgTotalSurplus) }} piezas para completar el lote? El lote pasará por el flujo completo nuevamente."
+                                                class="p-4 border-2 border-indigo-200 dark:border-indigo-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors cursor-pointer text-center">
+                                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center">
+                                                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                    </svg>
+                                                </div>
+                                                <div class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Completar Lote</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kit de {{ number_format($pkgTotalSurplus) }} pz</div>
+                                            </button>
+
+                                            {{-- Opción 2: Nuevo Lote --}}
+                                            <button wire:click="createNewLot"
+                                                wire:confirm="¿Crear un nuevo lote con {{ number_format($pkgTotalSurplus) }} piezas y cerrar el lote actual?"
+                                                class="p-4 border-2 border-green-200 dark:border-green-700 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors cursor-pointer text-center">
+                                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center">
+                                                    <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                                    </svg>
+                                                </div>
+                                                <div class="text-sm font-semibold text-green-700 dark:text-green-300">Nuevo Lote</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format($pkgTotalSurplus) }} pz en lote nuevo</div>
+                                            </button>
+
+                                            {{-- Opción 3: Cerrar con sobrante --}}
+                                            <button wire:click="closeAsIs"
+                                                wire:confirm="¿Cerrar el lote con {{ number_format($pkgTotalSurplus) }} piezas sobrantes? Se devolverán las piezas a materiales."
+                                                class="p-4 border-2 border-orange-200 dark:border-orange-700 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer text-center">
+                                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-orange-100 dark:bg-orange-800 flex items-center justify-center">
+                                                    <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                </div>
+                                                <div class="text-sm font-semibold text-orange-700 dark:text-orange-300">Cerrar Lote</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Con {{ number_format($pkgTotalSurplus) }} pz sobrantes</div>
+                                            </button>
+                                        </div>
+                                    @else
+                                        {{-- Sin sobrantes: cerrar directamente --}}
+                                        <button wire:click="closeAsIs"
+                                            wire:confirm="¿Cerrar el lote? No hay piezas sobrantes."
+                                            class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            Cerrar Lote (Completo)
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        @elseif ($pkgClosureDecision)
+                            {{-- Mostrar decisión tomada --}}
+                            @php
+                                $closureLabel = match ($pkgClosureDecision) {
+                                    'complete_lot' => 'Completar Lote (Kit creado)',
+                                    'new_lot' => 'Nuevo Lote Creado',
+                                    'close_as_is' => 'Cerrado con Sobrantes',
+                                    default => $pkgClosureDecision,
+                                };
+                                $closureColor = match ($pkgClosureDecision) {
+                                    'complete_lot' => 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700 text-indigo-800 dark:text-indigo-200',
+                                    'new_lot' => 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 text-green-800 dark:text-green-200',
+                                    'close_as_is' => 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700 text-orange-800 dark:text-orange-200',
+                                    default => 'bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200',
+                                };
+                            @endphp
+                            <div class="border rounded-lg p-3 {{ $closureColor }}">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm font-medium">Decisión: {{ $closureLabel }}</span>
+                                </div>
+                            </div>
+
+                            {{-- Fase 4b: Confirmar recepción de sobrantes --}}
+                            @if ($pkgClosureDecision === 'close_as_is' && $pkgTotalSurplus > 0 && !$pkgSurplusReceived)
+                                <div class="border border-red-200 dark:border-red-700 rounded-lg p-4">
+                                    <h5 class="text-sm font-semibold text-red-800 dark:text-red-200 mb-3">Pendiente: Recepción de Material Sobrante</h5>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                        Control de Materiales debe confirmar la recepción de <strong class="text-orange-600">{{ number_format($pkgTotalSurplus) }}</strong> piezas sobrantes.
+                                    </p>
+                                    <button wire:click="confirmSurplusReceived"
+                                        wire:confirm="¿Confirma que Control de Materiales recibió {{ number_format($pkgTotalSurplus) }} piezas sobrantes? Los sobrantes se eliminarán de la lista de envío."
+                                        class="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        Material Recibido
+                                    </button>
+                                </div>
+                            @elseif ($pkgSurplusReceived)
+                                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span class="text-sm font-medium text-green-800 dark:text-green-200">Material sobrante recibido. Lote completado.</span>
+                                    </div>
+                                </div>
                             @endif
-                            @error('packagingComments')
-                                <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
-                            @enderror
-                        </div>
+                        @endif
                     </div>
 
                     {{-- Footer --}}
-                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
+                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-end">
                         <button wire:click="closePackagingModal"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            Cancelar
-                        </button>
-                        <button wire:click="savePackagingStatus"
-                            class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors">
-                            Guardar Cambios
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                            Cerrar
                         </button>
                     </div>
                 </div>

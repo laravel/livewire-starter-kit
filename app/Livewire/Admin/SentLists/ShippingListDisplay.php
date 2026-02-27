@@ -7,6 +7,7 @@ use App\Models\WorkOrder;
 use App\Models\Lot;
 use App\Models\Kit;
 use App\Models\QualityWeighing;
+use App\Models\PackagingRecord;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
@@ -62,11 +63,31 @@ class ShippingListDisplay extends Component
     public $selectedLotForMaterial = null;
     public $materialStatus = 'pending';
 
-    // Modal de Empaque por lote
+    // Modal de Empaque por lote (4 phases)
     public $showPackagingModal = false;
     public $selectedLotForPackaging = null;
-    public $packagingStatus = 'pending';
-    public $packagingComments = '';
+
+    // Fase 1: Registro de empaque
+    public $pkgAvailablePieces = 0;
+    public $pkgAlreadyPacked = 0;
+    public $pkgPendingPieces = 0;
+    public $pkgPackedPieces = 0;
+    public $pkgSurplusPieces = 0;
+    public $pkgPackedAt = '';
+    public $pkgComments = '';
+    public $pkgRecordsList = [];
+    public $pkgEditingId = null;
+
+    // Fase 2: Ajuste de sobrantes
+    public $pkgAdjustRecordId = null;
+    public $pkgAdjustedSurplus = null;
+    public $pkgAdjustmentReason = '';
+
+    // Fase 3 & 4: Viajero + Closure
+    public $pkgViajeroReceived = false;
+    public $pkgClosureDecision = null;
+    public $pkgSurplusReceived = false;
+    public $pkgTotalSurplus = 0;
 
     // Modal de Pesada (Producción) por lote
     public $showProductionModal = false;
@@ -800,12 +821,12 @@ class ShippingListDisplay extends Component
     }
 
     // ===============================================
-    // PACKAGING (EMPAQUE) MODAL
+    // PACKAGING (EMPAQUE) MODAL — 4 PHASES
     // ===============================================
 
     public function openPackagingModal($lotId)
     {
-        $lot = Lot::with(['workOrder.purchaseOrder.part'])->find($lotId);
+        $lot = Lot::with(['workOrder.purchaseOrder.part', 'packagingRecords.packedBy', 'qualityWeighings'])->find($lotId);
 
         if (!$lot) {
             session()->flash('error', 'Lote no encontrado.');
@@ -813,8 +834,42 @@ class ShippingListDisplay extends Component
         }
 
         $this->selectedLotForPackaging = $lot;
-        $this->packagingStatus = $lot->packaging_status ?? 'pending';
-        $this->packagingComments = $lot->packaging_comments ?? '';
+
+        // Fase 1 data
+        $this->pkgAvailablePieces = $lot->getPackagingAvailablePieces();
+        $this->pkgAlreadyPacked = $lot->getPackagingPackedPieces();
+        $this->pkgPendingPieces = $lot->getPackagingPendingPieces();
+        $this->pkgPackedPieces = 0;
+        $this->pkgSurplusPieces = 0;
+        $this->pkgPackedAt = now()->format('Y-m-d\TH:i');
+        $this->pkgComments = '';
+        $this->pkgEditingId = null;
+
+        // Tabla de registros previos
+        $this->pkgRecordsList = $lot->packagingRecords->map(function ($pr) {
+            return [
+                'id' => $pr->id,
+                'packed_pieces' => $pr->packed_pieces,
+                'surplus_pieces' => $pr->surplus_pieces,
+                'adjusted_surplus' => $pr->adjusted_surplus,
+                'adjustment_reason' => $pr->adjustment_reason,
+                'packed_at' => $pr->packed_at->format('d/m/Y H:i'),
+                'packed_by' => $pr->packedBy->name ?? 'N/A',
+                'comments' => $pr->comments,
+            ];
+        })->values()->toArray();
+
+        // Fase 2 data
+        $this->pkgAdjustRecordId = null;
+        $this->pkgAdjustedSurplus = null;
+        $this->pkgAdjustmentReason = '';
+
+        // Fase 3 & 4 data
+        $this->pkgViajeroReceived = (bool) $lot->viajero_received;
+        $this->pkgClosureDecision = $lot->closure_decision;
+        $this->pkgSurplusReceived = (bool) $lot->surplus_received;
+        $this->pkgTotalSurplus = $lot->getPackagingTotalSurplus();
+
         $this->showPackagingModal = true;
     }
 
@@ -822,32 +877,47 @@ class ShippingListDisplay extends Component
     {
         $this->showPackagingModal = false;
         $this->selectedLotForPackaging = null;
-        $this->packagingStatus = 'pending';
-        $this->packagingComments = '';
+        $this->pkgAvailablePieces = 0;
+        $this->pkgAlreadyPacked = 0;
+        $this->pkgPendingPieces = 0;
+        $this->pkgPackedPieces = 0;
+        $this->pkgSurplusPieces = 0;
+        $this->pkgPackedAt = '';
+        $this->pkgComments = '';
+        $this->pkgRecordsList = [];
+        $this->pkgEditingId = null;
+        $this->pkgAdjustRecordId = null;
+        $this->pkgAdjustedSurplus = null;
+        $this->pkgAdjustmentReason = '';
+        $this->pkgViajeroReceived = false;
+        $this->pkgClosureDecision = null;
+        $this->pkgSurplusReceived = false;
+        $this->pkgTotalSurplus = 0;
         $this->resetErrorBag();
     }
 
-    public function setPackagingStatus($status)
+    /**
+     * Auto-calculate surplus when packed pieces change.
+     */
+    public function updatedPkgPackedPieces($value)
     {
-        $this->packagingStatus = $status;
+        $packed = (int) $value;
+        $this->pkgSurplusPieces = max(0, $this->pkgPendingPieces - $packed);
     }
 
-    public function savePackagingStatus()
+    /**
+     * Save or update a packaging record (Fase 1).
+     */
+    public function savePackaging()
     {
-        $rules = [
-            'packagingStatus' => 'required|in:pending,approved,rejected',
-        ];
-
-        if ($this->packagingStatus === 'rejected') {
-            $rules['packagingComments'] = 'required|string|min:5|max:1000';
-        } else {
-            $rules['packagingComments'] = 'nullable|string|max:1000';
-        }
-
-        $this->validate($rules, [
-            'packagingStatus.required' => 'Debe seleccionar un status de empaque.',
-            'packagingComments.required' => 'Debe indicar el motivo del rechazo.',
-            'packagingComments.min' => 'El comentario debe tener al menos 5 caracteres.',
+        $this->validate([
+            'pkgPackedPieces' => 'required|integer|min:0',
+            'pkgPackedAt' => 'required|date',
+            'pkgComments' => 'nullable|string|max:1000',
+        ], [
+            'pkgPackedPieces.required' => 'Las piezas empacadas son requeridas.',
+            'pkgPackedPieces.min' => 'Las piezas empacadas no pueden ser negativas.',
+            'pkgPackedAt.required' => 'La fecha y hora son requeridas.',
         ]);
 
         if (!$this->selectedLotForPackaging) {
@@ -855,18 +925,324 @@ class ShippingListDisplay extends Component
             return;
         }
 
-        $this->selectedLotForPackaging->update([
-            'packaging_status' => $this->packagingStatus,
-            'packaging_comments' => $this->packagingComments,
-            'packaging_inspected_at' => now(),
-            'packaging_inspected_by' => auth()->id(),
+        if ($this->pkgPackedPieces > $this->pkgPendingPieces && !$this->pkgEditingId) {
+            $this->addError('pkgPackedPieces', 'Las piezas empacadas (' . number_format($this->pkgPackedPieces) . ') sobrepasan las pendientes (' . number_format($this->pkgPendingPieces) . ').');
+            return;
+        }
+
+        $surplus = max(0, $this->pkgPendingPieces - $this->pkgPackedPieces);
+
+        $data = [
+            'lot_id' => $this->selectedLotForPackaging->id,
+            'kit_id' => null,
+            'available_pieces' => $this->pkgAvailablePieces,
+            'packed_pieces' => $this->pkgPackedPieces,
+            'surplus_pieces' => $surplus,
+            'packed_at' => $this->pkgPackedAt,
+            'packed_by' => auth()->id(),
+            'comments' => $this->pkgComments ?: null,
+        ];
+
+        if ($this->pkgEditingId) {
+            $record = PackagingRecord::find($this->pkgEditingId);
+            if ($record) {
+                $record->update($data);
+                $message = 'Registro de empaque actualizado correctamente.';
+            } else {
+                session()->flash('error', 'Registro no encontrado.');
+                return;
+            }
+        } else {
+            PackagingRecord::create($data);
+            $message = 'Empaque registrado correctamente.';
+        }
+
+        if ($surplus > 0) {
+            $message .= ' ' . number_format($surplus) . ' piezas sobrantes.';
+        }
+
+        session()->flash('message', $message);
+
+        // Refresh modal data
+        $this->openPackagingModal($this->selectedLotForPackaging->id);
+        $this->dispatch('refresh-display');
+    }
+
+    /**
+     * Load a packaging record for editing (Fase 1).
+     */
+    public function editPackagingRecord($recordId)
+    {
+        $record = PackagingRecord::find($recordId);
+        if (!$record) {
+            session()->flash('error', 'Registro no encontrado.');
+            return;
+        }
+
+        $this->pkgEditingId = $record->id;
+        $this->pkgPackedPieces = $record->packed_pieces;
+        $this->pkgPackedAt = $record->packed_at->format('Y-m-d\TH:i');
+        $this->pkgComments = $record->comments ?? '';
+        $this->pkgSurplusPieces = $record->surplus_pieces;
+    }
+
+    /**
+     * Cancel editing a packaging record.
+     */
+    public function cancelEditPackaging()
+    {
+        $this->pkgEditingId = null;
+        $this->pkgPackedPieces = 0;
+        $this->pkgPackedAt = now()->format('Y-m-d\TH:i');
+        $this->pkgComments = '';
+        $this->pkgSurplusPieces = 0;
+        $this->resetErrorBag();
+    }
+
+    /**
+     * Delete a packaging record.
+     */
+    public function deletePackagingRecord($recordId)
+    {
+        $record = PackagingRecord::find($recordId);
+        if ($record) {
+            $record->delete();
+            if ($this->selectedLotForPackaging) {
+                $this->openPackagingModal($this->selectedLotForPackaging->id);
+            }
+            session()->flash('message', 'Registro de empaque eliminado.');
+            $this->dispatch('refresh-display');
+        }
+    }
+
+    /**
+     * Start adjusting surplus for a specific record (Fase 2).
+     */
+    public function startAdjustSurplus($recordId)
+    {
+        $record = PackagingRecord::find($recordId);
+        if (!$record) {
+            return;
+        }
+        $this->pkgAdjustRecordId = $record->id;
+        $this->pkgAdjustedSurplus = $record->adjusted_surplus ?? $record->surplus_pieces;
+        $this->pkgAdjustmentReason = $record->adjustment_reason ?? '';
+    }
+
+    /**
+     * Cancel surplus adjustment.
+     */
+    public function cancelAdjustSurplus()
+    {
+        $this->pkgAdjustRecordId = null;
+        $this->pkgAdjustedSurplus = null;
+        $this->pkgAdjustmentReason = '';
+        $this->resetErrorBag();
+    }
+
+    /**
+     * Save surplus adjustment (Fase 2).
+     */
+    public function saveAdjustSurplus()
+    {
+        $this->validate([
+            'pkgAdjustedSurplus' => 'required|integer|min:0',
+            'pkgAdjustmentReason' => 'required|string|min:3|max:500',
+        ], [
+            'pkgAdjustedSurplus.required' => 'El sobrante ajustado es requerido.',
+            'pkgAdjustedSurplus.min' => 'El sobrante no puede ser negativo.',
+            'pkgAdjustmentReason.required' => 'Debe indicar el motivo del ajuste.',
+            'pkgAdjustmentReason.min' => 'El motivo debe tener al menos 3 caracteres.',
         ]);
 
-        $statusLabels = ['pending' => 'Pendiente', 'approved' => 'Aprobado', 'rejected' => 'Rechazado'];
-        $statusLabel = $statusLabels[$this->packagingStatus] ?? $this->packagingStatus;
-        session()->flash('message', "Status de empaque actualizado a: {$statusLabel}");
+        $record = PackagingRecord::find($this->pkgAdjustRecordId);
+        if (!$record) {
+            session()->flash('error', 'Registro no encontrado.');
+            return;
+        }
 
+        if ($this->pkgAdjustedSurplus > $record->surplus_pieces) {
+            $this->addError('pkgAdjustedSurplus', 'El sobrante ajustado (' . number_format($this->pkgAdjustedSurplus) . ') no puede ser mayor al original (' . number_format($record->surplus_pieces) . ').');
+            return;
+        }
+
+        $record->update([
+            'adjusted_surplus' => $this->pkgAdjustedSurplus,
+            'adjustment_reason' => $this->pkgAdjustmentReason,
+        ]);
+
+        session()->flash('message', 'Sobrantes ajustados correctamente: ' . number_format($record->surplus_pieces) . ' → ' . number_format($this->pkgAdjustedSurplus));
+
+        $this->cancelAdjustSurplus();
+        if ($this->selectedLotForPackaging) {
+            $this->openPackagingModal($this->selectedLotForPackaging->id);
+        }
+        $this->dispatch('refresh-display');
+    }
+
+    /**
+     * Mark viajero as received (Fase 3).
+     */
+    public function receiveViajero()
+    {
+        if (!$this->selectedLotForPackaging) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $this->selectedLotForPackaging->update([
+            'viajero_received' => true,
+            'viajero_received_at' => now(),
+            'viajero_received_by' => auth()->id(),
+        ]);
+
+        session()->flash('message', 'Viajero recibido correctamente. Pendiente decisión de Control de Materiales.');
+        $this->openPackagingModal($this->selectedLotForPackaging->id);
+        $this->dispatch('refresh-display');
+    }
+
+    /**
+     * Complete the lot by creating a complementary kit (Fase 4 — Opción 1).
+     */
+    public function completeLot()
+    {
+        if (!$this->selectedLotForPackaging) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $lot = $this->selectedLotForPackaging;
+        $surplus = $lot->getPackagingTotalSurplus();
+
+        if ($surplus <= 0) {
+            session()->flash('error', 'No hay sobrantes para completar.');
+            return;
+        }
+
+        // Create a kit with the surplus quantity
+        $kit = Kit::create([
+            'work_order_id' => $lot->work_order_id,
+            'kit_number' => Kit::generateKitNumber($lot->work_order_id),
+            'quantity' => $surplus,
+            'status' => Kit::STATUS_PREPARING,
+            'current_approval_cycle' => 1,
+        ]);
+
+        // Associate kit with lot
+        $lot->kits()->attach($kit->id);
+
+        $lot->update([
+            'closure_decision' => Lot::CLOSURE_COMPLETE_LOT,
+            'closure_decided_by' => auth()->id(),
+            'closure_decided_at' => now(),
+        ]);
+
+        session()->flash('message', "Kit {$kit->kit_number} creado con {$surplus} piezas. El lote pasará por el flujo completo nuevamente.");
+        $this->openPackagingModal($lot->id);
+        $this->dispatch('refresh-display');
+    }
+
+    /**
+     * Create a new lot for the surplus pieces (Fase 4 — Opción 2).
+     */
+    public function createNewLot()
+    {
+        if (!$this->selectedLotForPackaging) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $lot = $this->selectedLotForPackaging;
+        $surplus = $lot->getPackagingTotalSurplus();
+
+        if ($surplus <= 0) {
+            session()->flash('error', 'No hay sobrantes para crear nuevo lote.');
+            return;
+        }
+
+        $part = $lot->workOrder->purchaseOrder->part;
+
+        // Create new lot
+        $newLot = Lot::create([
+            'work_order_id' => $lot->work_order_id,
+            'quantity' => $surplus,
+            'description' => $part->description,
+            'status' => Lot::STATUS_PENDING,
+        ]);
+
+        // Close current lot
+        $lot->update([
+            'closure_decision' => Lot::CLOSURE_NEW_LOT,
+            'closure_decided_by' => auth()->id(),
+            'closure_decided_at' => now(),
+            'status' => Lot::STATUS_COMPLETED,
+            'packaging_status' => 'approved',
+        ]);
+
+        session()->flash('message', "Lote actual cerrado. Nuevo lote {$newLot->lot_number} creado con {$surplus} piezas.");
         $this->closePackagingModal();
+        $this->dispatch('refresh-display');
+    }
+
+    /**
+     * Close lot as-is with surplus (Fase 4 — Opción 3).
+     */
+    public function closeAsIs()
+    {
+        if (!$this->selectedLotForPackaging) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $lot = $this->selectedLotForPackaging;
+        $surplus = $lot->getPackagingTotalSurplus();
+
+        $lot->update([
+            'closure_decision' => Lot::CLOSURE_CLOSE_AS_IS,
+            'closure_decided_by' => auth()->id(),
+            'closure_decided_at' => now(),
+        ]);
+
+        if ($surplus > 0) {
+            session()->flash('message', "Lote cerrado con {$surplus} piezas sobrantes. Pendiente confirmación de recepción de materiales.");
+        } else {
+            // No surplus — mark as fully completed
+            $lot->update([
+                'status' => Lot::STATUS_COMPLETED,
+                'packaging_status' => 'approved',
+                'surplus_received' => true,
+                'surplus_received_at' => now(),
+                'surplus_received_by' => auth()->id(),
+            ]);
+            session()->flash('message', 'Lote cerrado y completado.');
+        }
+
+        $this->openPackagingModal($lot->id);
+        $this->dispatch('refresh-display');
+    }
+
+    /**
+     * Confirm surplus material received by Control de Materiales (Fase 4b).
+     */
+    public function confirmSurplusReceived()
+    {
+        if (!$this->selectedLotForPackaging) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $lot = $this->selectedLotForPackaging;
+
+        $lot->update([
+            'surplus_received' => true,
+            'surplus_received_at' => now(),
+            'surplus_received_by' => auth()->id(),
+            'status' => Lot::STATUS_COMPLETED,
+            'packaging_status' => 'approved',
+        ]);
+
+        session()->flash('message', 'Material sobrante recibido. Lote completado y sobrantes eliminados de la lista de envío.');
+        $this->openPackagingModal($lot->id);
         $this->dispatch('refresh-display');
     }
 
@@ -1391,6 +1767,7 @@ class ShippingListDisplay extends Component
             },
             'lots.weighings', // Cargar todos los lotes con sus pesadas
             'lots.qualityWeighings', // Cargar pesadas de calidad
+            'lots.packagingRecords', // Cargar registros de empaque
             'sentList'
         ])
         ->whereHas('lots'); // Solo WOs que tengan al menos un lote

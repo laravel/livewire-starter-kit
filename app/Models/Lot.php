@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Kit;
 use App\Models\QualityWeighing;
+use App\Models\PackagingRecord;
+use Illuminate\Support\Facades\DB;
 
 class Lot extends Model
 {
@@ -32,6 +34,19 @@ class Lot extends Model
         'inspection_completed_at',
         'inspection_completed_by',
         'material_status',
+        'packaging_status',
+        'packaging_comments',
+        'packaging_inspected_by',
+        'packaging_inspected_at',
+        'viajero_received',
+        'viajero_received_at',
+        'viajero_received_by',
+        'closure_decision',
+        'closure_decided_by',
+        'closure_decided_at',
+        'surplus_received',
+        'surplus_received_at',
+        'surplus_received_by',
     ];
 
     protected $casts = [
@@ -40,6 +55,12 @@ class Lot extends Model
         'receipt_date' => 'date',
         'expiration_date' => 'date',
         'inspection_completed_at' => 'datetime',
+        'packaging_inspected_at' => 'datetime',
+        'viajero_received' => 'boolean',
+        'viajero_received_at' => 'datetime',
+        'closure_decided_at' => 'datetime',
+        'surplus_received' => 'boolean',
+        'surplus_received_at' => 'datetime',
     ];
 
     /**
@@ -579,4 +600,156 @@ class Lot extends Model
     {
         return $this->weighings()->exists();
     }
+
+    // =====================================================
+    // PACKAGING HELPERS
+    // =====================================================
+
+    /**
+     * Get the packaging records for this lot.
+     */
+    public function packagingRecords(): HasMany
+    {
+        return $this->hasMany(PackagingRecord::class);
+    }
+
+    /**
+     * Relationship: viajero received by user.
+     */
+    public function viajeroReceivedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'viajero_received_by');
+    }
+
+    /**
+     * Relationship: closure decided by user.
+     */
+    public function closureDecidedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'closure_decided_by');
+    }
+
+    /**
+     * Relationship: surplus received by user.
+     */
+    public function surplusReceivedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'surplus_received_by');
+    }
+
+    /**
+     * Get pieces available for packaging (quality approved pieces).
+     */
+    public function getPackagingAvailablePieces(): int
+    {
+        return $this->getQualityGoodPieces();
+    }
+
+    /**
+     * Get total packed pieces across all packaging records.
+     */
+    public function getPackagingPackedPieces(): int
+    {
+        return (int) $this->packagingRecords()->sum('packed_pieces');
+    }
+
+    /**
+     * Get pieces pending packaging.
+     */
+    public function getPackagingPendingPieces(): int
+    {
+        return max(0, $this->getPackagingAvailablePieces() - $this->getPackagingPackedPieces());
+    }
+
+    /**
+     * Get total effective surplus (adjusted if exists, otherwise original).
+     */
+    public function getPackagingTotalSurplus(): int
+    {
+        return (int) $this->packagingRecords()
+            ->selectRaw('COALESCE(SUM(COALESCE(adjusted_surplus, surplus_pieces)), 0) as total')
+            ->value('total');
+    }
+
+    /**
+     * Check if lot has any packaging records.
+     */
+    public function hasPackagingRecords(): bool
+    {
+        return $this->packagingRecords()->exists();
+    }
+
+    /**
+     * Check if viajero has been received.
+     */
+    public function isViajeroReceived(): bool
+    {
+        return (bool) $this->viajero_received;
+    }
+
+    /**
+     * Check if a closure decision has been made.
+     */
+    public function hasClosureDecision(): bool
+    {
+        return !is_null($this->closure_decision);
+    }
+
+    /**
+     * Check if surplus has been received by Control de Materiales.
+     */
+    public function isSurplusReceived(): bool
+    {
+        return (bool) $this->surplus_received;
+    }
+
+    /**
+     * Get the packaging semaphore status.
+     * gray = quality hasn't approved any pieces yet
+     * yellow = pieces available but not all packed
+     * green = fully packed & viajero received & closed
+     * blue = viajero received, pending closure decision
+     * orange = closed with surplus, pending material reception
+     */
+    public function getPackagingSemaphoreStatus(): string
+    {
+        $available = $this->getPackagingAvailablePieces();
+        if ($available <= 0) {
+            return 'gray';
+        }
+
+        if ($this->isSurplusReceived()) {
+            return 'green';
+        }
+
+        if ($this->closure_decision === 'close_as_is') {
+            return 'orange';
+        }
+
+        if ($this->hasClosureDecision()) {
+            return 'green';
+        }
+
+        if ($this->isViajeroReceived()) {
+            return 'blue';
+        }
+
+        $packed = $this->getPackagingPackedPieces();
+        if ($packed <= 0) {
+            return 'yellow';
+        }
+
+        if ($packed >= $available && !$this->isViajeroReceived()) {
+            return 'yellow';
+        }
+
+        return 'yellow';
+    }
+
+    /**
+     * Closure decision constants.
+     */
+    public const CLOSURE_COMPLETE_LOT = 'complete_lot';
+    public const CLOSURE_NEW_LOT = 'new_lot';
+    public const CLOSURE_CLOSE_AS_IS = 'close_as_is';
 }
