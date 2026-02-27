@@ -34,7 +34,7 @@ class TwoFactorAuthenticationTest extends TestCase
             ->withSession(['auth.password_confirmed_at' => time()])
             ->get(route('two-factor.show'))
             ->assertOk()
-            ->assertSee('Two Factor Authentication')
+            ->assertSee('Two-factor authentication')
             ->assertSee('Disabled');
     }
 

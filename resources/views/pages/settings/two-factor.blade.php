@@ -8,7 +8,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\Response;
 
-new #[Title('Two-Factor Authentication')] class extends Component {
+new #[Title('Two-factor authentication')] class extends Component {
     public bool $twoFactorEnabled;
 
     public bool $requiresConfirmation;
@@ -51,10 +51,10 @@ new #[Title('Two-Factor Authentication')] class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <flux:heading class="sr-only">{{ __('Two-Factor Authentication Settings') }}</flux:heading>
+    <flux:heading class="sr-only">{{ __('Two-factor authentication settings') }}</flux:heading>
 
     <x-pages::settings.layout
-        :heading="__('Two Factor Authentication')"
+        :heading="__('Two-factor authentication')"
         :subheading="__('Manage your two-factor authentication settings')"
     >
         <div class="flex flex-col w-full mx-auto space-y-6 text-sm" wire:cloak>

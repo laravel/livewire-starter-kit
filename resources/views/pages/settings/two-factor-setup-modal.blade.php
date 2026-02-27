@@ -128,7 +128,7 @@ new class extends Component {
     {
         if ($this->setupComplete) {
             return [
-                'title' => __('Two-Factor Authentication Enabled'),
+                'title' => __('Two-factor authentication enabled'),
                 'description' => __('Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.'),
                 'buttonText' => __('Close'),
             ];
@@ -136,14 +136,14 @@ new class extends Component {
 
         if ($this->showVerificationStep) {
             return [
-                'title' => __('Verify Authentication Code'),
+                'title' => __('Verify authentication code'),
                 'description' => __('Enter the 6-digit code from your authenticator app.'),
                 'buttonText' => __('Continue'),
             ];
         }
 
         return [
-            'title' => __('Enable Two-Factor Authentication'),
+            'title' => __('Enable two-factor authentication'),
             'description' => __('To finish enabling two-factor authentication, scan the QR code or enter the setup key in your authenticator app.'),
             'buttonText' => __('Continue'),
         ];

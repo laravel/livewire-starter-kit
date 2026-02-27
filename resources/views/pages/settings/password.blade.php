@@ -62,7 +62,7 @@ new #[Title('Password settings')] class extends Component {
             />
             <flux:input
                 wire:model="password_confirmation"
-                :label="__('Confirm Password')"
+                :label="__('Confirm password')"
                 type="password"
                 required
                 autocomplete="new-password"
