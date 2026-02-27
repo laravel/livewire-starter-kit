@@ -1,10 +1,10 @@
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <flux:heading class="sr-only">{{ __('Two-Factor Authentication Settings') }}</flux:heading>
+    <flux:heading class="sr-only">{{ __('Two-factor authentication settings') }}</flux:heading>
 
     <x-settings.layout
-        :heading="__('Two Factor Authentication')"
+        :heading="__('Two-factor authentication')"
         :subheading="__('Manage your two-factor authentication settings')"
     >
         <div class="flex flex-col w-full mx-auto space-y-6 text-sm" wire:cloak>
