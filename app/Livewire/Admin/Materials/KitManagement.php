@@ -295,6 +295,8 @@ class KitManagement extends Component
         // Record audit trail before deletion
         $this->auditTrailService->recordDelete($kit, Auth::user());
 
+        // Detach lots and clean up before deleting
+        $kit->lots()->detach();
         $kit->delete();
 
         session()->flash('message', 'Kit eliminado exitosamente.');

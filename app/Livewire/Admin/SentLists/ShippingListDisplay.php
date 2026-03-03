@@ -1168,8 +1168,7 @@ class ShippingListDisplay extends Component
         } else {
             // NO-CRIMP: Create a new lot with the MISSING quantity
             $part = $lot->workOrder->purchaseOrder->part;
-            $maxLotNumber = Lot::where('work_order_id', $lot->work_order_id)->max('lot_number');
-            $nextLotNumber = ($maxLotNumber ?? 0) + 1;
+            $nextLotNumber = Lot::generateNextLotNumber($lot->work_order_id);
 
             $newLot = Lot::create([
                 'work_order_id' => $lot->work_order_id,
@@ -1220,9 +1219,8 @@ class ShippingListDisplay extends Component
 
         $part = $lot->workOrder->purchaseOrder->part;
 
-        // Determine next lot number
-        $maxLotNumber = Lot::where('work_order_id', $lot->work_order_id)->max('lot_number');
-        $nextLotNumber = ($maxLotNumber ?? 0) + 1;
+        // Determine next lot number (handles padding and soft-deleted records)
+        $nextLotNumber = Lot::generateNextLotNumber($lot->work_order_id);
 
         // Create new lot with REMAINING quantity (not surplus)
         $newLot = Lot::create([

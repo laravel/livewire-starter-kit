@@ -299,6 +299,39 @@ class Lot extends Model
     }
 
     /**
+     * Generate the next lot number for a given work order.
+     * Handles zero-padded string format (e.g., '001', '002') and includes
+     * soft-deleted records to avoid unique constraint violations.
+     */
+    public static function generateNextLotNumber(int $workOrderId): string
+    {
+        // Include soft-deleted lots to avoid unique constraint collisions
+        $allLotNumbers = static::withTrashed()
+            ->where('work_order_id', $workOrderId)
+            ->pluck('lot_number')
+            ->toArray();
+
+        if (empty($allLotNumbers)) {
+            return '001';
+        }
+
+        // Detect padding length from existing lot numbers
+        $maxPadding = max(array_map('strlen', $allLotNumbers));
+        $padLength = max($maxPadding, 3); // at least 3 digits
+
+        // Find highest numeric value among all lot numbers
+        $maxNumeric = 0;
+        foreach ($allLotNumbers as $ln) {
+            $num = (int) $ln;
+            if ($num > $maxNumeric) {
+                $maxNumeric = $num;
+            }
+        }
+
+        return str_pad((string) ($maxNumeric + 1), $padLength, '0', STR_PAD_LEFT);
+    }
+
+    /**
      * Get complete traceability data for this lot.
      */
     public function getTraceabilityData(): array

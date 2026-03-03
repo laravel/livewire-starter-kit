@@ -220,12 +220,18 @@ class LotManagement extends Component
         $lot = Lot::findOrFail($lotId);
 
         if (!$lot->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar este lote porque está asociado a kits.');
+            session()->flash('error', 'No se puede eliminar este lote en su estado actual.');
             return;
         }
 
         // Record audit trail before deletion
         $this->auditTrailService->recordDelete($lot, Auth::user());
+
+        // Detach kits and clean up related records before soft-deleting
+        $lot->kits()->detach();
+        $lot->weighings()->delete();
+        $lot->qualityWeighings()->delete();
+        $lot->packagingRecords()->delete();
 
         $lot->delete();
 
