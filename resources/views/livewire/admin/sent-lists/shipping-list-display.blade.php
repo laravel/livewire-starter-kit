@@ -1758,6 +1758,44 @@
                             </div>
                         </div>
 
+                        {{-- Banner: Kits pendientes de proceso (creados por Opción 1) --}}
+                        @if (count($pkgPendingKits) > 0)
+                            <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg p-4">
+                                <h4 class="text-sm font-semibold text-indigo-800 dark:text-indigo-200 mb-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Kits en Proceso (pendientes de producción/calidad)
+                                </h4>
+                                <div class="space-y-2">
+                                    @foreach ($pkgPendingKits as $pk)
+                                        <div class="flex items-center justify-between text-sm bg-white dark:bg-gray-800 rounded p-2 border border-indigo-100 dark:border-indigo-800">
+                                            <span class="text-indigo-700 dark:text-indigo-300 font-medium">{{ $pk['kit_number'] }}</span>
+                                            <span class="text-gray-600 dark:text-gray-400">{{ number_format($pk['quantity']) }} pz</span>
+                                            <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                                                {{ $pk['status'] === 'preparing' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200' : '' }}
+                                                {{ $pk['status'] === 'ready' ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200' : '' }}
+                                                {{ $pk['status'] === 'released' ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200' : '' }}
+                                                {{ $pk['status'] === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200' : '' }}
+                                            ">{{ $pk['status_label'] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="flex items-center justify-between mt-3">
+                                    <p class="text-xs text-indigo-600 dark:text-indigo-400">
+                                        Estos kits deben completar el flujo (Kit → Producción → Calidad) antes de poder empacar.
+                                    </p>
+                                    <a href="{{ route('admin.kits.index') }}" target="_blank"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                        Ir a Gestión de Kits
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
                         {{-- ================================================ --}}
                         {{-- FASE 1: Registrar Empaque --}}
                         {{-- ================================================ --}}
@@ -1944,26 +1982,37 @@
                                     </h4>
                                 </div>
                                 <div class="p-4">
-                                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded p-4 mb-4">
-                                        <div class="grid grid-cols-2 gap-3 text-sm">
-                                            <div>
-                                                <span class="text-gray-500 dark:text-gray-400">Total Empacadas:</span>
-                                                <span class="ml-2 font-bold text-green-600 dark:text-green-400">{{ number_format($pkgAlreadyPacked) }}</span>
-                                            </div>
-                                            <div>
-                                                <span class="text-gray-500 dark:text-gray-400">Sobrantes Finales:</span>
-                                                <span class="ml-2 font-bold text-orange-600 dark:text-orange-400">{{ number_format($pkgTotalSurplus) }}</span>
+                                    @if ($pkgHasPendingKits)
+                                        {{-- Kits pendientes: bloquear viajero --}}
+                                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded p-4 text-center">
+                                            <svg class="mx-auto h-8 w-8 text-amber-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <p class="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-1">Esperando kits en proceso</p>
+                                            <p class="text-xs text-amber-600 dark:text-amber-400">Los kits deben completar el flujo (Kit → Producción → Calidad) antes de poder recibir el viajero.</p>
+                                        </div>
+                                    @else
+                                        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded p-4 mb-4">
+                                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                                <div>
+                                                    <span class="text-gray-500 dark:text-gray-400">Total Empacadas:</span>
+                                                    <span class="ml-2 font-bold text-green-600 dark:text-green-400">{{ number_format($pkgAlreadyPacked) }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-gray-500 dark:text-gray-400">Sobrantes Finales:</span>
+                                                    <span class="ml-2 font-bold text-orange-600 dark:text-orange-400">{{ number_format($pkgTotalSurplus) }}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <button wire:click="receiveViajero"
-                                        wire:confirm="¿Confirma que recibió el viajero? Esta acción no se puede deshacer."
-                                        class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        Recibí Viajero
-                                    </button>
+                                        <button wire:click="receiveViajero"
+                                            wire:confirm="¿Confirma que recibió el viajero? Esta acción no se puede deshacer."
+                                            class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Recibí Viajero
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         @elseif ($pkgViajeroReceived)
@@ -1980,7 +2029,7 @@
                         {{-- ================================================ --}}
                         {{-- FASE 4: Decisión Control de Materiales --}}
                         {{-- ================================================ --}}
-                        @if ($pkgViajeroReceived && !$pkgClosureDecision)
+                        @if ($pkgViajeroReceived && !$pkgClosureDecision && !$pkgHasPendingKits)
                             <div class="border border-purple-200 dark:border-purple-700 rounded-lg">
                                 <div class="px-4 py-3 bg-purple-50 dark:bg-purple-900/20 border-b border-purple-200 dark:border-purple-700 rounded-t-lg">
                                     <h4 class="text-sm font-semibold text-purple-800 dark:text-purple-200 flex items-center gap-2">
@@ -2006,7 +2055,7 @@
                                             {{-- Opción 1: Completar Lote (solo si hay piezas faltantes) --}}
                                             @if ($pkgMissing > 0)
                                                 <button wire:click="completeLot"
-                                                    wire:confirm="¿Crear kit de {{ number_format($pkgMissing) }} piezas para completar el lote? El kit pasará por el flujo completo (producción → calidad → empaque)."
+                                                    wire:confirm="¿Crear {{ $pkgIsCrimp ? 'kit' : 'lote' }} de {{ number_format($pkgMissing) }} piezas para completar? Pasará por el flujo completo {{ $pkgIsCrimp ? '(Kit → Producción → Calidad)' : '(Producción → Calidad → Empaque)' }}."
                                                     class="p-4 border-2 border-indigo-200 dark:border-indigo-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors cursor-pointer text-center">
                                                     <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center">
                                                         <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2014,7 +2063,7 @@
                                                         </svg>
                                                     </div>
                                                     <div class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Completar Lote</div>
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kit de {{ number_format($pkgMissing) }} pz</div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $pkgIsCrimp ? 'Kit' : 'Lote' }} de {{ number_format($pkgMissing) }} pz</div>
                                                 </button>
                                             @endif
 

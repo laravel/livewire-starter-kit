@@ -88,6 +88,9 @@ class ShippingListDisplay extends Component
     public $pkgClosureDecision = null;
     public $pkgSurplusReceived = false;
     public $pkgTotalSurplus = 0;
+    public $pkgPendingKits = [];
+    public $pkgHasPendingKits = false;
+    public $pkgIsCrimp = true;
 
     // Modal de Pesada (Producción) por lote
     public $showProductionModal = false;
@@ -870,6 +873,24 @@ class ShippingListDisplay extends Component
         $this->pkgSurplusReceived = (bool) $lot->surplus_received;
         $this->pkgTotalSurplus = $lot->getPackagingTotalSurplus();
 
+        // Kits pendientes de proceso (creados por Opción 1)
+        // Un kit es "pendiente" si no tiene pesadas de calidad que cubran sus piezas
+        $allKits = $lot->kits()->get();
+        $pendingKits = $allKits->filter(function ($kit) {
+            $qualityDone = \App\Models\QualityWeighing::where('kit_id', $kit->id)->sum('good_pieces');
+            return $qualityDone < $kit->quantity;
+        });
+        $this->pkgPendingKits = $pendingKits->map(fn ($k) => [
+            'kit_number' => $k->kit_number,
+            'quantity' => $k->quantity,
+            'status' => $k->status,
+            'status_label' => Kit::getStatuses()[$k->status] ?? $k->status,
+        ])->values()->toArray();
+        $this->pkgHasPendingKits = count($this->pkgPendingKits) > 0;
+
+        // Determine if part is crimp (only crimp parts use kits)
+        $this->pkgIsCrimp = (bool) ($lot->workOrder->purchaseOrder->part->is_crimp ?? true);
+
         $this->showPackagingModal = true;
     }
 
@@ -893,6 +914,9 @@ class ShippingListDisplay extends Component
         $this->pkgClosureDecision = null;
         $this->pkgSurplusReceived = false;
         $this->pkgTotalSurplus = 0;
+        $this->pkgPendingKits = [];
+        $this->pkgHasPendingKits = false;
+        $this->pkgIsCrimp = true;
         $this->resetErrorBag();
     }
 
@@ -1102,8 +1126,10 @@ class ShippingListDisplay extends Component
     }
 
     /**
-     * Complete the lot by creating a complementary kit (Fase 4 — Opción 1).
-     * Kit qty = lot_quantity - packed - surplus (the MISSING pieces).
+     * Complete the lot by creating complementary material (Fase 4 — Opción 1).
+     * Crimp parts → create a KIT (goes through kit → production → quality).
+     * No-crimp parts → create a new LOT (goes through full shipping process).
+     * Qty = lot_quantity - packed - surplus (the MISSING pieces).
      * Resets viajero & closure_decision so the packaging flow repeats.
      */
     public function completeLot()
@@ -1123,19 +1149,40 @@ class ShippingListDisplay extends Component
             return;
         }
 
-        // Create a kit with the MISSING quantity (not the surplus)
-        $kit = Kit::create([
-            'work_order_id' => $lot->work_order_id,
-            'kit_number' => Kit::generateKitNumber($lot->work_order_id),
-            'quantity' => $missing,
-            'status' => Kit::STATUS_PREPARING,
-            'current_approval_cycle' => 1,
-        ]);
+        $isCrimp = (bool) ($lot->workOrder->purchaseOrder->part->is_crimp ?? true);
 
-        // Associate kit with lot
-        $lot->kits()->attach($kit->id);
+        if ($isCrimp) {
+            // CRIMP: Create a kit with the MISSING quantity
+            $kit = Kit::create([
+                'work_order_id' => $lot->work_order_id,
+                'kit_number' => Kit::generateKitNumber($lot->work_order_id),
+                'quantity' => $missing,
+                'status' => Kit::STATUS_PREPARING,
+                'current_approval_cycle' => 1,
+            ]);
 
-        // Reset viajero & closure so the flow can repeat after kit is processed
+            // Associate kit with lot
+            $lot->kits()->attach($kit->id);
+
+            $message = "Kit {$kit->kit_number} creado con " . number_format($missing) . " piezas para completar el lote. El kit debe pasar por el proceso completo (Kit → Producción → Calidad).";
+        } else {
+            // NO-CRIMP: Create a new lot with the MISSING quantity
+            $part = $lot->workOrder->purchaseOrder->part;
+            $maxLotNumber = Lot::where('work_order_id', $lot->work_order_id)->max('lot_number');
+            $nextLotNumber = ($maxLotNumber ?? 0) + 1;
+
+            $newLot = Lot::create([
+                'work_order_id' => $lot->work_order_id,
+                'lot_number' => $nextLotNumber,
+                'quantity' => $missing,
+                'description' => $part->description,
+                'status' => Lot::STATUS_PENDING,
+            ]);
+
+            $message = "Lote #{$nextLotNumber} creado con " . number_format($missing) . " piezas para completar. El lote debe pasar por el proceso completo (Producción → Calidad → Empaque).";
+        }
+
+        // Reset viajero & closure so the flow can repeat after kit/lot is processed
         $lot->update([
             'viajero_received' => false,
             'viajero_received_at' => null,
@@ -1145,7 +1192,7 @@ class ShippingListDisplay extends Component
             'closure_decided_at' => null,
         ]);
 
-        session()->flash('message', "Kit {$kit->kit_number} creado con " . number_format($missing) . " piezas para completar el lote. El kit debe pasar por el proceso completo.");
+        session()->flash('message', $message);
         $this->openPackagingModal($lot->id);
         $this->dispatch('refresh-display');
     }
@@ -1787,6 +1834,7 @@ class ShippingListDisplay extends Component
             'lots.weighings', // Cargar todos los lotes con sus pesadas
             'lots.qualityWeighings', // Cargar pesadas de calidad
             'lots.packagingRecords', // Cargar registros de empaque
+            'lots.kits', // Cargar kits para semáforo
             'sentList'
         ])
         ->whereHas('lots'); // Solo WOs que tengan al menos un lote
