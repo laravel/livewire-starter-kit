@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\Kit;
 use App\Models\QualityWeighing;
 use App\Models\PackagingRecord;
-use Illuminate\Support\Facades\DB;
 
 class Lot extends Model
 {
@@ -662,13 +661,18 @@ class Lot extends Model
     }
 
     /**
-     * Get total effective surplus (adjusted if exists, otherwise original).
+     * Get total effective surplus: available − packed, minus any manual adjustment deltas.
      */
     public function getPackagingTotalSurplus(): int
     {
-        return (int) $this->packagingRecords()
-            ->selectRaw('COALESCE(SUM(COALESCE(adjusted_surplus, surplus_pieces)), 0) as total')
-            ->value('total');
+        $surplus = $this->getPackagingPendingPieces(); // available − packed
+
+        // Apply manual adjustment deltas (original − adjusted) from recounts
+        $adjustmentDelta = $this->packagingRecords
+            ->filter(fn ($r) => $r->adjusted_surplus !== null)
+            ->sum(fn ($r) => $r->surplus_pieces - $r->adjusted_surplus);
+
+        return max(0, $surplus - $adjustmentDelta);
     }
 
     /**
@@ -722,7 +726,7 @@ class Lot extends Model
             return 'green';
         }
 
-        if ($this->closure_decision === 'close_as_is') {
+        if (in_array($this->closure_decision, ['close_as_is', 'new_lot']) && !$this->isSurplusReceived()) {
             return 'orange';
         }
 

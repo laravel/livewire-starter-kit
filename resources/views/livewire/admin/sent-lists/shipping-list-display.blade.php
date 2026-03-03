@@ -1989,29 +1989,38 @@
                                     </h4>
                                 </div>
                                 <div class="p-4 space-y-3">
+                                    @php
+                                        $lotQty = $selectedLotForPackaging->quantity;
+                                        $pkgMissing = max(0, $lotQty - $pkgAlreadyPacked - $pkgTotalSurplus);
+                                        $pkgRemaining = max(0, $lotQty - $pkgAlreadyPacked);
+                                    @endphp
                                     <p class="text-sm text-gray-600 dark:text-gray-400">
-                                        Empaque: <strong>{{ number_format($pkgAlreadyPacked) }}</strong> piezas |
-                                        Sobrantes: <strong class="text-orange-600">{{ number_format($pkgTotalSurplus) }}</strong> piezas
+                                        Lote: <strong>{{ number_format($lotQty) }}</strong> |
+                                        Empacadas: <strong>{{ number_format($pkgAlreadyPacked) }}</strong> |
+                                        Sobrantes: <strong class="text-orange-600">{{ number_format($pkgTotalSurplus) }}</strong> |
+                                        Faltantes: <strong class="text-red-600">{{ number_format($pkgMissing) }}</strong>
                                     </p>
 
-                                    @if ($pkgTotalSurplus > 0)
+                                    @if ($pkgTotalSurplus > 0 || $pkgMissing > 0)
                                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                            {{-- Opción 1: Completar Lote --}}
-                                            <button wire:click="completeLot"
-                                                wire:confirm="¿Crear kit de {{ number_format($pkgTotalSurplus) }} piezas para completar el lote? El lote pasará por el flujo completo nuevamente."
-                                                class="p-4 border-2 border-indigo-200 dark:border-indigo-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors cursor-pointer text-center">
-                                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center">
-                                                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                                    </svg>
-                                                </div>
-                                                <div class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Completar Lote</div>
-                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kit de {{ number_format($pkgTotalSurplus) }} pz</div>
-                                            </button>
+                                            {{-- Opción 1: Completar Lote (solo si hay piezas faltantes) --}}
+                                            @if ($pkgMissing > 0)
+                                                <button wire:click="completeLot"
+                                                    wire:confirm="¿Crear kit de {{ number_format($pkgMissing) }} piezas para completar el lote? El kit pasará por el flujo completo (producción → calidad → empaque)."
+                                                    class="p-4 border-2 border-indigo-200 dark:border-indigo-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors cursor-pointer text-center">
+                                                    <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center">
+                                                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Completar Lote</div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kit de {{ number_format($pkgMissing) }} pz</div>
+                                                </button>
+                                            @endif
 
                                             {{-- Opción 2: Nuevo Lote --}}
                                             <button wire:click="createNewLot"
-                                                wire:confirm="¿Crear un nuevo lote con {{ number_format($pkgTotalSurplus) }} piezas y cerrar el lote actual?"
+                                                wire:confirm="¿Cerrar lote actual y crear nuevo lote de {{ number_format($pkgRemaining) }} piezas? Los {{ number_format($pkgTotalSurplus) }} sobrantes quedan pendientes de devolución."
                                                 class="p-4 border-2 border-green-200 dark:border-green-700 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors cursor-pointer text-center">
                                                 <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center">
                                                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2019,7 +2028,7 @@
                                                     </svg>
                                                 </div>
                                                 <div class="text-sm font-semibold text-green-700 dark:text-green-300">Nuevo Lote</div>
-                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format($pkgTotalSurplus) }} pz en lote nuevo</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format($pkgRemaining) }} pz en lote nuevo</div>
                                             </button>
 
                                             {{-- Opción 3: Cerrar con sobrante --}}
@@ -2074,7 +2083,7 @@
                             </div>
 
                             {{-- Fase 4b: Confirmar recepción de sobrantes --}}
-                            @if ($pkgClosureDecision === 'close_as_is' && $pkgTotalSurplus > 0 && !$pkgSurplusReceived)
+                            @if (in_array($pkgClosureDecision, ['close_as_is', 'new_lot']) && $pkgTotalSurplus > 0 && !$pkgSurplusReceived)
                                 <div class="border border-red-200 dark:border-red-700 rounded-lg p-4">
                                     <h5 class="text-sm font-semibold text-red-800 dark:text-red-200 mb-3">Pendiente: Recepción de Material Sobrante</h5>
                                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">

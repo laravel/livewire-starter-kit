@@ -1103,6 +1103,8 @@ class ShippingListDisplay extends Component
 
     /**
      * Complete the lot by creating a complementary kit (Fase 4 — Opción 1).
+     * Kit qty = lot_quantity - packed - surplus (the MISSING pieces).
+     * Resets viajero & closure_decision so the packaging flow repeats.
      */
     public function completeLot()
     {
@@ -1112,18 +1114,20 @@ class ShippingListDisplay extends Component
         }
 
         $lot = $this->selectedLotForPackaging;
+        $packed = $lot->getPackagingPackedPieces();
         $surplus = $lot->getPackagingTotalSurplus();
+        $missing = $lot->quantity - $packed - $surplus;
 
-        if ($surplus <= 0) {
-            session()->flash('error', 'No hay sobrantes para completar.');
+        if ($missing <= 0) {
+            session()->flash('error', 'No hay piezas faltantes para completar el lote.');
             return;
         }
 
-        // Create a kit with the surplus quantity
+        // Create a kit with the MISSING quantity (not the surplus)
         $kit = Kit::create([
             'work_order_id' => $lot->work_order_id,
             'kit_number' => Kit::generateKitNumber($lot->work_order_id),
-            'quantity' => $surplus,
+            'quantity' => $missing,
             'status' => Kit::STATUS_PREPARING,
             'current_approval_cycle' => 1,
         ]);
@@ -1131,19 +1135,25 @@ class ShippingListDisplay extends Component
         // Associate kit with lot
         $lot->kits()->attach($kit->id);
 
+        // Reset viajero & closure so the flow can repeat after kit is processed
         $lot->update([
-            'closure_decision' => Lot::CLOSURE_COMPLETE_LOT,
-            'closure_decided_by' => auth()->id(),
-            'closure_decided_at' => now(),
+            'viajero_received' => false,
+            'viajero_received_at' => null,
+            'viajero_received_by' => null,
+            'closure_decision' => null,
+            'closure_decided_by' => null,
+            'closure_decided_at' => null,
         ]);
 
-        session()->flash('message', "Kit {$kit->kit_number} creado con {$surplus} piezas. El lote pasará por el flujo completo nuevamente.");
+        session()->flash('message', "Kit {$kit->kit_number} creado con " . number_format($missing) . " piezas para completar el lote. El kit debe pasar por el proceso completo.");
         $this->openPackagingModal($lot->id);
         $this->dispatch('refresh-display');
     }
 
     /**
-     * Create a new lot for the surplus pieces (Fase 4 — Opción 2).
+     * Close current lot short & create a new lot for remaining pieces (Fase 4 — Opción 2).
+     * New lot qty = lot_quantity - packed (what's still needed).
+     * Surplus stays on current lot for "regresé sobrante" confirmation.
      */
     public function createNewLot()
     {
@@ -1153,24 +1163,30 @@ class ShippingListDisplay extends Component
         }
 
         $lot = $this->selectedLotForPackaging;
-        $surplus = $lot->getPackagingTotalSurplus();
+        $packed = $lot->getPackagingPackedPieces();
+        $remaining = $lot->quantity - $packed;
 
-        if ($surplus <= 0) {
-            session()->flash('error', 'No hay sobrantes para crear nuevo lote.');
+        if ($remaining <= 0) {
+            session()->flash('error', 'No hay piezas restantes para nuevo lote.');
             return;
         }
 
         $part = $lot->workOrder->purchaseOrder->part;
 
-        // Create new lot
+        // Determine next lot number
+        $maxLotNumber = Lot::where('work_order_id', $lot->work_order_id)->max('lot_number');
+        $nextLotNumber = ($maxLotNumber ?? 0) + 1;
+
+        // Create new lot with REMAINING quantity (not surplus)
         $newLot = Lot::create([
             'work_order_id' => $lot->work_order_id,
-            'quantity' => $surplus,
+            'lot_number' => $nextLotNumber,
+            'quantity' => $remaining,
             'description' => $part->description,
             'status' => Lot::STATUS_PENDING,
         ]);
 
-        // Close current lot
+        // Close current lot — surplus NOT yet received (needs separate confirmation)
         $lot->update([
             'closure_decision' => Lot::CLOSURE_NEW_LOT,
             'closure_decided_by' => auth()->id(),
@@ -1179,8 +1195,11 @@ class ShippingListDisplay extends Component
             'packaging_status' => 'approved',
         ]);
 
-        session()->flash('message', "Lote actual cerrado. Nuevo lote {$newLot->lot_number} creado con {$surplus} piezas.");
-        $this->closePackagingModal();
+        $surplus = $lot->getPackagingTotalSurplus();
+        $surplusMsg = $surplus > 0 ? " Sobrantes ({$surplus} pz) pendientes de devolución." : '';
+
+        session()->flash('message', "Lote actual cerrado. Nuevo lote #{$nextLotNumber} creado con " . number_format($remaining) . " piezas.{$surplusMsg}");
+        $this->openPackagingModal($lot->id);
         $this->dispatch('refresh-display');
     }
 
