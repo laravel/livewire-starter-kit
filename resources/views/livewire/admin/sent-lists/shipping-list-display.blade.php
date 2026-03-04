@@ -216,6 +216,10 @@
                                 </tr>
 
                                 {{-- Filas de Lotes --}}
+                                @php
+                                    $lastViajeroLot = $allLots->where('viajero_received', true)->sortByDesc('lot_number')->first();
+                                    $lastViajeroLotId = $lastViajeroLot?->id;
+                                @endphp
                                 @foreach ($allLots as $lot)
                                     @php
                                         $lotStatusInfo = match ($lot->status) {
@@ -451,7 +455,7 @@
                                                 <button wire:click="openPackagingModal({{ $lot->id }})"
                                                     class="w-5 h-5 rounded {{ $pkgSemColor }} hover:opacity-80 cursor-pointer transition-opacity"
                                                     title="{{ $pkgSemTitle }}"></button>
-                                                @if ($lot->viajero_received && !$lot->closure_decision)
+                                                @if ($lot->id === $lastViajeroLotId && !$lot->closure_decision)
                                                     <button wire:click="openDecisionModal({{ $lot->id }})"
                                                         class="w-5 h-5 rounded bg-purple-500 hover:bg-purple-600 cursor-pointer transition-colors flex items-center justify-center"
                                                         title="Decisión Control de Materiales">
@@ -1978,6 +1982,10 @@
                                 </div>
                             </div>
                         @elseif ($pkgViajeroReceived)
+                            @php
+                                $isLastLotOfWo = $selectedLotForPackaging->id === \App\Models\Lot::where('work_order_id', $selectedLotForPackaging->work_order_id)
+                                    ->orderByDesc('lot_number')->value('id');
+                            @endphp
                             <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
@@ -1986,10 +1994,12 @@
                                         </svg>
                                         <span class="text-sm font-medium text-blue-800 dark:text-blue-200">Viajero recibido</span>
                                     </div>
-                                    <button wire:click="openDecisionFromPackaging"
-                                        class="px-3 py-1.5 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors cursor-pointer">
-                                        Ir a Decisión
-                                    </button>
+                                    @if ($isLastLotOfWo)
+                                        <button wire:click="openDecisionFromPackaging"
+                                            class="px-3 py-1.5 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors cursor-pointer">
+                                            Ir a Decisión
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         @endif

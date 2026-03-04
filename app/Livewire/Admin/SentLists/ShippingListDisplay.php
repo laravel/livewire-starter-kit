@@ -1128,7 +1128,7 @@ class ShippingListDisplay extends Component
     }
 
     /**
-     * Open the Decision modal for a lot (after viajero received).
+     * Open the Decision modal — always resolves to the LAST lot of the WO.
      */
     public function openDecisionModal($lotId)
     {
@@ -1137,6 +1137,17 @@ class ShippingListDisplay extends Component
         if (!$lot) {
             session()->flash('error', 'Lote no encontrado.');
             return;
+        }
+
+        // Always resolve to the last lot with viajero received
+        $lastLot = Lot::with(['workOrder.purchaseOrder.part', 'packagingRecords'])
+            ->where('work_order_id', $lot->work_order_id)
+            ->where('viajero_received', true)
+            ->orderByDesc('lot_number')
+            ->first();
+
+        if ($lastLot) {
+            $lot = $lastLot;
         }
 
         $this->selectedLotForDecision = $lot;
