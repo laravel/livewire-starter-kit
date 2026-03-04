@@ -1151,9 +1151,15 @@ class ShippingListDisplay extends Component
         }
 
         $this->selectedLotForDecision = $lot;
-        $this->decWoTotal = $lot->quantity;
-        $this->decPacked = $lot->getPackagingPackedPieces();
-        $this->decSurplus = $lot->getPackagingTotalSurplus();
+
+        // Use the WO total, not the individual lot quantity
+        $wo = $lot->workOrder;
+        $this->decWoTotal = $wo->original_quantity;
+
+        // Sum packed and surplus across ALL lots of this WO
+        $allWoLots = Lot::where('work_order_id', $wo->id)->get();
+        $this->decPacked = $allWoLots->sum(fn ($l) => $l->getPackagingPackedPieces());
+        $this->decSurplus = $allWoLots->sum(fn ($l) => $l->getPackagingTotalSurplus());
         $this->decMissing = max(0, $this->decWoTotal - $this->decPacked - $this->decSurplus);
         $this->decIsCrimp = (bool) ($lot->workOrder->purchaseOrder->part->is_crimp ?? false);
         $this->decClosureDecision = $lot->closure_decision;
@@ -1194,16 +1200,15 @@ class ShippingListDisplay extends Component
     }
 
     /**
-     * Decision: Nuevo Lote — open Create Lot modal with REMAINING pieces.
-     * remaining = lote qty - empacadas
+     * Decision: Nuevo Lote — open Create Lot modal with MISSING pieces.
+     * faltantes = WO total - empacadas - sobrantes
      */
     public function decisionNewLot()
     {
         if (!$this->selectedLotForDecision) return;
 
-        $remaining = max(0, $this->decWoTotal - $this->decPacked);
         $this->createLotType = 'new_lot';
-        $this->createLotQuantity = $remaining;
+        $this->createLotQuantity = $this->decMissing;
         $this->createLotName = Lot::generateNextLotNumber($this->selectedLotForDecision->work_order_id);
         $this->showCreateLotFormModal = true;
     }

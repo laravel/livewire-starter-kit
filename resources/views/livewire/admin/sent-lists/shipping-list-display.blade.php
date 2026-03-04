@@ -2053,7 +2053,7 @@
                         {{-- Resumen --}}
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-center">
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Lote</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total WO</div>
                                 <div class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($decWoTotal) }}</div>
                             </div>
                             <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center">
@@ -2071,7 +2071,7 @@
                         </div>
 
                         <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
-                            Faltantes = Total Lote - Empacadas - Sobrantes
+                            Faltantes = Total WO - Empacadas - Sobrantes
                         </p>
 
                         {{-- Decision options (only if no closure decision yet) --}}
@@ -2101,7 +2101,7 @@
                                             </svg>
                                         </div>
                                         <div class="text-sm font-semibold text-green-700 dark:text-green-300">Nuevo Lote</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format(max(0, $decWoTotal - $decPacked)) }} pz en {{ $decIsCrimp ? 'lote + kit' : 'lote' }} nuevo</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format($decMissing) }} pz en {{ $decIsCrimp ? 'lote + kit' : 'lote' }} nuevo</div>
                                     </button>
 
                                     {{-- Opción 3: Cerrar Lote --}}
@@ -2253,11 +2253,7 @@
                                 <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span>
                             @enderror
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                @if ($createLotType === 'complete')
-                                    Piezas faltantes calculadas: {{ number_format($decMissing) }}
-                                @else
-                                    Piezas restantes calculadas: {{ number_format(max(0, $decWoTotal - $decPacked)) }}
-                                @endif
+                                Piezas faltantes del WO: {{ number_format($decMissing) }}
                             </p>
                         </div>
 
