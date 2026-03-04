@@ -99,6 +99,15 @@
                 </flux:navlist.item>
             </flux:navlist.group>
 
+            <flux:navlist.group :heading="__('Empaques')" class="grid">
+                <flux:navlist.item icon="chart-bar-square" :href="route('admin.packaging.index')"
+                    :current="request()->routeIs('admin.packaging.index')" wire:navigate>{{ __('Dashboard') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="archive-box" :href="route('admin.packaging.manage')"
+                    :current="request()->routeIs('admin.packaging.manage')" wire:navigate>{{ __('Gestión') }}
+                </flux:navlist.item>
+            </flux:navlist.group>
+
             <flux:navlist.group :heading="__('Calidad')" class="grid">
                 <flux:navlist.item icon="shield-check" :href="route('admin.quality.index')"
                     :current="request()->routeIs('admin.quality.index')" wire:navigate>{{ __('Dashboard') }}

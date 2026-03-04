@@ -80,6 +80,15 @@
                 </flux:navlist.item>
             </flux:navlist.group>
 
+            <flux:navlist.group :heading="__('Empaques')" class="grid">
+                <flux:navlist.item icon="chart-bar-square" :href="route('admin.packaging.index')"
+                    :current="request()->routeIs('admin.packaging.index')" wire:navigate>{{ __('Dashboard') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="archive-box" :href="route('admin.packaging.manage')"
+                    :current="request()->routeIs('admin.packaging.manage')" wire:navigate>{{ __('Gestión') }}
+                </flux:navlist.item>
+            </flux:navlist.group>
+
             <flux:navlist.group :heading="__('Administración')" class="grid">
                 <flux:navlist.item icon="users" :href="route('admin.users.index')"
                     :current="request()->routeIs('admin.users.*')" wire:navigate>{{ __('Usuarios') }}

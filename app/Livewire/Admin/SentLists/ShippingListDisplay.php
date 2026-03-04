@@ -1156,10 +1156,16 @@ class ShippingListDisplay extends Component
         $wo = $lot->workOrder;
         $this->decWoTotal = $wo->original_quantity;
 
-        // Sum packed and surplus across ALL lots of this WO
-        $allWoLots = Lot::where('work_order_id', $wo->id)->get();
+        // Sum packed and surplus across ALL lots of this WO (same formula as WO row)
+        $allWoLots = Lot::with('packagingRecords')->where('work_order_id', $wo->id)->get();
         $this->decPacked = $allWoLots->sum(fn ($l) => $l->getPackagingPackedPieces());
-        $this->decSurplus = $allWoLots->sum(fn ($l) => $l->getPackagingTotalSurplus());
+
+        // WO-level surplus: same calculation as the PZ SOBRANTES column
+        $this->decSurplus = $allWoLots->sum(function ($l) {
+            if ($l->isSurplusReceived()) return 0;
+            if ($l->hasPackagingRecords()) return $l->getPackagingTotalSurplus();
+            return $l->getQualityPendingPieces();
+        });
         $this->decMissing = max(0, $this->decWoTotal - $this->decPacked - $this->decSurplus);
         $this->decIsCrimp = (bool) ($lot->workOrder->purchaseOrder->part->is_crimp ?? false);
         $this->decClosureDecision = $lot->closure_decision;
@@ -1214,7 +1220,7 @@ class ShippingListDisplay extends Component
     }
 
     /**
-     * Decision: Cerrar Lote tal cual con sobrantes.
+     * Decision: Cerrar WO aceptando faltantes.
      */
     public function decisionCloseAsIs()
     {
@@ -1224,25 +1230,20 @@ class ShippingListDisplay extends Component
         }
 
         $lot = $this->selectedLotForDecision;
-        $surplus = $lot->getPackagingTotalSurplus();
+        $missing = $this->decMissing; // WO-level faltantes
 
         $lot->update([
             'closure_decision' => Lot::CLOSURE_CLOSE_AS_IS,
             'closure_decided_by' => auth()->id(),
             'closure_decided_at' => now(),
+            'status' => Lot::STATUS_COMPLETED,
+            'packaging_status' => 'approved',
         ]);
 
-        if ($surplus > 0) {
-            session()->flash('message', "Lote cerrado con {$surplus} piezas sobrantes. Pendiente confirmación de recepción de materiales.");
+        if ($missing > 0) {
+            session()->flash('message', "WO cerrado aceptando " . number_format($missing) . " piezas faltantes.");
         } else {
-            $lot->update([
-                'status' => Lot::STATUS_COMPLETED,
-                'packaging_status' => 'approved',
-                'surplus_received' => true,
-                'surplus_received_at' => now(),
-                'surplus_received_by' => auth()->id(),
-            ]);
-            session()->flash('message', 'Lote cerrado y completado.');
+            session()->flash('message', 'WO cerrado. No hay piezas faltantes.');
         }
 
         $this->openDecisionModal($lot->id);

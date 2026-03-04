@@ -2104,28 +2104,28 @@
                                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format($decMissing) }} pz en {{ $decIsCrimp ? 'lote + kit' : 'lote' }} nuevo</div>
                                     </button>
 
-                                    {{-- Opción 3: Cerrar Lote --}}
+                                    {{-- Opción 3: Cerrar WO como está --}}
                                     <button wire:click="decisionCloseAsIs"
-                                        wire:confirm="¿Cerrar el lote {{ $decSurplus > 0 ? 'con ' . number_format($decSurplus) . ' piezas sobrantes' : 'sin sobrantes' }}?"
+                                        wire:confirm="¿Cerrar el WO aceptando {{ number_format($decMissing) }} piezas faltantes?"
                                         class="p-4 border-2 border-orange-200 dark:border-orange-700 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer text-center">
                                         <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-orange-100 dark:bg-orange-800 flex items-center justify-center">
                                             <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                             </svg>
                                         </div>
-                                        <div class="text-sm font-semibold text-orange-700 dark:text-orange-300">Cerrar Lote</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Con {{ number_format($decSurplus) }} pz sobrantes</div>
+                                        <div class="text-sm font-semibold text-orange-700 dark:text-orange-300">Cerrar WO</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Aceptar {{ number_format($decMissing) }} pz faltantes</div>
                                     </button>
                                 </div>
                             @else
-                                {{-- Sin sobrantes ni faltantes: cerrar directamente --}}
+                                {{-- Sin faltantes: cerrar directamente --}}
                                 <button wire:click="decisionCloseAsIs"
-                                    wire:confirm="¿Cerrar el lote? No hay piezas sobrantes ni faltantes."
+                                    wire:confirm="¿Cerrar el WO? No hay piezas faltantes."
                                     class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
-                                    Cerrar Lote (Completo)
+                                    Cerrar WO (Completo)
                                 </button>
                             @endif
                         @else
@@ -2134,7 +2134,7 @@
                                 $closureLabel = match ($decClosureDecision) {
                                     'complete_lot' => 'Completar Lote',
                                     'new_lot' => 'Nuevo Lote Creado',
-                                    'close_as_is' => 'Cerrado con Sobrantes',
+                                    'close_as_is' => 'WO Cerrado (faltantes aceptados)',
                                     default => $decClosureDecision,
                                 };
                                 $closureColor = match ($decClosureDecision) {

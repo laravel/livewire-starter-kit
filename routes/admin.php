@@ -199,6 +199,14 @@ Route::middleware(['auth', 'verified', 'role:admin|Materiales'])->group(function
     Route::get('/materials/manage', \App\Livewire\Admin\Materials\MaterialsAreaDashboard::class)->name('materials.manage');
 });
 
+// ===================================================================
+// EMPAQUES: Dashboard (role: admin OR Empaques)
+// ===================================================================
+Route::middleware(['auth', 'verified', 'role:admin|Empaques'])->group(function () {
+    Route::get('/packaging', \App\Livewire\Admin\Packaging\PackagingDashboard::class)->name('packaging.index');
+    Route::get('/packaging/manage', \App\Livewire\Admin\Packaging\PackagingManagement::class)->name('packaging.manage');
+});
+
 // Inspection Area Routes (requires Inspection role)
 // Route::middleware(['auth', 'verified', 'permission:view_inspection_area'])->prefix('inspection')->name('inspection.')->group(function () {
 //     Route::get('/', \App\Livewire\Admin\Inspection\InspectionApprovalInterface::class)->name('dashboard');
