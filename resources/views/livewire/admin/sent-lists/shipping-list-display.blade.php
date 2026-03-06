@@ -216,10 +216,6 @@
                                 </tr>
 
                                 {{-- Filas de Lotes --}}
-                                @php
-                                    $lastViajeroLot = $allLots->where('viajero_received', true)->sortByDesc('lot_number')->first();
-                                    $lastViajeroLotId = $lastViajeroLot?->id;
-                                @endphp
                                 @foreach ($allLots as $lot)
                                     @php
                                         $lotStatusInfo = match ($lot->status) {
@@ -455,14 +451,40 @@
                                                 <button wire:click="openPackagingModal({{ $lot->id }})"
                                                     class="w-5 h-5 rounded {{ $pkgSemColor }} hover:opacity-80 cursor-pointer transition-opacity"
                                                     title="{{ $pkgSemTitle }}"></button>
-                                                @if ($lot->id === $lastViajeroLotId && !$lot->closure_decision)
+                                                @if ($lot->viajero_received)
                                                     <button wire:click="openDecisionModal({{ $lot->id }})"
-                                                        class="w-5 h-5 rounded bg-purple-500 hover:bg-purple-600 cursor-pointer transition-colors flex items-center justify-center"
-                                                        title="Decisión Control de Materiales">
+                                                        class="w-5 h-5 rounded {{ $lot->closure_decision ? 'bg-purple-700' : 'bg-purple-500 hover:bg-purple-600' }} cursor-pointer transition-colors flex items-center justify-center"
+                                                        title="Decisión Control de Materiales{{ $lot->closure_decision ? ' (decisión tomada)' : '' }}">
                                                         <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                                         </svg>
                                                     </button>
+                                                @endif
+                                                @if ($lot->viajero_received && $lot->getPackagingTotalSurplus() > 0 && !$lot->surplus_delivered)
+                                                    {{-- Paso 1: Empaque entrega sobrante --}}
+                                                    <button wire:click="openDeliverMaterialModal({{ $lot->id }})"
+                                                        class="w-5 h-5 rounded bg-amber-500 hover:bg-amber-600 cursor-pointer transition-colors flex items-center justify-center"
+                                                        title="Entregar Material Sobrante ({{ number_format($lot->getPackagingTotalSurplus()) }} pz)">
+                                                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                                        </svg>
+                                                    </button>
+                                                @elseif ($lot->viajero_received && $lot->getPackagingTotalSurplus() > 0 && $lot->surplus_delivered && !$lot->surplus_received)
+                                                    {{-- Paso 2: Entregado, pendiente recepción por Control de Materiales --}}
+                                                    <span class="w-5 h-5 rounded bg-amber-600 flex items-center justify-center"
+                                                        title="Material entregado, pendiente recepción ({{ number_format($lot->getPackagingTotalSurplus()) }} pz)">
+                                                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                        </svg>
+                                                    </span>
+                                                @elseif ($lot->viajero_received && $lot->getPackagingTotalSurplus() > 0 && $lot->surplus_received)
+                                                    {{-- Paso 3: Material recibido por Control de Materiales --}}
+                                                    <span class="w-5 h-5 rounded bg-green-600 flex items-center justify-center"
+                                                        title="Material sobrante recibido ({{ number_format($lot->getPackagingTotalSurplus()) }} pz)">
+                                                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                        </svg>
+                                                    </span>
                                                 @endif
                                             </div>
                                         </td>
@@ -1080,15 +1102,32 @@
                                     </span>
                                 </div>
                                 @if ($selectedLot->workOrder->purchaseOrder->part->is_crimp ?? false)
-                                    @php
-                                        $releasedKit = $selectedLot->getReleasedKit();
-                                    @endphp
-                                    @if ($releasedKit)
+                                    @if ($selectedLot->kits->count() > 0)
                                         <div class="col-span-2">
-                                            <span class="text-gray-500 dark:text-gray-400">Kit:</span>
-                                            <span class="ml-2 text-green-600 dark:text-green-400 font-medium">
-                                                {{ $releasedKit->kit_number }} (Liberado)
-                                            </span>
+                                            <span class="text-gray-500 dark:text-gray-400">Kits:</span>
+                                            <div class="mt-1 space-y-1">
+                                                @foreach ($selectedLot->kits->sortBy('created_at') as $inspKit)
+                                                    <div class="flex items-center gap-2">
+                                                        @php
+                                                            $inspKitColor = match($inspKit->status) {
+                                                                'released' => 'bg-green-500',
+                                                                'in_process' => 'bg-indigo-500',
+                                                                default => 'bg-yellow-500',
+                                                            };
+                                                            $inspKitLabel = match($inspKit->status) {
+                                                                'released' => 'Liberado',
+                                                                'in_process' => 'En Proceso',
+                                                                default => 'Preparando',
+                                                            };
+                                                        @endphp
+                                                        <span class="w-2 h-2 rounded-full {{ $inspKitColor }}"></span>
+                                                        <span class="text-green-600 dark:text-green-400 font-medium text-sm">
+                                                            {{ $inspKit->kit_number }}
+                                                        </span>
+                                                        <span class="text-xs text-gray-500 dark:text-gray-400">({{ $inspKitLabel }})</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
                                     @endif
                                 @endif
@@ -1264,12 +1303,32 @@
                                         {{ number_format($selectedLotForKit->quantity) }} piezas
                                     </span>
                                 </div>
-                                @if ($selectedKit)
+                                @if ($selectedLotForKit->kits->count() > 0)
                                     <div class="col-span-2">
-                                        <span class="text-gray-500 dark:text-gray-400">Kit:</span>
-                                        <span class="ml-2 text-indigo-600 dark:text-indigo-400 font-medium">
-                                            {{ $selectedKit->kit_number }}
-                                        </span>
+                                        <span class="text-gray-500 dark:text-gray-400">Kits:</span>
+                                        <div class="mt-1 space-y-1">
+                                            @foreach ($selectedLotForKit->kits->sortBy('created_at') as $kit)
+                                                <div class="flex items-center gap-2">
+                                                    @php
+                                                        $kitStatusColor = match($kit->status) {
+                                                            'released' => 'bg-green-500',
+                                                            'in_process' => 'bg-indigo-500',
+                                                            default => 'bg-yellow-500',
+                                                        };
+                                                        $kitStatusLabel = match($kit->status) {
+                                                            'released' => 'Liberado',
+                                                            'in_process' => 'En Proceso',
+                                                            default => 'Preparando',
+                                                        };
+                                                    @endphp
+                                                    <span class="w-2 h-2 rounded-full {{ $kitStatusColor }}"></span>
+                                                    <span class="text-indigo-600 dark:text-indigo-400 font-medium text-sm">
+                                                        {{ $kit->kit_number }}
+                                                    </span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">({{ $kitStatusLabel }})</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 @else
                                     <div class="col-span-2">
@@ -1982,10 +2041,6 @@
                                 </div>
                             </div>
                         @elseif ($pkgViajeroReceived)
-                            @php
-                                $isLastLotOfWo = $selectedLotForPackaging->id === \App\Models\Lot::where('work_order_id', $selectedLotForPackaging->work_order_id)
-                                    ->orderByDesc('lot_number')->value('id');
-                            @endphp
                             <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
@@ -1994,12 +2049,10 @@
                                         </svg>
                                         <span class="text-sm font-medium text-blue-800 dark:text-blue-200">Viajero recibido</span>
                                     </div>
-                                    @if ($isLastLotOfWo)
-                                        <button wire:click="openDecisionFromPackaging"
-                                            class="px-3 py-1.5 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors cursor-pointer">
-                                            Ir a Decisión
-                                        </button>
-                                    @endif
+                                    <button wire:click="openDecisionFromPackaging"
+                                        class="px-3 py-1.5 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors cursor-pointer">
+                                        Ir a Decisión
+                                    </button>
                                 </div>
                             </div>
                         @endif
@@ -2053,8 +2106,8 @@
                         {{-- Resumen --}}
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-center">
-                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total WO</div>
-                                <div class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($decWoTotal) }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Lote</div>
+                                <div class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($decLotTotal) }}</div>
                             </div>
                             <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center">
                                 <div class="text-xs text-green-600 dark:text-green-400 mb-1">Empacadas</div>
@@ -2071,7 +2124,7 @@
                         </div>
 
                         <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
-                            Faltantes = Total WO - Empacadas - Sobrantes
+                            Faltantes = Total Lote - Empacadas - Sobrantes
                         </p>
 
                         {{-- Decision options (only if no closure decision yet) --}}
@@ -2104,28 +2157,28 @@
                                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ number_format($decMissing) }} pz en {{ $decIsCrimp ? 'lote + kit' : 'lote' }} nuevo</div>
                                     </button>
 
-                                    {{-- Opción 3: Cerrar WO como está --}}
+                                    {{-- Opción 3: Cerrar Lote como está --}}
                                     <button wire:click="decisionCloseAsIs"
-                                        wire:confirm="¿Cerrar el WO aceptando {{ number_format($decMissing) }} piezas faltantes?"
+                                        wire:confirm="¿Cerrar el lote aceptando {{ number_format($decMissing) }} piezas faltantes?"
                                         class="p-4 border-2 border-orange-200 dark:border-orange-700 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors cursor-pointer text-center">
                                         <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-orange-100 dark:bg-orange-800 flex items-center justify-center">
                                             <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                             </svg>
                                         </div>
-                                        <div class="text-sm font-semibold text-orange-700 dark:text-orange-300">Cerrar WO</div>
+                                        <div class="text-sm font-semibold text-orange-700 dark:text-orange-300">Cerrar Lote</div>
                                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Aceptar {{ number_format($decMissing) }} pz faltantes</div>
                                     </button>
                                 </div>
                             @else
                                 {{-- Sin faltantes: cerrar directamente --}}
                                 <button wire:click="decisionCloseAsIs"
-                                    wire:confirm="¿Cerrar el WO? No hay piezas faltantes."
+                                    wire:confirm="¿Cerrar el lote? No hay piezas faltantes."
                                     class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
-                                    Cerrar WO (Completo)
+                                    Cerrar Lote (Completo)
                                 </button>
                             @endif
                         @else
@@ -2134,7 +2187,7 @@
                                 $closureLabel = match ($decClosureDecision) {
                                     'complete_lot' => 'Completar Lote',
                                     'new_lot' => 'Nuevo Lote Creado',
-                                    'close_as_is' => 'WO Cerrado (faltantes aceptados)',
+                                    'close_as_is' => 'Lote Cerrado (faltantes aceptados)',
                                     default => $decClosureDecision,
                                 };
                                 $closureColor = match ($decClosureDecision) {
@@ -2153,32 +2206,57 @@
                                 </div>
                             </div>
 
-                            {{-- Confirmar recepción de sobrantes --}}
-                            @if (in_array($decClosureDecision, ['close_as_is', 'new_lot']) && $decSurplus > 0 && !$decSurplusReceived)
-                                <div class="border border-red-200 dark:border-red-700 rounded-lg p-4">
-                                    <h5 class="text-sm font-semibold text-red-800 dark:text-red-200 mb-3">Pendiente: Recepción de Material Sobrante</h5>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                        Confirmar recepción de <strong class="text-orange-600">{{ number_format($decSurplus) }}</strong> piezas sobrantes.
-                                    </p>
-                                    <button wire:click="confirmSurplusReceived"
-                                        wire:confirm="¿Confirma que se recibieron {{ number_format($decSurplus) }} piezas sobrantes?"
-                                        class="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                        </svg>
-                                        Material Recibido
-                                    </button>
-                                </div>
-                            @elseif ($decSurplusReceived)
-                                <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                        </svg>
-                                        <span class="text-sm font-medium text-green-800 dark:text-green-200">Material sobrante recibido. Lote completado.</span>
+                            {{-- Estado de entrega de sobrantes --}}
+                            @if ($decSurplus > 0)
+                                @if (!$decSurplusDelivered)
+                                    {{-- Paso 1: Empaque aún no ha entregado el sobrante --}}
+                                    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <span class="text-sm font-medium text-amber-800 dark:text-amber-200">Pendiente: Empaque debe entregar {{ number_format($decSurplus) }} pz sobrantes</span>
+                                        </div>
                                     </div>
-                                </div>
+                                @elseif (!$decSurplusReceived)
+                                    {{-- Paso 2: Entregado, pendiente recepción --}}
+                                    <div class="border border-red-200 dark:border-red-700 rounded-lg p-4">
+                                        <h5 class="text-sm font-semibold text-red-800 dark:text-red-200 mb-3">Pendiente: Recepción de Material Sobrante</h5>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                            Empaque entregó <strong class="text-orange-600">{{ number_format($decSurplus) }}</strong> piezas sobrantes. Confirmar recepción.
+                                        </p>
+                                        <button wire:click="confirmSurplusReceived"
+                                            wire:confirm="¿Confirma que se recibieron {{ number_format($decSurplus) }} piezas sobrantes?"
+                                            class="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                            </svg>
+                                            Material Recibido
+                                        </button>
+                                    </div>
+                                @else
+                                    {{-- Paso 3: Todo completado --}}
+                                    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <span class="text-sm font-medium text-green-800 dark:text-green-200">Material sobrante recibido. Lote completado.</span>
+                                        </div>
+                                    </div>
+                                @endif
                             @endif
+
+                            {{-- Reabrir Lote --}}
+                            <button wire:click="reopenLot"
+                                wire:confirm="¿Desea reabrir este lote y anular la decisión tomada?"
+                                class="w-full px-4 py-3 border-2 border-yellow-400 dark:border-yellow-600 text-yellow-700 dark:text-yellow-300 font-semibold rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                Reabrir Lote
+                            </button>
+
                         @endif
                     </div>
 
@@ -2253,7 +2331,7 @@
                                 <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span>
                             @enderror
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                Piezas faltantes del WO: {{ number_format($decMissing) }}
+                                Piezas faltantes del Lote: {{ number_format($decMissing) }}
                             </p>
                         </div>
 
@@ -2289,6 +2367,86 @@
                         <button wire:click="confirmCreateLot"
                             class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors cursor-pointer">
                             Crear {{ $decIsCrimp ? 'Lote + Kit' : 'Lote' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- ================================================================ --}}
+    {{-- MODAL: Entregar Material Sobrante --}}
+    {{-- ================================================================ --}}
+    @if ($showDeliverMaterialModal && $selectedLotForDelivery)
+        <div class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-900/50 transition-opacity" wire:click="closeDeliverMaterialModal"></div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-gray-200 dark:border-gray-700">
+
+                    {{-- Header --}}
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-amber-600">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">Entregar Material</h3>
+                                <p class="text-sm text-amber-100 mt-1">
+                                    Lote {{ $selectedLotForDelivery->lot_number }} |
+                                    WO: {{ $selectedLotForDelivery->workOrder->purchaseOrder->wo ?? 'N/A' }} |
+                                    Parte: {{ $selectedLotForDelivery->workOrder->purchaseOrder->part->number ?? 'N/A' }}
+                                </p>
+                            </div>
+                            <button wire:click="closeDeliverMaterialModal" class="text-white hover:text-amber-200 cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="px-6 py-5 space-y-4">
+                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-4 text-center">
+                            <p class="text-sm text-amber-800 dark:text-amber-200 mb-1">Material sobrante por entregar</p>
+                            <p class="text-3xl font-bold text-amber-700 dark:text-amber-300">{{ number_format($deliverSurplusAmount) }} <span class="text-sm font-normal">piezas</span></p>
+                        </div>
+
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 text-sm space-y-1">
+                            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+                                <span>Lote:</span>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ $selectedLotForDelivery->lot_number }}</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+                                <span>Cantidad del lote:</span>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ number_format($selectedLotForDelivery->quantity) }} pz</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+                                <span>Empacadas:</span>
+                                <span class="font-medium text-green-600 dark:text-green-400">{{ number_format($selectedLotForDelivery->getPackagingPackedPieces()) }} pz</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+                                <span>Sobrantes:</span>
+                                <span class="font-medium text-orange-600 dark:text-orange-400">{{ number_format($deliverSurplusAmount) }} pz</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                            Al confirmar, se registrará que el material sobrante fue entregado a Control de Materiales.
+                        </p>
+                    </div>
+
+                    {{-- Footer --}}
+                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-end gap-3">
+                        <button wire:click="closeDeliverMaterialModal"
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                            Cancelar
+                        </button>
+                        <button wire:click="confirmDeliverMaterial"
+                            wire:confirm="¿Confirma la entrega de {{ number_format($deliverSurplusAmount) }} piezas sobrantes del Lote {{ $selectedLotForDelivery->lot_number }}?"
+                            class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            Confirmar Entrega
                         </button>
                     </div>
                 </div>

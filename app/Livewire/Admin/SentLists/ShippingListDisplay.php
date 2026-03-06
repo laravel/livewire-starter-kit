@@ -90,12 +90,13 @@ class ShippingListDisplay extends Component
     // Modal Decisión Control de Materiales (separate modal)
     public $showDecisionModal = false;
     public $selectedLotForDecision = null;
-    public $decWoTotal = 0;
+    public $decLotTotal = 0;
     public $decPacked = 0;
     public $decSurplus = 0;
     public $decMissing = 0;
     public $decIsCrimp = false;
     public $decClosureDecision = null;
+    public $decSurplusDelivered = false;
     public $decSurplusReceived = false;
 
     // Modal Crear Lote (from Decision modal)
@@ -103,6 +104,11 @@ class ShippingListDisplay extends Component
     public $createLotName = '';
     public $createLotQuantity = 0;
     public $createLotType = ''; // 'complete' or 'new_lot'
+
+    // Modal Entregar Material (separate modal)
+    public $showDeliverMaterialModal = false;
+    public $selectedLotForDelivery = null;
+    public $deliverSurplusAmount = 0;
 
     // Modal de Pesada (Producción) por lote
     public $showProductionModal = false;
@@ -1128,7 +1134,7 @@ class ShippingListDisplay extends Component
     }
 
     /**
-     * Open the Decision modal — always resolves to the LAST lot of the WO.
+     * Open the Decision modal for a specific lot.
      */
     public function openDecisionModal($lotId)
     {
@@ -1139,36 +1145,16 @@ class ShippingListDisplay extends Component
             return;
         }
 
-        // Always resolve to the last lot with viajero received
-        $lastLot = Lot::with(['workOrder.purchaseOrder.part', 'packagingRecords'])
-            ->where('work_order_id', $lot->work_order_id)
-            ->where('viajero_received', true)
-            ->orderByDesc('lot_number')
-            ->first();
-
-        if ($lastLot) {
-            $lot = $lastLot;
-        }
-
         $this->selectedLotForDecision = $lot;
 
-        // Use the WO total, not the individual lot quantity
-        $wo = $lot->workOrder;
-        $this->decWoTotal = $wo->original_quantity;
-
-        // Sum packed and surplus across ALL lots of this WO (same formula as WO row)
-        $allWoLots = Lot::with('packagingRecords')->where('work_order_id', $wo->id)->get();
-        $this->decPacked = $allWoLots->sum(fn ($l) => $l->getPackagingPackedPieces());
-
-        // WO-level surplus: same calculation as the PZ SOBRANTES column
-        $this->decSurplus = $allWoLots->sum(function ($l) {
-            if ($l->isSurplusReceived()) return 0;
-            if ($l->hasPackagingRecords()) return $l->getPackagingTotalSurplus();
-            return $l->getQualityPendingPieces();
-        });
-        $this->decMissing = max(0, $this->decWoTotal - $this->decPacked - $this->decSurplus);
+        // LOT-level calculations
+        $this->decLotTotal = $lot->quantity;
+        $this->decPacked = $lot->getPackagingPackedPieces();
+        $this->decSurplus = $lot->getPackagingTotalSurplus();
+        $this->decMissing = max(0, $this->decLotTotal - $this->decPacked - $this->decSurplus);
         $this->decIsCrimp = (bool) ($lot->workOrder->purchaseOrder->part->is_crimp ?? false);
         $this->decClosureDecision = $lot->closure_decision;
+        $this->decSurplusDelivered = (bool) $lot->surplus_delivered;
         $this->decSurplusReceived = (bool) $lot->surplus_received;
 
         $this->showDecisionModal = true;
@@ -1181,7 +1167,7 @@ class ShippingListDisplay extends Component
     {
         $this->showDecisionModal = false;
         $this->selectedLotForDecision = null;
-        $this->decWoTotal = 0;
+        $this->decLotTotal = 0;
         $this->decPacked = 0;
         $this->decSurplus = 0;
         $this->decMissing = 0;
@@ -1220,7 +1206,7 @@ class ShippingListDisplay extends Component
     }
 
     /**
-     * Decision: Cerrar WO aceptando faltantes.
+     * Decision: Cerrar Lote aceptando faltantes.
      */
     public function decisionCloseAsIs()
     {
@@ -1230,7 +1216,7 @@ class ShippingListDisplay extends Component
         }
 
         $lot = $this->selectedLotForDecision;
-        $missing = $this->decMissing; // WO-level faltantes
+        $missing = $this->decMissing;
 
         $lot->update([
             'closure_decision' => Lot::CLOSURE_CLOSE_AS_IS,
@@ -1241,11 +1227,42 @@ class ShippingListDisplay extends Component
         ]);
 
         if ($missing > 0) {
-            session()->flash('message', "WO cerrado aceptando " . number_format($missing) . " piezas faltantes.");
+            session()->flash('message', "Lote cerrado aceptando " . number_format($missing) . " piezas faltantes.");
         } else {
-            session()->flash('message', 'WO cerrado. No hay piezas faltantes.');
+            session()->flash('message', 'Lote cerrado sin faltantes.');
         }
 
+        $this->openDecisionModal($lot->id);
+        $this->dispatch('refresh-display');
+    }
+
+    /**
+     * Reopen a lot: clear its closure decision and reset status.
+     */
+    public function reopenLot()
+    {
+        if (!$this->selectedLotForDecision) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $lot = $this->selectedLotForDecision;
+
+        $lot->update([
+            'closure_decision' => null,
+            'closure_decided_by' => null,
+            'closure_decided_at' => null,
+            'surplus_delivered' => false,
+            'surplus_delivered_at' => null,
+            'surplus_delivered_by' => null,
+            'surplus_received' => false,
+            'surplus_received_at' => null,
+            'surplus_received_by' => null,
+            'status' => Lot::STATUS_IN_PROGRESS,
+            'packaging_status' => 'pending',
+        ]);
+
+        session()->flash('message', 'Lote ' . $lot->lot_number . ' reabierto exitosamente.');
         $this->openDecisionModal($lot->id);
         $this->dispatch('refresh-display');
     }
@@ -1272,6 +1289,60 @@ class ShippingListDisplay extends Component
 
         session()->flash('message', 'Material sobrante recibido. Lote completado.');
         $this->openDecisionModal($lot->id);
+        $this->dispatch('refresh-display');
+    }
+
+    // ===============================================
+    // ENTREGAR MATERIAL MODAL (separate)
+    // ===============================================
+
+    /**
+     * Open the Deliver Material modal for a specific lot.
+     */
+    public function openDeliverMaterialModal($lotId)
+    {
+        $lot = Lot::with(['workOrder.purchaseOrder.part', 'packagingRecords'])->find($lotId);
+
+        if (!$lot) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $this->selectedLotForDelivery = $lot;
+        $this->deliverSurplusAmount = $lot->getPackagingTotalSurplus();
+        $this->showDeliverMaterialModal = true;
+    }
+
+    /**
+     * Close the Deliver Material modal.
+     */
+    public function closeDeliverMaterialModal()
+    {
+        $this->showDeliverMaterialModal = false;
+        $this->selectedLotForDelivery = null;
+        $this->deliverSurplusAmount = 0;
+    }
+
+    /**
+     * Confirm material delivery (surplus received).
+     */
+    public function confirmDeliverMaterial()
+    {
+        if (!$this->selectedLotForDelivery) {
+            session()->flash('error', 'Lote no encontrado.');
+            return;
+        }
+
+        $lot = $this->selectedLotForDelivery;
+
+        $lot->update([
+            'surplus_delivered' => true,
+            'surplus_delivered_at' => now(),
+            'surplus_delivered_by' => auth()->id(),
+        ]);
+
+        session()->flash('message', 'Material entregado correctamente para Lote ' . $lot->lot_number . '.');
+        $this->closeDeliverMaterialModal();
         $this->dispatch('refresh-display');
     }
 

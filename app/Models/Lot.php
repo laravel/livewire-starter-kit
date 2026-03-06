@@ -46,6 +46,9 @@ class Lot extends Model
         'surplus_received',
         'surplus_received_at',
         'surplus_received_by',
+        'surplus_delivered',
+        'surplus_delivered_at',
+        'surplus_delivered_by',
     ];
 
     protected $casts = [
@@ -60,6 +63,8 @@ class Lot extends Model
         'closure_decided_at' => 'datetime',
         'surplus_received' => 'boolean',
         'surplus_received_at' => 'datetime',
+        'surplus_delivered' => 'boolean',
+        'surplus_delivered_at' => 'datetime',
     ];
 
     /**
