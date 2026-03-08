@@ -21,5 +21,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Registrar observer para Price
         \App\Models\Price::observe(\App\Observers\PriceObserver::class);
+
+        // Registrar observer de Empaque -> Shipping para Lot.
+        // Detecta el closure_decision y activa ready_for_shipping en el lote.
+        \App\Models\Lot::observe(\App\Observers\LotPackagingObserver::class);
     }
 }
