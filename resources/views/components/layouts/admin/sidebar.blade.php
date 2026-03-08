@@ -106,6 +106,9 @@
                 <flux:navlist.item icon="archive-box" :href="route('admin.packaging.manage')"
                     :current="request()->routeIs('admin.packaging.manage')" wire:navigate>{{ __('Gestión') }}
                 </flux:navlist.item>
+                <flux:navlist.item icon="document-text" :href="route('admin.packing-slips.index')"
+                    :current="request()->routeIs('admin.packing-slips.*')" wire:navigate>{{ __('Packing Slips') }}
+                </flux:navlist.item>
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Calidad')" class="grid">
