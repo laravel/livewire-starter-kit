@@ -21,6 +21,10 @@ class Lot extends Model
         'lot_number',
         'description',
         'quantity',
+        'quantity_packed_final',
+        'ready_for_shipping',
+        'ready_for_shipping_at',
+        'closed_by_type',
         'status',
         'comments',
         'raw_material_batch_numbers',
@@ -53,6 +57,9 @@ class Lot extends Model
 
     protected $casts = [
         'quantity' => 'integer',
+        'quantity_packed_final' => 'integer',
+        'ready_for_shipping' => 'boolean',
+        'ready_for_shipping_at' => 'datetime',
         'raw_material_batch_numbers' => 'array',
         'receipt_date' => 'date',
         'expiration_date' => 'date',
@@ -173,6 +180,63 @@ class Lot extends Model
     // {
     //     return $this->hasMany(Inspection::class);
     // }
+
+    // =====================================================
+    // SHIPPING READINESS SCOPES (Packing Slip / FPL-10)
+    // =====================================================
+
+    /**
+     * Scope: lotes listos para incluirse en un Packing Slip.
+     * Un lote esta listo cuando ready_for_shipping = true y no ha sido
+     * asignado a ningun PS (no existe registro en packing_slip_items).
+     */
+    public function scopeReadyForShipping(Builder $query): Builder
+    {
+        return $query->where('ready_for_shipping', true)
+                     ->whereDoesntHave('packingSlipItem');
+    }
+
+    /**
+     * Scope: lotes listos para shipping (incluyendo los ya asignados a un PS).
+     * Util para reportes y auditorias.
+     */
+    public function scopeShippingReady(Builder $query): Builder
+    {
+        return $query->where('ready_for_shipping', true);
+    }
+
+    // =====================================================
+    // RELACIONES DE PACKING SLIP
+    // =====================================================
+
+    /**
+     * El item de Packing Slip donde fue incluido este lote (si aplica).
+     * Un lote solo puede estar en un PS a la vez (constraint unique en BD).
+     */
+    public function packingSlipItem(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(PackingSlipItem::class);
+    }
+
+    /**
+     * El Packing Slip al que pertenece este lote (acceso directo via item).
+     */
+    public function packingSlip(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
+    {
+        return $this->hasOneThrough(PackingSlip::class, PackingSlipItem::class, 'lot_id', 'id', 'id', 'packing_slip_id');
+    }
+
+    /**
+     * Verifica si el lote ya ha sido asignado a un Packing Slip.
+     */
+    public function isInPackingSlip(): bool
+    {
+        return $this->packingSlipItem()->exists();
+    }
+
+    // =====================================================
+    // SCOPES DE STATUS (existentes)
+    // =====================================================
 
     /**
      * Scope a query to only include lots with a specific status.
