@@ -13,7 +13,7 @@
     @endif
 
     {{-- Department Workflow Progress --}}
-    <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+    <div class="mb-6 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Flujo de Departamentos</h3>
 
         <div class="flex items-center justify-between">
@@ -89,7 +89,7 @@
     </div>
 
     {{-- Purchase Orders Table --}}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+    <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-6">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                 Purchase Orders en la Lista ({{ $sentList->purchaseOrders->count() }})
@@ -103,7 +103,7 @@
 
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-900">
+                <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                             WO</th>
@@ -124,7 +124,7 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($sentList->purchaseOrders as $po)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td class="px-4 py-3 font-medium text-indigo-600 dark:text-indigo-400">
+                            <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">
                                 {{ $po->wo ?? '-' }}
                             </td>
                             <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">
@@ -139,7 +139,7 @@
                             <td class="px-4 py-3 text-right text-gray-900 dark:text-white">
                                 @if ($canEdit)
                                     <input type="number" wire:model.blur="quantities.{{ $po->id }}"
-                                        class="w-24 text-right rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm" />
+                                        class="w-24 text-right rounded border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:outline-none focus:border-blue-500" />
                                 @else
                                     {{ number_format($po->pivot->quantity) }}
                                 @endif
@@ -178,7 +178,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                            <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                                 No hay Purchase Orders en esta lista
                             </td>
                         </tr>
@@ -189,12 +189,12 @@
     </div>
 
     {{-- Notes Section --}}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+    <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notas</h3>
 
         @if ($canEdit)
             <textarea wire:model="generalNotes" rows="4"
-                class="w-full rounded p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                class="w-full rounded p-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:border-blue-500"
                 placeholder="Agregar notas generales..."></textarea>
         @else
             <div class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">

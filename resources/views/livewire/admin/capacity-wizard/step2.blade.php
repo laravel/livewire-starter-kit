@@ -1,13 +1,13 @@
 {{-- Step 2: Cálculo de horas necesarias por número de parte --}}
 <div>
     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Paso 2 de 3 - Cálculo de Horas Necesarias
+        Paso 2 de 4 — Cálculo de horas necesarias
     </h2>
 
     <div class="grid gap-6 lg:grid-cols-3">
         {{-- Left Column: Add Part Form --}}
         <div class="lg:col-span-1 space-y-4">
-            <div class="rounded-lg bg-gray-50 dark:bg-gray-900 p-4">
+            <div class="rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
                 <h3 class="font-medium text-gray-900 dark:text-white mb-4">Agregar Número de Parte</h3>
 
                 {{-- Button to open PO Modal --}}
@@ -39,20 +39,20 @@
         <div class="lg:col-span-2 space-y-4">
             {{-- Hours Summary --}}
             <div class="grid grid-cols-3 gap-4">
-                <div class="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-4 text-center">
+                <div class="rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4 text-center">
                     <p class="text-sm text-blue-700 dark:text-blue-300">Disponibles</p>
                     <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
                         {{ number_format($totalAvailableHours, 2) }}</p>
                 </div>
-                <div class="rounded-lg bg-orange-50 dark:bg-orange-900/20 p-4 text-center">
+                <div class="rounded-lg border-2 border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 p-4 text-center">
                     <p class="text-sm text-orange-700 dark:text-orange-300">Requeridas</p>
                     <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">
                         {{ number_format($totalRequiredHours, 2) }}</p>
                 </div>
                 <div @class([
-                    'rounded-lg p-4 text-center',
-                    'bg-green-50 dark:bg-green-900/20' => $remainingHours >= 0,
-                    'bg-red-50 dark:bg-red-900/20' => $remainingHours < 0,
+                    'rounded-lg border-2 p-4 text-center',
+                    'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20' => $remainingHours >= 0,
+                    'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20' => $remainingHours < 0,
                 ])>
                     <p @class([
                         'text-sm',
@@ -70,7 +70,7 @@
             {{-- Overtime Suggestion --}}
             @if ($suggestedOvertime > 0)
                 <div
-                    class="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 p-4">
+                    class="rounded-lg border-2 border-yellow-200 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20 p-4">
                     <div class="flex items-center gap-3">
                         <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -90,9 +90,9 @@
             @endif
 
             {{-- Work Orders Table --}}
-            <div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="rounded-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
                 <table class="w-full">
-                    <thead class="bg-gray-50 dark:bg-gray-900">
+                    <thead class="bg-gray-50 dark:bg-gray-900/50">
                         <tr>
                             <th
                                 class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
@@ -200,7 +200,7 @@
 
             {{-- Modal panel --}}
             <div
-                class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                 <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     {{-- Header --}}
                     <div class="flex items-center justify-between mb-4">
@@ -219,7 +219,7 @@
                     <div class="mb-4">
                         <input wire:model.live.debounce.300ms="poSearchTerm" type="text"
                             placeholder="Buscar por WO o número de parte..."
-                            class="w-full rounded-md p-3 border border-gray-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500" />
+                            class="w-full rounded-md p-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
                     </div>
 
                     {{-- PO List --}}
@@ -312,7 +312,7 @@
                 {{-- Footer --}}
                 <div class="bg-gray-50 dark:bg-gray-900 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
                     <button wire:click="addSelectedPOs" type="button"
-                        class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-800 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-800 sm:ml-3 sm:w-auto sm:text-sm">
+                        class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
                         Agregar Seleccionados ({{ count($selectedPOs) }})
                     </button>
                     <button wire:click="closePOModal" type="button"

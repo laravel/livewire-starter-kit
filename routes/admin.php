@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     // Gestión de usuarios
     Route::get('/users', \App\Livewire\Admin\Users\UserList::class)->name('users.index');
     Route::get('/users/create', \App\Livewire\Admin\Users\UserCreate::class)->name('users.create');
+    Route::get('/users/{user}', \App\Livewire\Admin\Users\UserShow::class)->name('users.show');
     Route::get('/users/{user}/edit', \App\Livewire\Admin\Users\UserEdit::class)->name('users.edit');
 
     // Gestión de roles

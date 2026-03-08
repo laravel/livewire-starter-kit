@@ -1,212 +1,187 @@
-<div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Producción - Pesadas</h1>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Registro de pesadas por lote y kit
-                    </p>
-                </div>
-                <div class="mt-4 sm:mt-0 flex space-x-2">
-                    <a href="{{ route('admin.sent-lists.display') }}"
-                       class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                        </svg>
-                        Volver a Display
-                    </a>
-                    <button wire:click="openCreateModal"
-                       class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        Nueva Pesada
-                    </button>
-                </div>
-            </div>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Producción - Pesadas</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Registro de pesadas por lote y kit</p>
         </div>
-
-        <!-- Flash Messages -->
-        @if (session()->has('message'))
-            <div class="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 text-green-600 dark:text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="text-green-800 dark:text-green-200 text-sm font-medium">{{ session('message') }}</span>
-                </div>
-            </div>
-        @endif
-
-        @if (session()->has('error'))
-            <div class="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="text-red-800 dark:text-red-200 text-sm font-medium">{{ session('error') }}</span>
-                </div>
-            </div>
-        @endif
-
-        <!-- Search -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
-            <div class="p-6">
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <div class="flex-1">
-                        <input wire:model.live.debounce.300ms="search" type="text"
-                            placeholder="Buscar por lote, WO o parte..."
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Table -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-900/50">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('id')">
-                                ID
-                                @if($sortField === 'id')
-                                    <span class="ml-1">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                                @endif
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                Lote</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                WO</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                Parte</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                Kit</th>
-                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                Cantidad</th>
-                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                Pz Pesadas</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('weighed_at')">
-                                Fecha Pesada
-                                @if($sortField === 'weighed_at')
-                                    <span class="ml-1">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                                @endif
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                Pesó</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse ($weighings as $weighing)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $weighing->id }}</td>
-                                <td class="px-4 py-3 text-sm text-blue-600 dark:text-blue-400 font-medium">
-                                    {{ $weighing->lot->lot_number ?? 'N/A' }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $weighing->lot->workOrder->purchaseOrder->wo ?? 'N/A' }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $weighing->lot->workOrder->purchaseOrder->part->number ?? 'N/A' }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                                    @if ($weighing->lot->workOrder->purchaseOrder->part->is_crimp ?? true)
-                                        {{ $weighing->kit->kit_number ?? '-' }}
-                                    @else
-                                        <span class="text-gray-400">—</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3 text-sm text-right text-gray-500 dark:text-gray-400">
-                                    {{ number_format($weighing->quantity) }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-right font-medium text-indigo-600 dark:text-indigo-400">
-                                    {{ number_format($weighing->good_pieces) }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
-                                    {{ $weighing->weighed_at->format('m/d/Y H:i') }}
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $weighing->weighedBy->name ?? 'N/A' }}
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="flex items-center justify-center space-x-2">
-                                        {{-- Ver --}}
-                                        <button wire:click="openDetailModal({{ $weighing->id }})"
-                                            class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                                            title="Ver detalle">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </button>
-                                        {{-- Editar --}}
-                                        <button wire:click="openEditModal({{ $weighing->id }})"
-                                            class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300"
-                                            title="Editar">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </button>
-                                        {{-- Eliminar --}}
-                                        <button wire:click="confirmDeletion({{ $weighing->id }})"
-                                            class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                                            title="Eliminar">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="10" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                                    <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                                    </svg>
-                                    <p class="text-lg font-medium">No hay pesadas registradas</p>
-                                    <p class="mt-1">Haz clic en "Nueva Pesada" para registrar una.</p>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            @if ($weighings->hasPages())
-                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                    {{ $weighings->links() }}
-                </div>
-            @endif
+        <div class="flex gap-2">
+            <a href="{{ route('admin.sent-lists.display') }}"
+               class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg border-2 border-gray-500 hover:border-gray-600 transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Volver a Display
+            </a>
+            <button wire:click="openCreateModal"
+               class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg border-2 border-blue-500 hover:border-blue-600 transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Nueva Pesada
+            </button>
         </div>
     </div>
 
-    {{-- ============================================= --}}
+    <!-- Flash Messages -->
+    @if (session()->has('message'))
+        <div class="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg" role="alert">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="text-sm font-medium">{{ session('message') }}</span>
+            </div>
+        </div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg" role="alert">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="text-sm font-medium">{{ session('error') }}</span>
+            </div>
+        </div>
+    @endif
+
+    <!-- Search -->
+    <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4">
+        <input wire:model.live.debounce.300ms="search" type="text"
+            placeholder="Buscar por lote, WO o parte..."
+            class="w-full px-4 py-2.5 text-sm border-2 border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('id')">
+                            ID
+                            @if($sortField === 'id')
+                                <span class="ml-1">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                            @endif
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Lote</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">WO</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Parte</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Kit</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Cantidad</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Pz Pesadas</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer" wire:click="sortBy('weighed_at')">
+                            Fecha Pesada
+                            @if($sortField === 'weighed_at')
+                                <span class="ml-1">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                            @endif
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Pesó</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse ($weighings as $weighing)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $weighing->id }}</td>
+                            <td class="px-6 py-4 text-sm text-blue-600 dark:text-blue-400 font-medium">
+                                {{ $weighing->lot->lot_number ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                {{ $weighing->lot->workOrder->purchaseOrder->wo ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                {{ $weighing->lot->workOrder->purchaseOrder->part->number ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                @if ($weighing->lot->workOrder->purchaseOrder->part->is_crimp ?? true)
+                                    {{ $weighing->kit->kit_number ?? '-' }}
+                                @else
+                                    <span class="text-gray-400">—</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-500 dark:text-gray-400">
+                                {{ number_format($weighing->quantity) }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-right font-medium text-blue-600 dark:text-blue-400">
+                                {{ number_format($weighing->good_pieces) }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-center text-gray-700 dark:text-gray-300">
+                                {{ $weighing->weighed_at->format('m/d/Y H:i') }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                {{ $weighing->weighedBy->name ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button wire:click="openDetailModal({{ $weighing->id }})"
+                                        class="inline-flex items-center justify-center w-8 h-8 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-2 border-transparent hover:border-blue-300 dark:hover:border-blue-700 rounded-md transition-colors"
+                                        title="Ver detalle">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </button>
+                                    <button wire:click="openEditModal({{ $weighing->id }})"
+                                        class="inline-flex items-center justify-center w-8 h-8 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 border-2 border-transparent hover:border-yellow-300 dark:hover:border-yellow-700 rounded-md transition-colors"
+                                        title="Editar">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </button>
+                                    <button wire:click="confirmDeletion({{ $weighing->id }})"
+                                        class="inline-flex items-center justify-center w-8 h-8 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 border-2 border-transparent hover:border-red-300 dark:hover:border-red-700 rounded-md transition-colors"
+                                        title="Eliminar">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="10" class="px-6 py-12 text-center">
+                                <svg class="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                                </svg>
+                                <p class="text-base font-medium text-gray-900 dark:text-white">No hay pesadas registradas</p>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Haz clic en "Nueva Pesada" para registrar una.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if ($weighings->hasPages())
+            <div class="px-6 py-4 border-t-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+                {{ $weighings->links() }}
+            </div>
+        @endif
+    </div>
+
     {{-- MODAL CREAR / EDITAR PESADA --}}
-    {{-- ============================================= --}}
     @if ($showFormModal)
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="weighing-form-title" role="dialog" aria-modal="true">
             <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-900/50 transition-opacity" wire:click="closeFormModal"></div>
 
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg">
                     {{-- Header --}}
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-indigo-600">
+                    <div class="px-6 py-4 border-b-2 border-blue-500 bg-blue-600">
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 id="weighing-form-title" class="text-lg font-semibold text-white">
                                     {{ $editingWeighingId ? 'Editar Pesada' : 'Nueva Pesada' }}
                                 </h3>
-                                <p class="text-sm text-indigo-100 mt-1">
+                                <p class="text-sm text-blue-100 mt-1">
                                     {{ $editingWeighingId ? 'Modificar registro de pesada' : 'Registrar nueva pesada de producción' }}
                                 </p>
                             </div>
-                            <button wire:click="closeFormModal" class="text-white hover:text-indigo-200">
+                            <button wire:click="closeFormModal" class="text-white hover:text-blue-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
@@ -215,12 +190,12 @@
                     </div>
 
                     {{-- Body --}}
-                    <div class="px-6 py-4 space-y-5">
+                    <div class="px-6 py-5 space-y-4">
                         {{-- Lote --}}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lote *</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Lote *</label>
                             <select wire:model.live="selectedLotId"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                class="w-full px-4 py-2.5 text-sm border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Seleccionar lote...</option>
                                 @foreach ($lots as $lot)
                                     <option value="{{ $lot->id }}">
@@ -236,9 +211,9 @@
                         {{-- Kit (opcional, solo si es CRIMP) --}}
                         @if ($isCrimp && count($kits) > 0)
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kit (opcional)</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kit (opcional)</label>
                                 <select wire:model="selectedKitId"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    class="w-full px-4 py-2.5 text-sm border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Sin kit</option>
                                     @foreach ($kits as $kit)
                                         <option value="{{ $kit->id }}">{{ $kit->kit_number }}</option>
@@ -249,8 +224,8 @@
 
                         {{-- Cantidad (solo visual) --}}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad del Lote</label>
-                            <div class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700/50 text-gray-900 dark:text-white text-sm rounded-lg font-semibold">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cantidad del Lote</label>
+                            <div class="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white text-sm rounded-lg font-semibold">
                                 {{ number_format($formQuantity) }} piezas
                             </div>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Campo informativo - no editable</p>
@@ -258,9 +233,9 @@
 
                         {{-- Piezas pesadas --}}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Piezas Pesadas *</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Piezas Pesadas *</label>
                             <input wire:model="formWeighedPieces" type="number" min="0"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-4 py-2.5 text-sm border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="0">
                             @error('formWeighedPieces')
                                 <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
@@ -269,9 +244,9 @@
 
                         {{-- Fecha y hora --}}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha y Hora de Pesada *</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fecha y Hora de Pesada *</label>
                             <input wire:model="formWeighedAt" type="datetime-local"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                class="w-full px-4 py-2.5 text-sm border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             @error('formWeighedAt')
                                 <span class="text-xs text-red-600 dark:text-red-400 mt-1 block">{{ $message }}</span>
                             @enderror
@@ -279,21 +254,21 @@
 
                         {{-- Comentarios --}}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comentarios</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comentarios</label>
                             <textarea wire:model="formComments" rows="2"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-4 py-2.5 text-sm border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Observaciones (opcional)..."></textarea>
                         </div>
                     </div>
 
                     {{-- Footer --}}
-                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
+                    <div class="px-6 py-4 border-t-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-col sm:flex-row gap-3 sm:justify-end">
                         <button wire:click="closeFormModal"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            class="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             Cancelar
                         </button>
                         <button wire:click="save"
-                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
                             {{ $editingWeighingId ? 'Actualizar' : 'Registrar' }} Pesada
                         </button>
                     </div>
@@ -302,17 +277,15 @@
         </div>
     @endif
 
-    {{-- ============================================= --}}
     {{-- MODAL VER DETALLE --}}
-    {{-- ============================================= --}}
     @if ($showDetailModal && $detailWeighing)
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="weighing-detail-title" role="dialog" aria-modal="true">
             <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-900/50 transition-opacity" wire:click="closeDetailModal"></div>
 
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700 rounded-lg">
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg">
                     {{-- Header --}}
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-700">
+                    <div class="px-6 py-4 border-b-2 border-gray-200 dark:border-gray-700 bg-gray-700">
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 id="weighing-detail-title" class="text-lg font-semibold text-white">Detalle de Pesada #{{ $detailWeighing->id }}</h3>
@@ -329,7 +302,7 @@
                     </div>
 
                     {{-- Body --}}
-                    <div class="px-6 py-4 space-y-4">
+                    <div class="px-6 py-5 space-y-4">
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400 block">WO:</span>
@@ -362,13 +335,13 @@
                         <hr class="border-gray-200 dark:border-gray-700">
 
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-center">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Cantidad del Lote</p>
-                                <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($detailWeighing->quantity) }}</p>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600 p-3 rounded-lg text-center">
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Cantidad del Lote</p>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ number_format($detailWeighing->quantity) }}</p>
                             </div>
-                            <div class="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg text-center">
-                                <p class="text-xs text-indigo-600 dark:text-indigo-400">Pz Pesadas</p>
-                                <p class="text-lg font-bold text-indigo-700 dark:text-indigo-300">{{ number_format($detailWeighing->good_pieces) }}</p>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 p-3 rounded-lg text-center">
+                                <p class="text-xs text-blue-600 dark:text-blue-400 mb-1">Pz Pesadas</p>
+                                <p class="text-lg font-semibold text-blue-700 dark:text-blue-300">{{ number_format($detailWeighing->good_pieces) }}</p>
                             </div>
                         </div>
 
@@ -389,8 +362,8 @@
 
                         @if ($detailWeighing->comments)
                             <div>
-                                <span class="text-gray-500 dark:text-gray-400 block text-sm">Comentarios:</span>
-                                <p class="text-gray-900 dark:text-white text-sm mt-1 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                                <span class="text-gray-500 dark:text-gray-400 block text-sm mb-2">Comentarios:</span>
+                                <p class="text-gray-900 dark:text-white text-sm bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600 p-3 rounded-lg">
                                     {{ $detailWeighing->comments }}
                                 </p>
                             </div>
@@ -403,9 +376,9 @@
                     </div>
 
                     {{-- Footer --}}
-                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-end">
+                    <div class="px-6 py-4 border-t-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-end">
                         <button wire:click="closeDetailModal"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            class="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             Cerrar
                         </button>
                     </div>
@@ -414,18 +387,16 @@
         </div>
     @endif
 
-    {{-- ============================================= --}}
     {{-- MODAL CONFIRMAR ELIMINACIÓN --}}
-    {{-- ============================================= --}}
     @if ($confirmingDeletion)
         <div class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
             <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-900/50 transition-opacity" wire:click="cancelDeletion"></div>
 
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <div class="px-6 py-4">
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border-2 border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div class="px-6 py-5">
                         <div class="flex items-center">
-                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-700 flex items-center justify-center">
                                 <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                                 </svg>
@@ -438,9 +409,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-end gap-3">
+                    <div class="px-6 py-4 border-t-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-end gap-3">
                         <button wire:click="cancelDeletion"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            class="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             Cancelar
                         </button>
                         <button wire:click="delete"

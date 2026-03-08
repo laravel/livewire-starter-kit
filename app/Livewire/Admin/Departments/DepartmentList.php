@@ -14,8 +14,6 @@ class DepartmentList extends Component
     public string $sortField = 'name';
     public string $sortDirection = 'asc';
     public int $perPage = 10;
-    public ?int $deleteId = null;
-    public bool $confirmingDeletion = false;
 
     public function updatingSearch(): void
     {
@@ -33,26 +31,13 @@ class DepartmentList extends Component
         $this->sortField = $field;
     }
 
-    public function confirmDeletion(int $id): void
+    public function deleteDepartment(int $id): void
     {
         $department = Department::findOrFail($id);
         
         if (!$department->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar este departamento porque tiene áreas asociadas.');
-            return;
-        }
-
-        $this->deleteId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    public function delete(): void
-    {
-        $department = Department::findOrFail($this->deleteId);
-        
-        if (!$department->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar este departamento porque tiene áreas asociadas.');
-            $this->confirmingDeletion = false;
+            session()->flash('flash.banner', 'No se puede eliminar este departamento porque tiene áreas asociadas.');
+            session()->flash('flash.bannerStyle', 'danger');
             return;
         }
         
@@ -60,18 +45,22 @@ class DepartmentList extends Component
         
         session()->flash('flash.banner', 'Departamento eliminado correctamente.');
         session()->flash('flash.bannerStyle', 'success');
-        
-        $this->confirmingDeletion = false;
     }
 
     public function render()
     {
-        $departments = Department::search($this->search)
+        $departments = Department::with('areas')
+            ->search($this->search)
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
+        $totalDepartments = Department::count();
+        $totalAreas = \App\Models\Area::count();
+
         return view('livewire.admin.departments.department-list', [
             'departments' => $departments,
+            'totalDepartments' => $totalDepartments,
+            'totalAreas' => $totalAreas,
         ]);
     }
 }

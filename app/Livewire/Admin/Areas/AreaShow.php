@@ -12,7 +12,7 @@ class AreaShow extends Component
 
     public function mount(Area $area): void
     {
-        $this->area = $area;
+        $this->area = $area->load(['department', 'machines', 'tables', 'semiAutomatics']);
         $this->stats = $area->getStats();
     }
 

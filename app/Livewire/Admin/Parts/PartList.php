@@ -14,8 +14,6 @@ class PartList extends Component
     public string $sortField = 'number';
     public string $sortDirection = 'asc';
     public int $perPage = 10;
-    public ?int $deleteId = null;
-    public bool $confirmingDeletion = false;
     public string $filterActive = 'all';
 
     public function updatingSearch(): void
@@ -30,39 +28,19 @@ class PartList extends Component
         } else {
             $this->sortDirection = 'asc';
         }
-
         $this->sortField = $field;
     }
 
-    public function confirmDeletion(int $id): void
+    public function deletePart(int $id): void
     {
         $part = Part::findOrFail($id);
-
         if (!$part->canBeDeleted()) {
             session()->flash('error', 'No se puede eliminar esta parte porque tiene precios asociados.');
             return;
         }
-
-        $this->deleteId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    public function delete(): void
-    {
-        $part = Part::findOrFail($this->deleteId);
-
-        if (!$part->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar esta parte porque tiene precios asociados.');
-            $this->confirmingDeletion = false;
-            return;
-        }
-
         $part->delete();
-
         session()->flash('flash.banner', 'Parte eliminada correctamente.');
         session()->flash('flash.bannerStyle', 'success');
-
-        $this->confirmingDeletion = false;
     }
 
     public function render()
@@ -78,8 +56,15 @@ class PartList extends Component
         $parts = $query->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
+        $totalParts = Part::count();
+        $activeParts = Part::active()->count();
+        $withPrices = Part::has('prices')->count();
+
         return view('livewire.admin.parts.part-list', [
             'parts' => $parts,
+            'totalParts' => $totalParts,
+            'activeParts' => $activeParts,
+            'withPrices' => $withPrices,
         ]);
     }
 }

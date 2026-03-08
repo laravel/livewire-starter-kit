@@ -214,6 +214,12 @@ class PackagingManagement extends Component
 
         $records = $query->latest('packed_at')->paginate(20);
 
+        // Statistics
+        $totalRecords = PackagingRecord::count();
+        $totalPackedPieces = PackagingRecord::sum('packed_pieces');
+        $totalSurplusPieces = PackagingRecord::sum('surplus_pieces');
+        $totalAdjustedSurplus = PackagingRecord::whereNotNull('adjusted_surplus')->sum('adjusted_surplus');
+
         // Lots for dropdown filter
         $lotsForFilter = Lot::whereHas('packagingRecords')
             ->with('workOrder.purchaseOrder.part')
@@ -240,6 +246,10 @@ class PackagingManagement extends Component
             'lotsForFilter' => $lotsForFilter,
             'workOrdersForFilter' => $workOrdersForFilter,
             'lotsForCreate' => $lotsForCreate,
+            'totalRecords' => $totalRecords,
+            'totalPackedPieces' => $totalPackedPieces,
+            'totalSurplusPieces' => $totalSurplusPieces,
+            'totalAdjustedSurplus' => $totalAdjustedSurplus,
         ]);
     }
 }

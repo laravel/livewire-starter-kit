@@ -12,7 +12,7 @@ class DepartmentShow extends Component
 
     public function mount(Department $department): void
     {
-        $this->department = $department;
+        $this->department = $department->load('areas');
         $this->stats = $department->getStats();
     }
 
