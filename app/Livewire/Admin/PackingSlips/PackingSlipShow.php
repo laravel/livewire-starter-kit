@@ -53,6 +53,24 @@ class PackingSlipShow extends Component
         session()->flash('flash.bannerStyle', 'success');
     }
 
+    public function updateItemDate(int $itemId, string $value): void
+    {
+        if ($this->packingSlip->isShipped()) return;
+
+        $item = $this->packingSlip->items()->findOrFail($itemId);
+        $item->update(['lot_date_code' => trim($value) ?: null]);
+        $this->packingSlip->load(['creator', 'shipper', 'items.lot.workOrder.purchaseOrder.part']);
+    }
+
+    public function updateItemLabelSpec(int $itemId, string $value): void
+    {
+        if ($this->packingSlip->isShipped()) return;
+
+        $item = $this->packingSlip->items()->findOrFail($itemId);
+        $item->update(['label_spec' => trim($value) ?: null]);
+        $this->packingSlip->load(['creator', 'shipper', 'items.lot.workOrder.purchaseOrder.part']);
+    }
+
     public function render()
     {
         return view('livewire.admin.packing-slips.packing-slip-show');
