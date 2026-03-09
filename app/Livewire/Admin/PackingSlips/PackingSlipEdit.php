@@ -11,6 +11,7 @@ class PackingSlipEdit extends Component
 {
     public PackingSlip $packingSlip;
     public string $notes = '';
+    public string $document_date = '';
     public array $selectedLotIds = [];
     public array $labelSpecs = [];
 
@@ -26,6 +27,7 @@ class PackingSlipEdit extends Component
         }
 
         $this->notes = $packingSlip->notes ?? '';
+        $this->document_date = $packingSlip->document_date?->toDateString() ?? now()->toDateString();
 
         // Cargar los lotes actuales del PS
         foreach ($packingSlip->items as $item) {
@@ -38,6 +40,7 @@ class PackingSlipEdit extends Component
     {
         return [
             'notes'            => 'nullable|string|max:1000',
+            'document_date'    => 'required|date',
             'selectedLotIds'   => 'required|array|min:1',
             'selectedLotIds.*' => 'integer|exists:lots,id',
             'labelSpecs'       => 'array',
@@ -92,9 +95,10 @@ class PackingSlipEdit extends Component
             }
         }
 
-        // Actualizar notas
+        // Actualizar notas y document_date
         $this->packingSlip->update([
-            'notes' => $this->notes ?: null,
+            'notes'         => $this->notes ?: null,
+            'document_date' => $this->document_date ?: now()->toDateString(),
         ]);
 
         // IDs de items actuales en el PS
@@ -121,7 +125,7 @@ class PackingSlipEdit extends Component
                     'lot_id'          => $lot->id,
                     'quantity_packed' => $lot->quantity_packed_final ?? $lot->quantity ?? 0,
                     'wo_number_ps'    => $lot->workOrder->external_wo_number ?? $lot->workOrder->wo_number,
-                    'lot_date_code'   => $lot->receipt_date?->format('Y-m-d') ?? null,
+                    'lot_date_code'   => null,
                     'label_spec'      => $this->labelSpecs[$lot->id] ?? null,
                 ]);
             }

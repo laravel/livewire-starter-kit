@@ -46,25 +46,42 @@
             </div>
         @else
             <form wire:submit="update">
-                <!-- Notas -->
+                <!-- Notas y Fecha del Documento -->
                 <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
                     <div class="p-6">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Información del Packing Slip</h2>
-                        <div>
-                            <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Notas <span class="text-gray-400 font-normal">(opcional)</span>
-                            </label>
-                            <textarea
-                                id="notes"
-                                wire:model="notes"
-                                rows="3"
-                                maxlength="1000"
-                                placeholder="Ingrese notas o comentarios adicionales..."
-                                class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                            ></textarea>
-                            @error('notes')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="document_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Fecha del Documento <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    id="document_date"
+                                    type="date"
+                                    wire:model="document_date"
+                                    class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                                >
+                                @error('document_date')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Corresponde al campo DATE del encabezado del FPL-10.</p>
+                            </div>
+                            <div>
+                                <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Notas <span class="text-gray-400 font-normal">(opcional)</span>
+                                </label>
+                                <textarea
+                                    id="notes"
+                                    wire:model="notes"
+                                    rows="3"
+                                    maxlength="1000"
+                                    placeholder="Ingrese notas o comentarios adicionales..."
+                                    class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                                ></textarea>
+                                @error('notes')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
                     </div>
                 </div>

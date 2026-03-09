@@ -75,6 +75,11 @@
                         <p class="text-base font-mono text-gray-900 dark:text-white mt-1">{{ $packingSlip->ps_number }}</p>
                     </div>
                     <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha del Documento</p>
+                        <p class="text-base text-gray-900 dark:text-white mt-1">{{ $packingSlip->document_date?->format('d/m/Y') ?? '-' }}</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">Campo DATE del FPL-10</p>
+                    </div>
+                    <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Creado por</p>
                         <p class="text-base text-gray-900 dark:text-white mt-1">{{ $packingSlip->creator?->name ?? '-' }}</p>
                     </div>
@@ -129,61 +134,76 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                                @foreach ($packingSlip->items as $item)
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">
-                                            {{ $item->wo_number_ps ?? '-' }}
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                            {{ $item->lot?->workOrder?->purchaseOrder?->po_number ?? '-' }}
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $item->lot?->workOrder?->purchaseOrder?->part?->item_number ?? '-' }}
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $item->lot?->workOrder?->purchaseOrder?->part?->number ?? '-' }}
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-right font-medium text-gray-900 dark:text-white">
-                                            {{ number_format($item->quantity_packed) }}
-                                        </td>
-                                        {{-- Celda editable: Date --}}
-                                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
-                                            x-data="{ editing: false, value: '{{ $item->lot_date_code ?? '' }}' }">
-                                            @if (!$packingSlip->isShipped())
-                                                <span x-show="!editing" @click="editing = true"
-                                                      class="cursor-pointer hover:text-blue-600 hover:underline min-w-[80px] inline-block"
-                                                      x-text="value || '-'"></span>
-                                                <input x-show="editing" x-model="value" type="text"
-                                                       maxlength="20"
-                                                       placeholder="ej: 20250512A22"
-                                                       class="border border-blue-400 rounded px-2 py-0.5 text-sm w-36 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                                       @blur="editing = false; $wire.updateItemDate({{ $item->id }}, value)"
-                                                       @keydown.enter="editing = false; $wire.updateItemDate({{ $item->id }}, value)"
-                                                       @keydown.escape="editing = false"
-                                                       x-effect="if (editing) $el.focus()">
-                                            @else
-                                                {{ $item->lot_date_code ?? '-' }}
-                                            @endif
-                                        </td>
-                                        {{-- Celda editable: Label Spec --}}
-                                        <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
-                                            x-data="{ editing: false, value: '{{ $item->label_spec ?? '' }}' }">
-                                            @if (!$packingSlip->isShipped())
-                                                <span x-show="!editing" @click="editing = true"
-                                                      class="cursor-pointer hover:text-blue-600 hover:underline min-w-[80px] inline-block"
-                                                      x-text="value || '-'"></span>
-                                                <input x-show="editing" x-model="value" type="text"
-                                                       class="border border-blue-400 rounded px-2 py-0.5 text-sm w-32 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                                       @blur="editing = false; $wire.updateItemLabelSpec({{ $item->id }}, value)"
-                                                       @keydown.enter="editing = false; $wire.updateItemLabelSpec({{ $item->id }}, value)"
-                                                       @keydown.escape="editing = false"
-                                                       x-effect="if (editing) $el.focus()"
-                                                       placeholder="Label spec...">
-                                            @else
-                                                {{ $item->label_spec ?? '-' }}
-                                            @endif
-                                        </td>
-                                    </tr>
+                                @foreach ($itemsGroupedByPo as $poNumber => $poItems)
+                                    @foreach ($poItems as $item)
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">
+                                                {{ $item->wo_number_ps ?? '-' }}
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                                {{ $item->lot?->workOrder?->purchaseOrder?->po_number ?? '-' }}
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                                {{ $item->lot?->workOrder?->purchaseOrder?->part?->item_number ?? '-' }}
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                                {{ $item->lot?->workOrder?->purchaseOrder?->part?->description ?? '-' }}
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900 dark:text-white">
+                                                {{ number_format($item->quantity_packed) }}
+                                            </td>
+                                            {{-- Celda editable: Date --}}
+                                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
+                                                x-data="{ editing: false, value: '{{ $item->lot_date_code ?? '' }}' }">
+                                                @if (!$packingSlip->isShipped())
+                                                    <span x-show="!editing" @click="editing = true"
+                                                          class="cursor-pointer hover:text-blue-600 hover:underline min-w-[80px] inline-block"
+                                                          x-text="value || '-'"></span>
+                                                    <input x-show="editing" x-model="value" type="text"
+                                                           maxlength="20"
+                                                           placeholder="ej: 20250512A22"
+                                                           class="border border-blue-400 rounded px-2 py-0.5 text-sm w-36 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                           @blur="editing = false; $wire.updateItemDate({{ $item->id }}, value)"
+                                                           @keydown.enter="editing = false; $wire.updateItemDate({{ $item->id }}, value)"
+                                                           @keydown.escape="editing = false"
+                                                           x-effect="if (editing) $el.focus()">
+                                                @else
+                                                    {{ $item->lot_date_code ?? '-' }}
+                                                @endif
+                                            </td>
+                                            {{-- Celda editable: Label Spec --}}
+                                            <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
+                                                x-data="{ editing: false, value: '{{ $item->label_spec ?? '' }}' }">
+                                                @if (!$packingSlip->isShipped())
+                                                    <span x-show="!editing" @click="editing = true"
+                                                          class="cursor-pointer hover:text-blue-600 hover:underline min-w-[80px] inline-block"
+                                                          x-text="value || '-'"></span>
+                                                    <input x-show="editing" x-model="value" type="text"
+                                                           class="border border-blue-400 rounded px-2 py-0.5 text-sm w-32 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                           @blur="editing = false; $wire.updateItemLabelSpec({{ $item->id }}, value)"
+                                                           @keydown.enter="editing = false; $wire.updateItemLabelSpec({{ $item->id }}, value)"
+                                                           @keydown.escape="editing = false"
+                                                           x-effect="if (editing) $el.focus()"
+                                                           placeholder="Label spec...">
+                                                @else
+                                                    {{ $item->label_spec ?? '-' }}
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                    {{-- Fila de subtotal por PO: solo si el grupo tiene mas de 1 item --}}
+                                    @if ($poItems->count() > 1)
+                                        <tr class="bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-700">
+                                            <td colspan="3" class="px-4 py-2"></td>
+                                            <td class="px-4 py-2 text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider text-right">
+                                                Total PO {{ $poNumber }}:
+                                            </td>
+                                            <td class="px-4 py-2 text-sm font-bold text-right text-blue-700 dark:text-blue-300">
+                                                {{ number_format($poItems->sum('quantity_packed')) }}
+                                            </td>
+                                            <td colspan="2"></td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                             <tfoot class="bg-gray-50 dark:bg-gray-800">

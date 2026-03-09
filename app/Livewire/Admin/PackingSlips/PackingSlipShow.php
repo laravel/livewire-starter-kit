@@ -73,6 +73,13 @@ class PackingSlipShow extends Component
 
     public function render()
     {
-        return view('livewire.admin.packing-slips.packing-slip-show');
+        // Agrupar items por PO para mostrar subtotales por grupo en la vista,
+        // replicando la estructura del Excel FPL-10 (columna C agrupada con subtotal).
+        $itemsGroupedByPo = $this->packingSlip->items
+            ->groupBy(fn ($item) => $item->lot?->workOrder?->purchaseOrder?->po_number ?? 'Sin PO');
+
+        return view('livewire.admin.packing-slips.packing-slip-show', [
+            'itemsGroupedByPo' => $itemsGroupedByPo,
+        ]);
     }
 }

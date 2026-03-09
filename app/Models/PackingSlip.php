@@ -31,13 +31,15 @@ class PackingSlip extends Model
         'ps_number',
         'created_by',
         'status',
+        'document_date',
         'shipped_at',
         'shipped_by',
         'notes',
     ];
 
     protected $casts = [
-        'shipped_at' => 'datetime',
+        'document_date' => 'date',
+        'shipped_at'    => 'datetime',
     ];
 
     // =========================================================

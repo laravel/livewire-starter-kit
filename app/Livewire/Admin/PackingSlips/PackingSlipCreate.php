@@ -11,14 +11,21 @@ use Livewire\Component;
 class PackingSlipCreate extends Component
 {
     public string $notes = '';
+    public string $document_date = '';
     public array $selectedLotIds = [];
     public array $labelSpecs = [];
     public array $dateSpecs = [];
+
+    public function mount(): void
+    {
+        $this->document_date = now()->toDateString();
+    }
 
     protected function rules(): array
     {
         return [
             'notes'            => 'nullable|string|max:1000',
+            'document_date'    => 'required|date',
             'selectedLotIds'   => 'required|array|min:1',
             'selectedLotIds.*' => 'integer|exists:lots,id',
             'labelSpecs'       => 'array',
@@ -70,9 +77,10 @@ class PackingSlipCreate extends Component
 
         // Crear el Packing Slip
         $packingSlip = PackingSlip::create([
-            'created_by' => Auth::id(),
-            'status'     => PackingSlip::STATUS_DRAFT,
-            'notes'      => $this->notes ?: null,
+            'created_by'    => Auth::id(),
+            'status'        => PackingSlip::STATUS_DRAFT,
+            'document_date' => $this->document_date ?: now()->toDateString(),
+            'notes'         => $this->notes ?: null,
         ]);
 
         // Crear los items

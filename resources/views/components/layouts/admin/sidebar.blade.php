@@ -109,6 +109,9 @@
                 <flux:navlist.item icon="document-text" :href="route('admin.packing-slips.index')"
                     :current="request()->routeIs('admin.packing-slips.*')" wire:navigate>{{ __('Packing Slips') }}
                 </flux:navlist.item>
+                <flux:navlist.item icon="queue-list" :href="route('admin.shipping.queue')"
+                    :current="request()->routeIs('admin.shipping.queue')" wire:navigate>{{ __('Cola de Despacho') }}
+                </flux:navlist.item>
             </flux:navlist.group>
 
             <flux:navlist.group :heading="__('Calidad')" class="grid">
