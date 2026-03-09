@@ -16,9 +16,7 @@ class TwoFactorAuthenticationTest extends TestCase
     {
         parent::setUp();
 
-        if (! Features::canManageTwoFactorAuthentication()) {
-            $this->markTestSkipped('Two-factor authentication is not enabled.');
-        }
+        $this->skipUnlessFortifyFeature(Features::twoFactorAuthentication());
 
         Features::twoFactorAuthentication([
             'confirm' => true,
