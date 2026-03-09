@@ -12,6 +12,7 @@ class WOEdit extends Component
     public WorkOrder $workOrder;
 
     public int $status_id;
+    public ?string $external_wo_number = null;
     public ?string $scheduled_send_date = null;
     public ?string $actual_send_date = null;
     public ?string $eq = null;
@@ -25,6 +26,7 @@ class WOEdit extends Component
     {
         return [
             'status_id' => 'required|exists:statuses_wo,id',
+            'external_wo_number' => 'nullable|string|max:20',
             'scheduled_send_date' => 'nullable|date',
             'actual_send_date' => 'nullable|date',
             'eq' => 'nullable|string|max:255',
@@ -42,6 +44,7 @@ class WOEdit extends Component
     {
         $this->workOrder = $workOrder->load(['purchaseOrder.part', 'status']);
         $this->status_id = $workOrder->status_id;
+        $this->external_wo_number = $workOrder->external_wo_number ?? null;
         $this->scheduled_send_date = $workOrder->scheduled_send_date?->format('Y-m-d');
         $this->actual_send_date = $workOrder->actual_send_date?->format('Y-m-d');
         $this->eq = $workOrder->eq;
@@ -57,6 +60,7 @@ class WOEdit extends Component
 
         // Update the work order
         $this->workOrder->update([
+            'external_wo_number' => $this->external_wo_number ?: null,
             'scheduled_send_date' => $this->scheduled_send_date,
             'actual_send_date' => $this->actual_send_date,
             'eq' => $this->eq,

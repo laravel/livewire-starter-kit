@@ -93,7 +93,7 @@ class WorkOrder extends Model
      * Construye el codigo de WO para el Packing Slip FPL-10.
      *
      * Formato: "W0" + external_wo_number + lot_seq_padded_3_digits
-     * Ejemplo: external_wo_number = "1234567", lot_seq = 1 -> "W012345670001"
+     * Ejemplo: external_wo_number = "1980231", lot_seq = 1 -> "W01980231001"  (3 digitos)
      *
      * NOTA: El prefijo es "W0" (W + cero), no "WO" (W + O maiuscula).
      * Esto es consistente con el formato del documento FPL-10 real.

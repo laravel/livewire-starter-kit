@@ -211,6 +211,9 @@ Route::middleware(['auth', 'verified', 'role:admin|Empaques'])->group(function (
     Route::get('/packing-slips/create', \App\Livewire\Admin\PackingSlips\PackingSlipCreate::class)->name('packing-slips.create');
     Route::get('/packing-slips/{packingSlip}/edit', \App\Livewire\Admin\PackingSlips\PackingSlipEdit::class)->name('packing-slips.edit');
     Route::get('/packing-slips/{packingSlip}', \App\Livewire\Admin\PackingSlips\PackingSlipShow::class)->name('packing-slips.show');
+
+    // Cola de despacho (Shipping Queue)
+    Route::get('/shipping-queue', \App\Livewire\Admin\Shipping\ShippingQueue::class)->name('shipping.queue');
 });
 
 // Inspection Area Routes (requires Inspection role)

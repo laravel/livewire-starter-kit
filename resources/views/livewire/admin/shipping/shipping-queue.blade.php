@@ -112,8 +112,7 @@
                                     </th>
                                 @endif
                                 <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Lote</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">WO / Parte</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">WO Externo</th>
+                                <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Work Order</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-600 dark:text-gray-300">Qty Empacada</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Tipo Cierre</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Fecha Cierre</th>
@@ -148,28 +147,32 @@
                                         </span>
                                     </td>
 
-                                    {{-- WO / Parte --}}
+                                    {{-- Work Order (codigo FPL-10 o advertencia) --}}
                                     <td class="px-4 py-3">
-                                        <div class="text-gray-900 dark:text-white font-medium">
-                                            {{ $lot->workOrder?->wo_number ?? '—' }}
-                                        </div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                            {{ $lot->workOrder?->purchaseOrder?->part?->number ?? '—' }}
-                                        </div>
-                                    </td>
-
-                                    {{-- WO Externo --}}
-                                    <td class="px-4 py-3">
-                                        @if($hasExternalWo)
-                                            <span class="font-mono text-gray-700 dark:text-gray-300">
-                                                {{ $lot->workOrder->external_wo_number }}
-                                            </span>
+                                        @php
+                                            $woCode = $hasExternalWo
+                                                ? 'W0' . $lot->workOrder->external_wo_number . str_pad((string) $lot->lot_number, 3, '0', STR_PAD_LEFT)
+                                                : null;
+                                        @endphp
+                                        @if($woCode)
+                                            <div class="font-mono font-semibold text-gray-900 dark:text-white text-sm">
+                                                {{ $woCode }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                {{ $lot->workOrder?->purchaseOrder?->part?->number ?? '—' }}
+                                            </div>
                                         @else
-                                            <span class="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 text-xs font-medium">
-                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <div class="text-gray-900 dark:text-white font-medium text-sm">
+                                                {{ $lot->workOrder?->wo_number ?? '—' }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                {{ $lot->workOrder?->purchaseOrder?->part?->number ?? '—' }}
+                                            </div>
+                                            <span class="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                                                <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                                                 </svg>
-                                                Sin numero externo
+                                                Sin WO externo — no puede incluirse en PS
                                             </span>
                                         @endif
                                     </td>

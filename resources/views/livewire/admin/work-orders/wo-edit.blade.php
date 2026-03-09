@@ -94,6 +94,26 @@
                     </div>
                 @endif
 
+                <!-- Numero WO Externo (FPL-10) -->
+                <div>
+                    <label for="external_wo_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Numero WO Externo
+                        <span class="ml-1 text-xs font-normal text-gray-400">(Packing Slip FPL-10)</span>
+                    </label>
+                    <input
+                        wire:model="external_wo_number"
+                        type="text"
+                        id="external_wo_number"
+                        maxlength="20"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono"
+                        placeholder="Ej: 1980231"
+                    >
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Numero externo de 7 digitos para el Packing Slip FPL-10 (ej: 1980231). Sin este numero el lote no puede incluirse en un PS.
+                    </p>
+                    @error('external_wo_number') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                </div>
+
                 <!-- Dates -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
