@@ -121,7 +121,16 @@
                                                     {{ $lot->workOrder?->purchaseOrder?->part?->number ?? '-' }}
                                                 </td>
                                                 <td class="px-4 py-3 text-sm font-mono text-gray-500 dark:text-gray-400">
-                                                    {{ $lot->workOrder?->external_wo_number ?? $lot->workOrder?->wo_number ?? '-' }}
+                                                    @php
+                                                        $woPreview = $lot->workOrder?->external_wo_number
+                                                            ? 'W0' . $lot->workOrder->external_wo_number . str_pad($lot->lot_number, 3, '0', STR_PAD_LEFT)
+                                                            : null;
+                                                    @endphp
+                                                    @if ($woPreview)
+                                                        {{ $woPreview }}
+                                                    @else
+                                                        <span class="text-orange-500 text-xs font-sans">Sin WO externo</span>
+                                                    @endif
                                                 </td>
                                                 <td class="px-4 py-3 text-sm text-right text-gray-900 dark:text-white">
                                                     {{ number_format($lot->quantity_packed_final ?? $lot->quantity ?? 0) }}

@@ -13,6 +13,7 @@ class PackingSlipCreate extends Component
     public string $notes = '';
     public array $selectedLotIds = [];
     public array $labelSpecs = [];
+    public array $dateSpecs = [];
 
     protected function rules(): array
     {
@@ -22,6 +23,8 @@ class PackingSlipCreate extends Component
             'selectedLotIds.*' => 'integer|exists:lots,id',
             'labelSpecs'       => 'array',
             'labelSpecs.*'     => 'nullable|string|max:50',
+            'dateSpecs'        => 'array',
+            'dateSpecs.*'      => 'nullable|string|max:20',
         ];
     }
 
@@ -40,9 +43,11 @@ class PackingSlipCreate extends Component
                 array_filter($this->selectedLotIds, fn($id) => $id !== $lotId)
             );
             unset($this->labelSpecs[$lotId]);
+            unset($this->dateSpecs[$lotId]);
         } else {
             $this->selectedLotIds[] = $lotId;
             $this->labelSpecs[$lotId] = '';
+            $this->dateSpecs[$lotId] = '';
         }
     }
 
@@ -72,12 +77,13 @@ class PackingSlipCreate extends Component
 
         // Crear los items
         foreach ($lots as $lot) {
+            $woCode = $lot->workOrder->buildWoCode((int) $lot->lot_number);
             PackingSlipItem::create([
                 'packing_slip_id' => $packingSlip->id,
                 'lot_id'          => $lot->id,
                 'quantity_packed' => $lot->quantity_packed_final ?? $lot->quantity ?? 0,
-                'wo_number_ps'    => $lot->workOrder->external_wo_number ?? $lot->workOrder->wo_number,
-                'lot_date_code'   => $lot->receipt_date?->format('Y-m-d') ?? null,
+                'wo_number_ps'    => $woCode,
+                'lot_date_code'   => $this->dateSpecs[$lot->id] ?? null,
                 'label_spec'      => $this->labelSpecs[$lot->id] ?? null,
             ]);
         }
@@ -94,6 +100,16 @@ class PackingSlipCreate extends Component
             ->readyForShipping()
             ->orderBy('lot_number')
             ->get();
+
+        // Inicializar arrays para todos los lotes visibles
+        foreach ($availableLots as $lot) {
+            if (!array_key_exists($lot->id, $this->dateSpecs)) {
+                $this->dateSpecs[$lot->id] = '';
+            }
+            if (!array_key_exists($lot->id, $this->labelSpecs)) {
+                $this->labelSpecs[$lot->id] = '';
+            }
+        }
 
         return view('livewire.admin.packing-slips.packing-slip-create', [
             'availableLots' => $availableLots,

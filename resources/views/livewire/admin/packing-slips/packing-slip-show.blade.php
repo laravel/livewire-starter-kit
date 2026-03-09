@@ -141,7 +141,7 @@
                                             {{ $item->lot?->workOrder?->purchaseOrder?->part?->item_number ?? '-' }}
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $item->lot?->workOrder?->purchaseOrder?->part?->description ?? '-' }}
+                                            {{ $item->lot?->workOrder?->purchaseOrder?->part?->number ?? '-' }}
                                         </td>
                                         <td class="px-4 py-3 text-sm text-right font-medium text-gray-900 dark:text-white">
                                             {{ number_format($item->quantity_packed) }}
@@ -154,12 +154,13 @@
                                                       class="cursor-pointer hover:text-blue-600 hover:underline min-w-[80px] inline-block"
                                                       x-text="value || '-'"></span>
                                                 <input x-show="editing" x-model="value" type="text"
-                                                       class="border border-blue-400 rounded px-2 py-0.5 text-sm w-28 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                       maxlength="20"
+                                                       placeholder="ej: 20250512A22"
+                                                       class="border border-blue-400 rounded px-2 py-0.5 text-sm w-36 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                                        @blur="editing = false; $wire.updateItemDate({{ $item->id }}, value)"
                                                        @keydown.enter="editing = false; $wire.updateItemDate({{ $item->id }}, value)"
                                                        @keydown.escape="editing = false"
-                                                       x-effect="if (editing) $el.focus()"
-                                                       placeholder="mm/dd/yy">
+                                                       x-effect="if (editing) $el.focus()">
                                             @else
                                                 {{ $item->lot_date_code ?? '-' }}
                                             @endif
