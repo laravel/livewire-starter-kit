@@ -30,7 +30,9 @@
       "Bash(npm run dev:*)",
       "Bash(npm install:*)",
       "Bash(python3:*)",
-      "mcp__playwright__browser_evaluate"
+      "mcp__playwright__browser_evaluate",
+      "Bash(cd C:/xampp/htdocs/flexcon-tracker && \"C:/xampp/mysql/bin/mysql.exe\" -u root flexcon_tracker -e \"SELECT id, lot_number, ready_for_shipping, closed_at FROM lots;\")",
+      "Bash(\"C:/xampp/mysql/bin/mysql.exe\" -u root flexcon_db -e \"SELECT id, lot_number, ready_for_shipping, closed_at FROM lots;\")"
     ],
     "deny": [],
     "ask": []
