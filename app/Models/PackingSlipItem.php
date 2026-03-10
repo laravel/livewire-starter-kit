@@ -42,10 +42,12 @@ class PackingSlipItem extends Model
 
     /**
      * Lote incluido en este item.
+     * Se usa withTrashed() para que los lotes soft-deleted sigan siendo accesibles
+     * desde el Packing Slip (documento historico de auditoria).
      */
     public function lot(): BelongsTo
     {
-        return $this->belongsTo(Lot::class);
+        return $this->belongsTo(Lot::class)->withTrashed();
     }
 
     /**

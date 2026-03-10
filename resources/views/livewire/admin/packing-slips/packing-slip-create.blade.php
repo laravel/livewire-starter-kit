@@ -131,7 +131,7 @@
                                             </td>
                                             {{-- Description --}}
                                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
-                                                {{ $lot->workOrder?->purchaseOrder?->part?->description ?? '-' }}
+                                                {{ $lot->workOrder?->purchaseOrder?->part?->number ?? '-' }}
                                             </td>
                                             {{-- Quantity --}}
                                             <td class="px-4 py-3 text-sm text-right text-gray-900 dark:text-white">

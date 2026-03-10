@@ -17,14 +17,14 @@ class PackingSlip extends Model
     // =========================================================
     // Constantes de estado del ciclo de vida
     // =========================================================
-    public const STATUS_DRAFT     = 'draft';
-    public const STATUS_CONFIRMED = 'confirmed';
+    public const STATUS_PENDING   = 'pending';
     public const STATUS_SHIPPED   = 'shipped';
+    public const STATUS_CANCELLED = 'cancelled';
 
     public const STATUSES = [
-        self::STATUS_DRAFT     => 'Borrador',
-        self::STATUS_CONFIRMED => 'Confirmado',
+        self::STATUS_PENDING   => 'Pendiente',
         self::STATUS_SHIPPED   => 'Despachado',
+        self::STATUS_CANCELLED => 'Cancelado',
     ];
 
     protected $fillable = [
@@ -108,19 +108,19 @@ class PackingSlip extends Model
     // Scopes
     // =========================================================
 
-    public function scopeDraft(Builder $query): Builder
+    public function scopePending(Builder $query): Builder
     {
-        return $query->where('status', self::STATUS_DRAFT);
-    }
-
-    public function scopeConfirmed(Builder $query): Builder
-    {
-        return $query->where('status', self::STATUS_CONFIRMED);
+        return $query->where('status', self::STATUS_PENDING);
     }
 
     public function scopeShipped(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_SHIPPED);
+    }
+
+    public function scopeCancelled(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_CANCELLED);
     }
 
     public function scopeSearch(Builder $query, ?string $search): Builder
@@ -136,19 +136,19 @@ class PackingSlip extends Model
     // Helpers de estado
     // =========================================================
 
-    public function isDraft(): bool
+    public function isPending(): bool
     {
-        return $this->status === self::STATUS_DRAFT;
-    }
-
-    public function isConfirmed(): bool
-    {
-        return $this->status === self::STATUS_CONFIRMED;
+        return $this->status === self::STATUS_PENDING;
     }
 
     public function isShipped(): bool
     {
         return $this->status === self::STATUS_SHIPPED;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === self::STATUS_CANCELLED;
     }
 
     /**
@@ -165,9 +165,9 @@ class PackingSlip extends Model
     public function getStatusColorAttribute(): string
     {
         return match ($this->status) {
-            self::STATUS_DRAFT     => 'yellow',
-            self::STATUS_CONFIRMED => 'blue',
+            self::STATUS_PENDING   => 'orange',
             self::STATUS_SHIPPED   => 'green',
+            self::STATUS_CANCELLED => 'red',
             default                => 'gray',
         };
     }

@@ -43,8 +43,8 @@ class PackingSlipList extends Component
     {
         $packingSlip = PackingSlip::findOrFail($id);
 
-        if (!$packingSlip->isDraft()) {
-            session()->flash('error', 'Solo se pueden eliminar Packing Slips en estado Borrador.');
+        if (!$packingSlip->isPending()) {
+            session()->flash('error', 'Solo se pueden eliminar Packing Slips en estado Pendiente.');
             return;
         }
 
@@ -56,11 +56,17 @@ class PackingSlipList extends Component
     {
         $packingSlip = PackingSlip::findOrFail($this->deleteId);
 
-        if (!$packingSlip->isDraft()) {
-            session()->flash('error', 'Solo se pueden eliminar Packing Slips en estado Borrador.');
+        if (!$packingSlip->isPending()) {
+            session()->flash('error', 'Solo se pueden eliminar Packing Slips en estado Pendiente.');
             $this->confirmingDeletion = false;
             return;
         }
+
+        // Eliminar explicitamente los items antes del soft-delete del PS.
+        // Esto libera los lotes (packing_slip_items.lot_id UNIQUE) para que
+        // puedan ser asignados a un nuevo Packing Slip. El cascade de BD no
+        // se activa con SoftDeletes ya que no es un DELETE SQL real.
+        $packingSlip->items()->delete();
 
         $packingSlip->delete();
 
@@ -82,12 +88,12 @@ class PackingSlipList extends Component
         $query = PackingSlip::with(['creator', 'items'])
             ->search($this->search);
 
-        if ($this->filterStatus === 'draft') {
-            $query->draft();
-        } elseif ($this->filterStatus === 'confirmed') {
-            $query->confirmed();
+        if ($this->filterStatus === 'pending') {
+            $query->pending();
         } elseif ($this->filterStatus === 'shipped') {
             $query->shipped();
+        } elseif ($this->filterStatus === 'cancelled') {
+            $query->cancelled();
         }
 
         $packingSlips = $query->orderBy($this->sortField, $this->sortDirection)
@@ -95,9 +101,9 @@ class PackingSlipList extends Component
 
         $stats = [
             'total'     => PackingSlip::count(),
-            'draft'     => PackingSlip::draft()->count(),
-            'confirmed' => PackingSlip::confirmed()->count(),
+            'pending'   => PackingSlip::pending()->count(),
             'shipped'   => PackingSlip::shipped()->count(),
+            'cancelled' => PackingSlip::cancelled()->count(),
         ];
 
         return view('livewire.admin.packing-slips.packing-slip-list', [

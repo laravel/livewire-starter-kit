@@ -143,7 +143,7 @@ class ShippingQueue extends Component
      * Proceso:
      * 1. Valida que los lotes existen y siguen en la cola (no asignados a otro PS).
      * 2. Valida que todos los WOs tienen external_wo_number.
-     * 3. Crea el PackingSlip en estado 'draft'.
+     * 3. Crea el PackingSlip en estado 'pending'.
      * 4. Crea un PackingSlipItem por cada lote con los snapshots correspondientes.
      * 5. NO marca el lote como "fuera de la cola" — el scope scopeReadyForShipping
      *    usa whereDoesntHave('packingSlipItem'), por lo que al existir el item,
@@ -189,10 +189,10 @@ class ShippingQueue extends Component
 
         DB::beginTransaction();
         try {
-            // Crear el Packing Slip en estado draft
+            // Crear el Packing Slip en estado pending
             $packingSlip = PackingSlip::create([
                 'created_by' => Auth::id(),
-                'status'     => PackingSlip::STATUS_DRAFT,
+                'status'     => PackingSlip::STATUS_PENDING,
                 'notes'      => $this->psNotes ?: null,
             ]);
 

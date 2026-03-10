@@ -5,9 +5,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Cola de Despacho</h1>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">WO Listos para PS</h1>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        Lotes listos para incluir en un Packing Slip (FPL-10)
+                        Work Orders con lotes disponibles para crear un Packing Slip (FPL-10)
                     </p>
                 </div>
                 @if($canCreatePs && !empty($selectedLotIds))

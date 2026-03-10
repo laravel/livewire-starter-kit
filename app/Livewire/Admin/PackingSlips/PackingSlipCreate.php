@@ -78,7 +78,7 @@ class PackingSlipCreate extends Component
         // Crear el Packing Slip
         $packingSlip = PackingSlip::create([
             'created_by'    => Auth::id(),
-            'status'        => PackingSlip::STATUS_DRAFT,
+            'status'        => PackingSlip::STATUS_PENDING,
             'document_date' => $this->document_date ?: now()->toDateString(),
             'notes'         => $this->notes ?: null,
         ]);

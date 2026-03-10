@@ -29,7 +29,8 @@
       "Bash(ls:*)",
       "Bash(npm run dev:*)",
       "Bash(npm install:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "mcp__playwright__browser_evaluate"
     ],
     "deny": [],
     "ask": []
