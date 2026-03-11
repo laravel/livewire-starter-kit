@@ -1118,6 +1118,24 @@ class ShippingListDisplay extends Component
         $this->dispatch('refresh-display');
     }
 
+    /**
+     * Reopen packaging (undo viajero_received) so more pieces can be packed.
+     */
+    public function reopenPackaging()
+    {
+        if (!$this->selectedLotForPackaging) return;
+
+        $this->selectedLotForPackaging->update([
+            'viajero_received'    => false,
+            'viajero_received_at' => null,
+            'viajero_received_by' => null,
+        ]);
+
+        session()->flash('message', 'Empaque reabierto. Ya puedes registrar más piezas.');
+        $this->openPackagingModal($this->selectedLotForPackaging->id);
+        $this->dispatch('refresh-display');
+    }
+
     // ===============================================
     // DECISION MODAL — Control de Materiales
     // ===============================================
@@ -1680,6 +1698,9 @@ class ShippingListDisplay extends Component
         $this->qualWeighedAt = $qw->weighed_at->format('Y-m-d\TH:i');
         $this->qualComments = $qw->comments ?? '';
         $this->qualKitId = $qw->kit_id;
+
+        // Add back this weighing's pieces so the user can redistribute them
+        $this->qualRemainingPieces += $qw->good_pieces + $qw->bad_pieces;
     }
 
     public function cancelEditQuality()
