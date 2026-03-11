@@ -218,10 +218,13 @@ span.flatpickr-weekday { color: rgb(99 102 241); font-weight: 600; font-size: 0.
         const maxDate  = el.getAttribute('max') || null;
         const defVal   = el.value || null;
 
-        // Flatpickr will set el.type = 'text' internally; keep the behavior
+        // dateFormat = value stored in the real input (what Livewire reads)
+        // altFormat  = display format shown to the user
         el._flatpickr = flatpickr(el, {
             locale        : 'es',
             dateFormat    : isDatetime ? 'Y-m-d\\TH:i' : 'Y-m-d',
+            altInput      : true,
+            altFormat     : isDatetime ? 'm/d/Y H:i' : 'm/d/Y',
             enableTime    : isDatetime,
             time_24hr     : true,
             defaultDate   : defVal,
