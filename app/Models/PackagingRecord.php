@@ -61,6 +61,6 @@ class PackagingRecord extends Model
      */
     public function getEffectiveSurplusAttribute(): int
     {
-        return $this->adjusted_surplus ?? $this->surplus_pieces;
+        return (int) ($this->adjusted_surplus ?? $this->surplus_pieces ?? 0);
     }
 }

@@ -7,6 +7,13 @@
         </div>
     </div>
 
+    <!-- Pending Sent Lists -->
+    @include('livewire.admin.sent-lists.partials.pending-lists-panel', [
+        'pendingSentLists' => $pendingSentLists,
+        'deptLabel'        => 'Materiales',
+        'deptColor'        => 'blue',
+    ])
+
     <!-- Statistics Cards -->
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div class="bg-white dark:bg-gray-800 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4">

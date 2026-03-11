@@ -1,16 +1,14 @@
 <x-layouts.admin>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center gap-4 w-full">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                    Lista Preliminar #{{ $sentList->id }}
-                </h2>
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Lista preliminar #{{ $sentList->id }}</h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Detalle y flujo por departamentos</p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-shrink-0 ml-auto">
                 @if ($sentList->isPending())
                     <a href="{{ route('admin.sent-lists.edit', $sentList) }}"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-md transition shadow-sm">
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
@@ -18,7 +16,7 @@
                     </a>
                 @endif
                 <a href="{{ route('admin.sent-lists.index') }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-md transition shadow-sm">
+                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
@@ -122,7 +120,63 @@
             </div>
         </div>
 
-        {{-- Department workflow & POs --}}
-        <livewire:admin.sent-lists.sent-list-department-view :sentList="$sentList" :key="'dept-view-'.$sentList->id" />
+        {{-- Department tabs --}}
+        <div x-data="{ activeTab: '{{ $sentList->current_department }}' }" class="space-y-0">
+            {{-- Tab buttons --}}
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-t-lg overflow-hidden">
+                <div class="flex overflow-x-auto">
+                    @foreach (\App\Models\SentList::getDepartments() as $deptKey => $deptLabel)
+                        @php
+                            $isActive = $deptKey === $sentList->current_department;
+                            $isDone = match($deptKey) {
+                                'materiales'  => !is_null($sentList->materials_approved_at),
+                                'inspeccion'  => !is_null($sentList->inspection_approved_at),
+                                'produccion'  => !is_null($sentList->production_approved_at),
+                                'calidad'     => !is_null($sentList->quality_approved_at),
+                                'envios'      => !is_null($sentList->shipping_approved_at),
+                                default       => false,
+                            };
+                        @endphp
+                        <button
+                            @click="activeTab = '{{ $deptKey }}'"
+                            :class="activeTab === '{{ $deptKey }}'
+                                ? 'border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 font-semibold'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/30'"
+                            class="flex items-center gap-2 px-5 py-3.5 text-sm whitespace-nowrap transition-colors border-b-2 border-transparent">
+                            @if ($isDone)
+                                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            @elseif ($isActive)
+                                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse inline-block"></span>
+                            @else
+                                <span class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 inline-block"></span>
+                            @endif
+                            {{ $deptLabel }}
+                            @if ($isActive)
+                                <span class="px-1.5 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded">Activo</span>
+                            @endif
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Tab content --}}
+            <div class="bg-white dark:bg-gray-800 border border-t-0 border-gray-200 dark:border-gray-700 rounded-b-lg p-4">
+                <div x-show="activeTab === 'materiales'" x-cloak>
+                    @livewire('admin.sent-lists.sent-list-materials-view', ['sentList' => $sentList], key('dept-materials-'.$sentList->id))
+                </div>
+                <div x-show="activeTab === 'inspeccion'" x-cloak>
+                    @livewire('admin.sent-lists.sent-list-inspection-view', ['sentList' => $sentList], key('dept-inspection-'.$sentList->id))
+                </div>
+                <div x-show="activeTab === 'produccion'" x-cloak>
+                    @livewire('admin.sent-lists.sent-list-production-view', ['sentList' => $sentList], key('dept-production-'.$sentList->id))
+                </div>
+                <div x-show="activeTab === 'calidad'" x-cloak>
+                    @livewire('admin.sent-lists.sent-list-quality-view', ['sentList' => $sentList], key('dept-quality-'.$sentList->id))
+                </div>
+                <div x-show="activeTab === 'envios'" x-cloak>
+                    @livewire('admin.sent-lists.sent-list-packaging-view', ['sentList' => $sentList], key('dept-shipping-'.$sentList->id))
+                </div>
+            </div>
+        </div>
     </div>
 </x-layouts.admin>

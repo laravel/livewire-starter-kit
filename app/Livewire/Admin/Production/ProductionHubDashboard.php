@@ -8,6 +8,7 @@ use App\Models\Weighing;
 use App\Models\QualityWeighing;
 use App\Models\Lot;
 use App\Models\Kit;
+use App\Models\SentList;
 use Illuminate\Support\Facades\DB;
 
 #[Layout('components.layouts.app')]
@@ -55,7 +56,14 @@ class ProductionHubDashboard extends Component
             ->with('weighedBy')
             ->get();
 
+        $pendingSentLists = SentList::with(['workOrders.purchaseOrder.part', 'workOrders.lots.weighings'])
+            ->where('current_department', SentList::DEPT_PRODUCTION)
+            ->where('status', SentList::STATUS_PENDING)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('livewire.admin.production.production-hub-dashboard', [
+            'pendingSentLists'   => $pendingSentLists,
             'totalWeighings' => $totalWeighings,
             'totalPiecesWeighed' => $totalPiecesWeighed,
             'lotsWithWeighings' => $lotsWithWeighings,

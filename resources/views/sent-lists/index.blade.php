@@ -1,18 +1,16 @@
 <x-layouts.admin>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center gap-4 w-full">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                    {{ __('Listas Preliminares') }}
-                </h2>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Listas generadas desde el wizard de capacidad</p>
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Listas preliminares</h1>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Generadas desde el wizard de capacidad</p>
             </div>
             <a href="{{ route('admin.capacity.wizard') }}"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition shadow-sm">
+                class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm flex-shrink-0 ml-auto">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Nueva Lista
+                Nueva lista
             </a>
         </div>
     </x-slot>
@@ -191,11 +189,11 @@
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Crea una desde el wizard de capacidad.</p>
                     <div class="mt-6">
                         <a href="{{ route('admin.capacity.wizard') }}"
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition">
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                            Ir al Wizard de Capacidad
+                            Ir al wizard de capacidad
                         </a>
                     </div>
                 </div>

@@ -7,6 +7,7 @@ use App\Models\Kit;
 use App\Models\QualityWeighing;
 use App\Models\WorkOrder;
 use App\Models\PurchaseOrder;
+use App\Models\SentList;
 use Livewire\Component;
 
 class QualityAreaDashboard extends Component
@@ -47,7 +48,15 @@ class QualityAreaDashboard extends Component
             ->limit(10)
             ->get();
 
+        // Calidad maneja tanto el paso de Inspección como el de Calidad
+        $pendingSentLists = SentList::with(['workOrders.purchaseOrder.part', 'workOrders.lots'])
+            ->whereIn('current_department', [SentList::DEPT_INSPECTION, SentList::DEPT_QUALITY])
+            ->where('status', SentList::STATUS_PENDING)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('livewire.admin.quality.quality-area-dashboard', [
+            'pendingSentLists'  => $pendingSentLists,
             'totalWOs' => $totalWOs,
             'activeWOs' => $activeWOs,
             'closedWOs' => $closedWOs,

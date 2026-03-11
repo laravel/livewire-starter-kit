@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use App\Models\Lot;
 use App\Models\PackagingRecord;
 use App\Models\WorkOrder;
+use App\Models\SentList;
 
 #[Layout('components.layouts.app')]
 class PackagingDashboard extends Component
@@ -60,7 +61,14 @@ class PackagingDashboard extends Component
             ->limit(15)
             ->get();
 
+        $pendingSentLists = SentList::with(['workOrders.purchaseOrder.part', 'workOrders.lots.packagingRecords'])
+            ->where('current_department', SentList::DEPT_SHIPPING)
+            ->where('status', SentList::STATUS_PENDING)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('livewire.admin.packaging.packaging-dashboard', [
+            'pendingSentLists'  => $pendingSentLists,
             'lotsWithPackaging' => $lotsWithPackaging,
             'lotsPendingPackaging' => $lotsPendingPackaging,
             'lotsPendingDecision' => $lotsPendingDecision,

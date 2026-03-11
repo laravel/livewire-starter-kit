@@ -219,10 +219,13 @@ class Kit extends Model
 
     /**
      * Check if the kit can be released.
+     * Requires: status=ready, validated=true, and at least one lot assigned.
      */
     public function canBeReleased(): bool
     {
-        return $this->status === self::STATUS_READY && $this->validated;
+        return $this->status === self::STATUS_READY
+            && $this->validated
+            && $this->lots()->exists();
     }
 
     /**
@@ -266,7 +269,7 @@ class Kit extends Model
      */
     public function canBeDeleted(): bool
     {
-        return $this->status === self::STATUS_PREPARING && !$this->submitted_to_quality_at;
+        return $this->status === self::STATUS_PREPARING && !$this->submitted_to_inspection_at;
     }
 
     /**

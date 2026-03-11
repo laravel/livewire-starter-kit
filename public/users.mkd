@@ -1,0 +1,7 @@
+
+Email	                Password	Rol	        Redirige a
+admin@flexcon.com	    password	admin	    Dashboard Admin (ve todo)
+materiales@flexcon.com	password	Materiales	Dashboard Materiales
+produccion@flexcon.com	password	Produccion	Dashboard Producción
+calidad@flexcon.com	    password	Calidad	    Dashboard Calidad
+empaques@flexcon.com	password	Empaques	Dashboard Empaques

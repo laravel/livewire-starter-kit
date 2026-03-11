@@ -24,6 +24,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // ===================================================================
+// SHARED: Sent Lists (admin + all department roles)
+// ===================================================================
+Route::middleware(['auth', 'verified', 'role:admin|Materiales|Produccion|Calidad|Empaques'])->group(function () {
+    Route::get('/sent-lists', [\App\Http\Controllers\SentListController::class, 'index'])->name('sent-lists.index');
+    Route::get('/sent-lists/display', \App\Livewire\Admin\SentLists\ShippingListDisplay::class)->name('sent-lists.display');
+    Route::get('/sent-lists/{sentList}', [\App\Http\Controllers\SentListController::class, 'show'])->name('sent-lists.show');
+    Route::get('/sent-lists/{sentList}/edit', [\App\Http\Controllers\SentListController::class, 'edit'])->name('sent-lists.edit');
+    Route::put('/sent-lists/{sentList}', [\App\Http\Controllers\SentListController::class, 'update'])->name('sent-lists.update');
+    Route::delete('/sent-lists/{sentList}', [\App\Http\Controllers\SentListController::class, 'destroy'])->name('sent-lists.destroy');
+});
+
+// ===================================================================
 // ADMIN-ONLY: Full admin panel (dashboard, users, catalogs, etc.)
 // ===================================================================
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
@@ -145,14 +157,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     
     // Capacity Wizard (New 3-step wizard)
     Route::get('/capacity-wizard', \App\Livewire\Admin\CapacityWizard::class)->name('capacity.wizard');
-
-    // Sent Lists Management
-    Route::get('/sent-lists', [\App\Http\Controllers\SentListController::class, 'index'])->name('sent-lists.index');
-    Route::get('/sent-lists/display', \App\Livewire\Admin\SentLists\ShippingListDisplay::class)->name('sent-lists.display');
-    Route::get('/sent-lists/{sentList}', [\App\Http\Controllers\SentListController::class, 'show'])->name('sent-lists.show');
-    Route::get('/sent-lists/{sentList}/edit', [\App\Http\Controllers\SentListController::class, 'edit'])->name('sent-lists.edit');
-    Route::put('/sent-lists/{sentList}', [\App\Http\Controllers\SentListController::class, 'update'])->name('sent-lists.update');
-    Route::delete('/sent-lists/{sentList}', [\App\Http\Controllers\SentListController::class, 'destroy'])->name('sent-lists.destroy');
 
     // Gestión de Kits
     Route::get('/kits', \App\Livewire\Admin\Kits\KitList::class)->name('kits.index');

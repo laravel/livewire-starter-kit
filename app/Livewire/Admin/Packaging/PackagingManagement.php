@@ -135,10 +135,16 @@ class PackagingManagement extends Component
             'packed_by' => Auth::id(),
         ];
 
-        // Calculate available_pieces for the record
+        // Calculate available_pieces for the record and validate
         $lot = Lot::find($this->formLotId);
         if ($lot) {
-            $data['available_pieces'] = $lot->getPackagingAvailablePieces();
+            $available = $lot->getPackagingAvailablePieces();
+            $data['available_pieces'] = $available;
+
+            if ($this->formPackedPieces > $available) {
+                $this->addError('formPackedPieces', "No puede empacar más piezas de las disponibles ({$available}).");
+                return;
+            }
         }
 
         if ($this->editingId) {

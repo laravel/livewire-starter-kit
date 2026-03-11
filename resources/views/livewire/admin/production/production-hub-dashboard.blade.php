@@ -7,6 +7,13 @@
         </div>
     </div>
 
+    <!-- Pending Sent Lists -->
+    @include('livewire.admin.sent-lists.partials.pending-lists-panel', [
+        'pendingSentLists' => $pendingSentLists,
+        'deptLabel'        => 'Producción',
+        'deptColor'        => 'purple',
+    ])
+
     <!-- Actividad de Hoy -->
     <section>
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">

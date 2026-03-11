@@ -29,10 +29,12 @@ class SentList extends Model
         'department_history',
         'materials_approved_at',
         'materials_approved_by',
-        'production_approved_at',
-        'production_approved_by',
         'inspection_approved_at',
         'inspection_approved_by',
+        'production_approved_at',
+        'production_approved_by',
+        'quality_approved_at',
+        'quality_approved_by',
         'shipping_approved_at',
         'shipping_approved_by',
         'notes',
@@ -47,8 +49,9 @@ class SentList extends Model
         'remaining_hours' => 'decimal:2',
         'department_history' => 'array',
         'materials_approved_at' => 'datetime',
-        'production_approved_at' => 'datetime',
         'inspection_approved_at' => 'datetime',
+        'production_approved_at' => 'datetime',
+        'quality_approved_at' => 'datetime',
         'shipping_approved_at' => 'datetime',
     ];
 
@@ -60,11 +63,12 @@ class SentList extends Model
     public const STATUS_CANCELED = 'canceled';
 
     /**
-     * Department constants
+     * Department constants — order matters for flow
      */
     public const DEPT_MATERIALS = 'materiales';
-    public const DEPT_PRODUCTION = 'produccion';
     public const DEPT_INSPECTION = 'inspeccion';
+    public const DEPT_PRODUCTION = 'produccion';
+    public const DEPT_QUALITY = 'calidad';
     public const DEPT_SHIPPING = 'envios';
 
     /**
@@ -81,6 +85,22 @@ class SentList extends Model
     public function workOrders(): HasMany
     {
         return $this->hasMany(WorkOrder::class, 'sent_list_id');
+    }
+
+    /**
+     * Returns all WOs for this SentList, merging:
+     * - WOs directly linked via sent_list_id (new flow)
+     * - WOs belonging to POs in the pivot (legacy flow where sent_list_id was never set)
+     * Assumes purchaseOrders.workOrder and workOrders relationships are already loaded.
+     */
+    public function getEffectiveWorkOrders(): \Illuminate\Support\Collection
+    {
+        $direct = $this->workOrders ?? collect();
+        $pivot  = $this->purchaseOrders
+            ? $this->purchaseOrders->map->workOrder->filter()->values()
+            : collect();
+
+        return $direct->merge($pivot)->unique('id')->values();
     }
 
     /**
@@ -119,9 +139,30 @@ class SentList extends Model
         return $this->belongsTo(User::class, 'inspection_approved_by');
     }
 
+    public function qualityApprover(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'quality_approved_by');
+    }
+
     public function shippingApprover(): BelongsTo
     {
         return $this->belongsTo(User::class, 'shipping_approved_by');
+    }
+
+    /**
+     * Get all rejection records for this sent list.
+     */
+    public function rejections(): HasMany
+    {
+        return $this->hasMany(SentListRejection::class);
+    }
+
+    /**
+     * Get unresolved rejections (pending correction by the receiving department).
+     */
+    public function unresolvedRejections(): HasMany
+    {
+        return $this->hasMany(SentListRejection::class)->whereNull('resolved_at');
     }
 
     /**
@@ -137,15 +178,16 @@ class SentList extends Model
     }
 
     /**
-     * Get all available departments.
+     * Get all available departments in order.
      */
     public static function getDepartments(): array
     {
         return [
-            self::DEPT_MATERIALS => 'Materiales',
-            self::DEPT_PRODUCTION => 'Producción',
+            self::DEPT_MATERIALS  => 'Materiales',
             self::DEPT_INSPECTION => 'Inspección',
-            self::DEPT_SHIPPING => 'Envíos',
+            self::DEPT_PRODUCTION => 'Producción',
+            self::DEPT_QUALITY    => 'Calidad',
+            self::DEPT_SHIPPING   => 'Empaque',
         ];
     }
 
@@ -167,51 +209,82 @@ class SentList extends Model
 
     /**
      * Move to next department in workflow.
-     * Flow: Materiales → Inspección → Producción → Envíos
+     * Flow: Materiales → Inspección → Producción → Calidad → Empaque
      */
     public function moveToNextDepartment(?int $userId = null): bool
     {
-        $departments = [
-            self::DEPT_MATERIALS => self::DEPT_INSPECTION,
+        $flow = [
+            self::DEPT_MATERIALS  => self::DEPT_INSPECTION,
             self::DEPT_INSPECTION => self::DEPT_PRODUCTION,
-            self::DEPT_PRODUCTION => self::DEPT_SHIPPING,
+            self::DEPT_PRODUCTION => self::DEPT_QUALITY,
+            self::DEPT_QUALITY    => self::DEPT_SHIPPING,
         ];
 
         $currentDept = $this->current_department;
 
-        if (!isset($departments[$currentDept])) {
-            return false; // Already at last department
+        if (!isset($flow[$currentDept])) {
+            return false; // Ya está en el último departamento
         }
 
-        // Update approval for current department
         $approvalField = match($currentDept) {
-            self::DEPT_MATERIALS => 'materials_approved',
+            self::DEPT_MATERIALS  => 'materials_approved',
             self::DEPT_INSPECTION => 'inspection_approved',
             self::DEPT_PRODUCTION => 'production_approved',
-            self::DEPT_SHIPPING => 'shipping_approved',
+            self::DEPT_QUALITY    => 'quality_approved',
             default => null,
         };
 
-        $updates = [
-            'current_department' => $departments[$currentDept],
-        ];
+        $updates = ['current_department' => $flow[$currentDept]];
 
         if ($approvalField && $userId) {
             $updates["{$approvalField}_at"] = now();
             $updates["{$approvalField}_by"] = $userId;
         }
 
-        // Add to history
         $history = $this->department_history ?? [];
         $history[] = [
-            'from' => $currentDept,
-            'to' => $departments[$currentDept],
-            'user_id' => $userId,
+            'from'      => $currentDept,
+            'to'        => $flow[$currentDept],
+            'action'    => 'approved',
+            'user_id'   => $userId,
             'timestamp' => now()->toISOString(),
         ];
         $updates['department_history'] = $history;
 
         return $this->update($updates);
+    }
+
+    /**
+     * Move back to a previous department (rejection flow).
+     * Records a rejection log entry.
+     */
+    public function moveToPreviousDepartment(string $targetDept, int $userId, string $reason, ?int $lotId = null): bool
+    {
+        $currentDept = $this->current_department;
+
+        // Create rejection record
+        $this->rejections()->create([
+            'from_department' => $currentDept,
+            'to_department'   => $targetDept,
+            'rejected_by'     => $userId,
+            'reason'          => $reason,
+            'lot_id'          => $lotId,
+        ]);
+
+        $history = $this->department_history ?? [];
+        $history[] = [
+            'from'      => $currentDept,
+            'to'        => $targetDept,
+            'action'    => 'rejected',
+            'user_id'   => $userId,
+            'reason'    => $reason,
+            'timestamp' => now()->toISOString(),
+        ];
+
+        return $this->update([
+            'current_department' => $targetDept,
+            'department_history' => $history,
+        ]);
     }
 
     /**

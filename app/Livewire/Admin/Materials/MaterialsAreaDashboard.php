@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use App\Models\WorkOrder;
 use App\Models\Lot;
 use App\Models\Kit;
+use App\Models\SentList;
 
 #[Layout('components.layouts.app')]
 class MaterialsAreaDashboard extends Component
@@ -43,8 +44,15 @@ class MaterialsAreaDashboard extends Component
      */
     public function render()
     {
+        $pendingSentLists = SentList::with(['workOrders.purchaseOrder.part', 'workOrders.lots', 'unresolvedRejections'])
+            ->where('current_department', SentList::DEPT_MATERIALS)
+            ->where('status', SentList::STATUS_PENDING)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('livewire.admin.materials.materials-area-dashboard', [
-            'stats' => $this->stats,
+            'stats'            => $this->stats,
+            'pendingSentLists' => $pendingSentLists,
         ]);
     }
 }
