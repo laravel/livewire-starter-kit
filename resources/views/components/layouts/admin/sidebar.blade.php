@@ -126,14 +126,23 @@
                 </flux:navlist.group>
             @endif
 
-            <flux:navlist.group :heading="__('Empaques')" class="grid">
-                <flux:navlist.item icon="chart-bar-square" :href="route('admin.packaging.index')"
-                    :current="request()->routeIs('admin.packaging.index')" wire:navigate>{{ __('Dashboard') }}
-                </flux:navlist.item>
-                <flux:navlist.item icon="archive-box" :href="route('admin.packaging.manage')"
-                    :current="request()->routeIs('admin.packaging.manage')" wire:navigate>{{ __('Gestión') }}
-                </flux:navlist.item>
-            </flux:navlist.group>
+            {{-- ── EMPAQUES (admin + Empaques) ── --}}
+            @if ($authUser->hasRole('admin') || $authUser->hasRole('Empaques'))
+                <flux:navlist.group :heading="__('Empaques')" class="grid">
+                    <flux:navlist.item icon="chart-bar-square" :href="route('admin.packaging.index')"
+                        :current="request()->routeIs('admin.packaging.index')" wire:navigate>{{ __('Dashboard') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="archive-box" :href="route('admin.packaging.manage')"
+                        :current="request()->routeIs('admin.packaging.manage')" wire:navigate>{{ __('Gestión') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="document-text" :href="route('admin.packing-slips.index')"
+                        :current="request()->routeIs('admin.packing-slips.*')" wire:navigate>{{ __('Packing Slips') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="truck" :href="route('admin.shipping.queue')"
+                        :current="request()->routeIs('admin.shipping.queue')" wire:navigate>{{ __('WO Listos para PS') }}
+                    </flux:navlist.item>
+                </flux:navlist.group>
+            @endif
 
             {{-- ── CALIDAD (admin + Calidad) ── --}}
             @if ($authUser->hasRole('admin') || $authUser->hasRole('Calidad'))
