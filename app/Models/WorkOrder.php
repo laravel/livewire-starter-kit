@@ -16,6 +16,7 @@ class WorkOrder extends Model
 
     protected $fillable = [
         'wo_number',
+        'external_wo_number',
         'purchase_order_id',
         'sent_list_id',
         'assembly_mode',
@@ -83,6 +84,45 @@ class WorkOrder extends Model
     {
         return $this->hasMany(WOStatusLog::class);
     }
+
+    // =========================================================
+    // METODOS DE PACKING SLIP / FPL-10
+    // =========================================================
+
+    /**
+     * Construye el codigo de WO para el Packing Slip FPL-10.
+     *
+     * Formato: "W0" + external_wo_number + lot_seq_padded_3_digits
+     * Ejemplo: external_wo_number = "1980231", lot_seq = 1 -> "W01980231001"  (3 digitos)
+     *
+     * NOTA: El prefijo es "W0" (W + cero), no "WO" (W + O maiuscula).
+     * Esto es consistente con el formato del documento FPL-10 real.
+     *
+     * @param int $lotSeq Numero secuencial del lote (ej: 1, 2, 3...)
+     * @return string|null Codigo de WO para FPL-10, o NULL si external_wo_number no esta definido
+     */
+    public function buildWoCode(int $lotSeq): ?string
+    {
+        if (empty($this->external_wo_number)) {
+            return null;
+        }
+
+        return 'W0' . $this->external_wo_number . str_pad((string) $lotSeq, 3, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Verifica si el WO tiene numero externo configurado.
+     * Los WOs sin external_wo_number no pueden incluirse en un Packing Slip.
+     * Ver decision D-06-05.
+     */
+    public function hasExternalWoNumber(): bool
+    {
+        return !empty($this->external_wo_number);
+    }
+
+    // =========================================================
+    // GENERACION DE NUMERO DE WO (existente)
+    // =========================================================
 
     /**
      * Generate a unique WO number.

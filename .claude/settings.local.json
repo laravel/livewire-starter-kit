@@ -28,7 +28,8 @@
       "mcp__playwright__browser_press_key",
       "Bash(ls:*)",
       "Bash(npm run dev:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

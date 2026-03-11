@@ -123,24 +123,14 @@
                 </flux:navlist.group>
             @endif
 
-            {{-- ── EMPAQUES (admin + Empaques) ── --}}
-            @if ($authUser->hasRole('admin') || $authUser->hasRole('Empaques'))
-                <flux:navlist.group :heading="__('Empaques')" class="grid">
-                    <flux:navlist.item icon="chart-bar-square" :href="route('admin.packaging.index')"
-                        :current="request()->routeIs('admin.packaging.index')" wire:navigate>{{ __('Dashboard') }}
-                    </flux:navlist.item>
-                    <flux:navlist.item icon="archive-box" :href="route('admin.packaging.manage')"
-                        :current="request()->routeIs('admin.packaging.manage')" wire:navigate>{{ __('Gestión') }}
-                    </flux:navlist.item>
-                    <flux:navlist.item icon="truck" :href="route('admin.sent-lists.display')"
-                        :current="request()->routeIs('admin.sent-lists.display')" wire:navigate>{{ __('Lista de Envío') }}
-                    </flux:navlist.item>
-                    <flux:navlist.item icon="list-bullet" :href="route('admin.sent-lists.index')"
-                        :current="request()->routeIs('admin.sent-lists.index') || request()->routeIs('admin.sent-lists.show')"
-                        wire:navigate>{{ __('Listas Preliminares') }}
-                    </flux:navlist.item>
-                </flux:navlist.group>
-            @endif
+            <flux:navlist.group :heading="__('Empaques')" class="grid">
+                <flux:navlist.item icon="chart-bar-square" :href="route('admin.packaging.index')"
+                    :current="request()->routeIs('admin.packaging.index')" wire:navigate>{{ __('Dashboard') }}
+                </flux:navlist.item>
+                <flux:navlist.item icon="archive-box" :href="route('admin.packaging.manage')"
+                    :current="request()->routeIs('admin.packaging.manage')" wire:navigate>{{ __('Gestión') }}
+                </flux:navlist.item>
+            </flux:navlist.group>
 
             {{-- ── CALIDAD (admin + Calidad) ── --}}
             @if ($authUser->hasRole('admin') || $authUser->hasRole('Calidad'))
