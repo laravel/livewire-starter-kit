@@ -41,7 +41,7 @@ Route::middleware(['auth', 'verified', 'role:admin|Materiales|Produccion|Calidad
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     // Dashboard Admin
-    Route::view('/', 'admin.dashboard')->name('dashboard');
+    Route::get('/', \App\Livewire\Admin\AdminDashboard::class)->name('dashboard');
 
     // Gestión de usuarios
     Route::get('/users', \App\Livewire\Admin\Users\UserList::class)->name('users.index');
