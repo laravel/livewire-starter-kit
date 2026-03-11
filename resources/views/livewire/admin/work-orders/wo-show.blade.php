@@ -1,72 +1,53 @@
-<div class="py-8">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+<div class="space-y-6">
+    @if(session('success'))
+        <div class="p-3 rounded-md bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 text-sm">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="p-3 rounded-md bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">{{ session('error') }}</div>
+    @endif
 
-        {{-- Flash Messages --}}
-        @if(session('success'))
-            <div class="mb-4 p-4 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 text-green-800 dark:text-green-300 rounded-lg text-sm">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="mb-4 p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 text-red-800 dark:text-red-300 rounded-lg text-sm">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        {{-- Header --}}
-        <div class="mb-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $workOrder->wo_number }}</p>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        WO: {{ $workOrder->purchaseOrder?->wo ?? $workOrder->wo_number }}
-                    </h1>
-                    <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-                        {{ $workOrder->purchaseOrder?->part?->number ?? '' }} — {{ $workOrder->purchaseOrder?->part?->description ?? '' }}
-                    </p>
-                </div>
-                <div class="mt-3 sm:mt-0 flex space-x-2">
-                    <a href="{{ route('admin.work-orders.index') }}" wire:navigate
-                        class="inline-flex items-center px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
-                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                        Volver
-                    </a>
-                    <a href="{{ route('admin.work-orders.edit', $workOrder) }}" wire:navigate
-                        class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                        Editar
-                    </a>
-                </div>
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{{ route('admin.work-orders.index') }}" class="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md transition-colors" title="Volver">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            </a>
+            <div>
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">WO: {{ $workOrder->purchaseOrder?->wo ?? $workOrder->wo_number }}</h1>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $workOrder->purchaseOrder?->part?->number ?? '' }} — {{ Str::limit($workOrder->purchaseOrder?->part?->description ?? '', 50) }}</p>
             </div>
         </div>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.work-orders.edit', $workOrder) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors">Editar</a>
+            <a href="{{ route('admin.work-orders.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 rounded-md transition-colors">Volver</a>
+        </div>
+    </div>
 
-        {{-- Summary Cards --}}
-        @php
-            $progress = $workOrder->original_quantity > 0 ? round(($workOrder->sent_pieces / $workOrder->original_quantity) * 100, 1) : 0;
-            $lotsCount = $workOrder->lots->count();
-            $kitsCount = $workOrder->kits->count();
-            $totalWeighings = $workOrder->lots->sum(fn($l) => $l->weighings->count());
-        @endphp
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+    @php
+        $progress = $workOrder->original_quantity > 0 ? round(($workOrder->sent_pieces / $workOrder->original_quantity) * 100, 1) : 0;
+        $lotsCount = $workOrder->lots->count();
+        $kitsCount = $workOrder->kits->count();
+        $totalWeighings = $workOrder->lots->sum(fn($l) => $l->weighings->count());
+    @endphp
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Estado</p>
                 <span class="mt-1 inline-block px-2 py-0.5 text-xs font-semibold rounded-full text-white" style="background-color: {{ $workOrder->status?->color ?? '#6b7280' }}">
                     {{ $workOrder->status?->name ?? 'Sin estado' }}
                 </span>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Cantidad</p>
                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($workOrder->original_quantity) }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Lotes</p>
                 <p class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $lotsCount }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Kits</p>
                 <p class="text-lg font-bold text-green-600 dark:text-green-400">{{ $kitsCount }}</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Pesadas</p>
                 <p class="text-lg font-bold text-purple-600 dark:text-purple-400">{{ $totalWeighings }}</p>
             </div>
@@ -481,8 +462,6 @@
             @endif
         </div>
         @endif
-
-    </div>
 
     {{-- ============================================ --}}
     {{-- MODALS --}}

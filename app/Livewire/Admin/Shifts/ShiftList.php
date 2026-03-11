@@ -14,8 +14,6 @@ class ShiftList extends Component
     public string $sortField = 'name';
     public string $sortDirection = 'asc';
     public int $perPage = 10;
-    public ?int $deleteId = null;
-    public bool $confirmingDeletion = false;
 
     public function updatingSearch(): void
     {
@@ -29,50 +27,37 @@ class ShiftList extends Component
         } else {
             $this->sortDirection = 'asc';
         }
-
         $this->sortField = $field;
     }
 
-    public function confirmDeletion(int $id): void
+    public function deleteShift(int $id): void
     {
         $shift = Shift::findOrFail($id);
-
         if (!$shift->canBeDeleted()) {
             session()->flash('error', 'No se puede eliminar este turno porque tiene empleados, sesiones de producción o descansos asociados.');
             return;
         }
-
-        $this->deleteId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    public function delete(): void
-    {
-        $shift = Shift::findOrFail($this->deleteId);
-
-        if (!$shift->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar este turno porque tiene empleados, sesiones de producción o descansos asociados.');
-            $this->confirmingDeletion = false;
-            return;
-        }
-
         $shift->delete();
-
         session()->flash('flash.banner', 'Turno eliminado correctamente.');
         session()->flash('flash.bannerStyle', 'success');
-
-        $this->confirmingDeletion = false;
     }
 
     public function render()
     {
         $shifts = Shift::withCount('employees')
-                    ->search($this->search)
-                    ->orderBy($this->sortField, $this->sortDirection)
-                    ->paginate($this->perPage);
+            ->search($this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage);
+
+        $totalShifts = Shift::count();
+        $activeShifts = Shift::where('active', true)->count();
+        $employeesAssigned = (int) \App\Models\User::role('employee')->whereNotNull('shift_id')->active()->count();
 
         return view('livewire.admin.shifts.shift-list', [
             'shifts' => $shifts,
+            'totalShifts' => $totalShifts,
+            'activeShifts' => $activeShifts,
+            'employeesAssigned' => $employeesAssigned,
         ]);
     }
 }

@@ -13,25 +13,26 @@
         {{-- Success State --}}
         <div class="text-center py-8">
             <div class="flex justify-center mb-4">
-                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-                    <flux:icon.check-circle class="h-10 w-10 text-green-600 dark:text-green-400" />
+                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900 border-2 border-green-200 dark:border-green-800">
+                    <svg class="h-10 w-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
                 </div>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">¡Lista Preliminar Generada Exitosamente!
-            </h3>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">¡Lista Preliminar Generada Exitosamente!</h3>
             <p class="text-gray-600 dark:text-gray-400 mb-6">
                 La lista preliminar #{{ $generatedSentListId }} ha sido creada y enviada al departamento de Materiales.
                 Ahora pasará por todos los departamentos: Materiales → Producción → Inspección → Envíos.
             </p>
             <div class="flex justify-center gap-4">
-                <flux:button wire:click="viewSentList" variant="primary">
-                    <flux:icon.eye class="w-4 h-4 mr-2" />
+                <button wire:click="viewSentList" type="button" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                     Ver Lista
-                </flux:button>
-                <flux:button wire:click="resetWizard" variant="ghost">
-                    <flux:icon.arrow-path class="w-4 h-4 mr-2" />
+                </button>
+                <button wire:click="resetWizard" type="button" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     Nueva Calculación
-                </flux:button>
+                </button>
             </div>
         </div>
     @else
@@ -39,15 +40,15 @@
         <div class="space-y-6">
             {{-- Configuration Summary --}}
             <div class="grid gap-4 md:grid-cols-3">
-                <div class="rounded-lg bg-gray-50 dark:bg-gray-900 p-4">
+                <div class="rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Turnos Seleccionados</p>
                     <p class="font-medium text-gray-900 dark:text-white">{{ count($selectedShifts) }} turno(s)</p>
                 </div>
-                <div class="rounded-lg bg-gray-50 dark:bg-gray-900 p-4">
+                <div class="rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Personal</p>
                     <p class="font-medium text-gray-900 dark:text-white">{{ $numPersons }} persona(s)</p>
                 </div>
-                <div class="rounded-lg bg-gray-50 dark:bg-gray-900 p-4">
+                <div class="rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Período</p>
                     <p class="font-medium text-gray-900 dark:text-white">
                         Semana {{ \Carbon\Carbon::parse($startDate)->weekOfYear }} -
@@ -62,20 +63,20 @@
 
             {{-- Hours Summary --}}
             <div class="grid gap-4 md:grid-cols-3">
-                <div class="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-4 text-center">
+                <div class="rounded-lg border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4 text-center">
                     <p class="text-sm text-blue-700 dark:text-blue-300">Horas Disponibles</p>
                     <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">
                         {{ number_format($totalAvailableHours, 2) }}</p>
                 </div>
-                <div class="rounded-lg bg-orange-50 dark:bg-orange-900/20 p-4 text-center">
+                <div class="rounded-lg border-2 border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 p-4 text-center">
                     <p class="text-sm text-orange-700 dark:text-orange-300">Horas Utilizadas</p>
                     <p class="text-3xl font-bold text-orange-600 dark:text-orange-400">
                         {{ number_format($totalRequiredHours, 2) }}</p>
                 </div>
                 <div @class([
-                    'rounded-lg p-4 text-center',
-                    'bg-green-50 dark:bg-green-900/20' => $remainingHours >= 0,
-                    'bg-red-50 dark:bg-red-900/20' => $remainingHours < 0,
+                    'rounded-lg border-2 p-4 text-center',
+                    'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20' => $remainingHours >= 0,
+                    'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20' => $remainingHours < 0,
                 ])>
                     <p @class([
                         'text-sm',
@@ -99,9 +100,9 @@
                         Envíos</strong>.
                     Opcionalmente puede asignar números de lote/viajero a cada PO.
                 </p>
-                <div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="rounded-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
                     <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
+                        <thead class="bg-gray-50 dark:bg-gray-900/50">
                             <tr>
                                 <th
                                     class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
@@ -133,7 +134,7 @@
                             @foreach ($workOrderItems as $index => $item)
                                 <tr>
                                     <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-3 font-medium text-indigo-600 dark:text-indigo-400">
+                                    <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">
                                         {{ $item['wo'] ?? '-' }}</td>
                                     <td class="px-4 py-3 font-medium text-blue-600 dark:text-blue-400">
                                         {{ $item['po_number'] ?? '-' }}</td>
@@ -200,10 +201,11 @@
 
             {{-- Overtime Warning --}}
             @if ($suggestedOvertime > 0)
-                <div
-                    class="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 p-4">
+                <div class="rounded-lg border-2 border-yellow-200 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20 p-4">
                     <div class="flex items-center gap-3">
-                        <flux:icon.exclamation-triangle class="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                        <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
                         <div>
                             <p class="font-medium text-yellow-800 dark:text-yellow-200">Atención: Capacidad Excedida</p>
                             <p class="text-sm text-yellow-700 dark:text-yellow-300">
@@ -218,14 +220,14 @@
 
         {{-- Navigation --}}
         <div class="flex justify-between mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <flux:button wire:click="previousStep" variant="ghost">
-                <flux:icon.arrow-left class="w-4 h-4 mr-2" />
+            <button wire:click="previousStep" type="button" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 Anterior
-            </flux:button>
-            <flux:button wire:click="nextStep" variant="primary">
+            </button>
+            <button wire:click="nextStep" type="button" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors">
                 Siguiente - Fechas de Envío
-                <flux:icon.arrow-right class="w-4 h-4 ml-2" />
-            </flux:button>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
         </div>
     @endif
 
@@ -240,7 +242,7 @@
 
                 {{-- Modal panel --}}
                 <div
-                    class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                     <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         {{-- Header --}}
                         <div class="flex items-center justify-between mb-4">
@@ -280,7 +282,7 @@
                                             </label>
                                             <input type="text" wire:model="tempLots.{{ $lotIndex }}.number"
                                                 placeholder="Ej: 30"
-                                                class="w-full rounded-md p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500" />
+                                                class="w-full rounded-md p-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
                                         </div>
                                         <div>
                                             <label
@@ -289,7 +291,7 @@
                                             </label>
                                             <input type="number" wire:model="tempLots.{{ $lotIndex }}.quantity"
                                                 placeholder="Ej: 400" min="1"
-                                                class="w-full rounded-md p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-blue-500" />
+                                                class="w-full rounded-md p-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
                                         </div>
                                     </div>
                                     @if (count($tempLots) > 1)

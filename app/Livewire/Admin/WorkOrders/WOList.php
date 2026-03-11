@@ -19,8 +19,6 @@ class WOList extends Component
     public ?int $filterStatus = null;
     public ?string $startDate = null;
     public ?string $endDate = null;
-    public ?int $deleteId = null;
-    public bool $confirmingDeletion = false;
 
     protected PurchaseOrderService $purchaseOrderService;
 
@@ -50,28 +48,16 @@ class WOList extends Component
         $this->sortField = $field;
     }
 
-    public function confirmDeletion(int $id): void
+    public function deleteWorkOrder(int $id): void
     {
-        $this->deleteId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-
-    public function delete(): void
-    {
-        $wo = WorkOrder::findOrFail($this->deleteId);
-
+        $wo = WorkOrder::findOrFail($id);
         try {
-            // Use force delete with relations to cascade delete
             $wo->forceDeleteWithRelations();
-
             session()->flash('flash.banner', 'Work Order y registros relacionados eliminados correctamente.');
             session()->flash('flash.bannerStyle', 'success');
         } catch (\Exception $e) {
             session()->flash('error', 'Error al eliminar la Work Order: ' . $e->getMessage());
         }
-
-        $this->confirmingDeletion = false;
     }
 
     public function updateStatus(int $id, int $statusId): void
@@ -99,9 +85,12 @@ class WOList extends Component
         $workOrders = $query->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
+        $totalWOs = WorkOrder::count();
+
         return view('livewire.admin.work-orders.wo-list', [
             'workOrders' => $workOrders,
             'statuses' => StatusWO::all(),
+            'totalWOs' => $totalWOs,
         ]);
     }
 }

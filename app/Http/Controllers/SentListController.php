@@ -22,18 +22,25 @@ class SentListController extends Controller
 
     /**
      * Display the specified resource.
+     * Routes to the appropriate department view based on current_department.
      */
     public function show(SentList $sentList)
     {
         $sentList->load([
-            'purchaseOrder.part', 
-            'purchaseOrders.part', // Nueva relación many-to-many
-            'workOrders.purchaseOrder.part', 
+            'purchaseOrders.part',
+            'workOrders.purchaseOrder.part',
+            'workOrders.lots.weighings',
+            'workOrders.lots.qualityWeighings',
+            'workOrders.lots.packagingRecords',
+            'workOrders.kits',
             'shifts',
             'materialsApprover',
+            'inspectionApprover',
             'productionApprover',
             'qualityApprover',
             'shippingApprover',
+            'unresolvedRejections.rejectedBy',
+            'unresolvedRejections.lot',
         ]);
 
         return view('sent-lists.show', compact('sentList'));
@@ -44,11 +51,12 @@ class SentListController extends Controller
      */
     public function edit(SentList $sentList)
     {
-        // Only pending sent lists can be edited
         if (!$sentList->isPending()) {
             return redirect()->route('admin.sent-lists.show', $sentList)
                 ->with('error', 'Solo las listas pendientes pueden ser editadas.');
         }
+
+        $sentList->load(['purchaseOrders.part', 'workOrders']);
 
         return view('sent-lists.edit', compact('sentList'));
     }

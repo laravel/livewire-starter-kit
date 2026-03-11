@@ -15,8 +15,6 @@ class PriceList extends Component
     public string $sortField = 'effective_date';
     public string $sortDirection = 'desc';
     public int $perPage = 10;
-    public ?int $deleteId = null;
-    public bool $confirmingDeletion = false;
     public string $filterActive = 'all';
     public string $filterPart = 'all';
 
@@ -32,39 +30,19 @@ class PriceList extends Component
         } else {
             $this->sortDirection = 'asc';
         }
-
         $this->sortField = $field;
     }
 
-    public function confirmDeletion(int $id): void
+    public function deletePrice(int $id): void
     {
         $price = Price::findOrFail($id);
-
         if (!$price->canBeDeleted()) {
             session()->flash('error', 'No se puede eliminar este precio.');
             return;
         }
-
-        $this->deleteId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    public function delete(): void
-    {
-        $price = Price::findOrFail($this->deleteId);
-
-        if (!$price->canBeDeleted()) {
-            session()->flash('error', 'No se puede eliminar este precio.');
-            $this->confirmingDeletion = false;
-            return;
-        }
-
         $price->delete();
-
         session()->flash('flash.banner', 'Precio eliminado correctamente.');
         session()->flash('flash.bannerStyle', 'success');
-
-        $this->confirmingDeletion = false;
     }
 
     public function render()
@@ -86,9 +64,16 @@ class PriceList extends Component
 
         $parts = Part::active()->orderBy('number')->get();
 
+        $totalPrices = Price::count();
+        $activePrices = Price::active()->count();
+        $partsWithPrice = Price::distinct('part_id')->count('part_id');
+
         return view('livewire.admin.prices.price-list', [
             'prices' => $prices,
             'parts' => $parts,
+            'totalPrices' => $totalPrices,
+            'activePrices' => $activePrices,
+            'partsWithPrice' => $partsWithPrice,
         ]);
     }
 }

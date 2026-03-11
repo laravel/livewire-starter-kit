@@ -1,45 +1,27 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 sm:py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-6 sm:mb-8">
-            <div class="flex items-center gap-3 sm:gap-4 mb-2">
-                <a href="{{ route('admin.purchase-orders.index') }}" 
-                   class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                </a>
-                <div class="flex items-center gap-3 sm:gap-4">
-                    <div class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Editar Orden de Compra</h1>
-                        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Modificar información de la PO {{ $purchaseOrder->po_number }}</p>
-                    </div>
-                </div>
-            </div>
+<div class="space-y-6">
+    <div class="flex items-center gap-4">
+        <a href="{{ route('admin.purchase-orders.index') }}" class="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md transition-colors" title="Volver">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Editar orden de compra</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Modificar información de la PO {{ $purchaseOrder->po_number }}</p>
         </div>
+    </div>
 
-        <!-- Status Badge -->
-        @php
-            $statusColors = [
-                'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200',
-                'approved' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200',
-                'rejected' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200',
-                'pending_correction' => 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200',
-            ];
-        @endphp
-        <div class="mb-6">
-            <span class="inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-full {{ $statusColors[$purchaseOrder->status] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }}">
-                Estado: {{ $purchaseOrder->status_label }}
-            </span>
-        </div>
+    @php
+        $statusColors = [
+            'pending' => 'border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
+            'approved' => 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300',
+            'rejected' => 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300',
+            'pending_correction' => 'border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
+        ];
+    @endphp
+    <div class="flex items-center gap-2">
+        <span class="px-3 py-1 text-xs font-medium rounded-full border-2 {{ $statusColors[$purchaseOrder->status] ?? 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">{{ $purchaseOrder->status_label }}</span>
+    </div>
 
-        <!-- Form Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <form wire:submit="updatePO" class="divide-y divide-gray-200 dark:divide-gray-700">
                 <!-- Información Básica -->
                 <div class="p-4 sm:p-6 lg:p-8">
@@ -311,6 +293,5 @@
                     </div>
                 </div>
             </form>
-        </div>
     </div>
 </div>

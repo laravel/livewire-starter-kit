@@ -1,51 +1,31 @@
-<div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Estandar: Parte {{ $standard->part->number }}</h1>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Detalle completo del estandar
-                    </p>
-                </div>
-                <div class="mt-4 sm:mt-0 flex space-x-2">
-                    <a href="{{ route('admin.standards.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200"
-                        wire:navigate>
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                        </svg>
-                        Volver
-                    </a>
-                    <a href="{{ route('admin.standards.edit', $standard) }}"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200"
-                        wire:navigate>
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                        Editar
-                    </a>
-                </div>
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{{ route('admin.standards.index') }}" class="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md transition-colors" title="Volver">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </a>
+            <div>
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Estándar: Parte {{ $standard->part->number }}</h1>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Detalle completo del estándar</p>
             </div>
         </div>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.standards.edit', $standard) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors">Editar</a>
+            <a href="{{ route('admin.standards.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 rounded-md transition-colors">Volver</a>
+        </div>
+    </div>
 
-        @if (session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                <strong class="font-bold">Error!</strong>
-                <span class="block sm:inline">{{ session('error') }}</span>
-            </div>
-        @endif
+    @if (session('error'))
+        <div class="p-3 rounded-md bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
+            <p class="text-sm text-red-700 dark:text-red-300">{{ session('error') }}</p>
+        </div>
+    @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Main Info Card -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- General Information -->
-                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Informacion General</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Información general</h2>
 
                         <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -111,12 +91,11 @@
                                 </div>
                             </dl>
                         </div>
-                    </div>
                 </div>
+            </div>
 
-                <!-- Configurations Table -->
-                @if($standard->configurations->count() > 0)
-                    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            @if($standard->configurations->count() > 0)
+                <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Configuraciones de Produccion</h2>
@@ -200,10 +179,9 @@
                             </div>
                         </div>
                     </div>
-                @else
-                    <!-- Legacy Information (if no configurations) -->
-                    @if(!$standard->is_migrated)
-                        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            @else
+                @if(!$standard->is_migrated)
+                    <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                             <div class="p-6">
                                 <div class="flex items-center mb-4">
                                     <svg class="w-5 h-5 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,16 +244,14 @@
                                         </dd>
                                     </div>
                                 </dl>
-                            </div>
                         </div>
-                    @endif
+                    </div>
                 @endif
-            </div>
+            @endif
+        </div>
 
-            <!-- Actions Card -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- Actions -->
-                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                     <div class="p-6">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Acciones</h2>
 
@@ -309,9 +285,8 @@
                     </div>
                 </div>
 
-                <!-- Configuration Stats -->
-                @if($configurationStats['total'] > 0)
-                    <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            @if($configurationStats['total'] > 0)
+                <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                         <div class="p-6">
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Estadisticas</h2>
 

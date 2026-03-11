@@ -98,10 +98,17 @@ class EmployeeList extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
+        $totalEmployees = User::role('employee')->count();
+        $activeEmployees = User::role('employee')->where('active', true)->count();
+        $inactiveEmployees = User::role('employee')->where('active', false)->count();
+
         return view('livewire.admin.employees.employee-list', [
             'employees' => $employees,
             'areas' => Area::orderBy('name')->get(),
             'shifts' => Shift::active()->orderBy('name')->get(),
+            'totalEmployees' => $totalEmployees,
+            'activeEmployees' => $activeEmployees,
+            'inactiveEmployees' => $inactiveEmployees,
         ]);
     }
 }

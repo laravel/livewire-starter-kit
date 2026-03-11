@@ -15,8 +15,6 @@ class StandardList extends Component
     public string $sortField = 'created_at';
     public string $sortDirection = 'desc';
     public int $perPage = 10;
-    public ?int $deleteId = null;
-    public bool $confirmingDeletion = false;
     public string $filterStatus = 'all';
     public string $filterWorkstationType = 'all';
 
@@ -42,25 +40,15 @@ class StandardList extends Component
         } else {
             $this->sortDirection = 'asc';
         }
-
         $this->sortField = $field;
     }
 
-    public function confirmDeletion(int $id): void
+    public function deleteStandard(int $id): void
     {
-        $this->deleteId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    public function delete(): void
-    {
-        $standard = Standard::findOrFail($this->deleteId);
+        $standard = Standard::findOrFail($id);
         $standard->delete();
-
-        session()->flash('flash.banner', 'Estandar eliminado correctamente.');
+        session()->flash('flash.banner', 'Estándar eliminado correctamente.');
         session()->flash('flash.bannerStyle', 'success');
-
-        $this->confirmingDeletion = false;
     }
 
     public function toggleActive(int $id): void

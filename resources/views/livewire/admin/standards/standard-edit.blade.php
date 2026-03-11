@@ -1,69 +1,40 @@
-<div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Editar Estandar</h1>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Modificar informacion del estandar de la parte {{ $standard->part->number }}
-                    </p>
-                </div>
-                <div class="mt-4 sm:mt-0">
-                    <a href="{{ route('admin.standards.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200"
-                        wire:navigate>
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                        </svg>
-                        Volver a la lista
-                    </a>
-                </div>
-            </div>
+<div class="space-y-6">
+    <div class="flex items-center gap-4">
+        <a href="{{ route('admin.standards.index') }}" class="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md transition-colors" title="Volver">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Editar estándar</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Modificar información del estándar de la parte {{ $standard->part->number }}</p>
         </div>
+    </div>
 
-        <!-- Status Badge -->
-        <div class="mb-4 flex items-center space-x-2">
-            @if($standard->active)
-                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    Estado: Activo
-                </span>
-            @else
-                <span class="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                    Estado: Inactivo
-                </span>
-            @endif
-        </div>
-
-        <!-- Migration Banner (for legacy standards) -->
-        @if(!$useNewConfigSystem)
-            <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-900/20 dark:border-yellow-600">
-                <div class="flex items-start">
-                    <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                    </svg>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Estandar con formato antiguo</h3>
-                        <p class="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
-                            Este estandar usa el sistema legacy. Puede migrarlo al nuevo sistema de configuraciones multiples.
-                        </p>
-                        <button type="button" wire:click="migrateToNewSystem"
-                            class="mt-2 inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                            </svg>
-                            Migrar al Nuevo Sistema
-                        </button>
-                    </div>
-                </div>
-            </div>
+    <div class="flex items-center gap-2">
+        @if($standard->active)
+            <span class="px-3 py-1 text-xs font-medium rounded-full border-2 border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300">Activo</span>
+        @else
+            <span class="px-3 py-1 text-xs font-medium rounded-full border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300">Inactivo</span>
         @endif
+    </div>
 
-        <!-- Card Container -->
-        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div class="p-6">
-                <form wire:submit="updateStandard" class="space-y-6">
+    @if(!$useNewConfigSystem)
+        <div class="p-4 rounded-lg border-2 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+            <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <div>
+                    <h3 class="text-sm font-medium text-amber-800 dark:text-amber-200">Estándar con formato antiguo</h3>
+                    <p class="mt-1 text-sm text-amber-700 dark:text-amber-300">Este estándar usa el sistema legacy. Puede migrarlo al nuevo sistema de configuraciones múltiples.</p>
+                    <button type="button" wire:click="migrateToNewSystem" class="mt-2 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-md transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Migrar al nuevo sistema
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden divide-y divide-gray-200 dark:divide-gray-700">
+        <form wire:submit="updateStandard" class="p-6 space-y-6">
                     <!-- Part -->
                     <div>
                         <label for="part_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -386,23 +357,10 @@
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <a href="{{ route('admin.standards.index') }}"
-                            class="inline-flex items-center px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200"
-                            wire:navigate>
-                            Cancelar
-                        </a>
-
-                        <button type="submit"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Actualizar
-                        </button>
-                    </div>
-                </form>
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <a href="{{ route('admin.standards.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 rounded-md transition-colors">Cancelar</a>
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors">Actualizar estándar</button>
             </div>
-        </div>
+        </form>
     </div>
 </div>

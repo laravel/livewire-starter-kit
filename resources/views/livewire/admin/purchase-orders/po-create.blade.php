@@ -1,30 +1,15 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 sm:py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-6 sm:mb-8">
-            <div class="flex items-center gap-3 sm:gap-4 mb-2">
-                <a href="{{ route('admin.purchase-orders.index') }}" 
-                   class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                </a>
-                <div class="flex items-center gap-3 sm:gap-4">
-                    <div class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Nueva Orden de Compra</h1>
-                        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Ingrese la información de la nueva PO</p>
-                    </div>
-                </div>
-            </div>
+<div class="space-y-6">
+    <div class="flex items-center gap-4">
+        <a href="{{ route('admin.purchase-orders.index') }}" class="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md transition-colors" title="Volver">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Nueva orden de compra</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Ingrese la información de la nueva PO</p>
         </div>
+    </div>
 
-        <!-- Form Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <form wire:submit="savePO" class="divide-y divide-gray-200 dark:divide-gray-700">
                 <!-- Información Básica -->
                 <div class="p-4 sm:p-6 lg:p-8">
@@ -263,6 +248,5 @@
                     </div>
                 </div>
             </form>
-        </div>
     </div>
 </div>

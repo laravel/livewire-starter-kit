@@ -1,30 +1,13 @@
-<div class="py-12">
-    <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">ID: {{ $workOrder->wo_number }}</p>
-                    @if($workOrder->purchaseOrder->wo)
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Editar WO: {{ $workOrder->purchaseOrder->wo }}</h1>
-                    @else
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Editar: {{ $workOrder->wo_number }}</h1>
-                    @endif
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Actualizar información de la orden
-                    </p>
-                </div>
-                <div class="mt-4 sm:mt-0">
-                    <a href="{{ route('admin.work-orders.show', $workOrder) }}"
-                        class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                        </svg>
-                        Cancelar
-                    </a>
-                </div>
-            </div>
+<div class="space-y-6">
+    <div class="flex items-center gap-4">
+        <a href="{{ route('admin.work-orders.index') }}" class="inline-flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md transition-colors" title="Volver">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Editar WO: {{ $workOrder->purchaseOrder->wo ?? $workOrder->wo_number }}</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Actualizar información de la orden</p>
         </div>
+    </div>
 
         <!-- WO Cliente Card -->
         @if($workOrder->purchaseOrder->wo)
@@ -194,5 +177,4 @@
                 </div>
             </form>
         </div>
-    </div>
 </div>

@@ -15,8 +15,6 @@ class POList extends Component
     public string $sortField = 'po_date';
     public string $sortDirection = 'desc';
     public int $perPage = 10;
-    public ?int $deleteId = null;
-    public bool $confirmingDeletion = false;
     public string $filterStatus = 'all';
 
     protected PurchaseOrderService $purchaseOrderService;
@@ -47,27 +45,16 @@ class POList extends Component
         $this->sortField = $field;
     }
 
-    public function confirmDeletion(int $id): void
+    public function deletePO(int $id): void
     {
-        $this->deleteId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    public function delete(): void
-    {
-        $po = PurchaseOrder::findOrFail($this->deleteId);
-
+        $po = PurchaseOrder::findOrFail($id);
         try {
-            // Use force delete with relations to cascade delete
             $po->forceDeleteWithRelations();
-
             session()->flash('flash.banner', 'Orden de compra y registros relacionados eliminados correctamente.');
             session()->flash('flash.bannerStyle', 'success');
         } catch (\Exception $e) {
             session()->flash('error', 'Error al eliminar la orden de compra: ' . $e->getMessage());
         }
-
-        $this->confirmingDeletion = false;
     }
 
     public function approve(int $id): void
@@ -101,9 +88,18 @@ class POList extends Component
         $purchaseOrders = $query->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
+        $totalPOs = PurchaseOrder::count();
+        $pendingPOs = PurchaseOrder::pending()->count();
+        $approvedPOs = PurchaseOrder::approved()->count();
+        $pendingCorrectionPOs = PurchaseOrder::pendingCorrection()->count();
+
         return view('livewire.admin.purchase-orders.po-list', [
             'purchaseOrders' => $purchaseOrders,
             'statuses' => PurchaseOrder::getStatuses(),
+            'totalPOs' => $totalPOs,
+            'pendingPOs' => $pendingPOs,
+            'approvedPOs' => $approvedPOs,
+            'pendingCorrectionPOs' => $pendingCorrectionPOs,
         ]);
     }
 }

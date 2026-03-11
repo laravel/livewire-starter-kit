@@ -10,7 +10,7 @@
         </div>
 
         <div class="flex gap-2">
-            <select wire:model.live="filterStatus" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <select wire:model.live="filterStatus" class="px-3 py-2 text-sm border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                 <option value="">Todos los estados</option>
                 <option value="pending">Pendiente</option>
                 <option value="in_progress">En Progreso</option>
@@ -27,7 +27,7 @@
 
     {{-- Work Orders Table --}}
     @if($workOrders->isEmpty())
-        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -35,7 +35,7 @@
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Las Work Orders aparecerán cuando tengan lotes asignados.</p>
         </div>
     @else
-        <div class="overflow-hidden bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
+        <div class="overflow-hidden bg-white dark:bg-gray-800 shadow-sm rounded-lg border-2 border-gray-200 dark:border-gray-700">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-900">
@@ -136,7 +136,7 @@
                                         @if($workOrder->lots->isNotEmpty())
                                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                                 @foreach($workOrder->lots as $lot)
-                                                    <div class="p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
+                                                    <div class="p-3 bg-white dark:bg-gray-800 rounded border-2 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
                                                         <div class="flex items-start justify-between mb-2">
                                                             <div class="flex-1">
                                                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $lot->lot_number }}</div>
@@ -213,7 +213,7 @@
                                         @else
                                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                                 @foreach($workOrder->kits as $kit)
-                                                    <div class="p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:border-green-400 dark:hover:border-green-500 transition-colors">
+                                                    <div class="p-3 bg-white dark:bg-gray-800 rounded border-2 border-gray-200 dark:border-gray-700 hover:border-green-400 dark:hover:border-green-500 transition-colors">
                                                         <div class="flex items-start justify-between mb-2">
                                                             <div class="flex-1">
                                                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
@@ -312,7 +312,7 @@
                                                             default => 'zinc',
                                                         };
                                                     @endphp
-                                                    <div class="p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 transition-colors cursor-pointer"
+                                                    <div class="p-3 bg-white dark:bg-gray-800 rounded border-2 border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 transition-colors cursor-pointer"
                                                         wire:click="openMaterialModal({{ $matLot->id }})">
                                                         <div class="flex items-center justify-between">
                                                             <div class="flex items-center gap-2">
@@ -352,12 +352,12 @@
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeCreateLotModal"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border-2 border-gray-200 dark:border-gray-700">
                 <form wire:submit="createLot">
                     <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Agregar Lote</h3>
                         @if($this->selectedWorkOrder)
-                        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg">
                             <p class="text-xs text-blue-700 dark:text-blue-300">
                                 <span class="font-medium">WO:</span> {{ $this->selectedWorkOrder->purchaseOrder->wo ?? 'N/A' }} |
                                 <span class="font-medium">Cant. WO:</span> {{ number_format($this->selectedWorkOrder->original_quantity) }}
@@ -366,20 +366,20 @@
                         @endif
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Número de Lote</label>
-                                <input type="text" wire:model="newLotNumber" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: 001">
-                                @error('newLotNumber') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de Lote</label>
+                                <input type="text" wire:model="newLotNumber" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: 001">
+                                @error('newLotNumber') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad</label>
-                                <input type="number" wire:model="newLotQuantity" min="1" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Cantidad de piezas">
-                                @error('newLotQuantity') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cantidad</label>
+                                <input type="number" wire:model="newLotQuantity" min="1" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Cantidad de piezas">
+                                @error('newLotQuantity') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                    <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2 border-t-2 border-gray-200 dark:border-gray-700">
                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Crear Lote</button>
-                        <button type="button" wire:click="closeCreateLotModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
+                        <button type="button" wire:click="closeCreateLotModal" class="mt-3 w-full inline-flex justify-center rounded-md border-2 border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
                     </div>
                 </form>
             </div>
@@ -393,28 +393,28 @@
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeEditLotModal"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border-2 border-gray-200 dark:border-gray-700">
                 <form wire:submit="updateLot">
                     <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Editar Lote</h3>
                         @if($selectedLotId && $this->selectedLot)
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Número de Lote</label>
-                                <input type="text" disabled value="{{ $this->selectedLot->lot_number }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de Lote</label>
+                                <input type="text" disabled value="{{ $this->selectedLot->lot_number }}" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad</label>
-                                <input type="number" wire:model="lotQuantity" min="1" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                @error('lotQuantity') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cantidad</label>
+                                <input type="number" wire:model="lotQuantity" min="1" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                @error('lotQuantity') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
-                                <input type="text" wire:model="lotDescription" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descripción</label>
+                                <input type="text" wire:model="lotDescription" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-                                <select wire:model="lotStatus" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado</label>
+                                <select wire:model="lotStatus" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                     <option value="pending">Pendiente</option>
                                     <option value="in_progress">En Progreso</option>
                                     <option value="completed">Completado</option>
@@ -422,15 +422,15 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Comentarios</label>
-                                <textarea wire:model="lotComments" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comentarios</label>
+                                <textarea wire:model="lotComments" rows="3" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                             </div>
                         </div>
                         @endif
                     </div>
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                    <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2 border-t-2 border-gray-200 dark:border-gray-700">
                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Guardar</button>
-                        <button type="button" wire:click="closeEditLotModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
+                        <button type="button" wire:click="closeEditLotModal" class="mt-3 w-full inline-flex justify-center rounded-md border-2 border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
                     </div>
                 </form>
             </div>
@@ -444,10 +444,10 @@
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="cancelDeleteLot"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border-2 border-gray-200 dark:border-gray-700">
                 <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
-                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 sm:mx-0 sm:h-10 sm:w-10">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-700 sm:mx-0 sm:h-10 sm:w-10">
                             <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                             </svg>
@@ -462,9 +462,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2 border-t-2 border-gray-200 dark:border-gray-700">
                     <button type="button" wire:click="deleteLot" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Eliminar</button>
-                    <button type="button" wire:click="cancelDeleteLot" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
+                    <button type="button" wire:click="cancelDeleteLot" class="mt-3 w-full inline-flex justify-center rounded-md border-2 border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -477,7 +477,7 @@
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeCreateKitModal"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border-2 border-gray-200 dark:border-gray-700">
                 <form wire:submit="createKit">
                     <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Crear Nuevo Kit</h3>
@@ -487,7 +487,7 @@
                             $createKitPart = $createKitWO?->purchaseOrder?->part;
                         @endphp
                         @if($createKitPart)
-                        <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600 rounded-lg">
                             <div class="grid grid-cols-2 gap-3 text-sm">
                                 <div>
                                     <span class="text-gray-500 dark:text-gray-400 block text-xs">No. Parte</span>
@@ -503,25 +503,25 @@
                         <div class="space-y-4">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Número de Kit</label>
-                                    <input type="text" disabled value="(Se generará automáticamente)" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 shadow-sm">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de Kit</label>
+                                    <input type="text" disabled value="(Se generará automáticamente)" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad *</label>
-                                    <input type="number" wire:model="kitQuantity" min="1" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: 500">
-                                    @error('kitQuantity') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cantidad *</label>
+                                    <input type="number" wire:model="kitQuantity" min="1" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: 500">
+                                    @error('kitQuantity') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado Inicial</label>
-                                <select wire:model="kitStatus" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado Inicial</label>
+                                <select wire:model="kitStatus" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                     <option value="preparing">En Preparación</option>
                                     <option value="ready">Listo</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lotes a Incluir <span class="text-xs text-red-500 font-normal">* (obligatorio)</span></label>
-                                <div class="mt-1 space-y-2 max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-3">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Lotes a Incluir <span class="text-xs text-red-500 font-normal">* (obligatorio)</span></label>
+                                <div class="space-y-2 max-h-48 overflow-y-auto border-2 border-gray-200 dark:border-gray-600 rounded-md p-3">
                                     @forelse($this->availableLotsForKit as $lot)
                                         <label class="flex items-center space-x-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
                                             <input type="checkbox" wire:model="selectedLots" value="{{ $lot->id }}" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
@@ -534,15 +534,15 @@
                                 @error('selectedLots') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notas de Validación</label>
-                                <textarea wire:model="kitValidationNotes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notas de Validación</label>
+                                <textarea wire:model="kitValidationNotes" rows="3" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                             </div>
                         </div>
                         @endif
                     </div>
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                    <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2 border-t-2 border-gray-200 dark:border-gray-700">
                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Crear Kit</button>
-                        <button type="button" wire:click="closeCreateKitModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
+                        <button type="button" wire:click="closeCreateKitModal" class="mt-3 w-full inline-flex justify-center rounded-md border-2 border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
                     </div>
                 </form>
             </div>
@@ -556,7 +556,7 @@
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeEditKitModal"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border-2 border-gray-200 dark:border-gray-700">
                 <form wire:submit="updateKit">
                     <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Editar Kit</h3>
@@ -564,7 +564,7 @@
                             $editKitPart = $this->selectedKit->workOrder?->purchaseOrder?->part;
                         @endphp
                         @if($editKitPart)
-                        <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600 rounded-lg">
                             <div class="grid grid-cols-2 gap-3 text-sm">
                                 <div>
                                     <span class="text-gray-500 dark:text-gray-400 block text-xs">No. Parte</span>
@@ -580,18 +580,18 @@
                         <div class="space-y-4">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Número de Kit</label>
-                                    <input type="text" disabled value="{{ $this->selectedKit->kit_number }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de Kit</label>
+                                    <input type="text" disabled value="{{ $this->selectedKit->kit_number }}" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad *</label>
-                                    <input type="number" wire:model="editKitQuantity" min="1" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: 500">
-                                    @error('editKitQuantity') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cantidad *</label>
+                                    <input type="number" wire:model="editKitQuantity" min="1" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: 500">
+                                    @error('editKitQuantity') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-                                <select wire:model.live="editKitStatus" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado</label>
+                                <select wire:model.live="editKitStatus" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                     <option value="preparing">En Preparación</option>
                                     <option value="ready">Listo</option>
                                     <option value="released">Liberado</option>
@@ -600,8 +600,8 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lotes Asociados</label>
-                                <div class="mt-1 space-y-2 border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-gray-50 dark:bg-gray-900">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Lotes Asociados</label>
+                                <div class="space-y-2 border-2 border-gray-200 dark:border-gray-600 rounded-md p-3 bg-gray-50 dark:bg-gray-900">
                                     @foreach($this->selectedKit->lots as $lot)
                                         <div class="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded">
                                             <span class="text-sm text-gray-900 dark:text-white">{{ $lot->lot_number }}</span>
@@ -611,14 +611,14 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notas de Validación</label>
-                                <textarea wire:model="editKitValidationNotes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notas de Validación</label>
+                                <textarea wire:model="editKitValidationNotes" rows="3" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                    <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2 border-t-2 border-gray-200 dark:border-gray-700">
                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Guardar</button>
-                        <button type="button" wire:click="closeEditKitModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
+                        <button type="button" wire:click="closeEditKitModal" class="mt-3 w-full inline-flex justify-center rounded-md border-2 border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
                     </div>
                 </form>
             </div>
@@ -632,11 +632,11 @@
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="cancelDeleteKit"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border-2 border-gray-200 dark:border-gray-700">
                 <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
-                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-700 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                         </div>
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white">Confirmar Eliminación</h3>
@@ -647,9 +647,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2 border-t-2 border-gray-200 dark:border-gray-700">
                     <button type="button" wire:click="deleteKit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Eliminar</button>
-                    <button type="button" wire:click="cancelDeleteKit" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
+                    <button type="button" wire:click="cancelDeleteKit" class="mt-3 w-full inline-flex justify-center rounded-md border-2 border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -662,18 +662,18 @@
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeEditWOStatusModal"></div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border-2 border-gray-200 dark:border-gray-700">
                 <form wire:submit="updateWOStatus">
                     <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Cambiar Estado del Work Order</h3>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Work Order</label>
-                                <input type="text" disabled value="{{ $this->selectedWorkOrder->purchaseOrder->wo ?? 'N/A' }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Work Order</label>
+                                <input type="text" disabled value="{{ $this->selectedWorkOrder->purchaseOrder->wo ?? 'N/A' }}" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Parte</label>
-                                <input type="text" disabled value="{{ $this->selectedWorkOrder->purchaseOrder->part->number ?? 'N/A' }} - {{ $this->selectedWorkOrder->purchaseOrder->part->description ?? '' }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Parte</label>
+                                <input type="text" disabled value="{{ $this->selectedWorkOrder->purchaseOrder->part->number ?? 'N/A' }} - {{ $this->selectedWorkOrder->purchaseOrder->part->description ?? '' }}" class="w-full px-4 py-2.5 text-sm rounded-md border-2 border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado Actual</label>
@@ -707,9 +707,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                    <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2 border-t-2 border-gray-200 dark:border-gray-700">
                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Guardar</button>
-                        <button type="button" wire:click="closeEditWOStatusModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
+                        <button type="button" wire:click="closeEditWOStatusModal" class="mt-3 w-full inline-flex justify-center rounded-md border-2 border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
                     </div>
                 </form>
             </div>
@@ -725,9 +725,9 @@
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" wire:click="closeMaterialModal"></div>
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border-2 border-amber-200 dark:border-amber-700">
                     {{-- Header --}}
-                    <div class="bg-gradient-to-r from-amber-600 to-amber-700 px-6 py-4">
+                    <div class="bg-gradient-to-r from-amber-600 to-amber-700 px-6 py-4 border-b-2 border-amber-500">
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="text-lg font-semibold text-white" id="material-modal-title">
@@ -749,7 +749,7 @@
 
                     {{-- Body --}}
                     <div class="px-6 py-4 space-y-6">
-                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600 p-4 rounded-lg">
                             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Información del Lote</h4>
                             <div class="grid grid-cols-2 gap-4 text-sm">
                                 <div>
@@ -773,7 +773,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3 rounded-lg">
+                        <div class="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200 dark:border-amber-700 p-3 rounded-lg">
                             <div class="flex items-center text-sm text-amber-700 dark:text-amber-300">
                                 <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
@@ -838,9 +838,9 @@
                     </div>
 
                     {{-- Footer --}}
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                    <div class="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2 border-t-2 border-gray-200 dark:border-gray-700">
                         <button wire:click="saveMaterialStatus" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Guardar Cambios</button>
-                        <button wire:click="closeMaterialModal" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
+                        <button wire:click="closeMaterialModal" class="mt-3 w-full inline-flex justify-center rounded-md border-2 border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm">Cancelar</button>
                     </div>
                 </div>
             </div>

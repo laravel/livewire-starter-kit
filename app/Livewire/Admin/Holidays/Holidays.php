@@ -9,48 +9,33 @@ use App\Models\Holiday;
 class Holidays extends Component
 {
     use WithPagination;
+
     public $search = '';
     public $sortField = 'date';
     public $sortDirection = 'desc';
     public $perPage = 10;
-    public $deleteId = null;
-    public $confirmingDeletion = false;
 
-    public function mount()
-    {
-    }
-
-    public function updatingSearch()
+    public function updatingSearch(): void
     {
         $this->resetPage();
     }
 
-    public function sortBy($field)
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
             $this->sortDirection = 'asc';
         }
-
         $this->sortField = $field;
     }
 
-    public function confirmDeletion($id)
+    public function deleteHoliday(int $id): void
     {
-        $this->deleteId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    public function delete()
-    {
-        $holiday = Holiday::findOrFail($this->deleteId);
+        $holiday = Holiday::findOrFail($id);
         $holiday->delete();
-
-        session()->flash('flash.banner', 'Holiday eliminado correctamente.');
+        session()->flash('flash.banner', 'Día festivo eliminado correctamente.');
         session()->flash('flash.bannerStyle', 'success');
-
-        $this->confirmingDeletion = false;
     }
 
     public function render(): mixed
@@ -59,8 +44,15 @@ class Holidays extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
+        $totalHolidays = Holiday::count();
+        $upcomingHolidays = Holiday::where('date', '>=', now()->startOfDay())->count();
+        $pastHolidays = Holiday::where('date', '<', now()->startOfDay())->count();
+
         return view('livewire.admin.holidays.holiday-list', [
             'holidays' => $holidays,
+            'totalHolidays' => $totalHolidays,
+            'upcomingHolidays' => $upcomingHolidays,
+            'pastHolidays' => $pastHolidays,
         ]);
     }
-}; 
+} 

@@ -135,10 +135,16 @@ class PackagingManagement extends Component
             'packed_by' => Auth::id(),
         ];
 
-        // Calculate available_pieces for the record
+        // Calculate available_pieces for the record and validate
         $lot = Lot::find($this->formLotId);
         if ($lot) {
-            $data['available_pieces'] = $lot->getPackagingAvailablePieces();
+            $available = $lot->getPackagingAvailablePieces();
+            $data['available_pieces'] = $available;
+
+            if ($this->formPackedPieces > $available) {
+                $this->addError('formPackedPieces', "No puede empacar más piezas de las disponibles ({$available}).");
+                return;
+            }
         }
 
         if ($this->editingId) {
@@ -214,6 +220,12 @@ class PackagingManagement extends Component
 
         $records = $query->latest('packed_at')->paginate(20);
 
+        // Statistics
+        $totalRecords = PackagingRecord::count();
+        $totalPackedPieces = PackagingRecord::sum('packed_pieces');
+        $totalSurplusPieces = PackagingRecord::sum('surplus_pieces');
+        $totalAdjustedSurplus = PackagingRecord::whereNotNull('adjusted_surplus')->sum('adjusted_surplus');
+
         // Lots for dropdown filter
         $lotsForFilter = Lot::whereHas('packagingRecords')
             ->with('workOrder.purchaseOrder.part')
@@ -240,6 +252,10 @@ class PackagingManagement extends Component
             'lotsForFilter' => $lotsForFilter,
             'workOrdersForFilter' => $workOrdersForFilter,
             'lotsForCreate' => $lotsForCreate,
+            'totalRecords' => $totalRecords,
+            'totalPackedPieces' => $totalPackedPieces,
+            'totalSurplusPieces' => $totalSurplusPieces,
+            'totalAdjustedSurplus' => $totalAdjustedSurplus,
         ]);
     }
 }

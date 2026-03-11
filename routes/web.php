@@ -14,14 +14,18 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     $user = auth()->user();
 
-    if ($user->hasRole('employee') && !$user->hasRole('admin')) {
-        return redirect()->route('employee.dashboard');
-    } elseif ($user->hasRole('Materiales') && !$user->hasRole('admin')) {
+    if ($user->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    } elseif ($user->hasRole('Materiales')) {
         return redirect()->route('admin.materials.index');
-    } elseif ($user->hasRole('Produccion') && !$user->hasRole('admin')) {
+    } elseif ($user->hasRole('Produccion')) {
         return redirect()->route('admin.production.index');
-    } elseif ($user->hasRole('Calidad') && !$user->hasRole('admin')) {
+    } elseif ($user->hasRole('Calidad')) {
         return redirect()->route('admin.quality.index');
+    } elseif ($user->hasRole('Empaques')) {
+        return redirect()->route('admin.packaging.index');
+    } elseif ($user->hasRole('employee')) {
+        return redirect()->route('employee.dashboard');
     }
 
     return redirect()->route('admin.dashboard');

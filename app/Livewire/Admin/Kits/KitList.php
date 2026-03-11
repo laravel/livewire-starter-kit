@@ -81,15 +81,31 @@ class KitList extends Component
     public function release(int $id): void
     {
         $kit = Kit::find($id);
-        if ($kit && $kit->canBeReleased()) {
-            $kit->update([
-                'status' => Kit::STATUS_RELEASED,
-                'released_by' => auth()->id(),
-            ]);
-            session()->flash('message', 'Kit liberado correctamente.');
-        } else {
-            session()->flash('error', 'El kit debe estar validado antes de ser liberado.');
+        if (!$kit) {
+            session()->flash('error', 'Kit no encontrado.');
+            return;
         }
+
+        if ($kit->status !== Kit::STATUS_READY) {
+            session()->flash('error', 'El kit debe estar en estado "Listo" para ser liberado.');
+            return;
+        }
+
+        if (!$kit->validated) {
+            session()->flash('error', 'El kit debe estar validado antes de ser liberado.');
+            return;
+        }
+
+        if (!$kit->lots()->exists()) {
+            session()->flash('error', 'El kit no tiene lotes asignados. Asigne al menos un lote antes de liberar.');
+            return;
+        }
+
+        $kit->update([
+            'status' => Kit::STATUS_RELEASED,
+            'released_by' => auth()->id(),
+        ]);
+        session()->flash('message', 'Kit liberado correctamente.');
     }
 
     public function startAssembly(int $id): void

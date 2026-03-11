@@ -15,8 +15,7 @@ class OverTimeList extends Component
     public string $sortBy = 'date';
     public string $sortDirection = 'desc';
     public string $filterShift = '';
-    public bool $showDeleteModal = false;
-    public ?int $overTimeToDelete = null;
+    public int $perPage = 10;
 
     public function updatingSearch(): void
     {
@@ -39,27 +38,12 @@ class OverTimeList extends Component
         $this->resetPage();
     }
 
-    public function confirmDelete(int $overTimeId): void
+    public function deleteOverTime(int $id): void
     {
-        $this->overTimeToDelete = $overTimeId;
-        $this->showDeleteModal = true;
-    }
-
-    public function deleteOverTime(): void
-    {
-        if ($this->overTimeToDelete) {
-            OverTime::find($this->overTimeToDelete)->delete();
-            session()->flash('flash.banner', 'Over Time eliminado correctamente.');
-            session()->flash('flash.bannerStyle', 'success');
-        }
-        $this->showDeleteModal = false;
-        $this->overTimeToDelete = null;
-    }
-
-    public function cancelDelete(): void
-    {
-        $this->showDeleteModal = false;
-        $this->overTimeToDelete = null;
+        $overTime = OverTime::findOrFail($id);
+        $overTime->delete();
+        session()->flash('flash.banner', 'Tiempo extra eliminado correctamente.');
+        session()->flash('flash.bannerStyle', 'success');
     }
 
     public function render()
@@ -67,20 +51,18 @@ class OverTimeList extends Component
         $shifts = Shift::orderBy('name')->get();
 
         $query = OverTime::with('shift')
-            ->when($this->search, function ($query) {
-                $query->search($this->search);
-            })
-            ->when($this->filterShift, function ($query) {
-                $query->byShift($this->filterShift);
-            })
+            ->when($this->search, fn ($q) => $q->search($this->search))
+            ->when($this->filterShift, fn ($q) => $q->byShift($this->filterShift))
             ->orderBy($this->sortBy, $this->sortDirection);
 
-        $overTimes = $query->paginate(10);
+        $overTimes = $query->paginate($this->perPage);
 
-        // Calculate statistics
+        // total_hours es un accessor (calculado), no una columna en BD
+        $totalHours = OverTime::all()->sum(fn (OverTime $o) => $o->total_hours);
+
         $stats = [
             'total' => OverTime::count(),
-            'total_hours' => round(OverTime::all()->sum('total_hours'), 2),
+            'total_hours' => round($totalHours, 2),
             'upcoming' => OverTime::active()->count(),
         ];
 
