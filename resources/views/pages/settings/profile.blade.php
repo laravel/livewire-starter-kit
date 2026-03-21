@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
+use Flux\Flux;
 use Livewire\Component;
 
 new #[Title('Profile settings')] class extends Component {
@@ -40,7 +41,7 @@ new #[Title('Profile settings')] class extends Component {
 
         $user->save();
 
-        $this->dispatch('profile-updated', name: $user->name);
+        Flux::toast(__('Saved.'));
     }
 
     /**
@@ -106,17 +107,9 @@ new #[Title('Profile settings')] class extends Component {
                 @endif
             </div>
 
-            <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full" data-test="update-profile-button">
-                        {{ __('Save') }}
-                    </flux:button>
-                </div>
-
-                <x-action-message class="me-3" on="profile-updated">
-                    {{ __('Saved.') }}
-                </x-action-message>
-            </div>
+            <flux:button variant="primary" type="submit" class="w-full" data-test="update-profile-button">
+                {{ __('Save') }}
+            </flux:button>
         </form>
 
         @if ($this->showDeleteUser)
