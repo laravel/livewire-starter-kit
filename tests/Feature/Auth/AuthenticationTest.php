@@ -50,7 +50,9 @@ class AuthenticationTest extends TestCase
 
     public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge(): void
     {
-        $this->skipUnlessFortifyFeature(Features::twoFactorAuthentication());
+        if (! Features::canManageTwoFactorAuthentication()) {
+            $this->markTestSkipped('Two-factor authentication is not enabled.');
+        }
 
         Features::twoFactorAuthentication([
             'confirm' => true,
