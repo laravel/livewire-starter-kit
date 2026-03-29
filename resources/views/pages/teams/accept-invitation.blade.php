@@ -16,6 +16,32 @@ new #[Title('Teams')] class extends Component {
     {
         $this->invitation = $invitation;
 
+        if ($invitation->isAccepted()) {
+            throw ValidationException::withMessages([
+                'invitation' => [__('This invitation has already been accepted.')],
+            ]);
+        }
+
+        if ($invitation->isExpired()) {
+            throw ValidationException::withMessages([
+                'invitation' => [__('This invitation has expired.')],
+            ]);
+        }
+
+        if (!Auth::check()) {
+            session(['pending_invitation_code' => $invitation->code]);
+
+            $userExists = User::where('email', $invitation->email)->exists();
+
+            if ($userExists) {
+                $this->redirectRoute('login');
+            } else {
+                $this->redirectRoute('register');
+            }
+
+            return;
+        }
+
         $this->acceptInvitation();
     }
 
@@ -28,10 +54,7 @@ new #[Title('Teams')] class extends Component {
         DB::transaction(function () use ($user) {
             $team = $this->invitation->team;
 
-            $membership = $team->memberships()->firstOrCreate(
-                ['user_id' => $user->id],
-                ['role' => $this->invitation->role]
-            );
+            $membership = $team->memberships()->firstOrCreate(['user_id' => $user->id], ['role' => $this->invitation->role]);
 
             $this->invitation->update(['accepted_at' => now()]);
 
