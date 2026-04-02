@@ -10,7 +10,6 @@ This Livewire starter kit utilizes Livewire 4, TypeScript, Tailwind, and the [Fl
 
 If you are looking for the alternate configurations of this starter kit, they can be found in the following branches:
 
-- [components](https://github.com/laravel/livewire-starter-kit/tree/components) - if Volt is not selected
 - [workos](https://github.com/laravel/livewire-starter-kit/tree/workos) - if WorkOS is selected for authentication
 
 ## Official Documentation
@@ -20,6 +19,8 @@ Documentation for all Laravel starter kits can be found on the [Laravel website]
 ## Contributing
 
 Thank you for considering contributing to our starter kit! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+
+All contributions to the Starter Kits from now on should be made through [Maestro](https://github.com/laravel/maestro).
 
 ## Code of Conduct
 
