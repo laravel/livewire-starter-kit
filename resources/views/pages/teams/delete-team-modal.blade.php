@@ -31,7 +31,7 @@ new class extends Component {
         ]);
 
         if ($validated['deleteName'] !== $this->team->name) {
-            $this->addError('deleteName', 'The team name does not match.');
+            $this->addError('deleteName', __('The team name does not match.'));
 
             return;
         }
