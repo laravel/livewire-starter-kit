@@ -117,8 +117,8 @@ new class extends Component
         $teamName = $this->teamData['name'] ?? $this->teamModel->name;
 
         $title = $this->permissions->canUpdateTeam
-            ? "Edit {$teamName}"
-            : "View {$teamName}";
+            ? __('Edit :name', ['name' => $teamName])
+            : __('View :name', ['name' => $teamName]);
 
         return $this->view()->title($title);
     }
