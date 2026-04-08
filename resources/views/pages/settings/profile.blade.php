@@ -2,8 +2,8 @@
 
 use App\Concerns\ProfileValidationRules;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -40,7 +40,7 @@ new #[Title('Profile settings')] class extends Component {
 
         $user->save();
 
-        $this->dispatch('profile-updated', name: $user->name);
+        Flux::toast(variant: 'success', text: __('Profile updated.'));
     }
 
     /**
@@ -58,7 +58,7 @@ new #[Title('Profile settings')] class extends Component {
 
         $user->sendEmailVerificationNotification();
 
-        Session::flash('status', 'verification-link-sent');
+        Flux::toast(text: __('A new verification link has been sent to your email address.'));
     }
 
     #[Computed]
@@ -97,25 +97,14 @@ new #[Title('Profile settings')] class extends Component {
                             </flux:link>
                         </flux:text>
 
-                        @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
-                                {{ __('A new verification link has been sent to your email address.') }}
-                            </flux:text>
-                        @endif
                     </div>
                 @endif
             </div>
 
             <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full" data-test="update-profile-button">
-                        {{ __('Save') }}
-                    </flux:button>
-                </div>
-
-                <x-action-message class="me-3" on="profile-updated">
-                    {{ __('Saved.') }}
-                </x-action-message>
+                <flux:button variant="primary" type="submit" data-test="update-profile-button">
+                    {{ __('Save') }}
+                </flux:button>
             </div>
         </form>
 
