@@ -4,6 +4,7 @@ use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Rules\TeamName;
 use App\Support\TeamPermissions;
+use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -55,6 +56,8 @@ new class extends Component
 
         $this->populateTeamData();
 
+        Flux::toast(variant: 'success', text: __('Team updated.'));
+
         $this->redirectRoute('teams.edit', ['team' => $this->teamModel->fresh()->slug], navigate: true);
     }
 
@@ -72,6 +75,8 @@ new class extends Component
             ->update(['role' => TeamRole::from($validated['role'])]);
 
         $this->populateTeamData();
+
+        Flux::toast(variant: 'success', text: __('Member role updated.'));
     }
 
     private function populateTeamData(): void

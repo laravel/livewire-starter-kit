@@ -3,6 +3,7 @@
 use App\Actions\Teams\CreateTeam;
 use App\Rules\TeamName;
 use App\Support\UserTeam;
+use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
@@ -22,6 +23,8 @@ new #[Title('Teams')] class extends Component {
         $this->dispatch('close-modal', name: 'create-team');
 
         $this->reset('name');
+
+        Flux::toast(variant: 'success', text: __('Team created.'));
 
         $this->redirectRoute('teams.edit', ['team' => $team->slug], navigate: true);
     }

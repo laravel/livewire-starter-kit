@@ -2,6 +2,7 @@
 
 use App\Models\Team;
 use App\Models\User;
+use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -46,6 +47,8 @@ new class extends Component {
         }
 
         $this->dispatch('close-modal', name: $this->modalName);
+
+        Flux::toast(variant: 'success', text: __('Member removed.'));
 
         $this->redirectRoute('teams.edit', ['team' => $this->team->slug], navigate: true);
     }

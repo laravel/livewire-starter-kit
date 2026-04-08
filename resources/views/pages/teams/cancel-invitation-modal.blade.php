@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Team;
+use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -39,6 +40,8 @@ new class extends Component {
         $invitation->delete();
 
         $this->dispatch('close-modal', name: $this->modalName);
+
+        Flux::toast(variant: 'success', text: __('Invitation cancelled.'));
 
         $this->redirectRoute('teams.edit', ['team' => $this->team->slug], navigate: true);
     }
