@@ -2,6 +2,7 @@
 
 use App\Models\Team;
 use App\Models\User;
+use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -55,6 +56,8 @@ new class extends Component {
         if ($fallbackTeam) {
             $user->switchTeam($fallbackTeam);
         }
+
+        Flux::toast(variant: 'success', text: __('Team deleted.'));
 
         $this->redirectRoute('teams.index', navigate: true);
     }

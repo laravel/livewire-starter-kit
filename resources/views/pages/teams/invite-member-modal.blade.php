@@ -4,6 +4,7 @@ use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Notifications\Teams\TeamInvitation as TeamInvitationNotification;
 use App\Rules\UniqueTeamInvitation;
+use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
@@ -43,6 +44,8 @@ new class extends Component {
 
         $this->reset('inviteEmail', 'inviteRole');
         $this->dispatch('close-modal', name: 'invite-member');
+
+        Flux::toast(variant: 'success', text: __('Invitation sent.'));
 
         $this->redirectRoute('teams.edit', ['team' => $this->team->slug], navigate: true);
     }
