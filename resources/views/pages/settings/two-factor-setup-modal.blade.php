@@ -2,6 +2,7 @@
 
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
 use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
@@ -124,7 +125,8 @@ new class extends Component {
     /**
      * Get the current modal configuration state.
      */
-    public function getModalConfigProperty(): array
+    #[Computed]
+    public function modalConfig(): array
     {
         if ($this->setupComplete) {
             return [

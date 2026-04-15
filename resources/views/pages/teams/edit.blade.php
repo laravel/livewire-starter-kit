@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 new class extends Component
@@ -128,7 +129,8 @@ new class extends Component
         return $this->view()->title($title);
     }
 
-    public function getPermissionsProperty(): TeamPermissions
+    #[Computed]
+    public function permissions(): TeamPermissions
     {
         return Auth::user()->toTeamPermissions($this->teamModel);
     }

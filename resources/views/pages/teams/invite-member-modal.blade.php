@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 new class extends Component {
@@ -50,7 +51,8 @@ new class extends Component {
         $this->redirectRoute('teams.edit', ['team' => $this->team->slug], navigate: true);
     }
 
-    public function getAvailableRolesProperty(): array
+    #[Computed]
+    public function availableRoles(): array
     {
         return TeamRole::assignable();
     }
