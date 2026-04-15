@@ -6,6 +6,7 @@ use App\Support\UserTeam;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -32,7 +33,8 @@ new #[Title('Teams')] class extends Component {
     /**
      * @return Collection<int, UserTeam>
      */
-    public function getTeamsProperty()
+    #[Computed]
+    public function teams(): Collection
     {
         return Auth::user()->toUserTeams(includeCurrent: true);
     }
