@@ -185,7 +185,11 @@ new class extends Component {
 
             @if ($showVerificationStep)
                 <div class="space-y-6">
-                    <div class="flex flex-col items-center space-y-3 justify-center">
+                    <div
+                        class="flex flex-col items-center space-y-3 justify-center"
+                        x-data
+                        x-init="$nextTick(() => $el.querySelector('input')?.focus())"
+                    >
                         <flux:otp
                             name="code"
                             wire:model="code"
