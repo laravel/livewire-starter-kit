@@ -7,18 +7,24 @@
                 showRecoveryInput: @js($errors->has('recovery_code')),
                 code: '',
                 recovery_code: '',
+                focusOtp() {
+                    this.$nextTick(() => this.$refs.otp?.querySelector('input')?.focus());
+                },
+                init() {
+                    if (! this.showRecoveryInput) {
+                        this.focusOtp();
+                    }
+                },
                 toggleInput() {
                     this.showRecoveryInput = !this.showRecoveryInput;
 
                     this.code = '';
                     this.recovery_code = '';
 
-                    $dispatch('clear-2fa-auth-code');
-
                     $nextTick(() => {
                         this.showRecoveryInput
                             ? this.$refs.recovery_code?.focus()
-                            : $dispatch('focus-2fa-auth-code');
+                            : this.focusOtp();
                     });
                 },
             }"
@@ -42,7 +48,7 @@
 
                 <div class="space-y-5 text-center">
                     <div x-show="!showRecoveryInput">
-                        <div class="flex items-center justify-center my-5">
+                        <div class="flex items-center justify-center my-5" x-ref="otp">
                             <flux:otp
                                 x-model="code"
                                 length="6"
