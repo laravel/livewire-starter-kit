@@ -79,6 +79,8 @@
 
         {{ $slot }}
 
+        <livewire:create-team-modal />
+
         @persist('toast')
             <flux:toast.group>
                 <flux:toast />
