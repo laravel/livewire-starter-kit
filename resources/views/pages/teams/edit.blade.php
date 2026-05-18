@@ -99,7 +99,7 @@ new class extends Component
             'email' => $member->email,
             'avatar' => $member->avatar ?? null,
             'role' => $member->pivot->role->value,
-            'role_label' => $member->pivot->role?->label(),
+            'role_label' => $member->pivot->role->label(),
         ])->toArray();
 
         $this->invitations = $team->invitations()
