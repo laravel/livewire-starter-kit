@@ -20,7 +20,6 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    environment: Testing
     steps:
       - uses: actions/checkout@v6
 
