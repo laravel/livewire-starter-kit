@@ -17,26 +17,44 @@ class SecurityTest extends TestCase
     {
         parent::setUp();
 
+        /* @chisel-2fa */
         $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
 
         Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => true,
         ]);
+        /* @end-chisel-2fa */
+        /* @chisel-passkeys */
+        Features::passkeys([
+            'confirmPassword' => true,
+        ]);
+        /* @end-chisel-passkeys */
     }
 
     public function test_security_settings_page_can_be_rendered(): void
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
+            /* @chisel-password-confirmation */
             ->withSession(['auth.password_confirmed_at' => time()])
-            ->get(route('security.edit'))
-            ->assertOk()
-            ->assertSee('Two-factor authentication')
-            ->assertSee('Enable 2FA');
+            /* @end-chisel-password-confirmation */
+            ->get(route('security.edit'));
+
+        $response->assertOk();
+
+        /* @chisel-passkeys */
+        $response->assertSee('Passkeys');
+        $response->assertSee('No passkeys yet');
+        /* @end-chisel-passkeys */
+        /* @chisel-2fa */
+        $response->assertSee('Two-factor authentication');
+        $response->assertSee('Enable 2FA');
+        /* @end-chisel-2fa */
     }
 
+    /* @chisel-password-confirmation */
     public function test_security_settings_page_requires_password_confirmation_when_enabled(): void
     {
         $user = User::factory()->create();
@@ -46,6 +64,7 @@ class SecurityTest extends TestCase
 
         $response->assertRedirect(route('password.confirm'));
     }
+    /* @end-chisel-password-confirmation */
 
     public function test_security_settings_page_renders_without_two_factor_when_feature_is_disabled(): void
     {
@@ -54,15 +73,20 @@ class SecurityTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
+            /* @chisel-password-confirmation */
             ->withSession(['auth.password_confirmed_at' => time()])
+            /* @end-chisel-password-confirmation */
             ->get(route('security.edit'))
             ->assertOk()
             ->assertSee('Update password')
+            ->assertDontSee('Manage your passkeys for passwordless sign-in')
+            ->assertDontSee('Add a passkey to sign in without a password')
             ->assertDontSee('Two-factor authentication');
     }
 
     public function test_two_factor_authentication_disabled_when_confirmation_abandoned_between_requests(): void
     {
+        /* @chisel-2fa */
         $user = User::factory()->create();
 
         $user->forceFill([
@@ -82,6 +106,7 @@ class SecurityTest extends TestCase
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
         ]);
+        /* @end-chisel-2fa */
     }
 
     public function test_password_can_be_updated(): void
