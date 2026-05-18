@@ -17,7 +17,6 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    environment: Testing
     strategy:
       matrix:
         php-version: ['8.3', '8.4', '8.5']
