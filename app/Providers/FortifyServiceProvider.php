@@ -13,7 +13,12 @@ use App\Http\Responses\PasskeyLoginResponse;
 /* @chisel-registration */
 use App\Http\Responses\RegisterResponse;
 /* @end-chisel-registration */
+/* @chisel-2fa */
 use App\Http\Responses\TwoFactorLoginResponse;
+/* @end-chisel-2fa */
+/* @chisel-email-verification */
+use App\Http\Responses\VerifyEmailResponse;
+/* @end-chisel-email-verification */
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -25,13 +30,15 @@ use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 /* @end-chisel-registration */
 /* @chisel-2fa */
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
+/* @end-chisel-2fa */
+/* @chisel-email-verification */
+use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
+/* @end-chisel-email-verification */
 use Laravel\Fortify\Fortify;
 /* @chisel-passkeys */
 use Laravel\Passkeys\Contracts\PasskeyLoginResponse as PasskeyLoginResponseContract;
 
 /* @end-chisel-passkeys */
-
-/* @end-chisel-2fa */
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -50,6 +57,9 @@ class FortifyServiceProvider extends ServiceProvider
         /* @chisel-2fa */
         $this->app->singleton(TwoFactorLoginResponseContract::class, TwoFactorLoginResponse::class);
         /* @end-chisel-2fa */
+        /* @chisel-email-verification */
+        $this->app->singleton(VerifyEmailResponseContract::class, VerifyEmailResponse::class);
+        /* @end-chisel-email-verification */
     }
 
     /**
