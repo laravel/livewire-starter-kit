@@ -1,8 +1,10 @@
 <?php
 
+use App\Data\UserTeam;
 use App\Models\Team;
 use App\Models\User;
 use Flux\Flux;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
