@@ -1,9 +1,9 @@
 <?php
 
+use App\Data\TeamPermissions;
 use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Rules\TeamName;
-use App\Support\TeamPermissions;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

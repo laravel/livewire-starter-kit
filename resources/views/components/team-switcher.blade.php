@@ -1,7 +1,7 @@
 <?php
 
+use App\Data\UserTeam;
 use App\Models\Team;
-use App\Support\UserTeam;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;

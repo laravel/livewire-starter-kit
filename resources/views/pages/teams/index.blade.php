@@ -1,8 +1,8 @@
 <?php
 
 use App\Actions\Teams\CreateTeam;
+use App\Data\UserTeam;
 use App\Rules\TeamName;
-use App\Support\UserTeam;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
