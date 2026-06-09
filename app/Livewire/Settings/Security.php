@@ -68,6 +68,9 @@ class Security extends Component
     #[Locked]
     public bool $canManagePasskeys;
 
+    /**
+     * @var array<int, array{id: int, name: string, authenticator: string|null, created_at_diff: string, last_used_at_diff: string|null}>
+     */
     #[Locked]
     public array $passkeys = [];
 
@@ -149,7 +152,7 @@ class Security extends Component
                 'created_at_diff' => $passkey->created_at->diffForHumans(),
                 'last_used_at_diff' => $passkey->last_used_at?->diffForHumans(),
             ])
-            ->toArray();
+            ->all();
     }
 
     /**
@@ -299,6 +302,8 @@ class Security extends Component
 
     /**
      * Get the current modal configuration state.
+     *
+     * @return array{title: string, description: string, buttonText: string}
      */
     #[Computed]
     public function modalConfig(): array
