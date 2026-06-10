@@ -5,6 +5,10 @@
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
+        @if ($teamInvitation)
+            <x-team-invitation-alert :invitation="$teamInvitation" :action="__('Register')" />
+        @endif
+
         <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
             @csrf
             <!-- Name -->
@@ -63,7 +67,13 @@
 
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
             <span>{{ __('Already have an account?') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
+            <flux:link
+                :href="$teamInvitation ? route('login', ['invitation' => $teamInvitation['code']]) : route('login')"
+                data-test="team-invitation-login-link"
+                wire:navigate
+            >
+                {{ __('Log in') }}
+            </flux:link>
         </div>
     </div>
 </x-layouts::auth>
