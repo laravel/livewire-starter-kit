@@ -8,7 +8,7 @@
         <flux:icon name="information-circle" class="mt-0.5 size-4 shrink-0 text-blue-600 dark:text-blue-400" />
 
         <div>
-            {{ __(':action to join the ":team" Team.', ['action' => $action, 'team' => $invitation['teamName']]) }}
+            {{ __(':action to join the ":team" team.', ['action' => $action, 'team' => $invitation['teamName']]) }}
         </div>
     </div>
 </div>
