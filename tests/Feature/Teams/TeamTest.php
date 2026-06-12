@@ -226,6 +226,121 @@ class TeamTest extends TestCase
         $this->assertEquals($personalTeam->id, $user->fresh()->current_team_id);
     }
 
+    public function test_members_can_leave_non_personal_teams(): void
+    {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $team = Team::factory()->create();
+
+        $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+        $team->members()->attach($member, ['role' => TeamRole::Member->value]);
+
+        $this->actingAs($member);
+
+        Livewire::test('pages::teams.index')
+            ->call('leaveTeam', $team->id)
+            ->assertHasNoErrors();
+
+        $this->assertFalse($member->fresh()->belongsToTeam($team));
+    }
+
+    public function test_leaving_current_team_switches_to_alphabetically_first_remaining_team(): void
+    {
+        $owner = User::factory()->create();
+        $member = User::factory()->create(['name' => 'Mike']);
+
+        $zuluTeam = Team::factory()->create(['name' => 'Zulu Team']);
+        $zuluTeam->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+        $zuluTeam->members()->attach($member, ['role' => TeamRole::Member->value]);
+
+        $alphaTeam = Team::factory()->create(['name' => 'Alpha Team']);
+        $alphaTeam->members()->attach($member, ['role' => TeamRole::Member->value]);
+
+        $betaTeam = Team::factory()->create(['name' => 'Beta Team']);
+        $betaTeam->members()->attach($member, ['role' => TeamRole::Member->value]);
+
+        $member->update(['current_team_id' => $zuluTeam->id]);
+
+        $this->actingAs($member);
+
+        Livewire::test('pages::teams.index')
+            ->call('leaveTeam', $zuluTeam->id)
+            ->assertHasNoErrors();
+
+        $this->assertFalse($member->fresh()->belongsToTeam($zuluTeam));
+        $this->assertEquals($alphaTeam->id, $member->fresh()->current_team_id);
+    }
+
+    public function test_personal_teams_cannot_be_left(): void
+    {
+        $user = User::factory()->create();
+        $personalTeam = $user->personalTeam();
+
+        $this->actingAs($user);
+
+        Livewire::test('pages::teams.index')
+            ->call('leaveTeam', $personalTeam->id)
+            ->assertForbidden();
+
+        $this->assertTrue($user->fresh()->belongsToTeam($personalTeam));
+    }
+
+    public function test_team_owners_cannot_leave_their_team(): void
+    {
+        $owner = User::factory()->create();
+        $team = Team::factory()->create();
+
+        $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+
+        $this->actingAs($owner);
+
+        Livewire::test('pages::teams.index')
+            ->call('leaveTeam', $team->id)
+            ->assertForbidden();
+
+        $this->assertTrue($owner->fresh()->belongsToTeam($team));
+    }
+
+    public function test_users_cannot_leave_teams_they_dont_belong_to(): void
+    {
+        $user = User::factory()->create();
+        $team = Team::factory()->create();
+
+        $this->actingAs($user);
+
+        Livewire::test('pages::teams.index')
+            ->call('leaveTeam', $team->id)
+            ->assertForbidden();
+    }
+
+    public function test_leave_control_is_only_rendered_for_leaveable_teams(): void
+    {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $leaveableTeam = Team::factory()->create();
+
+        $leaveableTeam->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+        $leaveableTeam->members()->attach($member, ['role' => TeamRole::Member->value]);
+
+        $this->actingAs($member);
+
+        Livewire::test('pages::teams.index')
+            ->assertSeeHtml('data-test="team-leave-button"');
+    }
+
+    public function test_leave_control_is_not_rendered_for_personal_or_owned_teams(): void
+    {
+        $user = User::factory()->create();
+        $ownedTeam = Team::factory()->create();
+
+        $ownedTeam->members()->attach($user, ['role' => TeamRole::Owner->value]);
+
+        $this->actingAs($user);
+
+        Livewire::test('pages::teams.index')
+            ->assertDontSeeHtml('data-test="team-leave-button"');
+    }
+
     public function test_deleting_team_switches_other_affected_users_to_their_personal_team(): void
     {
         $owner = User::factory()->create();
