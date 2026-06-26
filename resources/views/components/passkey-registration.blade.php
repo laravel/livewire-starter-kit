@@ -12,7 +12,29 @@
         updateSupport() {
             this.supported = Boolean(window.Passkeys?.isSupported());
         },
+        getDefaultPasskeyName() {
+            const ua = navigator.userAgent;
+
+            const browser = [
+                { pattern: /Edg|Edge/, name: 'Edge' },
+                { pattern: /OPR|Opera|OPiOS/, name: 'Opera' },
+                { pattern: /Firefox|FxiOS/, name: 'Firefox' },
+                { pattern: /Chrome|CriOS/, name: 'Chrome' },
+                { pattern: /Safari/, name: 'Safari' },
+            ].find(({ pattern }) => pattern.test(ua))?.name;
+
+            const os = [
+                { pattern: /iPhone/, name: 'iPhone' },
+                { pattern: /iPad|Macintosh(?=.*Mobile)/, name: 'iPad' },
+                { pattern: /Android/, name: 'Android' },
+                { pattern: /Mac/, name: 'Mac' },
+                { pattern: /Windows/, name: 'Windows' },
+            ].find(({ pattern }) => pattern.test(ua))?.name;
+
+            return [browser, os].filter(Boolean).join(' on ') || '';
+        },
         init() {
+            this.name = this.getDefaultPasskeyName();
             this.updateSupport();
 
             window.addEventListener('passkeys:ready', () => this.updateSupport(), { once: true });
