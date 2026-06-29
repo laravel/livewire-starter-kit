@@ -22,6 +22,9 @@ foreach ($iterator as $file) {
     }
 }
 
+$searches = [];
+$replacements = [];
+
 foreach ($files as $file) {
     $directory = dirname($file);
     $filename = basename($file);
@@ -32,7 +35,26 @@ foreach ($files as $file) {
         rename($file, $newPath);
         $dirRelative = ltrim(str_replace(__DIR__.DIRECTORY_SEPARATOR, '', $directory), DIRECTORY_SEPARATOR);
         echo "Renamed: {$dirRelative}".DIRECTORY_SEPARATOR."{{$filename} => {$newFilename}}".PHP_EOL;
+
+        $searches[] = $dirRelative.DIRECTORY_SEPARATOR.$filename;
+        $replacements[] = $dirRelative.DIRECTORY_SEPARATOR.$newFilename;
     }
+}
+
+if (PHP_OS_FAMILY === 'Windows') {
+    $toForwardSlashes = fn (string $path): string => str_replace('\\', '/', $path);
+
+    $searches = array_map($toForwardSlashes, $searches);
+    $replacements = array_map($toForwardSlashes, $replacements);
+}
+
+$chiselPathsFile = __DIR__.DIRECTORY_SEPARATOR.'chisel-paths.php';
+
+if ($searches !== [] && file_exists($chiselPathsFile)) {
+    file_put_contents(
+        $chiselPathsFile,
+        str_replace($searches, $replacements, file_get_contents($chiselPathsFile)),
+    );
 }
 
 $composerJson = json_decode(
