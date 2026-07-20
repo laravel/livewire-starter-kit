@@ -39,6 +39,29 @@ function chiselRun(array $command, string $label): void
     }
 }
 
+function chiselSkipsNode(): bool
+{
+    return filter_var(
+        $_ENV['LARAVEL_INSTALLER_NO_NODE']
+            ?? $_SERVER['LARAVEL_INSTALLER_NO_NODE']
+            ?? getenv('LARAVEL_INSTALLER_NO_NODE'),
+        FILTER_VALIDATE_BOOL,
+    );
+}
+
+function chiselRemoveNpmPackages(Chisel $c, string ...$packages): void
+{
+    if (! chiselSkipsNode()) {
+        $c->npm()->remove(...$packages);
+
+        return;
+    }
+
+    foreach ($packages as $package) {
+        $c->file('package.json')->removeLinesContaining('"'.$package.'":');
+    }
+}
+
 /**
  * Variant-specific filenames are supplied by the sibling chisel-paths.php.
  * The Single-File Component variant ships the default paths file; the
@@ -202,7 +225,7 @@ return Chisel::script(__DIR__)
                 ...$paths['security_files'],
             )->removeSection('passkeys');
 
-            $c->npm()->remove('@laravel/passkeys');
+            chiselRemoveNpmPackages($c, '@laravel/passkeys');
 
             $c->files(
                 'resources/views/components/passkey-verify.blade.php',
