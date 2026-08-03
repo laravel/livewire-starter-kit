@@ -3,6 +3,7 @@
 use App\Models\TeamInvitation;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -46,7 +47,24 @@ new class extends Component {
     {
         $invitation = $this->findPendingInvitation($code);
 
-        $this->redirectRoute('invitations.accept', ['invitation' => $invitation->code], navigate: true);
+        $user = Auth::user();
+
+        DB::transaction(function () use ($user, $invitation) {
+            $team = $invitation->team;
+
+            $team->memberships()->firstOrCreate(
+                ['user_id' => $user->id],
+                ['role' => $invitation->role]
+            );
+
+            $invitation->update(['accepted_at' => now()]);
+
+            $user->switchTeam($team);
+        });
+
+        session()->flash('team-invitation-accepted', true);
+
+        $this->redirectRoute('dashboard', navigate: true);
     }
 
     public function declineInvitation(string $code): void
