@@ -6,6 +6,7 @@ use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -98,9 +99,8 @@ class TeamInvitationTest extends TestCase
 
         $this->actingAs($invitedUser);
 
-        $response = Livewire::test('pages::teams.accept-invitation', [
-            'invitation' => $invitation,
-        ]);
+        $response = Livewire::test('pages::teams.pending-invitations-modal')
+            ->call('acceptInvitation', $invitation->code);
 
         $response->assertRedirect(route('dashboard'));
 
@@ -108,6 +108,29 @@ class TeamInvitationTest extends TestCase
 
         $this->assertNotNull($invitation->fresh()->accepted_at);
         $this->assertTrue($invitedUser->fresh()->belongsToTeam($team));
+        $this->assertSame($team->id, $invitedUser->fresh()->current_team_id);
+    }
+
+    public function test_accepted_team_invitations_cannot_be_accepted_again(): void
+    {
+        $owner = User::factory()->create();
+        $invitedUser = User::factory()->create(['email' => 'invited@example.com']);
+        $team = Team::factory()->create();
+
+        $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
+
+        $invitation = TeamInvitation::factory()->accepted()->create([
+            'team_id' => $team->id,
+            'email' => 'invited@example.com',
+            'invited_by' => $owner->id,
+        ]);
+
+        $this->actingAs($invitedUser);
+
+        $this->expectException(ModelNotFoundException::class);
+
+        Livewire::test('pages::teams.pending-invitations-modal')
+            ->call('acceptInvitation', $invitation->code);
     }
 
     public function test_accepted_invitation_toast_is_shown_on_the_dashboard(): void
@@ -162,9 +185,8 @@ class TeamInvitationTest extends TestCase
 
         $this->actingAs($uninvitedUser);
 
-        $response = Livewire::test('pages::teams.accept-invitation', [
-            'invitation' => $invitation,
-        ]);
+        $response = Livewire::test('pages::teams.pending-invitations-modal')
+            ->call('acceptInvitation', $invitation->code);
 
         $response->assertHasErrors(['invitation']);
 
@@ -187,9 +209,8 @@ class TeamInvitationTest extends TestCase
 
         $this->actingAs($invitedUser);
 
-        $response = Livewire::test('pages::teams.accept-invitation', [
-            'invitation' => $invitation,
-        ]);
+        $response = Livewire::test('pages::teams.pending-invitations-modal')
+            ->call('acceptInvitation', $invitation->code);
 
         $response->assertHasErrors(['invitation']);
 
