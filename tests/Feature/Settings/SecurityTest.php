@@ -84,9 +84,9 @@ class SecurityTest extends TestCase
             ->assertDontSee('Two-factor authentication');
     }
 
+    /* @chisel-2fa */
     public function test_two_factor_authentication_disabled_when_confirmation_abandoned_between_requests(): void
     {
-        /* @chisel-2fa */
         $user = User::factory()->create();
 
         $user->forceFill([
@@ -106,8 +106,8 @@ class SecurityTest extends TestCase
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
         ]);
-        /* @end-chisel-2fa */
     }
+    /* @end-chisel-2fa */
 
     public function test_password_can_be_updated(): void
     {
