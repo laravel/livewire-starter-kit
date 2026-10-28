@@ -164,6 +164,7 @@ return Chisel::script(__DIR__)
                 'app/Providers/FortifyServiceProvider.php',
                 'routes/settings.php',
                 'tests/Feature/Settings/SecurityTest.php',
+                'tests/Feature/Auth/AuthenticationTest.php',
                 ...$paths['security_files'],
             )->removeSectionMarkers('2fa');
         },
@@ -179,6 +180,7 @@ return Chisel::script(__DIR__)
                 'app/Providers/FortifyServiceProvider.php',
                 'routes/settings.php',
                 'tests/Feature/Settings/SecurityTest.php',
+                'tests/Feature/Auth/AuthenticationTest.php',
                 ...$paths['security_files'],
             )->removeSection('2fa');
 
