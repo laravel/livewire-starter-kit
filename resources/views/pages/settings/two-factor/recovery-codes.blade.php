@@ -9,9 +9,9 @@ new class extends Component {
     public array $recoveryCodes = [];
 
     /**
-     * Mount the component.
+     * Load the recovery codes so the user can view them.
      */
-    public function mount(): void
+    public function viewRecoveryCodes(): void
     {
         $this->loadRecoveryCodes();
     }
@@ -67,6 +67,7 @@ new class extends Component {
                 icon="eye"
                 icon:variant="outline"
                 variant="primary"
+                wire:click="viewRecoveryCodes"
                 @click="showRecoveryCodes = true;"
                 aria-expanded="false"
                 aria-controls="recovery-codes-section"

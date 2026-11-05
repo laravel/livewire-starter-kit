@@ -20,6 +20,9 @@ use App\Http\Responses\TwoFactorLoginResponse;
 use App\Http\Responses\VerifyEmailResponse;
 /* @end-chisel-email-verification */
 use App\Models\TeamInvitation;
+/* @chisel-password-confirmation */
+use Illuminate\Auth\Middleware\RequirePassword;
+/* @end-chisel-password-confirmation */
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -38,8 +41,11 @@ use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract
 use Laravel\Fortify\Fortify;
 /* @chisel-passkeys */
 use Laravel\Passkeys\Contracts\PasskeyLoginResponse as PasskeyLoginResponseContract;
-
 /* @end-chisel-passkeys */
+/* @chisel-password-confirmation */
+use Livewire\Livewire;
+
+/* @end-chisel-password-confirmation */
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -71,7 +77,22 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        /* @chisel-password-confirmation */
+        $this->configurePasswordConfirmation();
+        /* @end-chisel-password-confirmation */
     }
+
+    /* @chisel-password-confirmation */
+    /**
+     * Require a recent password confirmation for Livewire requests from pages that require one.
+     */
+    private function configurePasswordConfirmation(): void
+    {
+        Livewire::addPersistentMiddleware([
+            RequirePassword::class,
+        ]);
+    }
+    /* @end-chisel-password-confirmation */
 
     /**
      * Configure Fortify actions.
