@@ -36,6 +36,12 @@ new class extends Component {
     #[On('start-two-factor-setup')]
     public function startTwoFactorSetup(): void
     {
+        if (auth()->user()->hasEnabledTwoFactorAuthentication()) {
+            $this->dispatch('two-factor-enabled');
+
+            return;
+        }
+
         $enableTwoFactorAuthentication = app(EnableTwoFactorAuthentication::class);
         $enableTwoFactorAuthentication(auth()->user());
 
