@@ -6,12 +6,19 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 /* @end-chisel-registration */
 use App\Actions\Fortify\ResetUserPassword;
+/* @chisel-password-confirmation */
+use Illuminate\Auth\Middleware\RequirePassword;
+/* @end-chisel-password-confirmation */
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+/* @chisel-password-confirmation */
+use Livewire\Livewire;
+
+/* @end-chisel-password-confirmation */
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -31,7 +38,22 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        /* @chisel-password-confirmation */
+        $this->configurePasswordConfirmation();
+        /* @end-chisel-password-confirmation */
     }
+
+    /* @chisel-password-confirmation */
+    /**
+     * Require a recent password confirmation for Livewire requests from pages that require one.
+     */
+    private function configurePasswordConfirmation(): void
+    {
+        Livewire::addPersistentMiddleware([
+            RequirePassword::class,
+        ]);
+    }
+    /* @end-chisel-password-confirmation */
 
     /**
      * Configure Fortify actions.

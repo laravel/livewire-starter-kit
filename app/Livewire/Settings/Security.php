@@ -202,6 +202,12 @@ class Security extends Component
      */
     public function enable(EnableTwoFactorAuthentication $enableTwoFactorAuthentication): void
     {
+        if (auth()->user()->hasEnabledTwoFactorAuthentication()) {
+            $this->twoFactorEnabled = true;
+
+            return;
+        }
+
         $enableTwoFactorAuthentication(auth()->user());
 
         if (! $this->requiresConfirmation) {

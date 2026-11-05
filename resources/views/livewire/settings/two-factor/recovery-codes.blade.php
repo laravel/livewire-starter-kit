@@ -20,6 +20,7 @@
                 icon="eye"
                 icon:variant="outline"
                 variant="primary"
+                wire:click="viewRecoveryCodes"
                 @click="showRecoveryCodes = true;"
                 aria-expanded="false"
                 aria-controls="recovery-codes-section"
