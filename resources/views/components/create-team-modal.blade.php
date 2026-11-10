@@ -1,9 +1,11 @@
 <?php
 
 use App\Actions\Teams\CreateTeam;
+use App\Models\Team;
 use App\Rules\TeamName;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 new class extends Component {
@@ -11,6 +13,8 @@ new class extends Component {
 
     public function createTeam(CreateTeam $createTeam): void
     {
+        Gate::authorize('create', Team::class);
+
         $validated = $this->validate([
             'teamName' => ['required', 'string', 'max:255', new TeamName],
         ]);

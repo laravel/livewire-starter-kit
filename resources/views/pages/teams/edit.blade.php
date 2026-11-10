@@ -31,6 +31,8 @@ new class extends Component
 
     public function mount(Team $team): void
     {
+        Gate::authorize('view', $team);
+
         $this->teamModel = $team;
         $this->teamName = $team->name;
 
