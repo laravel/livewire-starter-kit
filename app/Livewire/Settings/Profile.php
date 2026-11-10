@@ -8,6 +8,7 @@ use Flux\Flux;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 /* @end-chisel-email-verification */
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -36,6 +37,10 @@ class Profile extends Component
     public function updateProfileInformation(): void
     {
         $user = Auth::user();
+
+        if (config('fortify.lowercase_usernames')) {
+            $this->email = Str::lower($this->email);
+        }
 
         $validated = $this->validate($this->profileRules($user->id));
 
