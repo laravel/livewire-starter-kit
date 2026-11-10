@@ -6,6 +6,7 @@ use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -38,6 +39,24 @@ class TeamTest extends TestCase
         $this->assertDatabaseHas('teams', [
             'name' => 'Test Team',
             'is_personal' => false,
+        ]);
+    }
+
+    public function test_teams_cannot_be_created_when_the_policy_denies_it(): void
+    {
+        $user = User::factory()->create();
+
+        Gate::before(fn ($user, string $ability) => $ability === 'create' ? false : null);
+
+        $this->actingAs($user);
+
+        Livewire::test('pages::teams.index')
+            ->set('name', 'Test Team')
+            ->call('createTeam')
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('teams', [
+            'name' => 'Test Team',
         ]);
     }
 
